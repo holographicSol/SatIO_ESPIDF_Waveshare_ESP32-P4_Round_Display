@@ -18,38 +18,36 @@ struct CustomMappingStruct mappingData={
     .center_map_x1=0,
     .char_map_value={
     "Digital", // 0
-    "YawGPATT", // 1
-    "RollGPATT", // 2
-    "PitchGPATT", // 3
-    "Gyro0AccX", // 4
-    "Gyro0AccY", // 5
-    "Gyro0AccZ", // 6
-    "Gyro0AngX", // 7
-    "Gyro0AngY", // 8
-    "Gyro0AngZ", // 9
-    "Gyro0MagX", // 10not
-    "Gyro0MagY", // 11
-    "Gyro0MagZ", // 12
-    "Gyro0GyroX", // 13
-    "Gyro0GyroY", // 14
-    "Gyro0GyroZ", // 15
-    // reduce the following using an index array
-    "ADMPlex0_0", // 16
-    "ADMPlex0_1", // 17
-    "ADMPlex0_2", // 18
-    "ADMPlex0_3", // 19
-    "ADMPlex0_4", // 20
-    "ADMPlex0_5", // 21
-    "ADMPlex0_6", // 22
-    "ADMPlex0_7", // 23
-    "ADMPlex0_8", // 24
-    "ADMPlex0_9", // 25
-    "ADMPlex0_10", // 26
-    "ADMPlex0_11", // 27
-    "ADMPlex0_12", // 28
-    "ADMPlex0_13", // 29
-    "ADMPlex0_14", // 30
-    "ADMPlex0_15", // 31
+
+    "G0 G-Force X", // 1
+    "G0 G-Force Y", // 2
+    "G0 G-Force Y", // 3
+    "G0 Incline X", // 4
+    "G0 Incline Y", // 5
+    "G0 Incline Z", // 6
+    "G0 Mag Field X", // 7
+    "G0 Mag Field Y", // 8
+    "G0 Mag Field Z", // 9
+    "G0 Velocity X", // 10
+    "G0 Velocity Y", // 11
+    "G0 Velocity Z", // 12
+
+    "Plex Chan 0", // 13
+    "Plex Chan 1", // 14
+    "Plex Chan 2", // 15
+    "Plex Chan 3", // 16
+    "Plex Chan 4", // 17
+    "Plex Chan 5", // 18
+    "Plex Chan 6", // 19
+    "Plex Chan 7", // 20
+    "Plex Chan 8", // 21
+    "Plex Chan 9", // 22
+    "Plex Chan 10", // 23
+    "Plex Chan 11", // 24
+    "Plex Chan 12", // 25
+    "Plex Chan 13", // 26
+    "Plex Chan 14", // 27
+    "Plex Chan 15", // 28
     },
     .map_mode={
       {
@@ -176,105 +174,98 @@ void map_values_helper(int map_slot, int32_t map_input_value) {
 void map_values(void) {
     for (int map_slot=0; map_slot < MAX_MAPPABLE_VALUES; map_slot++) {
         switch ((int)mappingData.mapping_config[0][map_slot][INDEX_MAP_VALUE]) {
-        case INDEX_MAPPABLE_VALUES_DIGITAL:
-            mappingData.mapped_value[0][map_slot]=0; // todo: allow custom mapping for 0/1
-            break;
-        case INDEX_MAPPABLE_VALUES_YAWGPATT:
-            map_values_helper(map_slot, atol(gpattData.yaw));
-            break;
-        case INDEX_MAPPABLE_VALUES_ROLLGPATT:
-            map_values_helper(map_slot, atol(gpattData.roll));
-            break;
-        case INDEX_MAPPABLE_VALUES_PITCHGPATT:
-            map_values_helper(map_slot, atol(gpattData.pitch));
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0ACCX:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_acc_x);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0ACCY:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_acc_y);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0ACCZ:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_acc_z);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0ANGX:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_ang_x);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0ANGY:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_ang_y);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0ANGZ:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_ang_z);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0MAGX:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_mag_x);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0MAGY:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_mag_y);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0MAGZ:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_mag_z);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0GYROX:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_gyr_x);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0GYROY:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_gyr_y);
-            break;
-        case INDEX_MAPPABLE_VALUES_GYRO0GYROZ:
-            map_values_helper(map_slot, (int32_t)gyroData.gyro_0_gyr_z);
-            break;
-        // reduce the following using an index array
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_0:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[0]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_1:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[1]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_2:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[2]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_3:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[3]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_4:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[4]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_5:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[5]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_6:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[6]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_7:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[7]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_8:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[8]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_9:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[9]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_10:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[10]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_11:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[11]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_12:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[12]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_13:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[13]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_14:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[14]);
-            break;
-        case INDEX_MAPPABLE_VALUES_ADMPLEX0_15:
-            map_values_helper(map_slot, (int32_t)ad_mux_0.data[15]);
-            break;
-        default:
-            mappingData.mapped_value[0][map_slot]=0;
+
+            case INDEX_MAPPABLE_VALUES_DIGITAL:
+                mappingData.mapped_value[0][map_slot]=0; // todo: allow custom mapping for 0/1
+                break;
+
+            case INDEX_MAPPABLE_VALUES_GYRO0ACCX:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_acc_x);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0ACCY:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_acc_y);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0ACCZ:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_acc_z);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0ANGX:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_ang_x);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0ANGY:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_ang_y);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0ANGZ:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_ang_z);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0MAGX:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_mag_x);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0MAGY:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_mag_y);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0MAGZ:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_mag_z);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0GYROX:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_gyr_x);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0GYROY:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_gyr_y);
+                break;
+            case INDEX_MAPPABLE_VALUES_GYRO0GYROZ:
+                map_values_helper(map_slot, (int32_t)gyroData.gyro_0_gyr_z);
+                break;
+
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_0:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[0]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_1:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[1]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_2:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[2]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_3:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[3]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_4:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[4]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_5:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[5]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_6:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[6]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_7:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[7]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_8:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[8]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_9:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[9]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_10:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[10]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_11:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[11]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_12:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[12]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_13:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[13]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_14:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[14]);
+                break;
+            case INDEX_MAPPABLE_VALUES_ADMPLEX0_15:
+                map_values_helper(map_slot, (int32_t)ad_mux_0.data[15]);
+                break;
+            default:
+                mappingData.mapped_value[0][map_slot]=0;
         }
     }
 }
@@ -292,16 +283,6 @@ double get_mapping_input_value(int map_slot) {
 
         case INDEX_MAPPABLE_VALUES_DIGITAL:
             result = 0;
-            break;
-
-        case INDEX_MAPPABLE_VALUES_YAWGPATT:
-            result = strtod(gpattData.yaw, NULL);
-            break;
-        case INDEX_MAPPABLE_VALUES_ROLLGPATT:
-            result = strtod(gpattData.roll, NULL);
-            break;
-        case INDEX_MAPPABLE_VALUES_PITCHGPATT:
-            result = strtod(gpattData.pitch, NULL);
             break;
 
         case INDEX_MAPPABLE_VALUES_GYRO0ACCX:

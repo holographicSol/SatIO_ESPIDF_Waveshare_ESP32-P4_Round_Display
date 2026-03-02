@@ -142,6 +142,7 @@ button_t matrix_load;
 button_t matrix_delete;
 lv_obj_t * dd_matrix_slot_select;
 lv_obj_t * matrix_switch_output_value;
+lv_obj_t * label_current_matrix_switch;
 
 /** ---------------------------------------------------------------------------------------
  * @brief Global Style
@@ -3435,7 +3436,7 @@ mapping_config_container_t create_mapping_config_container(
     const int32_t padding = 0;
     const int32_t row_spacing = 0;
     const int32_t row_height = 34;
-    const int32_t label_width = 30;
+    const int32_t label_width = 80;
     const int32_t value_width = width_px-label_width-2*padding;
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
@@ -3491,7 +3492,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row1, LV_DIR_NONE);}
     
     result.slot = lv_label_create(row1);
-    lv_label_set_text(result.slot, "S:");
+    lv_label_set_text(result.slot, "Map:");
     lv_obj_set_size(result.slot, label_width, row_height);
     lv_obj_set_style_text_font(result.slot, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.slot, menu_text_color, LV_PART_MAIN);
@@ -3874,7 +3875,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Map Mode
     result.mode = lv_label_create(row8);
-    lv_label_set_text(result.mode, "M:");
+    lv_label_set_text(result.mode, "Mode:");
     lv_obj_set_size(result.mode, label_width, row_height);
     lv_obj_set_style_text_font(result.mode, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.mode, menu_text_color, LV_PART_MAIN);
@@ -3931,7 +3932,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row9, LV_DIR_NONE);}
 
     result.input_value = lv_label_create(row9);
-    lv_label_set_text(result.input_value, "I:");
+    lv_label_set_text(result.input_value, "In:");
     lv_obj_set_size(result.input_value, label_width, row_height);
     lv_obj_set_style_text_font(result.input_value, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.input_value, menu_text_color, LV_PART_MAIN);
@@ -3975,7 +3976,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row10, LV_DIR_NONE);}
 
     result.map_result = lv_label_create(row10);
-    lv_label_set_text(result.map_result, "O:");
+    lv_label_set_text(result.map_result, "Out:");
     lv_obj_set_size(result.map_result, label_width, row_height);
     lv_obj_set_style_text_font(result.map_result, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.map_result, menu_text_color, LV_PART_MAIN);
@@ -4285,15 +4286,33 @@ void display_matrix_screen() {
         lv_obj_add_event_cb(btn, matrix_overview_grid_1_event_cb, LV_EVENT_CLICKED, NULL);
     }
 
+    // Current Matrix Switch
+    label_current_matrix_switch = create_label(
+        matrix_screen,        // parent
+        56,                  // width
+        56,                   // height
+        LV_ALIGN_LEFT_MID,    // parent alignment
+        20,                   // pos x
+        0,                   // pos y
+        "S",                  // initial text
+        LV_TEXT_ALIGN_CENTER, // font alignment
+        &cobalt_alien_25,     // font
+        false,                // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        2,                    // outline width
+        radius_rounded,       // outline radius
+        1
+    );
 
     // Create Function Panel
     mfc = create_matrix_function_container(
         matrix_screen,    // parent
-        250,              // width px
+        270,              // width px
         350,              // height px
         LV_ALIGN_CENTER,  // alignment
-        -140,              // pos x
-        90,              // pos y
+        -130,              // pos x
+        85,              // pos y
         false,            // show scrollbar
         false,            // enable scrolling
         &cobalt_alien_17, // font for titles,
@@ -4303,7 +4322,7 @@ void display_matrix_screen() {
     // Create Mapping Panel
     mcc = create_mapping_config_container(
         matrix_screen,    // parent
-        250,              // width px
+        240,              // width px
         350,              // height px
         LV_ALIGN_CENTER, // alignment
         140,              // pos x
@@ -4322,7 +4341,7 @@ void display_matrix_screen() {
         28,                   // height px
         LV_ALIGN_BOTTOM_MID,    // alignment
         -130,                   // pos x
-        -70,                  // pos y
+        -60,                  // pos y
         "ASSIST",             // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
@@ -4339,7 +4358,7 @@ void display_matrix_screen() {
         28,                   // height px
         LV_ALIGN_BOTTOM_MID,    // alignment
         130,                   // pos x
-        -70,                  // pos y
+        -60,                  // pos y
         "OVERRIDE",           // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
@@ -4352,11 +4371,11 @@ void display_matrix_screen() {
     // Output Value
     matrix_switch_output_value = create_label(
         matrix_screen,        // parent
-        100,                  // width
+        110,                  // width
         28,                   // height
         LV_ALIGN_BOTTOM_MID,    // parent alignment
         0,                   // pos x
-        -70,                   // pos y
+        -60,                   // pos y
         "0",                  // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
@@ -4759,43 +4778,32 @@ void update_display() {
             for(uint32_t i = 0; i < grid_child_cnt; i++) {
                 lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
 
-                /**
-                 * Outline: Computer Assisst
-                 * level 0: level 1 + level 2  = false (dark gray)
-                 * level 1: computer assist (red)
-                 * level 2: computer intention (yellow)
-                 * level 3: level 1 + level 2  = true (blue)
-                */
+                // /* Current Switch (rainbow outline) */
+                // if (i == current_matrix_i) {
+                //     lv_obj_set_style_outline_color(btn, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
+                // }
+                // else {
+                /* Computer Assist (yellow outline) */
+                if (matrixData.computer_assist[0][i]==true) {lv_obj_set_style_outline_color(btn, lv_color_make(255, 255, 0), LV_PART_MAIN);}
+                else {lv_obj_set_style_outline_color(btn, lv_color_make(58, 58, 58), LV_PART_MAIN);}
+                // }
 
-                if (matrixData.computer_assist[0][i] == true && matrixData.computer_intention[0][i] == true) {
-                    lv_obj_set_style_outline_color(btn, lv_color_make(0, 0, 255), LV_PART_MAIN);     // level 3: blue
-                }
-                else if (matrixData.computer_intention[0][i] == true) {
-                    lv_obj_set_style_outline_color(btn, lv_color_make(255, 255, 0), LV_PART_MAIN);   // level 2: yellow
-                }
-                else if (matrixData.computer_assist[0][i] == true) {
-                    lv_obj_set_style_outline_color(btn, lv_color_make(255, 0, 0), LV_PART_MAIN);     // level 1: red
-                }
-                else {
-                    lv_obj_set_style_outline_color(btn, lv_color_make(58, 58, 58), LV_PART_MAIN);    // level 0: dark gray
-                }
-                
-                // Get label
                 lv_obj_t * label = lv_obj_get_child(btn, 0);
                 if(label && lv_obj_has_class(label, &lv_label_class)) {
 
-                    /**
-                     * Text Color: Switch Intention 
-                     * Level 4: switch intention (green)
-                     */
-                    if (matrixData.switch_intention[0][i]==true) {lv_obj_set_style_text_color(label, lv_color_make(0, 255, 0), LV_PART_MAIN);}
-                    else {lv_obj_set_style_text_color(label, lv_color_make(58, 58, 58), LV_PART_MAIN);}
+                    /* Switch Intention (blue text) */
+                    if (matrixData.switch_intention[0][i]==true) {lv_obj_set_style_text_color(label, lv_color_make(0, 0, 255), LV_PART_MAIN);}
+                    else {
+                        /* Computer Intention (yellow text) */
+                        if (matrixData.computer_intention[0][i]==true) {lv_obj_set_style_text_color(label, lv_color_make(255, 255, 0), LV_PART_MAIN);}
+                        else {lv_obj_set_style_text_color(label, lv_color_make(58, 58, 58), LV_PART_MAIN);}
+                    }
                 }
             }
         }
         vTaskDelay(10 / portTICK_PERIOD_MS);
 
-        // Matrix Slot
+        // Matrix Save Slot
         if (dd_matrix_slot_select) {
             lv_obj_set_style_outline_color(dd_matrix_slot_select, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
             lv_obj_set_style_text_color(dd_matrix_slot_select, lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100), LV_PART_MAIN);
@@ -4827,10 +4835,23 @@ void update_display() {
             lv_obj_set_style_text_color(matrix_delete.label, lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100), LV_PART_MAIN);
         }
 
+        // Current Matrix Switch
+        if (label_current_matrix_switch) {
+            lv_label_set_text(label_current_matrix_switch, String(String("") + String(current_matrix_i)).c_str());
+            lv_obj_set_style_outline_color(label_current_matrix_switch, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
+            /* Text Color: Switch Intention (blue) */
+            if (matrixData.switch_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(label_current_matrix_switch, lv_color_make(0, 0, 255), LV_PART_MAIN);}
+            else {
+                /* Text Color: Computer Intention (yellow) */
+                if (matrixData.computer_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(label_current_matrix_switch, lv_color_make(255, 255, 0), LV_PART_MAIN);}
+                else {lv_obj_set_style_text_color(label_current_matrix_switch, lv_color_make(58, 58, 58), LV_PART_MAIN);}
+            }
+        }
+
         // Computer Assist
         if (matrix_switch_computer_assist.panel) {
             if (matrixData.computer_assist[0][current_matrix_i]==true) {
-                lv_obj_set_style_outline_color(matrix_switch_computer_assist.panel, lv_color_make(0, 255, 0), LV_PART_MAIN);
+                lv_obj_set_style_outline_color(matrix_switch_computer_assist.panel, lv_color_make(255, 255, 0), LV_PART_MAIN);
                 lv_obj_set_style_text_color(matrix_switch_computer_assist.label, lv_color_make(255, 255, 0), LV_PART_MAIN);
             }
             else {
@@ -4848,8 +4869,14 @@ void update_display() {
         // Output Value
         if (matrix_switch_output_value) {
             lv_obj_set_style_outline_color(matrix_switch_output_value, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_switch_output_value, lv_color_make(0, 255, 0), LV_PART_MAIN);
             lv_label_set_text(matrix_switch_output_value, String(String("") + String(matrixData.output_value[0][current_matrix_i])).c_str());
+            /* Text Color: Switch Intention (blue) */
+            if (matrixData.switch_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);}
+            else {
+                /* Text Color: Computer Intention (yellow) */
+                if (matrixData.computer_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(matrix_switch_output_value, lv_color_make(255, 255, 0), LV_PART_MAIN);}
+                else {lv_obj_set_style_text_color(matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);}
+            }
         }
 
         // Matrix Configuration Panel
@@ -4899,7 +4926,6 @@ void update_display() {
             lv_dropdown_set_selected(mcc.dd_mode, mappingData.map_mode[0][current_map_slot]);
 
             lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_map_slot)).c_str());
-            // lv_label_set_text(mcc.value_input, "foo");
 
             lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]).c_str());
         }

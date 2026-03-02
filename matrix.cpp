@@ -678,93 +678,119 @@ struct MatrixStruct matrixData = {
   },
   .matrix_function_names =
   {
-  "NONE", // 0
-  "ON", // 1
-  "SWITCHLINK", // 2
-  "LOCALTIME", // 3
-  "WEEKDAY", // 4
-  "DATEDAYX", // 5
-  "DATEMONTHX", // 6
-  "DATEYEARX", // 7
-  "DEGLAT", // 8
-  "DEGLON", // 9
-  "INSLAT", // 10
-  "INSLON", // 11
-  "INSHEADING", // 12
-  "INSALTITUDE", // 13
-  "POSSTATUSGNGGA", // 14
-  "SATCOUNT", // 15
-  "GPSPRECISION", // 16
-  "ALTGNGGA", // 17
-  "GSPEEDGNRMC", // 18
-  "HEADINGGNRMC", // 19
-  "LFLAGGPATT", // 20
-  "SFLAGGPATT", // 21
-  "RSFLAGGPATT", // 22
-  "INSGPATT", // 23
-  "SPEEDNUMGPATT", // 24
-  "MILEAGEGPATT", // 25
-  "GSTDATAGPATT", // 26
-  "YAWGPATT", // 27
-  "ROLLGPATT", // 28
-  "PITCHGPATT", // 29
-  "GNGGAVALIDCS", // 30
-  "GNRMCVALIDCS", // 31
-  "GPATTVALIDCS", // 32
-  "GNGGAVALIDCD", // 33
-  "GNRMCVALIDCD", // 34
-  "GPATTVALIDCD", // 35
-  "GYRO0ACCX", // 36
-  "GYRO0ACCY", // 37
-  "GYRO0ACCZ", // 38
-  "GYRO0ANGX", // 39
-  "GYRO0ANGY", // 40
-  "GYRO0ANGZ", // 41
-  "GYRO0MAGX", // 42
-  "GYRO0MAGY", // 43
-  "GYRO0MAGZ", // 44
-  "GYRO0GYROX", // 45
-  "GYRO0GYROY", // 46
-  "GYRO0GYROZ", // 47
-  "METEORS", // 48
-  "SUNAZ", // 49
-  "SUNALT", // 50
-  "MOONAZ", // 51
-  "MOONALT", // 52
-  "MOONPHASE", // 53
-  "MERCURYAZ", // 54
-  "MERCURYALT", // 55
-  "VENUSAZ", // 56
-  "VENUSALT", // 57
-  "MARSAZ", // 58
-  "MARSALT", // 59
-  "JUPITERAZ", // 60
-  "JUPITERALT", // 61
-  "SATURNAZ", // 62
-  "SATURNALT", // 63
-  "URANUSAZ", // 64
-  "URANUSALT", // 65
-  "NEPTUNEAZ", // 66
-  "NEPTUNEALT", // 67
-  "HEMIGNGGANORTH", // 68
-  "HEMIGNGGASOUTH", // 69
-  "HEMIGNGGAEAST", // 70
-  "HEMIGNGGAWEST", // 71
-  "POSSTATUSGNRMCA", // 72
-  "POSSTATUSGNRMCV", // 73
-  "MODEGNRMCA", // 74
-  "MODEGNRMCD", // 75
-  "MODEGNRMCE", // 76
-  "MODEGNRMCN", // 77
-  "HEMIGNRMCNORTH", // 78
-  "HEMIGNRMCSOUTH", // 79
-  "HEMIGNRMCEAST", // 80
-  "HEMIGNRMCWEST", // 81
-  "ADMPLEX0", // 82
-  "MAPPEDVALUE", // 83
-  "SDCARDINSERTED", // 84
-  "SDCARDMOUNTED", // 85
-  "PCINPUTVALUE", // 85
+    "NONE", //0
+    "ON", //1
+    "Switch Link", //2
+    "Time HHMMSS", //3
+    "Week Day", //4
+    "Month Day", //5
+    "Month", //6
+    "Year", //7
+    "SatIO Deg Lat", //8
+    "SatIO Deg Lon", //9
+    "SatIO INS Lat", //10
+    "SatIO INS Lon", //11
+    "SatIO INS Heading", //12
+    "SatIO INS Alt", //13
+    "GNGGA Status", //14
+    "GNGGA Sat Count", //15
+    "GNGGA Prescion", //16
+    "GNGGA Altitude", //17
+    "GNRMC Ground Speed", //18
+    "GNRMC Heading", //19
+    "GPATT Line", //20
+    "GPATT Static", //21
+    "GPATT Run State", //22
+    "GPATT INS", //23
+    "GPATT Mileage", //24
+    "GPATT GST", //25
+    "GPATT Yaw", //26
+    "GPATT Roll", //27
+    "GPATT Pitch", //28
+    "GNGGA Valid CS", //29
+    "GNRMC Valid CS", //30
+    "GPATT Valid CS", //31
+    "GNGGA Valid CD", //32
+    "GNRMC Valid CD", //33
+    "GPATT Valid CD", //34
+    "GNRMC Pos Stat A", //35
+    "GNRMC Pos Stat V", //36
+    "GNRMC Mode Ind A", //37
+    "GNRMC Mode Ind D", //38
+    "GNRMC Mode Ind E", //39
+    "GNRMC Mode Ind N", //40
+    "GNRMC Hemi North", //41
+    "GNRMC Hemi South", //42
+    "GNRMC Hemi East", //43
+    "GNRMC Hemi West", //44
+    "G0 G-Force X", //45
+    "G0 G-Force Y", //46
+    "G0 G-Force Z", //47
+    "G0 Incline X", //48
+    "G0 Incline Y", //49
+    "G0 Incline Z", //50
+    "G0 Mag Field X", //51
+    "G0 Mag Field Y", //52
+    "G0 Mag Field Z", //53
+    "G0 Velocity X", //54
+    "G0 Velocity Y", //55
+    "G0 Velocity Z", //56
+    "Meteor", //57
+    "Sun Azimuth", //58
+    "Sun Altitude", //59
+    "Sun Helio Ecl Lat", //60
+    "Sun Helio Ecl Lon", //61
+    "Moon Azimuth", //62
+    "Moon Altitude", //63
+    "Moon Phase", //64
+    "Mercury Azimuth", //65
+    "Mercury Altitude", //66
+    "Mercury H.Ecliptic Lat", //67
+    "Mercury H.Ecliptic Lon", //68
+    "Mercury Ecliptic Lat", //69
+    "Mercury Ecliptic Lon", //70
+    "Venus Azimuth", //71
+    "Venus Altitude", //72
+    "Venus H.Ecliptic Lat", //73
+    "Venus H.Ecliptic Lon", //74
+    "Venus Ecliptic Lat", //75
+    "Venus Ecliptic Lon", //76
+    "Earth Ecliptic Lon", //77
+    "Mars Azimuth", //78
+    "Mars Altitude", //79
+    "Mars H.Ecliptic Lat", //80
+    "Mars H.Ecliptic Lon", //81
+    "Mars Ecliptic Lat", //82
+    "Mars Ecliptic Lon", //83
+    "Jupiter Azimuth", //84
+    "jupiter Altitude", //85
+    "Jupiter H.Ecliptic Lat", //86
+    "Jupiter H.Ecliptic Lon", //87
+    "Jupiter Ecliptic Lat", //88
+    "Jupiter Ecliptic Lon", //89
+    "Saturn Azimuth", //90
+    "Saturn Altitude", //91
+    "Saturn H.Ecliptic Lat", //92
+    "Saturn H.Ecliptic Lon", //93
+    "Saturn Ecliptic Lat", //94
+    "Saturn Ecliptic Lon", //95
+    "Uranus Azimuth", //96
+    "Uranus Altitude", //97
+    "Uranus H.Ecliptic Lat", //98
+    "Uranus H.Ecliptic Lon", //99
+    "Uranus Ecliptic Lat", //100
+    "Uranus Ecliptic Lon", //101
+    "Neptune Azimuth", //102
+    "Neptune Altitude", //103
+    "Neptune H.Ecliptic Lat", //104
+    "Neptune H.Ecliptic Lon", //105
+    "Neptune Ecliptic Lat", //106
+    "Neptune Ecliptic Lon", //107
+    "AD Multiplexer 0", //108
+    "Map Slot", //109
+    "SD Card Inserted", //110
+    "SD Card Mounted", //111
+    "Port Con 0", //112
   },
   .input_value = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
@@ -987,7 +1013,7 @@ bool matrixSwitch(void) {
       }
 
       // A special function that allows stacking matrix switch logic (specify matrix switch n to link).
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SWITCHLINK) && (Fi==0)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SWITCH_LINK) && (Fi==0)) {
         if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==false) {
           tmp_matrix[Fi]=check_equal_true(
             matrixData.switch_intention[0][(int)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]],
@@ -1001,277 +1027,272 @@ bool matrixSwitch(void) {
       }
 
       // Check digits.
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_LOCALTIME)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_TIME_HHMMSS)) {
         tmp_x = atol(satioData.padded_local_time_HHMMSS);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_WEEKDAY)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_WEEK_DAY)) {
         tmp_x = satioData.local_wday;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_DATEDAYX)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MONTH_DAY)) {
         tmp_x = satioData.local_mday;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_DATEMONTHX)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MONTH)) {
         tmp_x = satioData.local_month;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_DATEYEARX)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_YEAR)) {
         tmp_x = satioData.local_year;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_DEGLAT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATIO_DEG_LAT)) {
         tmp_x = satioData.degrees_latitude;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_DEGLON)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATIO_DEG_LON)) {
         tmp_x = satioData.degrees_longitude;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_INSLAT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATIO_INS_LAT)) {
         tmp_x = insData.ins_latitude;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_INSLON)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATIO_INS_LON)) {
         tmp_x = insData.ins_longitude;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_INSHEADING)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATIO_INS_HEADING)) {
         tmp_x = insData.ins_heading;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_INSALTITUDE)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATIO_INS_ALT)) {
         tmp_x = insData.ins_altitude;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_POSSTATUSGNGGA)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_STATUS)) {
         tmp_x = atoi(gnggaData.solution_status);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATCOUNT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_SAT_COUNT)) {
         tmp_x = atol(gnggaData.satellite_count);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPSPRECISION)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_PRESCION)) {
         tmp_x = atof(gnggaData.gps_precision_factor);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_ALTGNGGA)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_ALTITUDE)) {
         tmp_x = atof(gnggaData.altitude);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GSPEEDGNRMC)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_GROUND_SPEED)) {
         tmp_x = atof(gnrmcData.ground_speed);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEADINGGNRMC)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEADING)) {
         tmp_x = strtod(gnrmcData.ground_heading, &xyzptr);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_LFLAGGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_LINE)) {
         tmp_x = atoi(gpattData.line_flag);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SFLAGGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_STATIC)) {
         tmp_x = atoi(gpattData.static_flag);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_RSFLAGGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_RUN_STATE)) {
         tmp_x = atoi(gpattData.run_state_flag);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_INSGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_INS)) {
         tmp_x = atoi(gpattData.ins);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SPEEDNUMGPATT)) {
-        tmp_x = atoi(gpattData.speed_num);
-        tmp_y = 0;
-        tmp_z = 0;
-        handle_digit=true;
-      }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MILEAGEGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_MILEAGE)) {
         tmp_x = strtod(gpattData.mileage, &xyzptr);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GSTDATAGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_GST)) {
         tmp_x = strtod(gpattData.gst_data, &xyzptr);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_YAWGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_YAW)) {
         tmp_x = strtod(gpattData.yaw, &xyzptr);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_ROLLGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_ROLL)) {
         tmp_x = strtod(gpattData.roll, &xyzptr);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_PITCHGPATT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_PITCH)) {
         tmp_x = strtod(gpattData.pitch, &xyzptr);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGAVALIDCS)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_VALID_CS)) {
         tmp_x = gnggaData.valid_checksum;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMCVALIDCS)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_VALID_CS)) {
         tmp_x = gnrmcData.valid_checksum;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATTVALIDCS)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_VALID_CS)) {
         tmp_x = gpattData.valid_checksum;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGAVALIDCD)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_VALID_CD)) {
         tmp_x = (long)gnggaData.bad_element_count;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMCVALIDCD)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_VALID_CD)) {
         tmp_x = (long)gnrmcData.bad_element_count;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATTVALIDCD)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_VALID_CD)) {
         tmp_x = (long)gnrmcData.bad_element_count;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0ACCX)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_G_FORCE_X)) {
         tmp_x = gyroData.gyro_0_acc_x;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0ACCY)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_G_FORCE_Y)) {
         tmp_x = gyroData.gyro_0_acc_y;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0ACCZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_G_FORCE_Z)) {
         tmp_x = gyroData.gyro_0_acc_z;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0ANGX)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_INCLINE_X)) {
         tmp_x = gyroData.gyro_0_ang_x;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0ANGY)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_INCLINE_Y)) {
         tmp_x = gyroData.gyro_0_ang_y;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0ANGZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_INCLINE_Z)) {
         tmp_x = gyroData.gyro_0_ang_z;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0MAGX)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_MAG_FIELD_X)) {
         tmp_x = gyroData.gyro_0_mag_x;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0MAGY)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_MAG_FIELD_Y)) {
         tmp_x = gyroData.gyro_0_mag_y;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0MAGZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_MAG_FIELD_Z)) {
         tmp_x = gyroData.gyro_0_mag_z;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0GYROX)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_VELOCITY_X)) {
         tmp_x = gyroData.gyro_0_gyr_x;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0GYROY)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_VELOCITY_Y)) {
         tmp_x = gyroData.gyro_0_gyr_y;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GYRO0GYROZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_G0_VELOCITY_Z)) {
         tmp_x = gyroData.gyro_0_gyr_z;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_METEORS)) {
+
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_METEOR)) {
         tmp_x = meteor_shower_warning_system
                 [(int)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]]
                 [(int)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Y]];
@@ -1279,147 +1300,354 @@ bool matrixSwitch(void) {
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SUNAZ)) {
+
+      // Sun
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SUN_AZIMUTH)) {
         tmp_x = siderealPlanetData.sun_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SUNALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SUN_ALTITUDE)) {
         tmp_x = siderealPlanetData.sun_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOONAZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SUN_HELIO_ECL_LAT)) {
+        tmp_x = siderealPlanetData.sun_helio_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SUN_HELIO_ECL_LON)) {
+        tmp_x = siderealPlanetData.saturn_helio_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Moon
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOON_AZIMUTH)) {
         tmp_x = siderealPlanetData.moon_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOONALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOON_ALTITUDE)) {
         tmp_x = siderealPlanetData.moon_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOONPHASE)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOON_PHASE)) {
         tmp_x = siderealPlanetData.moon_p;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MERCURYAZ)) {
+
+      // Mercury
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_AZIMUTH)) {
         tmp_x = siderealPlanetData.mercury_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MERCURYALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_ALTITUDE)) {
         tmp_x = siderealPlanetData.mercury_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_VENUSAZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_H_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.mercury_helio_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_H_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.mercury_helio_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.mercury_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.mercury_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Venus
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_VENUS_AZIMUTH)) {
         tmp_x = siderealPlanetData.venus_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_VENUSALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_VENUS_ALTITUDE)) {
         tmp_x = siderealPlanetData.venus_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MARSAZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_VENUS_H_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.venus_helio_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_VENUS_H_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.venus_helio_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_VENUS_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.venus_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_EARTH_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.venus_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Earth
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_EARTH_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.earth_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Mars
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MARS_AZIMUTH)) {
         tmp_x = siderealPlanetData.mars_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MARSALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MARS_ALTITUDE)) {
         tmp_x = siderealPlanetData.mars_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_JUPITERAZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MARS_H_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.mars_helio_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MARS_H_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.mars_helio_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MARS_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.mars_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MARS_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.mars_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Jupiter
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_AZIMUTH)) {
         tmp_x = siderealPlanetData.jupiter_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_JUPITERALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_ALTITUDE)) {
         tmp_x = siderealPlanetData.jupiter_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATURNAZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_H_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.jupiter_helio_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_H_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.jupiter_helio_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.jupiter_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.jupiter_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Saturn
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATURN_AZIMUTH)) {
         tmp_x = siderealPlanetData.saturn_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATURNALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATURN_ALTITUDE)) {
         tmp_x = siderealPlanetData.saturn_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_URANUSAZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATURN_H_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.saturn_helio_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATURN_H_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.saturn_helio_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATURN_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.saturn_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SATURN_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.saturn_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Uranus
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_URANUS_AZIMUTH)) {
         tmp_x = siderealPlanetData.uranus_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_URANUSALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_URANUS_ALTITUDE)) {
         tmp_x = siderealPlanetData.uranus_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNEAZ)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_URANUS_H_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.uranus_helio_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_URANUS_H_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.uranus_helio_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_URANUS_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.uranus_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_URANUS_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.uranus_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Neptune
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_AZIMUTH)) {
         tmp_x = siderealPlanetData.uranus_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNEALT)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ALTITUDE)) {
         tmp_x = siderealPlanetData.uranus_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_ADMPLEX0)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_H_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.uranus_helio_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_H_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.uranus_helio_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ECLIPTIC_LAT)) {
+        tmp_x = siderealPlanetData.uranus_ecliptic_lat;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ECLIPTIC_LON)) {
+        tmp_x = siderealPlanetData.uranus_ecliptic_long;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_AD_MULTIPLEXER_0)) {
         tmp_x = ad_mux_0.data
                 [(int)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z]];
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MAPPEDVALUE)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MAP_SLOT)) {
         tmp_x = mappingData.mapped_value
                 [0][(int)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z]];
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      // else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SDCARDINSERTED)) {
+      // else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SD_CARD_INSERTED)) {
       //   tmp_x = sdcardData.sdcard_inserted;
       //   tmp_y = 0;
       //   tmp_z = 0;
       //   handle_digit=true;
       // }
-      // else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SDCARDMOUNTED)) {
-      //   tmp_x = sdcardData.sdcard_mounted;
-      //   tmp_y = 0;
-      //   tmp_z = 0;
-      //   handle_digit=true;
-      // }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_PCINPUTVALUE)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SD_CARD_MOUNTED)) {
+        tmp_x = sdcardData.sdcard_mounted;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_PORT_CON_0)) {
         tmp_x = matrixData.input_value[0][(int)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z]];
         tmp_y = 0;
         tmp_z = 0;
@@ -1473,33 +1701,27 @@ bool matrixSwitch(void) {
       }
       // Check chars.
       else {
-        if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEMIGNGGANORTH))
-          {temp_string_x="N"; temp_string_y=String(gnggaData.latitude_hemisphere); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEMIGNGGASOUTH))
-          {temp_string_x="S"; temp_string_y=String(gnggaData.latitude_hemisphere); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEMIGNGGAEAST))
-          {temp_string_x="E"; temp_string_y=String(gnggaData.longitude_hemisphere); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEMIGNGGAWEST))
-          {temp_string_x="W"; temp_string_y=String(gnggaData.longitude_hemisphere); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_POSSTATUSGNRMCA))
+        if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_POS_STAT_A))
           {temp_string_x="A"; temp_string_y=String(gnrmcData.positioning_status); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_POSSTATUSGNRMCV))
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_POS_STAT_V))
           {temp_string_x="V"; temp_string_y=String(gnrmcData.positioning_status); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MODEGNRMCA))
+
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_MODE_IND_A))
           {temp_string_x="A"; temp_string_y=String(gnrmcData.mode_indication); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MODEGNRMCD))
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_MODE_IND_D))
           {temp_string_x="D"; temp_string_y=String(gnrmcData.mode_indication); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MODEGNRMCE))
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_MODE_IND_E))
           {temp_string_x="E"; temp_string_y=String(gnrmcData.mode_indication); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MODEGNRMCN))
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_MODE_IND_N))
           {temp_string_x="N"; temp_string_y=String(gnrmcData.mode_indication); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEMIGNRMCNORTH))
+
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEMI_NORTH))
           {temp_string_x="N"; temp_string_y=String(gnrmcData.latitude_hemisphere); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEMIGNRMCSOUTH))
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEMI_SOUTH))
           {temp_string_x="S"; temp_string_y=String(gnrmcData.latitude_hemisphere); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEMIGNRMCEAST))
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEMI_EAST))
           {temp_string_x="E"; temp_string_y=String(gnrmcData.longitude_hemisphere); handle_char=true;}
-        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_HEMIGNRMCWEST))
+        else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEMI_WEST))
           {temp_string_x="W"; temp_string_y=String(gnrmcData.longitude_hemisphere); handle_char=true;}
         if (handle_char==true) {
           // Handle Chars.
