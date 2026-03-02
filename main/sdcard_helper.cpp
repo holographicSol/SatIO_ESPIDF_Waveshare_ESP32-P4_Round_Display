@@ -512,18 +512,18 @@ void sdcard_mount() {
         // printf("Failed to mount SD card, error: %s\n", esp_err_to_name(err));
         sdcardData.sdcard_mounted = false;
 
-        // clear any pending operations
-        sdcardFlagData.save_mapping = false;
-        sdcardFlagData.load_mapping = false;
-        sdcardFlagData.delete_mapping = false;
+        // (todo) clear any pending operations
+        // sdcardFlagData.save_mapping = false;
+        // sdcardFlagData.load_mapping = false;
+        // sdcardFlagData.delete_mapping = false;
 
-        sdcardFlagData.save_matrix = false;
-        sdcardFlagData.load_matrix = false;
-        sdcardFlagData.delete_matrix = false;
+        // sdcardFlagData.save_matrix = false;
+        // sdcardFlagData.load_matrix = false;
+        // sdcardFlagData.delete_matrix = false;
 
-        sdcardFlagData.save_system = false;
-        sdcardFlagData.load_system = false;
-        sdcardFlagData.delete_system = false;
+        // sdcardFlagData.save_system = false;
+        // sdcardFlagData.load_system = false;
+        // sdcardFlagData.delete_system = false;
     }
     else {
         // printf("SD card mounted successfully\n");

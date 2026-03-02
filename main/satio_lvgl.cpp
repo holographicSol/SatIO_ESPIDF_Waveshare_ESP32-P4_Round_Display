@@ -827,10 +827,15 @@ static void matrix_save_event_cb(lv_event_t * e) {
     ) {printf("[matrix_save_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
-        printf("[matrix_save_event_cb] Saving matrix to slot: %s\n", satioFileData.current_matrix_filepath);
-        sdcardFlagData.save_matrix=true;
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        sdcardFlagData.save_mapping=true;
+        if (sdcardData.sdcard_mounted==true) {
+            printf("[matrix_save_event_cb] Saving matrix to slot: %s\n", satioFileData.current_matrix_filepath);
+            sdcardFlagData.save_matrix=true;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            sdcardFlagData.save_mapping=true;
+        }
+        else {
+            printf("[matrix_save_event_cb] sdcard is not mounted.");
+        }
     }
 }
 
@@ -849,10 +854,15 @@ static void matrix_load_event_cb(lv_event_t * e) {
     ) {printf("[matrix_load_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
-        printf("[matrix_load_event_cb] Loading matrix from slot: %s\n", satioFileData.current_matrix_filepath);
-        sdcardFlagData.load_mapping=true;
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        sdcardFlagData.load_matrix=true;
+        if (sdcardData.sdcard_mounted==true) {
+            printf("[matrix_load_event_cb] Loading matrix from slot: %s\n", satioFileData.current_matrix_filepath);
+            sdcardFlagData.load_mapping=true;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            sdcardFlagData.load_matrix=true;
+        }
+        else {
+            printf("[matrix_load_event_cb] sdcard is not mounted.");
+        }
     }
 }
 
@@ -871,8 +881,13 @@ static void matrix_delete_event_cb(lv_event_t * e) {
     ) {printf("[matrix_delete_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
-        printf("[matrix_delete_event_cb] Deleting matrix in slot: %s\n", satioFileData.current_matrix_filepath);
-        sdcardFlagData.delete_matrix=true;
+        if (sdcardData.sdcard_mounted==true) {
+            printf("[matrix_delete_event_cb] Deleting matrix in slot: %s\n", satioFileData.current_matrix_filepath);
+            sdcardFlagData.delete_matrix=true;
+        }
+        else {
+            printf("[matrix_delete_event_cb] sdcard is not mounted.");
+        }
     }
 }
 
@@ -4818,16 +4833,28 @@ void update_display() {
             lv_label_set_text(system_tray.gps_signal_strength, gps_signal_text.c_str());
         }
 
-        // SD Card Mounted
-        if (sdcardData.sdcard_mounted) {
-            lv_obj_set_style_outline_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
-            lv_label_set_text(system_tray.sdcard_mounted, "SD");
+        // SD Card Mounted / Success Flag
+        if (sdcardFlagData.success_flag==2) {
+            lv_obj_set_style_outline_color(system_tray.sdcard_mounted, lv_color_make(0, 255, 0), LV_PART_MAIN);
+            lv_obj_set_style_text_color(system_tray.sdcard_mounted, lv_color_make(0, 255, 0), LV_PART_MAIN);
+            lv_label_set_text(system_tray.sdcard_mounted, "ok");
+        }
+        else if (sdcardFlagData.success_flag==1) {
+            lv_obj_set_style_outline_color(system_tray.sdcard_mounted, lv_color_make(255, 0, 0), LV_PART_MAIN);
+            lv_obj_set_style_text_color(system_tray.sdcard_mounted, lv_color_make(255, 0, 0), LV_PART_MAIN);
+            lv_label_set_text(system_tray.sdcard_mounted, "!");
         }
         else {
-            lv_obj_set_style_outline_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
-            lv_label_set_text(system_tray.sdcard_mounted, "SD!");
+            if (sdcardData.sdcard_mounted) {
+                lv_obj_set_style_outline_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_text_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+                lv_label_set_text(system_tray.sdcard_mounted, "SD");
+            }
+            else {
+                lv_obj_set_style_outline_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_text_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+                lv_label_set_text(system_tray.sdcard_mounted, "SD!");
+            }
         }
 
         // Grid Menu 1
