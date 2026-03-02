@@ -25,6 +25,7 @@ struct CustomMappingStruct {
      * Aligns with map_mode, mapping_config, mapped_value.
      */
     int map_mode[1][MAX_MAP_SLOTS];
+    char char_map_mode_names[3][MAX_GLOBAL_ELEMENT_SIZE];
 
     /**
      * Map Configuration.

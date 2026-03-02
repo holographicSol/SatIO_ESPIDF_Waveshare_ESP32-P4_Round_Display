@@ -62,6 +62,11 @@ struct CustomMappingStruct mappingData={
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60-69
       }
     },
+  .char_map_mode_names={
+    "Min To Max",
+    "Dual Axis 0",
+    "Dual Axis 1",
+  },
   .mapping_config={
     {
       {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}, // 0-4

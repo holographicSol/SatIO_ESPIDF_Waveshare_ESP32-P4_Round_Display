@@ -128,8 +128,8 @@ struct MatrixStruct matrixData = {
   },
   .output_mode_names=
   {
-    "Digital",                // 0
-    "Mapped (Analog/Digital)" // 1
+    "Digital", // 0
+    "Mapped"   // 1
   },
   .index_mapped_value={
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
