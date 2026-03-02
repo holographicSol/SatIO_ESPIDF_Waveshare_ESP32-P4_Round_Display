@@ -1,0 +1,22 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.openOcdConfigs": [
+    "board/esp32p4-builtin.cfg"
+  ],
+  "idf.portWin": "COM13",
+  "idf.currentSetup": "C:\\Users\\Benjamin\\esp\\v5.5.1\\esp-idf",
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32p4"
+  },
+  "clangd.path": "C:\\Users\\Benjamin\\.espressif\\tools\\esp-clang\\esp-19.1.2_20250312\\esp-clang\\bin\\clangd.exe",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=**",
+    "--compile-commands-dir=c:\\Users\\Benjamin\\SatIO_ESPIDF_000\\build"
+  ],
+  "idf.flashType": "UART",
+  "idf.monitorFlags": [
+    "--rawflags",
+    "--send-on-enter", "\\n"
+  ]
+}
