@@ -709,6 +709,104 @@ static void dd_mode_event_cb(lv_event_t * e) {
     }
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback for dd_mode_x_event_cb dropdown.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_mode_x_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        // Safety: Reset to 0
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]=0;
+        // Set mode
+        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = (int)sel;
+        printf("[dd_mode_x_event_cb] Set mode x: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback for dd_mode_y_event_cb dropdown.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_mode_y_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        // Safety: Reset to 0
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]=0;
+        // Set mode
+        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = (int)sel;
+        printf("[dd_mode_y_event_cb] Set mode y: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback for dd_mode_z_event_cb dropdown.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_mode_z_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        // Safety: Reset to 0
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]=0;
+        // Set mode
+        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
+        printf("[dd_mode_z_event_cb] Set mode z: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback for dd_x_event_cb dropdown.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_x_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = (int)sel;
+        printf("[dd_x_event_cb] Function X set to value index: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback for dd_y_event_cb dropdown.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_y_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = (int)sel;
+        printf("[dd_y_event_cb] Function Y set to value index: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback for dd_z_event_cb dropdown.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_z_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
+        printf("[dd_z_event_cb] Function Z set to value index: %lu\n", sel);
+    }
+}
 
 /** -------------------------------------------------------------------------------------
  * @brief Event callback for dd_operator dropdown.
@@ -2751,6 +2849,10 @@ matrix_function_container_t create_matrix_function_container(
     const int32_t row_height = 30;
     const int32_t label_width = 80;
     const int32_t value_width = width_px-label_width-2*padding;
+
+    const int32_t xyz_mode_width = 50;
+    const int32_t xyz_label_width = 20;
+    const int32_t xyz_value_width = width_px - xyz_label_width - xyz_mode_width;
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     
@@ -2918,18 +3020,19 @@ matrix_function_container_t create_matrix_function_container(
     
     result.label_x = lv_label_create(row3);
     lv_label_set_text(result.label_x, "X:");
-    lv_obj_set_size(result.label_x, label_width, row_height);
+    lv_obj_set_size(result.label_x, xyz_label_width, row_height);
     lv_obj_set_style_text_font(result.label_x, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_x, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_x, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
+    // User X
     result.ta_x = create_textarea(
-        row3,     // lv_obj_t
-        value_width,             // width px
-        row_height,              // height px
+        row3,            // lv_obj_t
+        xyz_value_width, // width px
+        row_height,      // height px
         LV_ALIGN_CENTER, // alignment
-        0,            // pos x
-        0,              // pos y
+        0,               // pos x
+        0,               // pos y
         true,            // one line
         LV_TXT_ALNUMDEC, // accepted char*
         "",              // placeholder text
@@ -2942,9 +3045,52 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.ta_x, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_x, &matrix_value_x_ctx);
 
+    // System X
+    result.dd_x = create_dropdown_menu(
+        row3,
+        NULL,
+        0,
+        xyz_value_width,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        font_sub
+    );
+    char dd_x_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
+        snprintf(dd_x_name, sizeof(dd_x_name), "%s", matrixData.matrix_function_names[i]);
+        lv_dropdown_add_option(result.dd_x, dd_x_name, LV_DROPDOWN_POS_LAST);
+    }
+    lv_dropdown_set_selected(result.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
+    lv_obj_add_event_cb(result.dd_x, dd_x_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_flag(result.dd_x, LV_OBJ_FLAG_HIDDEN);
+
+    // X Mode Select
+    result.dd_mode_x = create_dropdown_menu(
+        row3,
+        NULL,
+        0,
+        xyz_mode_width,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        font_sub
+    );
+    char dd_mode_x_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_FUNCTION_XYZ_MODES; i++) {
+        snprintf(dd_mode_x_name, sizeof(dd_mode_x_name), "%s", String(i).c_str());
+        lv_dropdown_add_option(result.dd_mode_x, dd_mode_x_name, LV_DROPDOWN_POS_LAST);
+    }
+    lv_dropdown_set_selected(result.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
+    lv_obj_add_event_cb(result.dd_mode_x, dd_mode_x_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
     // Critical for alignment
-    lv_obj_set_size(result.label_x, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_x, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_x, xyz_label_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_x, xyz_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_x, xyz_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_mode_x, xyz_mode_width, LV_SIZE_CONTENT);
     
     /* --- ROW 4: Y Value ------------------------------------------------------------- */
     
@@ -2971,7 +3117,7 @@ matrix_function_container_t create_matrix_function_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row4, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row4, LV_DIR_NONE);}
-    
+
     result.label_y = lv_label_create(row4);
     lv_label_set_text(result.label_y, "Y:");
     lv_obj_set_size(result.label_y, label_width, row_height);
@@ -2979,13 +3125,14 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_set_style_text_color(result.label_y, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_y, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
+    // User Y
     result.ta_y = create_textarea(
-        row4,     // lv_obj_t
-        value_width,             // width px
-        row_height,              // height px
+        row4,            // lv_obj_t
+        xyz_value_width, // width px
+        row_height,      // height px
         LV_ALIGN_CENTER, // alignment
-        0,            // pos x
-        0,              // pos y
+        0,               // pos x
+        0,               // pos y
         true,            // one line
         LV_TXT_ALNUMDEC, // accepted char*
         "",              // placeholder text
@@ -2998,9 +3145,52 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.ta_y, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_y, &matrix_value_y_ctx);
 
+    // System Y
+    result.dd_y = create_dropdown_menu(
+        row4,
+        NULL,
+        0,
+        xyz_value_width,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        font_sub
+    );
+    char dd_y_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
+        snprintf(dd_y_name, sizeof(dd_y_name), "%s", matrixData.matrix_function_names[i]);
+        lv_dropdown_add_option(result.dd_y, dd_y_name, LV_DROPDOWN_POS_LAST);
+    }
+    lv_dropdown_set_selected(result.dd_y, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
+    lv_obj_add_event_cb(result.dd_y, dd_y_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_flag(result.dd_y, LV_OBJ_FLAG_HIDDEN);
+
+    // Y Mode Select
+    result.dd_mode_y = create_dropdown_menu(
+        row4,
+        NULL,
+        0,
+        xyz_mode_width,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        font_sub
+    );
+    char dd_mode_y_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_FUNCTION_XYZ_MODES; i++) {
+        snprintf(dd_mode_y_name, sizeof(dd_mode_y_name), "%s", String(i).c_str());
+        lv_dropdown_add_option(result.dd_mode_y, dd_mode_y_name, LV_DROPDOWN_POS_LAST);
+    }
+    lv_dropdown_set_selected(result.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
+    lv_obj_add_event_cb(result.dd_mode_y, dd_mode_y_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
     // Critical for alignment
-    lv_obj_set_size(result.label_y, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_y, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_y, xyz_label_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_y, xyz_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_y, xyz_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_mode_y, xyz_mode_width, LV_SIZE_CONTENT);
 
     /* --- ROW 5: Z Value ------------------------------------------------------------- */
     
@@ -3035,13 +3225,14 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_set_style_text_color(result.label_z, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_z, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
+    // User Z
     result.ta_z = create_textarea(
-        row5,     // lv_obj_t
-        value_width,             // width px
-        row_height,              // height px
+        row5,            // lv_obj_t
+        xyz_value_width, // width px
+        row_height,      // height px
         LV_ALIGN_CENTER, // alignment
-        0,            // pos x
-        0,              // pos y
+        0,               // pos x
+        0,               // pos y
         true,            // one line
         LV_TXT_ALNUMDEC, // accepted char*
         "",              // placeholder text
@@ -3054,9 +3245,52 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.ta_z, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_z, &matrix_value_z_ctx);
 
+    // System Z
+    result.dd_z = create_dropdown_menu(
+        row5,
+        NULL,
+        0,
+        xyz_value_width,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        font_sub
+    );
+    char dd_z_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
+        snprintf(dd_z_name, sizeof(dd_z_name), "%s", matrixData.matrix_function_names[i]);
+        lv_dropdown_add_option(result.dd_z, dd_z_name, LV_DROPDOWN_POS_LAST);
+    }
+    lv_dropdown_set_selected(result.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
+    lv_obj_add_event_cb(result.dd_z, dd_z_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_flag(result.dd_z, LV_OBJ_FLAG_HIDDEN);
+
+    // Z Mode Select
+    result.dd_mode_z = create_dropdown_menu(
+        row5,
+        NULL,
+        0,
+        xyz_mode_width,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        font_sub
+    );
+    char dd_mode_z_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_FUNCTION_XYZ_MODES; i++) {
+        snprintf(dd_mode_z_name, sizeof(dd_mode_z_name), "%s", String(i).c_str());
+        lv_dropdown_add_option(result.dd_mode_z, dd_mode_z_name, LV_DROPDOWN_POS_LAST);
+    }
+    lv_dropdown_set_selected(result.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
+    lv_obj_add_event_cb(result.dd_mode_z, dd_mode_z_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
     // Critical for alignment
-    lv_obj_set_size(result.label_z, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_z, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_z, xyz_label_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_z, xyz_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_z, xyz_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_mode_z, xyz_mode_width, LV_SIZE_CONTENT);
     
     /* --- ROW 6: Operator ------------------------------------------------------------ */
     
@@ -4881,13 +5115,60 @@ void update_display() {
 
         // Matrix Configuration Panel
         if (mfc.panel) {
+            // Current Function
             lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
 
+            // Primary Function Comparotor
             lv_dropdown_set_selected(mfc.dd_function_name, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
 
-            lv_textarea_set_text(mfc.ta_x, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]).c_str());
+            // Comparitor X Mode
+            lv_dropdown_set_selected(mfc.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
+            // Comparitor X Value
+            if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]==0) {
+                // Mode 0: User Defined
+                lv_textarea_set_text(mfc.ta_x, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]).c_str());
+                lv_obj_add_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_remove_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
+            }
+            else {
+                // Mode 1: System Defined
+                lv_dropdown_set_selected(mfc.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
+                lv_obj_add_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_remove_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
+            }
 
-            lv_textarea_set_text(mfc.ta_y, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]).c_str());
+            // Comparitor Y Mode
+            lv_dropdown_set_selected(mfc.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
+            // Comparitor Y Value
+            if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]==0) {
+                // Mode 0: User Defined
+                lv_textarea_set_text(mfc.ta_y, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]).c_str());
+                lv_obj_add_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_remove_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
+            }
+            else {
+                // Mode 1: System Defined
+                lv_dropdown_set_selected(mfc.dd_y, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
+                lv_obj_add_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_remove_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
+            }
+
+            // Comparitor Z Mode
+            lv_dropdown_set_selected(mfc.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
+            // Comparitor Z Value
+            if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]==0) {
+                // Mode 0: User Defined
+                lv_textarea_set_text(mfc.ta_z, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]).c_str());
+                lv_obj_add_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_remove_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
+            }
+            else {
+                // Mode 1: System Defined
+                lv_dropdown_set_selected(mfc.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
+                lv_obj_add_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_remove_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
+            }
+
 
             lv_textarea_set_text(mfc.ta_z, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]).c_str());
 

@@ -274,7 +274,6 @@ void map_values(void) {
  * @brief Get Target value to be mapped.
  * 
  * @param mapslot Specify target mapslot.
- * @return Char value is returned so that map value types are returned as a uniform type.
  */
 double get_mapping_input_value(int map_slot) {
     

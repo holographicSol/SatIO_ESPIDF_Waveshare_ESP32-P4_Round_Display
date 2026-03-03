@@ -42,7 +42,10 @@ struct satioFileStruct satioFileData = {
         "SWITCH_PWM_VALUE_1", // 9
         "SWITCH_FLUX",        // 10
         "COMPUTER_ASSIST",    // 11
-        "MAP_SLOT",           // 12            
+        "MAP_SLOT",           // 12
+        "XYZ_MODE_X",         // 13      
+        "XYZ_MODE_Y",         // 14      
+        "XYZ_MODE_Z",         // 15            
         
     },
     .matix_filepaths=
@@ -740,6 +743,30 @@ bool saveMatrixFile(const char *filepath) {
                 printLine(f, lineBuf);
             }
         }
+        else if (i_tag==13) {
+            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
+                    printLine(f, lineBuf);
+                }
+            }
+        }
+        else if (i_tag==14) {
+            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
+                    printLine(f, lineBuf);
+                }
+            }
+        }
+        else if (i_tag==15) {
+            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
+                    printLine(f, lineBuf);
+                }
+            }
+        }
     }
     
     fclose(f);
@@ -792,6 +819,9 @@ bool loadMatrixFile(const char *filepath) {
         else if (tag_index==10) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {matrixData.flux_value[0][atoi(data_0.c_str())]=strtol(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==11) {if (str_is_int8(data_0.c_str()) && str_is_bool(data_1.c_str())) {matrixData.computer_assist[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==12) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.index_mapped_value[0][atoi(data_0.c_str())]=atoi(data_1.c_str());}}
+        else if (tag_index==13) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==14) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==15) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Z]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         currentTag++;
     }
     fclose(f);

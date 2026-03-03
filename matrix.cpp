@@ -594,6 +594,290 @@ struct MatrixStruct matrixData = {
       },
     }
   },
+  .matrix_function_mode_xyz={
+    {
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 0
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 1
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 2
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 3
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 4
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 5
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 6
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 7
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 8
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 9
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 10
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 11
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 12
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 13
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 14
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 15
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 16
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 17
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 18
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 19
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 20
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 21
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 22
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 23
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 24
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 25
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 26
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 27
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 28
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 29
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 30
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 31
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 32
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 33
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 34
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 35
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 36
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 37
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 38
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 39
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 40
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 41
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 42
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 43
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 44
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 45
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 46
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 47
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 48
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 49
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 50
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 51
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 52
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 53
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 54
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 55
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 56
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 57
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 58
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 59
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 60
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 61
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 62
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 63
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 64
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 65
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 66
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 67
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 68
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+      {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, // 69
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}
+      },
+    }
+  },
   .matrix_switch_operator_index={
     {
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // 0
@@ -710,9 +994,9 @@ struct MatrixStruct matrixData = {
     "GNGGA Valid CS", //29
     "GNRMC Valid CS", //30
     "GPATT Valid CS", //31
-    "GNGGA Valid CD", //32
-    "GNRMC Valid CD", //33
-    "GPATT Valid CD", //34
+    "GNGGA Bad CD", //32
+    "GNRMC Bad CD", //33
+    "GPATT Bad CD", //34
     "GNRMC Pos Stat A", //35
     "GNRMC Pos Stat V", //36
     "GNRMC Mode Ind A", //37
@@ -1201,19 +1485,19 @@ bool matrixSwitch(void) {
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_VALID_CD)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_BAD_CD)) {
         tmp_x = (long)gnggaData.bad_element_count;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_VALID_CD)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_BAD_CD)) {
         tmp_x = (long)gnrmcData.bad_element_count;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_VALID_CD)) {
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GPATT_BAD_CD)) {
         tmp_x = (long)gnrmcData.bad_element_count;
         tmp_y = 0;
         tmp_z = 0;
@@ -1585,37 +1869,37 @@ bool matrixSwitch(void) {
 
       // Neptune
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_AZIMUTH)) {
-        tmp_x = siderealPlanetData.uranus_az;
+        tmp_x = siderealPlanetData.neptune_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ALTITUDE)) {
-        tmp_x = siderealPlanetData.uranus_alt;
+        tmp_x = siderealPlanetData.neptune_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_H_ECLIPTIC_LAT)) {
-        tmp_x = siderealPlanetData.uranus_helio_ecliptic_lat;
+        tmp_x = siderealPlanetData.neptune_helio_ecliptic_lat;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_H_ECLIPTIC_LON)) {
-        tmp_x = siderealPlanetData.uranus_helio_ecliptic_long;
+        tmp_x = siderealPlanetData.neptune_helio_ecliptic_long;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ECLIPTIC_LAT)) {
-        tmp_x = siderealPlanetData.uranus_ecliptic_lat;
+        tmp_x = siderealPlanetData.neptune_ecliptic_lat;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ECLIPTIC_LON)) {
-        tmp_x = siderealPlanetData.uranus_ecliptic_long;
+        tmp_x = siderealPlanetData.neptune_ecliptic_long;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
@@ -1656,46 +1940,100 @@ bool matrixSwitch(void) {
 
       // Handle digits.
       if (handle_digit==true) {
+
         if ((matrixData.matrix_switch_operator_index[0][Mi][Fi]==INDEX_MATRIX_SWITCH_OPERATOR_OVER)) {
           if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==false) {
-            tmp_matrix[Fi]=check_over_true(tmp_x,
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            // User X: Compare System Value to Users X Value
+            if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==0) {
+              tmp_matrix[Fi]=check_over_true(tmp_x,
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            }
+            // System X: Compare System Value to System Value Using X as Index To System Value
+            else if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==1) {
+              tmp_matrix[Fi]=check_over_true(tmp_x,
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]).c_str(), NULL));
+            }
           }
           else if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==true) {
-            tmp_matrix[Fi]=check_over_false(tmp_x,
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            // User X: Compare System Value to Users X Value
+            if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==0) {
+              tmp_matrix[Fi]=check_over_false(tmp_x,
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            }
+            // System X: Compare System Value to System Value Using X as Index To System Value
+            else if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==1) {
+              tmp_matrix[Fi]=check_over_false(tmp_x,
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]).c_str(), NULL));
+            }
           }
         }
+
         else if ((matrixData.matrix_switch_operator_index[0][Mi][Fi]==INDEX_MATRIX_SWITCH_OPERATOR_UNDER)) {
           if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==false) {
-            tmp_matrix[Fi]=check_under_true(tmp_x,
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            // User X: Compare System Value to Users X Value
+            if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==0) {
+              tmp_matrix[Fi]=check_under_true(tmp_x,
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            }
+            // System X: Compare System Value to System Value Using X as Index To System Value
+            else if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==1) {
+              tmp_matrix[Fi]=check_under_true(tmp_x,
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]).c_str(), NULL));
+            }
           }
           else if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==true) {
-            tmp_matrix[Fi]=check_under_false(tmp_x,
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            // User X: Compare System Value to Users X Value
+            if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==0) {
+              tmp_matrix[Fi]=check_under_false(tmp_x,
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            }
+            // System X: Compare System Value to System Value Using X as Index To System Value
+            else if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==1) {
+              tmp_matrix[Fi]=check_under_false(tmp_x,
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]).c_str(), NULL));
+            }
           }
         }
+
         else if ((matrixData.matrix_switch_operator_index[0][Mi][Fi]==INDEX_MATRIX_SWITCH_OPERATOR_EQUAL)) {
-          if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==false) {
-            tmp_matrix[Fi]=check_equal_true(tmp_x,
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
-          }
-          else if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==true) {
-            tmp_matrix[Fi]=check_equal_false(tmp_x,
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
-          }
+            // User X: Compare System Value to Users X Value
+            if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==0) {
+              tmp_matrix[Fi]=check_equal_true(tmp_x,
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]);
+            }
+            // System X: Compare System Value to System Value Using X as Index To System Value
+            else if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==1) {
+              tmp_matrix[Fi]=check_equal_true(tmp_x,
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]).c_str(), NULL));
+            }
         }
+
         else if ((matrixData.matrix_switch_operator_index[0][Mi][Fi]==INDEX_MATRIX_SWITCH_OPERATOR_RANGE)) {
           if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==false) {
-            tmp_matrix[Fi]=check_ge_and_le_true(tmp_x,
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X],
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Y]);
+            // User X: Compare System Value to Users X Value
+            if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==0) {
+              tmp_matrix[Fi]=check_ge_and_le_true(tmp_x,
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X],
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Y]);
+            }
+            else if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==1) {
+              tmp_matrix[Fi]=check_ge_and_le_true(tmp_x,
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]).c_str(), NULL),
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Y]).c_str(), NULL));
+            }
           }
           else if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi]==true) {
-            tmp_matrix[Fi]=check_ge_and_le_false(tmp_x,
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X],
-            matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Y]);
+            // User X: Compare System Value to Users X Value
+            if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==0) {
+              tmp_matrix[Fi]=check_ge_and_le_false(tmp_x,
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X],
+              matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Y]);
+            }
+            else if (matrixData.matrix_function_mode_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]==1) {
+              tmp_matrix[Fi]=check_ge_and_le_false(tmp_x,
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X]).c_str(), NULL),
+              strtod(get_matrix_function_comparitor(matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Y]).c_str(), NULL));
+            }
           }
         }
       }
@@ -1773,6 +2111,505 @@ bool matrixSwitch(void) {
 
   } // End switch iteration
   return true;
+}
+
+/**
+ * @brief Get Matrix Switch Funstion Comparator.
+ * 
+ * @param index Specify target matrix value comparitor.
+ */
+String get_matrix_function_comparitor(int index_matrix_value_comparitor) {
+  String result = "NAN";
+  switch (index_matrix_value_comparitor) {
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_TIME_HHMMSS:
+      result = String(satioData.padded_local_time_HHMMSS);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_WEEK_DAY:
+      result = String(satioData.local_wday);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MONTH_DAY:
+      result = String(satioData.local_mday);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MONTH:
+      result = String(satioData.local_month);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_YEAR:
+      result = String(satioData.local_year);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATIO_DEG_LAT:
+      result = String(satioData.degrees_latitude);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATIO_DEG_LON:
+      result = String(satioData.degrees_longitude);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATIO_INS_LAT:
+      result = String(insData.ins_latitude);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATIO_INS_LON:
+      result = String(insData.ins_longitude);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATIO_INS_HEADING:
+      result = String(insData.ins_heading);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATIO_INS_ALT:
+      result = String(insData.ins_altitude);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_STATUS:
+      result = String(gnggaData.solution_status);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_SAT_COUNT:
+      result = String(gnggaData.satellite_count);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_PRESCION:
+      result = String(gnggaData.gps_precision_factor);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_ALTITUDE:
+      result = String(gnggaData.altitude);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_GROUND_SPEED:
+      result = String(gnrmcData.ground_speed);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEADING: {
+      result = String(gnrmcData.ground_heading);
+      break;
+    }
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_LINE:
+      result = String(gpattData.line_flag);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_STATIC:
+      result = String(gpattData.static_flag);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_RUN_STATE:
+      result = String(gpattData.run_state_flag);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_INS:
+      result = String(gpattData.ins);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_MILEAGE: {
+      result = String(gpattData.mileage);
+      break;
+    }
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_GST: {
+      result = String(gpattData.gst_data);
+      break;
+    }
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_YAW: {
+      result = String(gpattData.yaw);
+      break;
+    }
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_ROLL: {
+      result = String(gpattData.roll);
+      break;
+    }
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_PITCH: {
+      result = String(gpattData.pitch);
+      break;
+    }
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_VALID_CS:
+      result = String(gnggaData.valid_checksum);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_VALID_CS:
+      result = String(gnrmcData.valid_checksum);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_VALID_CS:
+      result = String(gpattData.valid_checksum);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_BAD_CD:
+      result = String((long)gnggaData.bad_element_count);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_BAD_CD:
+      result = String((long)gnrmcData.bad_element_count);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_BAD_CD:
+      result = String((long)gnrmcData.bad_element_count);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_G_FORCE_X:
+      result = String(gyroData.gyro_0_acc_x);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_G_FORCE_Y:
+      result = String(gyroData.gyro_0_acc_y);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_G_FORCE_Z:
+      result = String(gyroData.gyro_0_acc_z);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_INCLINE_X:
+      result = String(gyroData.gyro_0_ang_x);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_INCLINE_Y:
+      result = String(gyroData.gyro_0_ang_y);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_INCLINE_Z:
+      result = String(gyroData.gyro_0_ang_z);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_MAG_FIELD_X:
+      result = String(gyroData.gyro_0_mag_x);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_MAG_FIELD_Y:
+      result = String(gyroData.gyro_0_mag_y);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_MAG_FIELD_Z:
+      result = String(gyroData.gyro_0_mag_z);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_VELOCITY_X:
+      result = String(gyroData.gyro_0_gyr_x);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_VELOCITY_Y:
+      result = String(gyroData.gyro_0_gyr_y);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_G0_VELOCITY_Z:
+      result = String(gyroData.gyro_0_gyr_z);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_METEOR:
+      result = String(
+        meteor_shower_warning_system
+          [(int)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_X]]
+          [(int)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Y]]
+      );
+      break;
+
+    // Sun
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SUN_AZIMUTH:
+      result = String(siderealPlanetData.sun_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SUN_ALTITUDE:
+      result = String(siderealPlanetData.sun_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SUN_HELIO_ECL_LAT:
+      result = String(siderealPlanetData.sun_helio_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SUN_HELIO_ECL_LON:
+      result = String(siderealPlanetData.saturn_helio_ecliptic_long);
+      break;
+
+    // Moon
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MOON_AZIMUTH:
+      result = String(siderealPlanetData.moon_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MOON_ALTITUDE:
+      result = String(siderealPlanetData.moon_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MOON_PHASE:
+      result = String(siderealPlanetData.moon_p);
+      break;
+
+    // Mercury
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_AZIMUTH:
+      result = String(siderealPlanetData.mercury_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_ALTITUDE:
+      result = String(siderealPlanetData.mercury_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_H_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.mercury_helio_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_H_ECLIPTIC_LON:
+      result = String(siderealPlanetData.mercury_helio_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.mercury_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MERCURY_ECLIPTIC_LON:
+      result = String(siderealPlanetData.mercury_ecliptic_long);
+      break;
+
+    // Venus
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_VENUS_AZIMUTH:
+      result = String(siderealPlanetData.venus_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_VENUS_ALTITUDE:
+      result = String(siderealPlanetData.venus_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_VENUS_H_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.venus_helio_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_VENUS_H_ECLIPTIC_LON:
+      result = String(siderealPlanetData.venus_helio_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_VENUS_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.venus_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_VENUS_ECLIPTIC_LON:
+      result = String(siderealPlanetData.venus_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_EARTH_ECLIPTIC_LON:
+      result = String(siderealPlanetData.earth_ecliptic_long);
+      break;
+
+    // Mars
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MARS_AZIMUTH:
+      result = String(siderealPlanetData.mars_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MARS_ALTITUDE:
+      result = String(siderealPlanetData.mars_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MARS_H_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.mars_helio_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MARS_H_ECLIPTIC_LON:
+      result = String(siderealPlanetData.mars_helio_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MARS_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.mars_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MARS_ECLIPTIC_LON:
+      result = String(siderealPlanetData.mars_ecliptic_long);
+      break;
+
+    // Jupiter
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_AZIMUTH:
+      result = String(siderealPlanetData.jupiter_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_ALTITUDE:
+      result = String(siderealPlanetData.jupiter_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_H_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.jupiter_helio_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_H_ECLIPTIC_LON:
+      result = String(siderealPlanetData.jupiter_helio_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.jupiter_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_JUPITER_ECLIPTIC_LON:
+      result = String(siderealPlanetData.jupiter_ecliptic_long);
+      break;
+
+    // Saturn
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATURN_AZIMUTH:
+      result = String(siderealPlanetData.saturn_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATURN_ALTITUDE:
+      result = String(siderealPlanetData.saturn_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATURN_H_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.saturn_helio_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATURN_H_ECLIPTIC_LON:
+      result = String(siderealPlanetData.saturn_helio_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATURN_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.saturn_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SATURN_ECLIPTIC_LON:
+      result = String(siderealPlanetData.saturn_ecliptic_long);
+      break;
+
+    // Uranus
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_URANUS_AZIMUTH:
+      result = String(siderealPlanetData.uranus_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_URANUS_ALTITUDE:
+      result = String(siderealPlanetData.uranus_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_URANUS_H_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.uranus_helio_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_URANUS_H_ECLIPTIC_LON:
+      result = String(siderealPlanetData.uranus_helio_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_URANUS_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.uranus_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_URANUS_ECLIPTIC_LON:
+      result = String(siderealPlanetData.uranus_ecliptic_long);
+      break;
+
+    // Neptune
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_AZIMUTH:
+      result = String(siderealPlanetData.neptune_az);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ALTITUDE:
+      result = String(siderealPlanetData.neptune_alt);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_H_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.neptune_helio_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_H_ECLIPTIC_LON:
+      result = String(siderealPlanetData.neptune_helio_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ECLIPTIC_LAT:
+      result = String(siderealPlanetData.neptune_ecliptic_lat);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_NEPTUNE_ECLIPTIC_LON:
+      result = String(siderealPlanetData.neptune_ecliptic_long);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_AD_MULTIPLEXER_0:
+      result = String(
+        ad_mux_0.data[
+          (int)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Z]
+        ]
+      );
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_MAP_SLOT:
+      result = String(
+        mappingData.mapped_value[0][
+          (int)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Z]
+        ]
+      );
+      break;
+
+    // The SD_CARD_INSERTED block is commented out in your digit code.
+    case INDEX_MATRIX_SWITCH_FUNCTION_SD_CARD_INSERTED:
+      result = String("");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_SD_CARD_MOUNTED:
+      result = String(sdcardData.sdcard_mounted);
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_PORT_CON_0:
+      result = String(
+        matrixData.input_value[0][
+          (int)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Z]
+        ]
+      );
+      break;
+
+    // Char-comparison cases – return the “constant” side you compare against
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_POS_STAT_A:
+      result = String("A");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_POS_STAT_V:
+      result = String("V");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_MODE_IND_A:
+      result = String("A");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_MODE_IND_D:
+      result = String("D");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_MODE_IND_E:
+      result = String("E");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_MODE_IND_N:
+      result = String("N");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEMI_NORTH:
+      result = String("N");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEMI_SOUTH:
+      result = String("S");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEMI_EAST:
+      result = String("E");
+      break;
+
+    case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEMI_WEST:
+      result = String("W");
+      break;
+
+    default:
+      result = String("NAN");
+      break;
+  }
+  return result;
 }
 
 void SwitchStat(void) {

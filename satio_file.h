@@ -11,7 +11,7 @@
 #include <dirent.h>
 #include "config.h"
 
-#define MAX_MATRIX_TAGS   13
+#define MAX_MATRIX_TAGS   16
 #define MAX_MATRIX_SLOTS  10
 #define MAX_MAPPING_TAGS  7
 #define MAX_SYSTEM_TAGS   60

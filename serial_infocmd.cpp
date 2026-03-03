@@ -178,7 +178,7 @@ static void PrintHelp(void) {
       matrix -s n                 Specify switch index n.
       matrix -f n                 Specify function index n.
       matrix -p n                 Set port for switch -s.
-      matrix -fn n                Set function -f for switch -s. See available matrix functions.
+      matrix -fn n                Set function -f for switch -s. Primary Comparitors:
                                   [0] NONE
                                   [1] ON
                                   [2] Switch Link
@@ -292,6 +292,13 @@ static void PrintHelp(void) {
                                   [110] SD Card Inserted
                                   [111] SD Card Mounted
                                   [112] Port Con 0
+      matrix --xyz-mode-x         Specify function comparitor mode. Used with -s and -f.
+      matrix --xyz-mode-y         Specify function comparitor mode. Used with -s and -f.
+      matrix --xyz-mode-z         Specify function comparitor mode. Used with -s and -f.
+                                  [0] User Value. A value that is set by the user.
+                                  [1] System Value. A value that is set by the system. Allows primary comparitors to be compared to other primary comparitors.
+                                  In mode 0, user defined value is compared to a primary comparitor.
+                                  In mode 1, primary comparitors are compared to each other. 
       matrix -fx n                Set function -f value x for switch -s.
       matrix -fy n                Set function -f value y for switch -s.
       matrix -fz n                Set function -f value z for switch -s.
@@ -643,6 +650,39 @@ void setMatrixFunction(int switch_idx, int func_idx, int func_n) {
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
   printf("matrix_function %d\n", matrixData.matrix_function[0][switch_idx][func_idx]);
+}
+
+void setMatrixFunctionXComparitorMode(int switch_idx, int func_idx, int comparitor_mode) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
+      func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS)
+  {
+    if (comparitor_mode>=0 && comparitor_mode<MAX_MATRIX_FUNCTION_XYZ_MODES) {
+      matrixData.matrix_function_mode_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_X]=comparitor_mode;
+      matrixData.matrix_switch_write_required[0][switch_idx]=true;
+    }
+  }
+}
+
+void setMatrixFunctionYComparitorMode(int switch_idx, int func_idx, int comparitor_mode) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
+      func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS)
+  {
+    if (comparitor_mode>=0 && comparitor_mode<MAX_MATRIX_FUNCTION_XYZ_MODES) {
+      matrixData.matrix_function_mode_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_Y]=comparitor_mode;
+      matrixData.matrix_switch_write_required[0][switch_idx]=true;
+    }
+  }
+}
+
+void setMatrixFunctionZComparitorMode(int switch_idx, int func_idx, int comparitor_mode) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
+      func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS)
+  {
+    if (comparitor_mode>=0 && comparitor_mode<MAX_MATRIX_FUNCTION_XYZ_MODES) {
+      matrixData.matrix_function_mode_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_Z]=comparitor_mode;
+      matrixData.matrix_switch_write_required[0][switch_idx]=true;
+    }
+  }
 }
 
 void setMatrixX(int switch_idx, int func_idx, double func_x) {
@@ -1242,6 +1282,15 @@ void CmdProcess() {
           }
           if (argparser_has_flag(&parser, "s") && argparser_has_flag(&parser, "map-slot")) {
             setMapSlot(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "map-slot", -1));
+          }
+          if (argparser_has_flag(&parser, "s") && argparser_has_flag(&parser, "f") && argparser_has_flag(&parser, "xyz-mode-x")) {
+            setMatrixFunctionXComparitorMode(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", -1), argparser_get_int8(&parser, "xyz-mode-x", 0));
+          }
+          if (argparser_has_flag(&parser, "s") && argparser_has_flag(&parser, "f") && argparser_has_flag(&parser, "xyz-mode-y")) {
+            setMatrixFunctionYComparitorMode(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", -1), argparser_get_int8(&parser, "xyz-mode-y", 0));
+          }
+          if (argparser_has_flag(&parser, "s") && argparser_has_flag(&parser, "f") && argparser_has_flag(&parser, "xyz-mode-z")) {
+            setMatrixFunctionZComparitorMode(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", -1), argparser_get_int8(&parser, "xyz-mode-z", 0));
           }
         }
       }
