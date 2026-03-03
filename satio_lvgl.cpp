@@ -3122,7 +3122,7 @@ matrix_function_container_t create_matrix_function_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_value_x, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_value_x, LV_DIR_NONE);}
 
-    const int32_t xyz_mode_width = 100;
+    const int32_t xyz_mode_width = 120;
     const int32_t xyz_label_width = 20;
     const int32_t xyz_value_width = (width_px - xyz_mode_width - xyz_label_width); 
     
@@ -5125,7 +5125,7 @@ void update_display() {
 
     // matrix screen
     else if (lv_scr_act() == matrix_screen) {
-        
+
         matrix_contrast_outline_color = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
         matrix_value_title_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
         matrix_value_text_color = lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100);
