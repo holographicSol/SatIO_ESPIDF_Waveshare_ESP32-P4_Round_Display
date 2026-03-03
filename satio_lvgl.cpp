@@ -157,6 +157,15 @@ lv_color_t menu_outline_color;
 lv_color_t menu_shadow_color;
 lv_color_t menu_text_color;
 lv_color_t system_tray_bg_color;
+
+lv_color_t matrix_value_title_text_color;
+lv_color_t matrix_value_text_color;
+lv_color_t matrix_contrast_value_text_color;
+
+lv_color_t map_value_title_text_color;
+lv_color_t map_value_text_color;
+lv_color_t map_contrast_value_text_color;
+
 // ---------------------------
 // Size
 // ---------------------------
@@ -1183,7 +1192,7 @@ static void screen_swipe_cb(lv_event_t * e)
             lv_anim_init(&a);
             lv_anim_set_var(&a, system_tray.panel);
             lv_anim_set_values(&a, -290, 0);
-            lv_anim_set_time(&a, 200);
+            lv_anim_set_time(&a, 100);
             lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_y);
             lv_anim_start(&a);
             
@@ -1198,7 +1207,7 @@ static void screen_swipe_cb(lv_event_t * e)
         lv_anim_init(&a);
         lv_anim_set_var(&a, system_tray.panel);
         lv_anim_set_values(&a, 0, -290);
-        lv_anim_set_time(&a, 200);
+        lv_anim_set_time(&a, 100);
         lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_y);
         lv_anim_set_ready_cb(&a, tray_close_ready_cb);  // Hide when animation finishes
         lv_anim_start(&a);
@@ -1773,7 +1782,8 @@ lv_obj_t * create_textarea(
     bool transparent_bg,
     bool show_scrollbar,
     bool enable_scrolling,
-    const lv_font_t * font
+    const lv_font_t * font,
+    lv_text_align_t text_align
     )
 {
     /* ----------------------------------- TEXTAREA ------------------------------------ */
@@ -1848,7 +1858,7 @@ lv_obj_t * create_textarea(
     }
 
     // Main style: text
-    lv_obj_set_style_text_align(ta, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    lv_obj_set_style_text_align(ta, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(ta, font, LV_PART_MAIN);
     lv_obj_set_style_text_color(ta, menu_text_color, LV_PART_MAIN);
 
@@ -2853,6 +2863,9 @@ matrix_function_container_t create_matrix_function_container(
     const int32_t xyz_mode_width = 50;
     const int32_t xyz_label_width = 20;
     const int32_t xyz_value_width = width_px - xyz_label_width - xyz_mode_width;
+
+    const int32_t function_value_label_width = 20;
+    const int32_t function_value_width = width_px - function_value_label_width;
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     
@@ -2907,7 +2920,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row1, LV_DIR_NONE);}
     
     result.label_function_index_select = lv_label_create(row1);
-    lv_label_set_text(result.label_function_index_select, "Function:");
+    lv_label_set_text(result.label_function_index_select, "Function");
     lv_obj_set_size(result.label_function_index_select, label_width, row_height);
     lv_obj_set_style_text_font(result.label_function_index_select, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_function_index_select, menu_text_color, LV_PART_MAIN);
@@ -2963,8 +2976,8 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row2, LV_DIR_NONE);}
     
     result.label_function_name = lv_label_create(row2);
-    lv_label_set_text(result.label_function_name, "Function:");
-    lv_obj_set_size(result.label_function_name, label_width, row_height);
+    lv_label_set_text(result.label_function_name, "In");
+    lv_obj_set_size(result.label_function_name, function_value_label_width, row_height);
     lv_obj_set_style_text_font(result.label_function_name, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_function_name, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_function_name, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -2973,7 +2986,7 @@ matrix_function_container_t create_matrix_function_container(
         row2,
         NULL,
         0,
-        value_width,
+        function_value_width,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -2989,8 +3002,8 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.dd_function_name, dd_function_name_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_function_name, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_function_name, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_function_name, function_value_label_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_function_name, function_value_width, LV_SIZE_CONTENT);
     
     /* --- ROW 3: X Value ------------------------------------------------------------- */
     
@@ -3019,7 +3032,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row3, LV_DIR_NONE);}
     
     result.label_x = lv_label_create(row3);
-    lv_label_set_text(result.label_x, "X:");
+    lv_label_set_text(result.label_x, "X");
     lv_obj_set_size(result.label_x, xyz_label_width, row_height);
     lv_obj_set_style_text_font(result.label_x, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_x, menu_text_color, LV_PART_MAIN);
@@ -3039,7 +3052,8 @@ matrix_function_container_t create_matrix_function_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,        // font for labels
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_x, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]).c_str());
     lv_obj_add_event_cb(result.ta_x, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3119,7 +3133,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row4, LV_DIR_NONE);}
 
     result.label_y = lv_label_create(row4);
-    lv_label_set_text(result.label_y, "Y:");
+    lv_label_set_text(result.label_y, "Y");
     lv_obj_set_size(result.label_y, label_width, row_height);
     lv_obj_set_style_text_font(result.label_y, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_y, menu_text_color, LV_PART_MAIN);
@@ -3139,7 +3153,8 @@ matrix_function_container_t create_matrix_function_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_y, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]).c_str());
     lv_obj_add_event_cb(result.ta_y, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3219,7 +3234,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row5, LV_DIR_NONE);}
     
     result.label_z = lv_label_create(row5);
-    lv_label_set_text(result.label_z, "Z:");
+    lv_label_set_text(result.label_z, "Z");
     lv_obj_set_size(result.label_z, label_width, row_height);
     lv_obj_set_style_text_font(result.label_z, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_z, menu_text_color, LV_PART_MAIN);
@@ -3239,7 +3254,8 @@ matrix_function_container_t create_matrix_function_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_z, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]).c_str());
     lv_obj_add_event_cb(result.ta_z, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3319,7 +3335,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row6, LV_DIR_NONE);}
     
     result.label_operator = lv_label_create(row6);
-    lv_label_set_text(result.label_operator, "Operator:");
+    lv_label_set_text(result.label_operator, "Operator");
     lv_obj_set_size(result.label_operator, label_width, row_height);
     lv_obj_set_style_text_font(result.label_operator, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_operator, menu_text_color, LV_PART_MAIN);
@@ -3331,7 +3347,7 @@ matrix_function_container_t create_matrix_function_container(
         0,
         value_width,
         row_height,
-        LV_ALIGN_CENTER,
+        LV_TEXT_ALIGN_CENTER,
         0,
         0,
         font_sub
@@ -3375,7 +3391,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row9, LV_DIR_NONE);}
     
     result.label_output_mode = lv_label_create(row9);
-    lv_label_set_text(result.label_output_mode, "Output:");
+    lv_label_set_text(result.label_output_mode, "Output");
     lv_obj_set_size(result.label_output_mode, label_width, row_height);
     lv_obj_set_style_text_font(result.label_output_mode, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_output_mode, menu_text_color, LV_PART_MAIN);
@@ -3431,7 +3447,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row10, LV_DIR_NONE);}
 
     result.label_output_pwm_0 = lv_label_create(row10);
-    lv_label_set_text(result.label_output_pwm_0, "PWM0:");
+    lv_label_set_text(result.label_output_pwm_0, "PWM0");
     lv_obj_set_size(result.label_output_pwm_0, label_width, row_height);
     lv_obj_set_style_text_font(result.label_output_pwm_0, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_output_pwm_0, menu_text_color, LV_PART_MAIN);
@@ -3450,7 +3466,8 @@ matrix_function_container_t create_matrix_function_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_pwm_0, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF]).c_str());
     lv_obj_add_event_cb(result.ta_pwm_0, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3487,7 +3504,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row11, LV_DIR_NONE);}
 
     result.label_output_pwm_1 = lv_label_create(row11);
-    lv_label_set_text(result.label_output_pwm_1, "PWM1:");
+    lv_label_set_text(result.label_output_pwm_1, "PWM1");
     lv_obj_set_size(result.label_output_pwm_1, label_width, row_height);
     lv_obj_set_style_text_font(result.label_output_pwm_1, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_output_pwm_1, menu_text_color, LV_PART_MAIN);
@@ -3506,7 +3523,8 @@ matrix_function_container_t create_matrix_function_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_pwm_1, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON]).c_str());
     lv_obj_add_event_cb(result.ta_pwm_1, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3543,7 +3561,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row12, LV_DIR_NONE);}
     
     result.label_map_slot = lv_label_create(row12);
-    lv_label_set_text(result.label_map_slot, "Map Slot:");
+    lv_label_set_text(result.label_map_slot, "Map Slot");
     lv_obj_set_size(result.label_map_slot, label_width, row_height);
     lv_obj_set_style_text_font(result.label_map_slot, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_map_slot, menu_text_color, LV_PART_MAIN);
@@ -3599,7 +3617,7 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row13, LV_DIR_NONE);}
 
     result.label_port_map = lv_label_create(row13);
-    lv_label_set_text(result.label_port_map, "Port:");
+    lv_label_set_text(result.label_port_map, "Port");
     lv_obj_set_size(result.label_port_map, label_width, row_height);
     lv_obj_set_style_text_font(result.label_port_map, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_port_map, menu_text_color, LV_PART_MAIN);
@@ -3618,7 +3636,8 @@ matrix_function_container_t create_matrix_function_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_port_map, String(matrixData.matrix_port_map[0][current_matrix_i]).c_str());
     lv_obj_add_event_cb(result.ta_port_map, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3670,7 +3689,7 @@ mapping_config_container_t create_mapping_config_container(
     const int32_t padding = 0;
     const int32_t row_spacing = 0;
     const int32_t row_height = 34;
-    const int32_t label_width = 80;
+    const int32_t label_width = 40;
     const int32_t value_width = width_px-label_width-2*padding;
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
@@ -3726,7 +3745,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row1, LV_DIR_NONE);}
     
     result.slot = lv_label_create(row1);
-    lv_label_set_text(result.slot, "Map:");
+    lv_label_set_text(result.slot, "Map");
     lv_obj_set_size(result.slot, label_width, row_height);
     lv_obj_set_style_text_font(result.slot, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.slot, menu_text_color, LV_PART_MAIN);
@@ -3737,7 +3756,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_size(result.label_slot, value_width, row_height);
     lv_obj_set_style_text_font(result.label_slot, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_slot, menu_text_color, LV_PART_MAIN);
-    lv_obj_set_style_text_align(result.label_slot, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+    lv_obj_set_style_text_align(result.label_slot, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
 
     // Critical for alignment
     lv_obj_set_size(result.slot, label_width, LV_SIZE_CONTENT);
@@ -3771,7 +3790,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // C0
     result.c0 = lv_label_create(row2);
-    lv_label_set_text(result.c0, "C0:");
+    lv_label_set_text(result.c0, "C0");
     lv_obj_set_size(result.c0, label_width, row_height);
     lv_obj_set_style_text_font(result.c0, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c0, menu_text_color, LV_PART_MAIN);
@@ -3784,7 +3803,7 @@ mapping_config_container_t create_mapping_config_container(
         0,
         value_width,
         row_height,
-        LV_TEXT_ALIGN_RIGHT,
+        LV_TEXT_ALIGN_LEFT,
         0,
         0,
         font_sub
@@ -3828,7 +3847,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row3, LV_DIR_NONE);}
     
     result.c1 = lv_label_create(row3);
-    lv_label_set_text(result.c1, "C1:");
+    lv_label_set_text(result.c1, "C1");
     lv_obj_set_size(result.c1, label_width, row_height);
     lv_obj_set_style_text_font(result.c1, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c1, menu_text_color, LV_PART_MAIN);
@@ -3847,7 +3866,8 @@ mapping_config_container_t create_mapping_config_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_c1, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C1]).c_str());
     lv_obj_add_event_cb(result.ta_c1, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3884,7 +3904,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row4, LV_DIR_NONE);}
     
     result.c2 = lv_label_create(row4);
-    lv_label_set_text(result.c2, "C2:");
+    lv_label_set_text(result.c2, "C2");
     lv_obj_set_size(result.c2, label_width, row_height);
     lv_obj_set_style_text_font(result.c2, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c2, menu_text_color, LV_PART_MAIN);
@@ -3903,7 +3923,8 @@ mapping_config_container_t create_mapping_config_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_c2, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C2]).c_str());
     lv_obj_add_event_cb(result.ta_c2, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3940,7 +3961,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row5, LV_DIR_NONE);}
     
     result.c3 = lv_label_create(row5);
-    lv_label_set_text(result.c3, "C3:");
+    lv_label_set_text(result.c3, "C3");
     lv_obj_set_size(result.c3, label_width, row_height);
     lv_obj_set_style_text_font(result.c3, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c3, menu_text_color, LV_PART_MAIN);
@@ -3959,7 +3980,8 @@ mapping_config_container_t create_mapping_config_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_c3, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C3]).c_str());
     lv_obj_add_event_cb(result.ta_c3, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -3996,7 +4018,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row6, LV_DIR_NONE);}
     
     result.c4 = lv_label_create(row6);
-    lv_label_set_text(result.c4, "C4:");
+    lv_label_set_text(result.c4, "C4");
     lv_obj_set_size(result.c4, label_width, row_height);
     lv_obj_set_style_text_font(result.c4, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c4, menu_text_color, LV_PART_MAIN);
@@ -4015,7 +4037,8 @@ mapping_config_container_t create_mapping_config_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_c4, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C4]).c_str());
     lv_obj_add_event_cb(result.ta_c4, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -4052,7 +4075,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row7, LV_DIR_NONE);}
 
     result.c5 = lv_label_create(row7);
-    lv_label_set_text(result.c5, "C5:");
+    lv_label_set_text(result.c5, "C5");
     lv_obj_set_size(result.c5, label_width, row_height);
     lv_obj_set_style_text_font(result.c5, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c5, menu_text_color, LV_PART_MAIN);
@@ -4071,7 +4094,8 @@ mapping_config_container_t create_mapping_config_container(
         false,           // transparent bg
         false,           // show scrollbars
         false,           // enable scrolling
-        font_sub // font for labels,
+        font_sub,
+        LV_TEXT_ALIGN_RIGHT
     );
     lv_textarea_set_text(result.ta_c5, String(mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C5]).c_str());
     lv_obj_add_event_cb(result.ta_c5, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -4109,7 +4133,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Map Mode
     result.mode = lv_label_create(row8);
-    lv_label_set_text(result.mode, "Mode:");
+    lv_label_set_text(result.mode, "Mod");
     lv_obj_set_size(result.mode, label_width, row_height);
     lv_obj_set_style_text_font(result.mode, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.mode, menu_text_color, LV_PART_MAIN);
@@ -4166,7 +4190,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row9, LV_DIR_NONE);}
 
     result.input_value = lv_label_create(row9);
-    lv_label_set_text(result.input_value, "In:");
+    lv_label_set_text(result.input_value, "In");
     lv_obj_set_size(result.input_value, label_width, row_height);
     lv_obj_set_style_text_font(result.input_value, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.input_value, menu_text_color, LV_PART_MAIN);
@@ -4177,7 +4201,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_size(result.value_input, value_width, row_height);
     lv_obj_set_style_text_font(result.value_input, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.value_input, menu_text_color, LV_PART_MAIN);
-    lv_obj_set_style_text_align(result.value_input, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+    lv_obj_set_style_text_align(result.value_input, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
 
     // Critical for alignment
     lv_obj_set_size(result.input_value, label_width, LV_SIZE_CONTENT);
@@ -4210,7 +4234,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row10, LV_DIR_NONE);}
 
     result.map_result = lv_label_create(row10);
-    lv_label_set_text(result.map_result, "Out:");
+    lv_label_set_text(result.map_result, "Out");
     lv_obj_set_size(result.map_result, label_width, row_height);
     lv_obj_set_style_text_font(result.map_result, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.map_result, menu_text_color, LV_PART_MAIN);
@@ -4221,7 +4245,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_size(result.value_map_result, value_width, row_height);
     lv_obj_set_style_text_font(result.value_map_result, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.value_map_result, menu_text_color, LV_PART_MAIN);
-    lv_obj_set_style_text_align(result.value_map_result, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+    lv_obj_set_style_text_align(result.value_map_result, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
 
     // Critical for alignment
     lv_obj_set_size(result.map_result, label_width, LV_SIZE_CONTENT);
@@ -4494,6 +4518,8 @@ void display_matrix_screen() {
     matrix_screen = lv_obj_create(NULL);
 
     default_screen_objects(matrix_screen);
+    
+    lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
 
     matrix_overview_grid_1 = create_menu_grid(
         matrix_screen,        // parent screen
@@ -4505,7 +4531,7 @@ void display_matrix_screen() {
         0,                    // pos x
         145,                  // pos y
         LV_ALIGN_TOP_MID,     // alignment
-        radius_circle,        // item radius px
+        radius_rounded,        // item radius px
         15,                   // max cols visible (for scrollbar)
         3,                    // max rows visible (for scrollbar)
         false,                // show scrollbar
@@ -4520,6 +4546,9 @@ void display_matrix_screen() {
         lv_obj_add_event_cb(btn, matrix_overview_grid_1_event_cb, LV_EVENT_CLICKED, NULL);
     }
 
+    lv_obj_invalidate(matrix_screen);  // Force redraw
+    lv_timer_handler();  // Process events/render
+
     // Current Matrix Switch
     label_current_matrix_switch = create_label(
         matrix_screen,        // parent
@@ -4527,7 +4556,7 @@ void display_matrix_screen() {
         56,                   // height
         LV_ALIGN_LEFT_MID,    // parent alignment
         20,                   // pos x
-        0,                   // pos y
+        -54,                   // pos y
         "S",                  // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_25,     // font
@@ -4538,6 +4567,9 @@ void display_matrix_screen() {
         radius_rounded,       // outline radius
         1
     );
+
+    lv_obj_invalidate(matrix_screen);  // Force redraw
+    lv_timer_handler();  // Process events/render
 
     // Create Function Panel
     mfc = create_matrix_function_container(
@@ -4553,13 +4585,16 @@ void display_matrix_screen() {
         &cobalt_alien_17  // font for text,
     );
 
+    lv_obj_invalidate(matrix_screen);  // Force redraw
+    lv_timer_handler();  // Process events/render
+
     // Create Mapping Panel
     mcc = create_mapping_config_container(
         matrix_screen,    // parent
-        240,              // width px
+        210,              // width px
         350,              // height px
         LV_ALIGN_CENTER, // alignment
-        140,              // pos x
+        144,              // pos x
         80,               // pos y
         false,            // show scrollbar
         false,            // enable scrolling
@@ -4567,6 +4602,8 @@ void display_matrix_screen() {
         &cobalt_alien_17  // font for text,
     );
 
+    lv_obj_invalidate(matrix_screen);  // Force redraw
+    lv_timer_handler();  // Process events/render
 
     // Computer Assist Toggle
     matrix_switch_computer_assist = create_button(
@@ -4636,6 +4673,9 @@ void display_matrix_screen() {
     // lv_dropdown_set_selected(dd_matrix_slot_select, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
     lv_obj_add_event_cb(dd_matrix_slot_select, dd_matrix_slot_select_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
+    lv_obj_invalidate(matrix_screen);  // Force redraw
+    lv_timer_handler();  // Process events/render
+
     // New Matrix
     matrix_new = create_button(
         matrix_screen,        // parent
@@ -4704,17 +4744,11 @@ void display_matrix_screen() {
     );
     lv_obj_add_event_cb(matrix_delete.button, matrix_delete_event_cb, LV_EVENT_ALL, NULL);
 
-    // current matrix switch output value
-    // current matrix switch override value
-    // current matrix switch mapped value
 
-    // Map Slot
+    lv_obj_invalidate(matrix_screen);  // Force redraw
+    lv_timer_handler();  // Process events/render
 
-    // Map C0 - Map C5
-
-    // Map Mode
-
-    lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
+    // lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
     flag_display_matrix_screen = false;
 }
 
@@ -5012,15 +5046,9 @@ void update_display() {
             for(uint32_t i = 0; i < grid_child_cnt; i++) {
                 lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
 
-                // /* Current Switch (rainbow outline) */
-                // if (i == current_matrix_i) {
-                //     lv_obj_set_style_outline_color(btn, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-                // }
-                // else {
                 /* Computer Assist (yellow outline) */
                 if (matrixData.computer_assist[0][i]==true) {lv_obj_set_style_outline_color(btn, lv_color_make(255, 255, 0), LV_PART_MAIN);}
                 else {lv_obj_set_style_outline_color(btn, lv_color_make(58, 58, 58), LV_PART_MAIN);}
-                // }
 
                 lv_obj_t * label = lv_obj_get_child(btn, 0);
                 if(label && lv_obj_has_class(label, &lv_label_class)) {
@@ -5115,100 +5143,205 @@ void update_display() {
 
         // Matrix Configuration Panel
         if (mfc.panel) {
-            // Current Function
+            matrix_value_title_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
+            matrix_value_text_color = lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100);
+            matrix_contrast_value_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
+
+            // Label Current Function
+            lv_obj_set_style_text_color(mfc.label_function_index_select, matrix_value_title_text_color, LV_PART_MAIN);
+            // Value Current Function
             lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
+            lv_obj_set_style_text_color(mfc.dd_function_index_select, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-            // Primary Function Comparotor
+            // Label Primary Function Comparotor
+            lv_obj_set_style_text_color(mfc.label_function_name, matrix_value_title_text_color, LV_PART_MAIN);
+            // Value Primary Function Comparotor
             lv_dropdown_set_selected(mfc.dd_function_name, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
+            lv_obj_set_style_text_color(mfc.dd_function_name, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-            // Comparitor X Mode
+            // X
+            lv_obj_set_style_text_color(mfc.label_x, matrix_value_title_text_color, LV_PART_MAIN);
+
+            // X Comparitor Mode
             lv_dropdown_set_selected(mfc.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
-            // Comparitor X Value
+            lv_obj_set_style_text_color(mfc.dd_mode_x, matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+            // X Value
             if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]==0) {
                 // Mode 0: User Defined
                 lv_textarea_set_text(mfc.ta_x, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]).c_str());
                 lv_obj_add_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_set_style_text_color(mfc.ta_x, matrix_value_text_color, LV_PART_MAIN);
             }
             else {
                 // Mode 1: System Defined
                 lv_dropdown_set_selected(mfc.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
                 lv_obj_add_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_set_style_text_color(mfc.dd_x, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
             }
 
-            // Comparitor Y Mode
+            // Y
+            lv_obj_set_style_text_color(mfc.label_y, matrix_value_title_text_color, LV_PART_MAIN);
+
+            // Y Comparitor Mode
             lv_dropdown_set_selected(mfc.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
-            // Comparitor Y Value
+            lv_obj_set_style_text_color(mfc.dd_mode_y, matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+            // Y Value
             if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]==0) {
                 // Mode 0: User Defined
                 lv_textarea_set_text(mfc.ta_y, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]).c_str());
                 lv_obj_add_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_set_style_text_color(mfc.ta_y, matrix_value_text_color, LV_PART_MAIN);
             }
             else {
                 // Mode 1: System Defined
                 lv_dropdown_set_selected(mfc.dd_y, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
                 lv_obj_add_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_set_style_text_color(mfc.dd_y, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
             }
 
-            // Comparitor Z Mode
+            // Z
+            lv_obj_set_style_text_color(mfc.label_z, matrix_value_title_text_color, LV_PART_MAIN);
+            // Z Comparitor Mode
             lv_dropdown_set_selected(mfc.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
-            // Comparitor Z Value
+            lv_obj_set_style_text_color(mfc.dd_mode_z, matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+            // Z Value
             if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]==0) {
                 // Mode 0: User Defined
                 lv_textarea_set_text(mfc.ta_z, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]).c_str());
                 lv_obj_add_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_set_style_text_color(mfc.ta_z, matrix_value_text_color, LV_PART_MAIN);
             }
             else {
                 // Mode 1: System Defined
                 lv_dropdown_set_selected(mfc.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
                 lv_obj_add_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_set_style_text_color(mfc.dd_z, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
             }
 
-
-            lv_textarea_set_text(mfc.ta_z, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]).c_str());
-
+            // Operator
+            lv_obj_set_style_text_color(mfc.label_operator, matrix_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mfc.dd_operator, matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i]);
+            lv_obj_set_style_text_color(mfc.dd_operator, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
+            // Output Mode
+            lv_obj_set_style_text_color(mfc.label_output_mode, matrix_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
+            lv_obj_set_style_text_color(mfc.dd_output_mode, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
+            // PWM Off
+            lv_obj_set_style_text_color(mfc.label_output_pwm_0, matrix_value_title_text_color, LV_PART_MAIN);
             lv_textarea_set_text(mfc.ta_pwm_0, String(matrixData.output_pwm[0][current_matrix_i][0]).c_str());
+            lv_obj_set_style_text_color(mfc.ta_pwm_0, matrix_value_text_color, LV_PART_MAIN);
 
+            // PWM On
+            lv_obj_set_style_text_color(mfc.label_output_pwm_1, matrix_value_title_text_color, LV_PART_MAIN);
             lv_textarea_set_text(mfc.ta_pwm_1, String(matrixData.output_pwm[0][current_matrix_i][1]).c_str());
+            lv_obj_set_style_text_color(mfc.ta_pwm_1, matrix_value_text_color, LV_PART_MAIN);
 
+            // Connected Map Slot
+            lv_obj_set_style_text_color(mfc.label_map_slot, matrix_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
+            lv_obj_set_style_text_color(mfc.dd_map_slot, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
+            // Output Port
+            lv_obj_set_style_text_color(mfc.label_port_map, matrix_value_title_text_color, LV_PART_MAIN);
             lv_textarea_set_text(mfc.ta_port_map, String(matrixData.matrix_port_map[0][current_matrix_i]).c_str());
+            lv_obj_set_style_text_color(mfc.ta_port_map, matrix_value_text_color, LV_PART_MAIN);
         }
 
         // Mapping Configuration Panel
         if (mcc.panel) {
+            map_value_title_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
+            map_value_text_color = lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100);
+            map_contrast_value_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
+
             // determine which map slot is used for current matrix
             int current_map_slot = matrixData.index_mapped_value[0][current_matrix_i];
 
+            lv_obj_set_style_text_color(mcc.slot, map_value_title_text_color, LV_PART_MAIN);
             lv_label_set_text(mcc.label_slot, String(current_map_slot).c_str());
+            lv_obj_set_style_text_color(mcc.label_slot, map_value_text_color, LV_PART_MAIN);
 
+            lv_obj_set_style_text_color(mcc.c0, map_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mcc.dd_c0, (int)mappingData.mapping_config[0][current_map_slot][INDEX_MAP_C0]);
+            lv_obj_set_style_text_color(mcc.dd_c0, map_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
+            lv_obj_set_style_text_color(mcc.c1, map_value_title_text_color, LV_PART_MAIN);
             lv_textarea_set_text(mcc.ta_c1, String(mappingData.mapping_config[0][current_map_slot][INDEX_MAP_C1]).c_str());
+            lv_obj_set_style_text_color(mcc.ta_c1, map_value_text_color, LV_PART_MAIN);
 
+            lv_obj_set_style_text_color(mcc.c2, map_value_title_text_color, LV_PART_MAIN);
             lv_textarea_set_text(mcc.ta_c2, String(mappingData.mapping_config[0][current_map_slot][INDEX_MAP_C2]).c_str());
+            lv_obj_set_style_text_color(mcc.ta_c2, map_value_text_color, LV_PART_MAIN);
 
+            lv_obj_set_style_text_color(mcc.c3, map_value_title_text_color, LV_PART_MAIN);
             lv_textarea_set_text(mcc.ta_c3, String(mappingData.mapping_config[0][current_map_slot][INDEX_MAP_C3]).c_str());
+            lv_obj_set_style_text_color(mcc.ta_c3, map_value_text_color, LV_PART_MAIN);
 
+            lv_obj_set_style_text_color(mcc.c4, map_value_title_text_color, LV_PART_MAIN);
             lv_textarea_set_text(mcc.ta_c4, String(mappingData.mapping_config[0][current_map_slot][INDEX_MAP_C4]).c_str());
-
+            lv_obj_set_style_text_color(mcc.ta_c4, map_value_text_color, LV_PART_MAIN);
+            
+            lv_obj_set_style_text_color(mcc.c5, map_value_title_text_color, LV_PART_MAIN);
             lv_textarea_set_text(mcc.ta_c5, String(mappingData.mapping_config[0][current_map_slot][INDEX_MAP_C5]).c_str());
+            lv_obj_set_style_text_color(mcc.ta_c5, map_value_text_color, LV_PART_MAIN);
 
+            lv_obj_set_style_text_color(mcc.mode, map_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mcc.dd_mode, mappingData.map_mode[0][current_map_slot]);
+            lv_obj_set_style_text_color(mcc.dd_mode, map_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
+            lv_obj_set_style_text_color(mcc.input_value, map_value_title_text_color, LV_PART_MAIN);
             lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_map_slot)).c_str());
+            lv_obj_set_style_text_color(mcc.value_input, map_value_text_color, LV_PART_MAIN);
 
+            lv_obj_set_style_text_color(mcc.map_result, map_value_title_text_color, LV_PART_MAIN);
             lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]).c_str());
+            lv_obj_set_style_text_color(mcc.value_map_result, map_value_text_color, LV_PART_MAIN);
         }
     }
 

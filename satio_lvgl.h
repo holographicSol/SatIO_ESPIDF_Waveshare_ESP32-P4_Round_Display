@@ -358,7 +358,8 @@ lv_obj_t * create_textarea(
     bool transparent_bg,
     bool show_scrollbar,
     bool enable_scrolling,
-    const lv_font_t * font
+    const lv_font_t * font,
+    lv_text_align_t text_align
     );
 
 keyboard_t create_keyboard(
