@@ -3738,7 +3738,7 @@ mapping_config_container_t create_mapping_config_container(
     const int32_t padding = 0;
     const int32_t row_spacing = 0;
     const int32_t row_height = 36;
-    const int32_t label_width = 80;
+    const int32_t label_width = 200;
     const int32_t value_width = width_px-label_width-2*padding;
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
@@ -3794,7 +3794,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row1, LV_DIR_NONE);}
 
     const int32_t index_label_width = 80;
-    const int32_t index_value_width = (width_px/2 - index_label_width);
+    const int32_t index_value_width = (width_px - index_label_width);
     
     result.slot = lv_label_create(row1);
     lv_label_set_text(result.slot, "Map Slot");
@@ -4198,7 +4198,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Map Mode
     result.mode = lv_label_create(row8);
-    lv_label_set_text(result.mode, "Mod");
+    lv_label_set_text(result.mode, "Map Mode");
     lv_obj_set_size(result.mode, label_width, row_height);
     lv_obj_set_style_text_font(result.mode, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.mode, menu_text_color, LV_PART_MAIN);
@@ -4255,14 +4255,14 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row9, LV_DIR_NONE);}
 
     result.input_value = lv_label_create(row9);
-    lv_label_set_text(result.input_value, "In");
+    lv_label_set_text(result.input_value, "Input Value");
     lv_obj_set_size(result.input_value, label_width, row_height);
     lv_obj_set_style_text_font(result.input_value, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.input_value, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.input_value, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.value_input = lv_label_create(row9);
-    lv_label_set_text(result.value_input, "- - -");
+    lv_label_set_text(result.value_input, " - - -");
     lv_obj_set_size(result.value_input, value_width, row_height);
     lv_obj_set_style_text_font(result.value_input, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.value_input, menu_text_color, LV_PART_MAIN);
@@ -4299,7 +4299,7 @@ mapping_config_container_t create_mapping_config_container(
     else {lv_obj_set_scroll_dir(row10, LV_DIR_NONE);}
 
     result.map_result = lv_label_create(row10);
-    lv_label_set_text(result.map_result, "Out");
+    lv_label_set_text(result.map_result, "Output Value");
     lv_obj_set_size(result.map_result, label_width, row_height);
     lv_obj_set_style_text_font(result.map_result, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.map_result, menu_text_color, LV_PART_MAIN);
@@ -4639,7 +4639,7 @@ void display_matrix_screen() {
     // Create Function Panel
     mfc = create_matrix_function_container(
         matrix_screen,    // parent
-        450,              // width px
+        400,              // width px
         350,              // height px
         LV_ALIGN_CENTER,  // alignment
         0,              // pos x
@@ -4656,7 +4656,7 @@ void display_matrix_screen() {
     // Create Mapping Panel
     mcc = create_mapping_config_container(
         matrix_screen,    // parent
-        450,              // width px
+        400,              // width px
         350,              // height px
         LV_ALIGN_CENTER, // alignment
         0,              // pos x
@@ -5418,14 +5418,61 @@ void update_display() {
                 map_value_text_color = lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100);
                 map_contrast_value_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
 
+                // Map Slot
                 lv_obj_set_style_text_color(mcc.slot, map_value_title_text_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mcc.dd_slot, matrix_value_title_text_color, LV_PART_MAIN);
-                lv_dropdown_set_selected(mcc.dd_slot, matrixData.index_mapped_value[0][current_matrix_i]);
+                lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
                 lv_obj_set_style_text_color(mcc.dd_slot, matrix_value_text_color, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_slot), matrix_contrast_outline_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), matrix_value_text_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
+                // Map Mode 0
+                if (mappingData.map_mode[0][current_mapping_i]==MAP_MODE_MIN_TO_MAX) {
+                    // C0
+                    lv_label_set_text(mcc.c0, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C0]).c_str());
+                    // C1
+                    lv_label_set_text(mcc.c1, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C1]).c_str());
+                    // C2
+                    lv_label_set_text(mcc.c2, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C2]).c_str());
+                    // C3
+                    lv_label_set_text(mcc.c3, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C3]).c_str());
+                    // C4
+                    lv_label_set_text(mcc.c4, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C4]).c_str());
+                    // C5
+                    lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C5]).c_str());
+                }
+                // Map Mode 1
+                else if (mappingData.map_mode[0][current_mapping_i]==MAP_MODE_CENTER_MAP_AXIS_0) {
+                    // C0
+                    lv_label_set_text(mcc.c0, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C0]).c_str());
+                    // C1
+                    lv_label_set_text(mcc.c1, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C1]).c_str());
+                    // C2
+                    lv_label_set_text(mcc.c2, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C2]).c_str());
+                    // C3
+                    lv_label_set_text(mcc.c3, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C3]).c_str());
+                    // C4
+                    lv_label_set_text(mcc.c4, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C4]).c_str());
+                    // C5
+                    lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C5]).c_str());
+                }
+                // Map Mode 2
+                else if (mappingData.map_mode[0][current_mapping_i]==MAP_MODE_CENTER_MAP_AXIS_1) {
+                    // C0
+                    lv_label_set_text(mcc.c0, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C0]).c_str());
+                    // C1
+                    lv_label_set_text(mcc.c1, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C1]).c_str());
+                    // C2
+                    lv_label_set_text(mcc.c2, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C2]).c_str());
+                    // C3
+                    lv_label_set_text(mcc.c3, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C3]).c_str());
+                    // C4
+                    lv_label_set_text(mcc.c4, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C4]).c_str());
+                    // C5
+                    lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C5]).c_str());
+                }
 
                 lv_obj_set_style_text_color(mcc.c0, map_value_title_text_color, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_c0, (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
@@ -5468,7 +5515,7 @@ void update_display() {
                 lv_obj_set_style_text_color(mcc.value_input, map_value_text_color, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(mcc.map_result, map_value_title_text_color, LV_PART_MAIN);
-                lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]).c_str());
+                lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][current_mapping_i]).c_str());
                 lv_obj_set_style_text_color(mcc.value_map_result, map_value_text_color, LV_PART_MAIN);
             }
         }

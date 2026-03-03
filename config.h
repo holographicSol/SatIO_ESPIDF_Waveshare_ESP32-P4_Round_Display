@@ -206,6 +206,9 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define MAP_MIN_TO_MAX 0 // normal map
 #define MAP_CENTER_X0  1 // center map and select axis 0 (a side of center)
 #define MAP_CENTER_X1  2 // center map and select axis 1 (opposite side of center)
+#define MAP_MODE_MIN_TO_MAX 0
+#define MAP_MODE_CENTER_MAP_AXIS_0 1
+#define MAP_MODE_CENTER_MAP_AXIS_1 2
 
 // ----------------------------------------------------------------------------------------
 // INS.
