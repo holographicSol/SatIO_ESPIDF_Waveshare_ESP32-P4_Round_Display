@@ -878,6 +878,10 @@ struct MatrixStruct matrixData = {
       },
     }
   },
+  .matrix_function_mode_xyz_name={
+    "User",   // 0
+    "System", // 1
+  },
   .matrix_switch_operator_index={
     {
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // 0

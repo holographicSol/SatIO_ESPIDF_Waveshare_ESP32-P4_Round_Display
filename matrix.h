@@ -123,6 +123,13 @@ struct MatrixStruct {
    */
   volatile int matrix_function_mode_xyz[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS][3];
 
+  /**
+   * Matrix Comparator Modes
+   * 
+   * 0: User
+   * 1: System
+   */
+  char matrix_function_mode_xyz_name[MAX_MATRIX_FUNCTION_XYZ_MODES][MAX_GLOBAL_ELEMENT_SIZE]={};
 
   /**
    * Matrix switch function operators.

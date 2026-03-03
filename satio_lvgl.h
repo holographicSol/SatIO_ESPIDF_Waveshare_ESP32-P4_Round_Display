@@ -203,6 +203,10 @@ typedef struct {
 typedef struct {
     lv_obj_t * panel;                    // Main container panel
 
+    // Switch selection
+    lv_obj_t * label_switch_index_select; // Function index select label
+    lv_obj_t * dd_switch_index_select;     // Matrix function index select
+
     // Function selection
     lv_obj_t * label_function_index_select; // Function index select label
     lv_obj_t * dd_function_index_select;     // Matrix function index select
@@ -265,7 +269,7 @@ typedef struct {
 typedef struct {
     lv_obj_t * panel; // Main container panel
     lv_obj_t * slot;
-    lv_obj_t * label_slot;
+    lv_obj_t * dd_slot;
     lv_obj_t * c0;
     lv_obj_t * dd_c0;
     lv_obj_t * c1;

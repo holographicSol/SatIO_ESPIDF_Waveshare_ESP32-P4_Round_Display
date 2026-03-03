@@ -61,7 +61,6 @@ struct satioFileStruct satioFileData = {
         "/MATRIX/MATRIX_8.csv",
         "/MATRIX/MATRIX_9.csv",
     },
-    .matrix_file_slots={0},
     .current_matrix_filepath="/MATRIX/MATRIX_0.csv", // default
     .mapping_tags=
     {
