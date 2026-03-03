@@ -158,10 +158,12 @@ lv_color_t menu_shadow_color;
 lv_color_t menu_text_color;
 lv_color_t system_tray_bg_color;
 
+lv_color_t matrix_contrast_outline_color;
 lv_color_t matrix_value_title_text_color;
 lv_color_t matrix_value_text_color;
 lv_color_t matrix_contrast_value_text_color;
 
+lv_color_t map_contrast_outline_color;
 lv_color_t map_value_title_text_color;
 lv_color_t map_value_text_color;
 lv_color_t map_contrast_value_text_color;
@@ -5068,9 +5070,11 @@ void update_display() {
         // Matrix Save Slot
         if (dd_matrix_slot_select) {
             lv_obj_set_style_outline_color(dd_matrix_slot_select, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(dd_matrix_slot_select, lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(dd_matrix_slot_select, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_SELECTED);
-            // lv_dropdown_set_selected(dd_matrix_slot_select, 0); // change to current index (modify load/save/new/delete)
+            lv_obj_set_style_text_color(dd_matrix_slot_select, map_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(dd_matrix_slot_select), matrix_contrast_outline_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_slot_select), map_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_slot_select), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_slot_select), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
         }
 
         // Matrix New
@@ -5143,6 +5147,7 @@ void update_display() {
 
         // Matrix Configuration Panel
         if (mfc.panel) {
+            matrix_contrast_outline_color = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
             matrix_value_title_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
             matrix_value_text_color = lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100);
             matrix_contrast_value_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
@@ -5152,6 +5157,7 @@ void update_display() {
             // Value Current Function
             lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
             lv_obj_set_style_text_color(mfc.dd_function_index_select, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_value_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5161,6 +5167,7 @@ void update_display() {
             // Value Primary Function Comparotor
             lv_dropdown_set_selected(mfc.dd_function_name, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
             lv_obj_set_style_text_color(mfc.dd_function_name, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_value_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5171,6 +5178,7 @@ void update_display() {
             // X Comparitor Mode
             lv_dropdown_set_selected(mfc.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
             lv_obj_set_style_text_color(mfc.dd_mode_x, matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_value_title_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5188,6 +5196,7 @@ void update_display() {
                 lv_obj_add_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_set_style_text_color(mfc.dd_x, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_x), matrix_contrast_outline_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_value_text_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5199,6 +5208,7 @@ void update_display() {
             // Y Comparitor Mode
             lv_dropdown_set_selected(mfc.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
             lv_obj_set_style_text_color(mfc.dd_mode_y, matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_value_title_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5216,6 +5226,7 @@ void update_display() {
                 lv_obj_add_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_set_style_text_color(mfc.dd_y, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_y), matrix_contrast_outline_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_value_text_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5226,6 +5237,7 @@ void update_display() {
             // Z Comparitor Mode
             lv_dropdown_set_selected(mfc.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
             lv_obj_set_style_text_color(mfc.dd_mode_z, matrix_value_title_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_value_title_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5243,6 +5255,7 @@ void update_display() {
                 lv_obj_add_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_remove_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_set_style_text_color(mfc.dd_z, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_z), matrix_contrast_outline_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_value_text_color, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5252,6 +5265,7 @@ void update_display() {
             lv_obj_set_style_text_color(mfc.label_operator, matrix_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mfc.dd_operator, matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i]);
             lv_obj_set_style_text_color(mfc.dd_operator, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_operator), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_value_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5260,6 +5274,7 @@ void update_display() {
             lv_obj_set_style_text_color(mfc.label_output_mode, matrix_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
             lv_obj_set_style_text_color(mfc.dd_output_mode, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_value_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5278,6 +5293,7 @@ void update_display() {
             lv_obj_set_style_text_color(mfc.label_map_slot, matrix_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
             lv_obj_set_style_text_color(mfc.dd_map_slot, matrix_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_value_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5304,6 +5320,7 @@ void update_display() {
             lv_obj_set_style_text_color(mcc.c0, map_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mcc.dd_c0, (int)mappingData.mapping_config[0][current_map_slot][INDEX_MAP_C0]);
             lv_obj_set_style_text_color(mcc.dd_c0, map_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_c0), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_value_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
@@ -5331,6 +5348,7 @@ void update_display() {
             lv_obj_set_style_text_color(mcc.mode, map_value_title_text_color, LV_PART_MAIN);
             lv_dropdown_set_selected(mcc.dd_mode, mappingData.map_mode[0][current_map_slot]);
             lv_obj_set_style_text_color(mcc.dd_mode, map_value_text_color, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_mode), matrix_contrast_outline_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_value_text_color, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
