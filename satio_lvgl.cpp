@@ -5520,25 +5520,25 @@ void update_display() {
                 // Panel
                 lv_obj_set_style_outline_color(mfc.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
-                // Label Current Switch (Remeains Static Color For Emphasis)
-                // lv_obj_set_style_text_color(mfc.label_switch_index_select, main_contrast_title_hue, LV_PART_MAIN);
-                // // Value Current Switch
-                // lv_dropdown_set_selected(mfc.dd_switch_index_select, current_matrix_function_i);
-                // lv_obj_set_style_text_color(mfc.dd_switch_index_select, main_contrast_value_hue, LV_PART_MAIN);
-                // lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_outline_hue, LV_PART_MAIN);
-                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_MAIN);
-                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                // Label Current Switch
+                lv_obj_set_style_text_color(mfc.label_switch_index_select, main_contrast_title_hue, LV_PART_MAIN);
+                // Value Current Switch
+                lv_dropdown_set_selected(mfc.dd_switch_index_select, current_matrix_i);
+                lv_obj_set_style_text_color(mfc.dd_switch_index_select, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                // Label Current Function (Remeains Static Color For Emphasis)
-                // lv_obj_set_style_text_color(mfc.label_function_index_select, main_contrast_title_hue, LV_PART_MAIN);
-                // // Value Current Function
-                // lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
-                // lv_obj_set_style_text_color(mfc.dd_function_index_select, main_contrast_value_hue, LV_PART_MAIN);
-                // lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_outline_hue, LV_PART_MAIN);
-                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_MAIN);
-                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                // Label Current Function
+                lv_obj_set_style_text_color(mfc.label_function_index_select, main_contrast_title_hue, LV_PART_MAIN);
+                // Value Current Function
+                lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
+                lv_obj_set_style_text_color(mfc.dd_function_index_select, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Label Primary Function Comparotor
                 lv_obj_set_style_text_color(mfc.label_function_name, main_contrast_title_hue, LV_PART_MAIN);
