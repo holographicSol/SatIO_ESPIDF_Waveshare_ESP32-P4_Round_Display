@@ -98,6 +98,12 @@ LV_FONT_DECLARE(cobalt_alien_25);
 #define LV_TXT_NUMDEC  "0123456789.-"
 #define LV_TXT_ALNUMDEC "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-"
 
+typedef struct {
+    lv_obj_t * panel; // Main container panel
+    lv_obj_t * label;
+    lv_obj_t * button;
+} button_t;
+
 /** ---------------------------------------------------------------------------------------
  * @brief System Tray Struct
  * 
@@ -260,6 +266,10 @@ typedef struct {
     // Port
     lv_obj_t * label_port_map;           // Port map label
     lv_obj_t * ta_port_map;              // Port map textarea
+
+    button_t matrix_switch_computer_assist;
+    button_t matrix_switch_override;
+    lv_obj_t * matrix_switch_output_value;
     
 } matrix_function_container_t;
 
@@ -289,12 +299,6 @@ typedef struct {
     lv_obj_t * map_result;
     lv_obj_t * value_map_result;
 } mapping_config_container_t;
-
-typedef struct {
-    lv_obj_t * panel; // Main container panel
-    lv_obj_t * label;
-    lv_obj_t * button;
-} button_t;
 
 /** --------------------------------------------------------------------------------------- 
  * Function initializations.
@@ -447,6 +451,7 @@ matrix_function_container_t create_matrix_function_container(
     int32_t alignment,
     int32_t pos_x,
     int32_t pos_y,
+    int32_t radius,
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,

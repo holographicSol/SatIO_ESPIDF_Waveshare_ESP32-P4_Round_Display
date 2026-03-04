@@ -135,14 +135,11 @@ int current_matrix_function_i = 0;
 matrix_function_container_t mfc;
 mapping_config_container_t mcc;
 
-button_t matrix_switch_override;
-button_t matrix_switch_computer_assist;
 button_t matrix_new;
 button_t matrix_save;
 button_t matrix_load;
 button_t matrix_delete;
 lv_obj_t * dd_matrix_file_slot_select;
-lv_obj_t * matrix_switch_output_value;
 lv_obj_t * label_current_matrix_switch;
 button_t switch_matrix_mapping_panel;
 int current_matrix_panel_view=0;
@@ -2906,6 +2903,7 @@ matrix_function_container_t create_matrix_function_container(
     int32_t alignment,
     int32_t pos_x,
     int32_t pos_y,
+    int32_t radius,
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,
@@ -2914,14 +2912,17 @@ matrix_function_container_t create_matrix_function_container(
     matrix_function_container_t result = {0};
     
     // Layout constants
-    const int32_t padding = 0;
+    const int32_t padding = 4;
     const int32_t row_spacing = 0;
-    const int32_t row_height = 38;
+    const int32_t row_height = 32;
     const int32_t label_width = 80;
     const int32_t value_width = width_px-label_width-2*padding;
 
-    const int32_t function_value_label_width = 20;
-    const int32_t function_value_width = width_px - function_value_label_width;
+    // Row Object Widths
+    int32_t label_width_0 = 80;
+    int32_t label_width_1 = 80;
+    int32_t value_width_0 = ((width_px/2) - label_width_0) - padding*2;
+    int32_t value_width_1 = ((width_px/2) - label_width_1) - padding*2;
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     
@@ -2949,8 +2950,10 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_set_flex_flow(result.panel, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(result.panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_pad_row(result.panel, row_spacing, LV_PART_MAIN);
+    lv_obj_set_style_radius(result.panel, radius, LV_PART_MAIN);
+    lv_obj_set_style_outline_pad(result.panel, padding, LV_PART_MAIN);
 
-    /* --- ROW 1: Function Slot ------------------------------------------------------- */
+    /* --- Function Slot ------------------------------------------------------- */
     lv_obj_t * row_index = lv_obj_create(result.panel);
     lv_obj_set_size(row_index, LV_PCT(100), row_height);
     lv_obj_set_flex_flow(row_index, LV_FLEX_FLOW_ROW);
@@ -2975,13 +2978,19 @@ matrix_function_container_t create_matrix_function_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_index, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_index, LV_DIR_NONE);}
 
-    const int32_t i_function_label_width = 80;
-    const int32_t i_function_value_width = (width_px/2 - i_function_label_width);
+    // const int32_t i_function_label_width = 80;
+    // const int32_t i_function_value_width = (width_px/2 - i_function_label_width);
+
+    // Row Object Widths
+    label_width_0 = 80;
+    value_width_0 = ((width_px/2) - label_width_0) - padding*2;
+    label_width_1 = 80;
+    value_width_1 = ((width_px/2) - label_width_1) - padding*2;
 
     // Switch Label
     result.label_switch_index_select = lv_label_create(row_index);
     lv_label_set_text(result.label_switch_index_select, "Switch");
-    lv_obj_set_size(result.label_switch_index_select, i_function_label_width, row_height);
+    lv_obj_set_size(result.label_switch_index_select, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_switch_index_select, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_switch_index_select, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_switch_index_select, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -2991,7 +3000,7 @@ matrix_function_container_t create_matrix_function_container(
         row_index,
         NULL,
         0,
-        i_function_value_width,
+        value_width_0,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3009,7 +3018,7 @@ matrix_function_container_t create_matrix_function_container(
     // Function Label
     result.label_function_index_select = lv_label_create(row_index);
     lv_label_set_text(result.label_function_index_select, "Function");
-    lv_obj_set_size(result.label_function_index_select, i_function_label_width, row_height);
+    lv_obj_set_size(result.label_function_index_select, label_width_1, row_height);
     lv_obj_set_style_text_font(result.label_function_index_select, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_function_index_select, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_function_index_select, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3019,7 +3028,7 @@ matrix_function_container_t create_matrix_function_container(
         row_index,
         NULL,
         0,
-        i_function_value_width,
+        value_width_1,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3035,12 +3044,12 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.dd_function_index_select, dd_function_index_select_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_switch_index_select, i_function_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_switch_index_select, i_function_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.label_function_index_select, i_function_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_function_index_select, i_function_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_switch_index_select, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_switch_index_select, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_function_index_select, label_width_1, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_function_index_select, value_width_1, LV_SIZE_CONTENT);
     
-    /* --- ROW 2: Function Name ------------------------------------------------------- */
+    /* --- Function Name ------------------------------------------------------- */
     
     lv_obj_t * row_input_value = lv_obj_create(result.panel);
     lv_obj_set_size(row_input_value, LV_PCT(100), row_height);
@@ -3065,10 +3074,16 @@ matrix_function_container_t create_matrix_function_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_input_value, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_input_value, LV_DIR_NONE);}
+
+    // Row Object Widths
+    label_width_0 = 20;
+    value_width_0 = ((width_px) - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
     
     result.label_function_name = lv_label_create(row_input_value);
     lv_label_set_text(result.label_function_name, "In");
-    lv_obj_set_size(result.label_function_name, function_value_label_width, row_height);
+    lv_obj_set_size(result.label_function_name, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_function_name, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_function_name, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_function_name, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3077,7 +3092,7 @@ matrix_function_container_t create_matrix_function_container(
         row_input_value,
         NULL,
         0,
-        function_value_width,
+        value_width_0,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3093,10 +3108,10 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.dd_function_name, dd_function_name_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_function_name, function_value_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_function_name, function_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_function_name, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_function_name, value_width_0, LV_SIZE_CONTENT);
     
-    /* --- ROW 3: X Value ------------------------------------------------------------- */
+    /* --- X Value ------------------------------------------------------------- */
     
     lv_obj_t * row_value_x = lv_obj_create(result.panel);
     lv_obj_set_size(row_value_x, LV_PCT(100), row_height);
@@ -3122,13 +3137,15 @@ matrix_function_container_t create_matrix_function_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_value_x, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_value_x, LV_DIR_NONE);}
 
-    const int32_t xyz_mode_width = 120;
-    const int32_t xyz_label_width = 20;
-    const int32_t xyz_value_width = (width_px - xyz_mode_width - xyz_label_width); 
+    // Row Object Widths
+    label_width_0 = 20;
+    label_width_1 = 120;
+    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*2;
+    value_width_1 = NULL;
     
     result.label_x = lv_label_create(row_value_x);
     lv_label_set_text(result.label_x, "X");
-    lv_obj_set_size(result.label_x, xyz_label_width, row_height);
+    lv_obj_set_size(result.label_x, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_x, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_x, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_x, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3136,7 +3153,7 @@ matrix_function_container_t create_matrix_function_container(
     // User X
     result.ta_x = create_textarea(
         row_value_x,            // lv_obj_t
-        xyz_value_width, // width px
+        value_width_0, // width px
         row_height,      // height px
         LV_ALIGN_CENTER, // alignment
         0,               // pos x
@@ -3159,7 +3176,7 @@ matrix_function_container_t create_matrix_function_container(
         row_value_x,
         NULL,
         0,
-        xyz_value_width,
+        value_width_0,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3180,7 +3197,7 @@ matrix_function_container_t create_matrix_function_container(
         row_value_x,
         NULL,
         0,
-        xyz_mode_width,
+        label_width_1,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3196,12 +3213,12 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.dd_mode_x, dd_mode_x_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_x, xyz_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_x, xyz_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_x, xyz_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_mode_x, xyz_mode_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_x, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_x, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_x, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_mode_x, label_width_1, LV_SIZE_CONTENT);
     
-    /* --- ROW 4: Y Value ------------------------------------------------------------- */
+    /* --- Y Value ------------------------------------------------------------- */
     
     lv_obj_t * row_value_y = lv_obj_create(result.panel);
     lv_obj_set_size(row_value_y, LV_PCT(100), row_height);
@@ -3227,9 +3244,15 @@ matrix_function_container_t create_matrix_function_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_value_y, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_value_y, LV_DIR_NONE);}
 
+    // Row Object Widths
+    label_width_0 = 20;
+    label_width_1 = 120;
+    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*2;
+    value_width_1 = NULL;
+
     result.label_y = lv_label_create(row_value_y);
     lv_label_set_text(result.label_y, "Y");
-    lv_obj_set_size(result.label_y, label_width, row_height);
+    lv_obj_set_size(result.label_y, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_y, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_y, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_y, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3237,7 +3260,7 @@ matrix_function_container_t create_matrix_function_container(
     // User Y
     result.ta_y = create_textarea(
         row_value_y,            // lv_obj_t
-        xyz_value_width, // width px
+        value_width_0, // width px
         row_height,      // height px
         LV_ALIGN_CENTER, // alignment
         0,               // pos x
@@ -3260,7 +3283,7 @@ matrix_function_container_t create_matrix_function_container(
         row_value_y,
         NULL,
         0,
-        xyz_value_width,
+        value_width_0,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3281,7 +3304,7 @@ matrix_function_container_t create_matrix_function_container(
         row_value_y,
         NULL,
         0,
-        xyz_mode_width,
+        label_width_1,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3297,12 +3320,12 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.dd_mode_y, dd_mode_y_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_y, xyz_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_y, xyz_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_y, xyz_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_mode_y, xyz_mode_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_y, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_y, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_y, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_mode_y, label_width_1, LV_SIZE_CONTENT);
 
-    /* --- ROW 5: Z Value ------------------------------------------------------------- */
+    /* --- Z Value ------------------------------------------------------------- */
     
     lv_obj_t * row_value_z = lv_obj_create(result.panel);
     lv_obj_set_size(row_value_z, LV_PCT(100), row_height);
@@ -3327,10 +3350,16 @@ matrix_function_container_t create_matrix_function_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_value_z, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_value_z, LV_DIR_NONE);}
+
+    // Row Object Widths
+    label_width_0 = 20;
+    label_width_1 = 120;
+    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*2;
+    value_width_1 = NULL;
     
     result.label_z = lv_label_create(row_value_z);
     lv_label_set_text(result.label_z, "Z");
-    lv_obj_set_size(result.label_z, label_width, row_height);
+    lv_obj_set_size(result.label_z, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_z, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_z, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_z, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3338,7 +3367,7 @@ matrix_function_container_t create_matrix_function_container(
     // User Z
     result.ta_z = create_textarea(
         row_value_z,            // lv_obj_t
-        xyz_value_width, // width px
+        value_width_0, // width px
         row_height,      // height px
         LV_ALIGN_CENTER, // alignment
         0,               // pos x
@@ -3361,7 +3390,7 @@ matrix_function_container_t create_matrix_function_container(
         row_value_z,
         NULL,
         0,
-        xyz_value_width,
+        value_width_0,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3382,7 +3411,7 @@ matrix_function_container_t create_matrix_function_container(
         row_value_z,
         NULL,
         0,
-        xyz_mode_width,
+        label_width_1,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3398,12 +3427,12 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.dd_mode_z, dd_mode_z_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_z, xyz_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_z, xyz_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_z, xyz_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_mode_z, xyz_mode_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_z, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_z, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_z, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_mode_z, label_width_1, LV_SIZE_CONTENT);
     
-    /* --- ROW 6: Operator ------------------------------------------------------------ */
+    /* --- Operator ------------------------------------------------------------ */
     
     lv_obj_t * row_operator = lv_obj_create(result.panel);
     lv_obj_set_size(row_operator, LV_PCT(100), row_height);
@@ -3429,12 +3458,15 @@ matrix_function_container_t create_matrix_function_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_operator, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_operator, LV_DIR_NONE);}
 
-    const int32_t operator_label_width = 80;
-    const int32_t operator_value_width = (width_px/2 - operator_label_width);
+    // Row Object Widths
+    label_width_0 = 80;
+    value_width_0 = ((width_px/2) - label_width_0) - padding*2;
+    label_width_1 = 80;
+    value_width_1 = ((width_px/2) - label_width_1) - padding*2;
     
     result.label_operator = lv_label_create(row_operator);
     lv_label_set_text(result.label_operator, "Operator");
-    lv_obj_set_size(result.label_operator, operator_label_width, row_height);
+    lv_obj_set_size(result.label_operator, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_operator, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_operator, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_operator, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3443,7 +3475,7 @@ matrix_function_container_t create_matrix_function_container(
         row_operator,
         NULL,
         0,
-        operator_value_width,
+        value_width_0,
         row_height,
         LV_TEXT_ALIGN_CENTER,
         0,
@@ -3460,7 +3492,7 @@ matrix_function_container_t create_matrix_function_container(
 
     result.label_output_mode = lv_label_create(row_operator);
     lv_label_set_text(result.label_output_mode, "Output");
-    lv_obj_set_size(result.label_output_mode, operator_label_width, row_height);
+    lv_obj_set_size(result.label_output_mode, label_width_1, row_height);
     lv_obj_set_style_text_font(result.label_output_mode, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_output_mode, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_output_mode, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3469,7 +3501,7 @@ matrix_function_container_t create_matrix_function_container(
         row_operator,
         NULL,
         0,
-        operator_value_width,
+        value_width_1,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3485,12 +3517,12 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_add_event_cb(result.dd_output_mode, dd_output_mode_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_operator, operator_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_operator, operator_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.label_output_mode, operator_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_output_mode, operator_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_operator, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_operator, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_output_mode, label_width_1, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_output_mode, value_width_1, LV_SIZE_CONTENT);
     
-    /* --- ROW 7: Output PWM ---------------------------------------------------------- */
+    /* --- Output PWM ---------------------------------------------------------- */
     
     lv_obj_t * row_pwm0 = lv_obj_create(result.panel);
     lv_obj_set_size(row_pwm0, LV_PCT(100), row_height);
@@ -3516,16 +3548,22 @@ matrix_function_container_t create_matrix_function_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_pwm0, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_pwm0, LV_DIR_NONE);}
 
+    // Row Object Widths
+    label_width_0 = 80;
+    value_width_0 = ((width_px) - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
+
     result.label_output_pwm_0 = lv_label_create(row_pwm0);
     lv_label_set_text(result.label_output_pwm_0, "PWM0");
-    lv_obj_set_size(result.label_output_pwm_0, label_width, row_height);
+    lv_obj_set_size(result.label_output_pwm_0, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_output_pwm_0, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_output_pwm_0, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_output_pwm_0, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_pwm_0 = create_textarea(
         row_pwm0,     // lv_obj_t
-        value_width,             // width px
+        value_width_0,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -3544,10 +3582,10 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_set_user_data(result.ta_pwm_0, &matrix_output_pwm_0_ctx);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_output_pwm_0, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_pwm_0, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_output_pwm_0, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_pwm_0, value_width_0, LV_SIZE_CONTENT);
 
-    /* --- ROW 8: Output PWM ---------------------------------------------------------- */
+    /* --- Output PWM ---------------------------------------------------------- */
     
     lv_obj_t * row_pwm1 = lv_obj_create(result.panel);
     lv_obj_set_size(row_pwm1, LV_PCT(100), row_height);
@@ -3573,16 +3611,22 @@ matrix_function_container_t create_matrix_function_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_pwm1, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_pwm1, LV_DIR_NONE);}
 
+    // Row Object Widths
+    label_width_0 = 80;
+    value_width_0 = ((width_px) - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
+
     result.label_output_pwm_1 = lv_label_create(row_pwm1);
     lv_label_set_text(result.label_output_pwm_1, "PWM1");
-    lv_obj_set_size(result.label_output_pwm_1, label_width, row_height);
+    lv_obj_set_size(result.label_output_pwm_1, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_output_pwm_1, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_output_pwm_1, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_output_pwm_1, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_pwm_1 = create_textarea(
         row_pwm1,     // lv_obj_t
-        value_width,             // width px
+        value_width_0,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -3601,10 +3645,10 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_set_user_data(result.ta_pwm_1, &matrix_output_pwm_1_ctx);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_output_pwm_1, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_pwm_1, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_output_pwm_1, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_pwm_1, value_width_0, LV_SIZE_CONTENT);
 
-    /* --- ROW 9: Index Map Slot ------------------------------------------------ */
+    /* --- Index Map Slot ------------------------------------------------ */
     
     lv_obj_t * row_port = lv_obj_create(result.panel);
     lv_obj_set_size(row_port, LV_PCT(100), row_height);
@@ -3629,14 +3673,17 @@ matrix_function_container_t create_matrix_function_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row_port, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row_port, LV_DIR_NONE);}
-
-    const int32_t port_label_width = 80;
-    const int32_t port_value_width = (width_px/2 - port_label_width);
     
+    // Row Object Widths
+    label_width_0 = 80;
+    label_width_1 = 80;
+    value_width_0 = ((width_px/2) - label_width_0) - padding*2;
+    value_width_1 = ((width_px/2) - label_width_1) - padding*2;
+
     // Map Slot Label
     result.label_map_slot = lv_label_create(row_port);
     lv_label_set_text(result.label_map_slot, "Map Slot");
-    lv_obj_set_size(result.label_map_slot, port_label_width, row_height);
+    lv_obj_set_size(result.label_map_slot, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_map_slot, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_map_slot, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_map_slot, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3646,7 +3693,7 @@ matrix_function_container_t create_matrix_function_container(
         row_port,
         NULL,
         0,
-        port_value_width,
+        value_width_0,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3664,7 +3711,7 @@ matrix_function_container_t create_matrix_function_container(
     // Output Port Label
     result.label_port_map = lv_label_create(row_port);
     lv_label_set_text(result.label_port_map, "Port");
-    lv_obj_set_size(result.label_port_map, port_label_width, row_height);
+    lv_obj_set_size(result.label_port_map, label_width_1, row_height);
     lv_obj_set_style_text_font(result.label_port_map, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_port_map, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_port_map, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3672,7 +3719,7 @@ matrix_function_container_t create_matrix_function_container(
     // Output Port Value
     result.ta_port_map = create_textarea(
         row_port,     // lv_obj_t
-        port_value_width,             // width px
+        value_width_1,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -3691,10 +3738,89 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_set_user_data(result.ta_port_map, &matrix_port_map_ctx);
 
     // Critical for alignment
-    lv_obj_set_size(result.label_map_slot, port_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_map_slot, port_value_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.label_port_map, port_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_port_map, port_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_map_slot, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_map_slot, value_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_port_map, label_width_1, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_port_map, value_width_1, LV_SIZE_CONTENT);
+
+    /* ------------- Switches  ------------------------------- */
+
+    lv_obj_t * row_switches_0 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_switches_0, LV_PCT(100), row_height*2);
+    lv_obj_set_flex_flow(row_switches_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_switches_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_switches_0, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_switches_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_switches_0, padding*4, LV_PART_MAIN);
+
+    // Critical for alignment
+    lv_obj_set_flex_align(
+        row_switches_0,
+        LV_FLEX_ALIGN_CENTER,   // main axis (left‑right)
+        LV_FLEX_ALIGN_CENTER,  // cross axis (top‑bottom)
+        LV_FLEX_ALIGN_CENTER   // track alignment
+    );
+
+    // Show scrollbar
+    if (show_scrollbar) {lv_obj_set_scrollbar_mode(row_switches_0, LV_SCROLLBAR_MODE_AUTO);}
+    else {lv_obj_set_scrollbar_mode(row_switches_0, LV_SCROLLBAR_MODE_OFF);}
+
+    // Enable scrolling
+    if (enable_scrolling) {lv_obj_set_scroll_dir(row_switches_0, LV_DIR_ALL);}
+    else {lv_obj_set_scroll_dir(row_switches_0, LV_DIR_NONE);}
+
+    // Computer Assist Toggle
+    result.matrix_switch_computer_assist = create_button(
+        row_switches_0,       // parent
+        80,                  // width px
+        28,                   // height px
+        LV_ALIGN_BOTTOM_MID,  // alignment
+        0,                    // pos x
+        0,                    // pos y
+        "ASSIST",             // label text
+        LV_TEXT_ALIGN_CENTER, // text align
+        false,                // show scrollbar
+        false,                // enable scrolling
+        &cobalt_alien_17,     // font for labels,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.matrix_switch_computer_assist.button, current_matrix_computer_assist_event_cb, LV_EVENT_ALL, NULL);
+
+    // Output Value
+    result.matrix_switch_output_value = create_label(
+        row_switches_0,       // parent
+        170,                  // width
+        28,                   // height
+        LV_ALIGN_BOTTOM_MID,  // parent alignment
+        0,                    // pos x
+        0,                    // pos y
+        "0",                  // initial text
+        LV_TEXT_ALIGN_CENTER, // font alignment
+        &cobalt_alien_17,     // font
+        false,                // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        2,                    // outline width
+        radius_rounded,       // outline radius
+        1
+    );
+
+    // Matrix Switch Override
+    result.matrix_switch_override = create_button(
+        row_switches_0,       // parent
+        100,                  // width px
+        28,                   // height px
+        LV_ALIGN_BOTTOM_MID,  // alignment
+        0,                    // pos x
+        0,                    // pos y
+        "OVERRIDE",           // label text
+        LV_TEXT_ALIGN_CENTER, // text align
+        false,                // show scrollbar
+        false,                // enable scrolling
+        &cobalt_alien_17,     // font for labels,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.matrix_switch_override.button, current_matrix_override_off_event_cb, LV_EVENT_ALL, NULL);
     
     return result;
 }
@@ -3727,6 +3853,7 @@ mapping_config_container_t create_mapping_config_container(
     int32_t alignment,
     int32_t pos_x,
     int32_t pos_y,
+    int32_t radius,
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,
@@ -3735,11 +3862,17 @@ mapping_config_container_t create_mapping_config_container(
     mapping_config_container_t result = {0};
     
     // Layout constants
-    const int32_t padding = 0;
+    const int32_t padding = 4;
     const int32_t row_spacing = 0;
     const int32_t row_height = 36;
     const int32_t label_width = 200;
     const int32_t value_width = width_px-label_width-2*padding;
+
+    // Row Object Widths
+    int32_t label_width_0 = 80;
+    int32_t label_width_1 = 80;
+    int32_t value_width_0 = ((width_px/2) - label_width_0) - padding*2;
+    int32_t value_width_1 = ((width_px/2) - label_width_1) - padding*2;
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     
@@ -3767,6 +3900,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_flex_flow(result.panel, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(result.panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_pad_row(result.panel, row_spacing, LV_PART_MAIN);
+    lv_obj_set_style_radius(result.panel, radius, LV_PART_MAIN);
+    lv_obj_set_style_outline_pad(result.panel, padding, LV_PART_MAIN);
 
     /* --- ROW 1: Slot ------------------------------------------------------- */
     lv_obj_t * row1 = lv_obj_create(result.panel);
@@ -3793,12 +3928,14 @@ mapping_config_container_t create_mapping_config_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row1, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row1, LV_DIR_NONE);}
 
-    const int32_t index_label_width = 80;
-    const int32_t index_value_width = (width_px - index_label_width);
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
     
     result.slot = lv_label_create(row1);
     lv_label_set_text(result.slot, "Map Slot");
-    lv_obj_set_size(result.slot, index_label_width, row_height);
+    lv_obj_set_size(result.slot, label_width_0, row_height);
     lv_obj_set_style_text_font(result.slot, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.slot, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.slot, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3808,7 +3945,7 @@ mapping_config_container_t create_mapping_config_container(
         row1,
         NULL,
         0,
-        index_value_width,
+        value_width_0,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -3824,8 +3961,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_add_event_cb(result.dd_slot, dd_current_map_slot_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.slot, index_label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_slot, index_value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.slot, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_slot, value_width_0, LV_SIZE_CONTENT);
     
     /* --- ROW 2: Function Name ------------------------------------------------------- */
     
@@ -3852,11 +3989,16 @@ mapping_config_container_t create_mapping_config_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row2, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row2, LV_DIR_NONE);}
+
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
     
     // C0
     result.c0 = lv_label_create(row2);
     lv_label_set_text(result.c0, "C0");
-    lv_obj_set_size(result.c0, label_width, row_height);
+    lv_obj_set_size(result.c0, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c0, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c0, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c0, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -3866,7 +4008,7 @@ mapping_config_container_t create_mapping_config_container(
         row2,
         NULL,
         0,
-        value_width,
+        value_width_0,
         row_height,
         LV_TEXT_ALIGN_LEFT,
         0,
@@ -3882,8 +4024,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_add_event_cb(result.dd_c0, dd_c0_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.c0, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_c0, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.c0, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_c0, value_width_0, LV_SIZE_CONTENT);
     
     /* --- ROW 3: C1 Value ------------------------------------------------------------- */
     
@@ -3910,17 +4052,22 @@ mapping_config_container_t create_mapping_config_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row3, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row3, LV_DIR_NONE);}
+
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
     
     result.c1 = lv_label_create(row3);
     lv_label_set_text(result.c1, "C1");
-    lv_obj_set_size(result.c1, label_width, row_height);
+    lv_obj_set_size(result.c1, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c1, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c1, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c1, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c1 = create_textarea(
         row3,     // lv_obj_t
-        value_width,             // width px
+        value_width_0,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -3939,8 +4086,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_user_data(result.ta_c1, &mapping_c1_ctx);
 
     // Critical for alignment
-    lv_obj_set_size(result.c1, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_c1, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.c1, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_c1, value_width_0, LV_SIZE_CONTENT);
     
     /* --- ROW 4: C2 Value ------------------------------------------------------------- */
     
@@ -3967,17 +4114,22 @@ mapping_config_container_t create_mapping_config_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row4, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row4, LV_DIR_NONE);}
+
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
     
     result.c2 = lv_label_create(row4);
     lv_label_set_text(result.c2, "C2");
-    lv_obj_set_size(result.c2, label_width, row_height);
+    lv_obj_set_size(result.c2, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c2, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c2, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c2, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c2 = create_textarea(
         row4,     // lv_obj_t
-        value_width,             // width px
+        value_width_0,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -3996,8 +4148,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_user_data(result.ta_c2, &mapping_c2_ctx);
 
     // Critical for alignment
-    lv_obj_set_size(result.c2, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_c2, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.c2, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_c2, value_width_0, LV_SIZE_CONTENT);
 
     /* --- ROW 5: C3 Value ------------------------------------------------------------- */
     
@@ -4024,17 +4176,22 @@ mapping_config_container_t create_mapping_config_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row5, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row5, LV_DIR_NONE);}
+
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
     
     result.c3 = lv_label_create(row5);
     lv_label_set_text(result.c3, "C3");
-    lv_obj_set_size(result.c3, label_width, row_height);
+    lv_obj_set_size(result.c3, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c3, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c3, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c3, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c3 = create_textarea(
         row5,     // lv_obj_t
-        value_width,             // width px
+        value_width_0,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -4053,8 +4210,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_user_data(result.ta_c3, &mapping_c3_ctx);
 
     // Critical for alignment
-    lv_obj_set_size(result.c3, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_c3, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.c3, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_c3, value_width_0, LV_SIZE_CONTENT);
     
     /* --- ROW 6: C4 Value ------------------------------------------------------------ */
     
@@ -4081,17 +4238,22 @@ mapping_config_container_t create_mapping_config_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row6, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row6, LV_DIR_NONE);}
+
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
     
     result.c4 = lv_label_create(row6);
     lv_label_set_text(result.c4, "C4");
-    lv_obj_set_size(result.c4, label_width, row_height);
+    lv_obj_set_size(result.c4, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c4, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c4, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c4, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c4 = create_textarea(
         row6,     // lv_obj_t
-        value_width,             // width px
+        value_width_0,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -4110,8 +4272,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_user_data(result.ta_c4, &mapping_c4_ctx);
 
     // Critical for alignment
-    lv_obj_set_size(result.c4, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_c4, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.c4, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_c4, value_width_0, LV_SIZE_CONTENT);
     
     /* --- ROW 7: Map Mode ---------------------------------------------------------- */
     
@@ -4139,16 +4301,21 @@ mapping_config_container_t create_mapping_config_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row7, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row7, LV_DIR_NONE);}
 
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
+
     result.c5 = lv_label_create(row7);
     lv_label_set_text(result.c5, "C5");
-    lv_obj_set_size(result.c5, label_width, row_height);
+    lv_obj_set_size(result.c5, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c5, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.c5, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c5, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c5 = create_textarea(
         row7,     // lv_obj_t
-        value_width,             // width px
+        value_width_0,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -4167,8 +4334,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_set_user_data(result.ta_c5, &mapping_c5_ctx);
 
     // Critical for alignment
-    lv_obj_set_size(result.c5, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_c5, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.c5, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_c5, value_width_0, LV_SIZE_CONTENT);
     
     /* --- ROW 8: Map Mode --------------------------------------------------------- */
     
@@ -4195,11 +4362,16 @@ mapping_config_container_t create_mapping_config_container(
     // Enable scrolling
     if (enable_scrolling) {lv_obj_set_scroll_dir(row8, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row8, LV_DIR_NONE);}
+
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*2;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
     
     // Map Mode
     result.mode = lv_label_create(row8);
     lv_label_set_text(result.mode, "Map Mode");
-    lv_obj_set_size(result.mode, label_width, row_height);
+    lv_obj_set_size(result.mode, label_width_0, row_height);
     lv_obj_set_style_text_font(result.mode, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.mode, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.mode, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
@@ -4209,7 +4381,7 @@ mapping_config_container_t create_mapping_config_container(
         row8,
         NULL,
         0,
-        value_width,
+        value_width_0,
         row_height,
         LV_ALIGN_CENTER,
         0,
@@ -4225,8 +4397,8 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_add_event_cb(result.dd_mode, dd_mode_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
-    lv_obj_set_size(result.mode, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_mode, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.mode, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_mode, value_width_0, LV_SIZE_CONTENT);
 
     /* --- ROW 9: Map Input Value --------------------------------------------------- */
     
@@ -4254,23 +4426,28 @@ mapping_config_container_t create_mapping_config_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row9, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row9, LV_DIR_NONE);}
 
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*4;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
+
     result.input_value = lv_label_create(row9);
     lv_label_set_text(result.input_value, "Input Value");
-    lv_obj_set_size(result.input_value, label_width, row_height);
+    lv_obj_set_size(result.input_value, label_width_0, row_height);
     lv_obj_set_style_text_font(result.input_value, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.input_value, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.input_value, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.value_input = lv_label_create(row9);
     lv_label_set_text(result.value_input, " - - -");
-    lv_obj_set_size(result.value_input, value_width, row_height);
+    lv_obj_set_size(result.value_input, value_width_0, row_height);
     lv_obj_set_style_text_font(result.value_input, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.value_input, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.value_input, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
 
     // Critical for alignment
-    lv_obj_set_size(result.input_value, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.value_input, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.input_value, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.value_input, value_width_0, LV_SIZE_CONTENT);
 
     /* --- ROW 10: Map Result ---------------------------------------------------------- */
     
@@ -4298,23 +4475,28 @@ mapping_config_container_t create_mapping_config_container(
     if (enable_scrolling) {lv_obj_set_scroll_dir(row10, LV_DIR_ALL);}
     else {lv_obj_set_scroll_dir(row10, LV_DIR_NONE);}
 
+    label_width_0 = 200;
+    value_width_0 = (width_px - label_width_0) - padding*4;
+    label_width_1 = NULL;
+    value_width_1 = NULL;
+
     result.map_result = lv_label_create(row10);
     lv_label_set_text(result.map_result, "Output Value");
-    lv_obj_set_size(result.map_result, label_width, row_height);
+    lv_obj_set_size(result.map_result, label_width_0, row_height);
     lv_obj_set_style_text_font(result.map_result, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.map_result, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.map_result, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.value_map_result = lv_label_create(row10);
     lv_label_set_text(result.value_map_result, String(mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]).c_str());
-    lv_obj_set_size(result.value_map_result, value_width, row_height);
+    lv_obj_set_size(result.value_map_result, value_width_0, row_height);
     lv_obj_set_style_text_font(result.value_map_result, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.value_map_result, menu_text_color, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.value_map_result, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
 
     // Critical for alignment
-    lv_obj_set_size(result.map_result, label_width, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.value_map_result, value_width, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.map_result, label_width_0, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.value_map_result, value_width_0, LV_SIZE_CONTENT);
 
     return result;
 }
@@ -4614,36 +4796,15 @@ void display_matrix_screen() {
     lv_obj_invalidate(matrix_screen);  // Force redraw
     lv_timer_handler();  // Process events/render
 
-    // // Current Matrix Switch
-    // label_current_matrix_switch = create_label(
-    //     matrix_screen,        // parent
-    //     56,                  // width
-    //     56,                   // height
-    //     LV_ALIGN_LEFT_MID,    // parent alignment
-    //     20,                   // pos x
-    //     -54,                   // pos y
-    //     "S",                  // initial text
-    //     LV_TEXT_ALIGN_CENTER, // font alignment
-    //     &cobalt_alien_25,     // font
-    //     false,                // transparent background
-    //     false,                // show scrollbar
-    //     false,                // enable scrolling
-    //     2,                    // outline width
-    //     radius_rounded,       // outline radius
-    //     1
-    // );
-
-    // lv_obj_invalidate(matrix_screen);  // Force redraw
-    // lv_timer_handler();  // Process events/render
-
     // Create Function Panel
     mfc = create_matrix_function_container(
         matrix_screen,    // parent
         400,              // width px
         350,              // height px
         LV_ALIGN_CENTER,  // alignment
-        0,              // pos x
-        85,              // pos y
+        0,                // pos x
+        105,              // pos y
+        radius_rounded,   // radius
         false,            // show scrollbar
         false,            // enable scrolling
         &cobalt_alien_17, // font for titles,
@@ -4657,25 +4818,27 @@ void display_matrix_screen() {
     mcc = create_mapping_config_container(
         matrix_screen,    // parent
         400,              // width px
-        350,              // height px
-        LV_ALIGN_CENTER, // alignment
-        0,              // pos x
-        82,               // pos y
+        360,              // height px
+        LV_ALIGN_CENTER,  // alignment
+        0,                // pos x
+        105,               // pos y
+        radius_rounded,   // radius
         false,            // show scrollbar
         false,            // enable scrolling
-        &cobalt_alien_17, // font for titles,
-        &cobalt_alien_17  // font for text,
+        &cobalt_alien_17, // font for titles
+        &cobalt_alien_17  // font for text
+        
     );
     lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
 
     // Switch Panel View
     switch_matrix_mapping_panel = create_button(
         matrix_screen,        // parent
-        80,                  // width
+        80,                   // width
         56,                   // height
         LV_ALIGN_LEFT_MID,    // alignment
         20,                   // pos x
-        -54,                   // pos y
+        -54,                  // pos y
         "MATRIX",             // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
@@ -4687,59 +4850,6 @@ void display_matrix_screen() {
 
     lv_obj_invalidate(matrix_screen);  // Force redraw
     lv_timer_handler();  // Process events/render
-
-    // Computer Assist Toggle
-    matrix_switch_computer_assist = create_button(
-        matrix_screen,        // parent
-        100,                  // width px
-        28,                   // height px
-        LV_ALIGN_BOTTOM_MID,    // alignment
-        -130,                   // pos x
-        -60,                  // pos y
-        "ASSIST",             // label text
-        LV_TEXT_ALIGN_CENTER, // text align
-        false,                // show scrollbar
-        false,                // enable scrolling
-        &cobalt_alien_17,     // font for labels,
-        radius_rounded
-    );
-    lv_obj_add_event_cb(matrix_switch_computer_assist.button, current_matrix_computer_assist_event_cb, LV_EVENT_ALL, NULL);
-
-    // Matrix Switch Override
-    matrix_switch_override = create_button(
-        matrix_screen,        // parent
-        100,                  // width px
-        28,                   // height px
-        LV_ALIGN_BOTTOM_MID,    // alignment
-        130,                   // pos x
-        -60,                  // pos y
-        "OVERRIDE",           // label text
-        LV_TEXT_ALIGN_CENTER, // text align
-        false,                // show scrollbar
-        false,                // enable scrolling
-        &cobalt_alien_17,     // font for labels,
-        radius_rounded
-    );
-    lv_obj_add_event_cb(matrix_switch_override.button, current_matrix_override_off_event_cb, LV_EVENT_ALL, NULL);
-
-    // Output Value
-    matrix_switch_output_value = create_label(
-        matrix_screen,        // parent
-        110,                  // width
-        28,                   // height
-        LV_ALIGN_BOTTOM_MID,    // parent alignment
-        0,                   // pos x
-        -60,                   // pos y
-        "0",                  // initial text
-        LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_17,     // font
-        false,                // transparent background
-        false,                // show scrollbar
-        false,                // enable scrolling
-        2,                    // outline width
-        radius_rounded,       // outline radius
-        1
-    );
 
     // Select Matrix File Slot
     dd_matrix_file_slot_select = create_dropdown_menu(
@@ -5210,47 +5320,28 @@ void update_display() {
             lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
             lv_obj_set_style_text_color(switch_matrix_mapping_panel.label, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
         }
-
-        // Computer Assist
-        if (matrix_switch_computer_assist.panel) {
-            if (matrixData.computer_assist[0][current_matrix_i]==true) {
-                lv_obj_set_style_outline_color(matrix_switch_computer_assist.panel, lv_color_make(255, 255, 0), LV_PART_MAIN);
-                lv_obj_set_style_text_color(matrix_switch_computer_assist.label, lv_color_make(255, 255, 0), LV_PART_MAIN);
-            }
-            else {
-                lv_obj_set_style_outline_color(matrix_switch_computer_assist.panel, lv_color_make(58, 58, 58), LV_PART_MAIN);
-                lv_obj_set_style_text_color(matrix_switch_computer_assist.label, lv_color_make(58, 58, 58), LV_PART_MAIN);
-            }
-        }
-
-        // Override
-        if (matrix_switch_override.panel) {
-            lv_obj_set_style_outline_color(matrix_switch_override.panel, lv_color_make(255, 0, 0), LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_switch_override.label, lv_color_make(255, 0, 0), LV_PART_MAIN);
-        }
-
-        // Output Value
-        if (matrix_switch_output_value) {
-            lv_obj_set_style_outline_color(matrix_switch_output_value, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_label_set_text(matrix_switch_output_value, String(String("") + String(matrixData.output_value[0][current_matrix_i])).c_str());
-            /* Text Color: Switch Intention (blue) */
-            if (matrixData.switch_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);}
-            else {
-                /* Text Color: Computer Intention (yellow) */
-                if (matrixData.computer_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(matrix_switch_output_value, lv_color_make(255, 255, 0), LV_PART_MAIN);}
-                else {lv_obj_set_style_text_color(matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);}
-            }
-        }
-
         
         // Matrix Configuration Panel
         if (current_matrix_panel_view==0) {
             if (mfc.panel) {
 
-                lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
+                // Hide Matrix Configuration Panel
+                lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN); 
+
+                // Show Computer Assist Panel
+                lv_obj_remove_flag(mfc.matrix_switch_computer_assist.panel, LV_OBJ_FLAG_HIDDEN);
+                // Show Matrix Switch Override Panel
+                lv_obj_remove_flag(mfc.matrix_switch_override.panel, LV_OBJ_FLAG_HIDDEN);
+                // Show Matrix Switch Output Value Panel
+                lv_obj_remove_flag(mfc.matrix_switch_output_value, LV_OBJ_FLAG_HIDDEN);
+
+                // Show Matrix Configuration Panel
                 lv_obj_remove_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
+
+                // Panel
+                lv_obj_set_style_outline_color(mfc.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
 
                 // Label Current Function
                 lv_obj_set_style_text_color(mfc.label_function_index_select, matrix_value_title_text_color, LV_PART_MAIN);
@@ -5402,6 +5493,37 @@ void update_display() {
                 lv_obj_set_style_text_color(mfc.label_port_map, matrix_value_title_text_color, LV_PART_MAIN);
                 lv_textarea_set_text(mfc.ta_port_map, String(matrixData.matrix_port_map[0][current_matrix_i]).c_str());
                 lv_obj_set_style_text_color(mfc.ta_port_map, matrix_value_text_color, LV_PART_MAIN);
+
+                // Computer Assist
+                if (mfc.matrix_switch_computer_assist.panel) {
+                    if (matrixData.computer_assist[0][current_matrix_i]==true) {
+                        lv_obj_set_style_outline_color(mfc.matrix_switch_computer_assist.panel, lv_color_make(255, 255, 0), LV_PART_MAIN);
+                        lv_obj_set_style_text_color(mfc.matrix_switch_computer_assist.label, lv_color_make(255, 255, 0), LV_PART_MAIN);
+                    }
+                    else {
+                        lv_obj_set_style_outline_color(mfc.matrix_switch_computer_assist.panel, lv_color_make(58, 58, 58), LV_PART_MAIN);
+                        lv_obj_set_style_text_color(mfc.matrix_switch_computer_assist.label, lv_color_make(58, 58, 58), LV_PART_MAIN);
+                    }
+                }
+
+                // Override
+                if (mfc.matrix_switch_override.panel) {
+                    lv_obj_set_style_outline_color(mfc.matrix_switch_override.panel, lv_color_make(255, 0, 0), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.matrix_switch_override.label, lv_color_make(255, 0, 0), LV_PART_MAIN);
+                }
+
+                // Output Value
+                if (mfc.matrix_switch_output_value) {
+                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
+                    lv_label_set_text(mfc.matrix_switch_output_value, String(String("") + String(matrixData.output_value[0][current_matrix_i])).c_str());
+                    /* Text Color: Switch Intention (blue) */
+                    if (matrixData.switch_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);}
+                    else {
+                        /* Text Color: Computer Intention (yellow) */
+                        if (matrixData.computer_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(255, 255, 0), LV_PART_MAIN);}
+                        else {lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);}
+                    }
+                }
             }
         }
 
@@ -5409,14 +5531,23 @@ void update_display() {
         if (current_matrix_panel_view==1) {
             if (mcc.panel) {
 
+                // Hide Computer Assist Panel
+                lv_obj_add_flag(mfc.matrix_switch_computer_assist.panel, LV_OBJ_FLAG_HIDDEN);
+                // Hide Matrix Switch Override Panel
+                lv_obj_add_flag(mfc.matrix_switch_override.panel, LV_OBJ_FLAG_HIDDEN);
+                // Hide Matrix Switch Output Value Panel
+                lv_obj_add_flag(mfc.matrix_switch_output_value, LV_OBJ_FLAG_HIDDEN);
+
+                // Hide Matrix Configuration Panel
                 lv_obj_add_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
+
+                // Show Mapping Configuration Panel
                 lv_obj_remove_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
-                map_value_title_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
-                map_value_text_color = lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100);
-                map_contrast_value_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
+                // Panel
+                lv_obj_set_style_outline_color(mcc.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
 
                 // Map Slot
                 lv_obj_set_style_text_color(mcc.slot, map_value_title_text_color, LV_PART_MAIN);
