@@ -96,11 +96,20 @@ struct MatrixStruct {
   volatile uint32_t output_pwm[1][MAX_MATRIX_SWITCHES][2];
 
   /**
+   * Inverted logic Names.
+   * 
+   * 0: Standard
+   * 1: Inverted
+   */
+  char inverted_logic_names[MAX_MATRIX_FUNCTION_INVERTED_LOGIC_MODES][MAX_GLOBAL_ELEMENT_SIZE]={};
+
+  /**
    * Inverted logic.
    * 
    * If true then matrix switch function logic return true if false, false if true. 
    */
   volatile bool matrix_switch_inverted_logic[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
+  
 
   // Matrix switch function name index (default off = 0).
   volatile int matrix_function[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];

@@ -84,7 +84,7 @@ lv_obj_t * gps_screen;
 lv_obj_t * gyro_screen;
 lv_obj_t * disp_screen;
 lv_obj_t * system_screen;
-lv_obj_t * _screen;
+lv_obj_t * uap_screen;
 
 bool flag_display_loading_screen = false;
 bool flag_display_home_screen = false;
@@ -93,7 +93,7 @@ bool flag_display_gps_screen = false;
 bool flag_display_gyro_screen = false;
 bool flag_display_disp_screen = false;
 bool flag_display_system_screen = false;
-bool flag_display__screen = false;
+bool flag_display_uap_screen = false;
 
 bool update_matrix_screen=false;
 
@@ -151,10 +151,13 @@ int current_matrix_panel_view=0;
 // Color
 // ---------------------------
 
+// Rainbow Effect
+bool enable_rainbow_effect=true;
+
 // Current Hue
 uint32_t current_hue=0;
 
-// Default Color Default
+// Default Color Major
 lv_color_t default_bg_hue;
 lv_color_t default_outline_hue;
 lv_color_t default_border_hue;
@@ -169,14 +172,29 @@ lv_color_t default_contrast_shadow_hue;
 lv_color_t default_contrast_title_hue;
 lv_color_t default_contrast_value_hue;
 
-// Color Major
+// Custom Color Major
+lv_color_t custom_bg_hue;
+lv_color_t custom_outline_hue;
+lv_color_t custom_border_hue;
+lv_color_t custom_shadow_hue;
+lv_color_t custom_title_hue;
+lv_color_t custom_value_hue;
+// Custom Color Minor
+lv_color_t custom_contrast_bg_hue;
+lv_color_t custom_contrast_outline_hue;
+lv_color_t custom_contrast_border_hue;
+lv_color_t custom_contrast_shadow_hue;
+lv_color_t custom_contrast_title_hue;
+lv_color_t custom_contrast_value_hue;
+
+// Current Color Major (Is set as default/custom)
 lv_color_t main_bg_hue;
 lv_color_t main_outline_hue;
 lv_color_t main_border_hue;
 lv_color_t main_shadow_hue;
 lv_color_t main_title_hue;
 lv_color_t main_value_hue;
-// Color Minor
+// Current Color Minor (Is set as default/custom)
 lv_color_t main_contrast_bg_hue;
 lv_color_t main_contrast_outline_hue;
 lv_color_t main_contrast_border_hue;
@@ -603,7 +621,7 @@ static void system_tray_grid_menu_1_event_cb(lv_event_t * e) {
             case 3:  flag_display_gyro_screen=true; break;
             case 4:  flag_display_disp_screen=true; break;
             case 5:  flag_display_system_screen=true; break;
-            case 6:  flag_display__screen=true; break;
+            case 6:  flag_display_uap_screen=true; break;
             default: break;
         }
     }
@@ -820,6 +838,22 @@ static void dd_mode_z_event_cb(lv_event_t * e) {
         // Set mode
         matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
         printf("[dd_mode_z_event_cb] Set mode z: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback for dd_inverted_logic_event_cb dropdown.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_inverted_logic_event_cb(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        // Set mode
+        matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i] = (int)sel;
+        printf("[dd_inverted_logic_event_cb] Set switch standard/inverted: %lu\n", sel);
     }
 }
 
@@ -2931,9 +2965,11 @@ matrix_function_container_t create_matrix_function_container(
 
     // Row Object Widths
     int32_t label_width_0 = 80;
-    int32_t label_width_1 = 80;
     int32_t value_width_0 = ((width_px/2) - label_width_0) - padding*2;
+    int32_t label_width_1 = 80;
     int32_t value_width_1 = ((width_px/2) - label_width_1) - padding*2;
+    int32_t label_width_2 = 80;
+    int32_t value_width_2 = ((width_px/2) - label_width_2) - padding*2;
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     
@@ -3472,7 +3508,7 @@ matrix_function_container_t create_matrix_function_container(
     // Row Object Widths
     label_width_0 = 80;
     value_width_0 = ((width_px/2) - label_width_0) - padding*2;
-    label_width_1 = 80;
+    label_width_1 = 60;
     value_width_1 = ((width_px/2) - label_width_1) - padding*2;
     
     result.label_operator = lv_label_create(row_operator);
@@ -3501,14 +3537,16 @@ matrix_function_container_t create_matrix_function_container(
     // lv_dropdown_set_selected(result.label_operator, matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i]);
     lv_obj_add_event_cb(result.dd_operator, dd_operator_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
-    result.label_output_mode = lv_label_create(row_operator);
-    lv_label_set_text(result.label_output_mode, "Output");
-    lv_obj_set_size(result.label_output_mode, label_width_1, row_height);
-    lv_obj_set_style_text_font(result.label_output_mode, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_output_mode, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_align(result.label_output_mode, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+    // Inverted Logic Label
+    result.label_inverted_logic = lv_label_create(row_operator);
+    lv_label_set_text(result.label_inverted_logic, "Invert");
+    lv_obj_set_size(result.label_inverted_logic, label_width_1, row_height);
+    lv_obj_set_style_text_font(result.label_inverted_logic, font_title, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_inverted_logic, default_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_align(result.label_inverted_logic, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
-    result.dd_output_mode = create_dropdown_menu(
+    // Inverted Logic Value
+    result.dd_inverted_logic = create_dropdown_menu(
         row_operator,
         NULL,
         0,
@@ -3519,19 +3557,25 @@ matrix_function_container_t create_matrix_function_container(
         0,
         font_sub
     );
-    char dd_output_mode_name[MAX_GLOBAL_ELEMENT_SIZE];
-    for (int i = 0; i < MAX_MATRIX_OUTPUT_MODES; i++) {
-        snprintf(dd_output_mode_name, sizeof(dd_output_mode_name), "%s", matrixData.output_mode_names[i]);
-        lv_dropdown_add_option(result.dd_output_mode, dd_output_mode_name, LV_DROPDOWN_POS_LAST);
+    char dd_inverted_logic_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_FUNCTION_INVERTED_LOGIC_MODES; i++) {
+        snprintf(
+            dd_inverted_logic_name,
+            sizeof(dd_inverted_logic_name),
+            "%s",
+            matrixData.inverted_logic_names[i]
+        );
+        lv_dropdown_add_option(result.dd_inverted_logic, dd_inverted_logic_name, LV_DROPDOWN_POS_LAST);
     }
-    lv_dropdown_set_selected(result.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
-    lv_obj_add_event_cb(result.dd_output_mode, dd_output_mode_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_dropdown_set_selected(result.dd_inverted_logic, 0);
+    lv_obj_add_event_cb(result.dd_inverted_logic, dd_inverted_logic_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
 
     // Critical for alignment
     lv_obj_set_size(result.label_operator, label_width_0, LV_SIZE_CONTENT);
     lv_obj_set_size(result.dd_operator, value_width_0, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.label_output_mode, label_width_1, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.dd_output_mode, value_width_1, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.label_inverted_logic, label_width_1, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_inverted_logic, value_width_1, LV_SIZE_CONTENT);
     
     /* --- Output PWM ---------------------------------------------------------- */
     
@@ -3686,14 +3730,16 @@ matrix_function_container_t create_matrix_function_container(
     else {lv_obj_set_scroll_dir(row_port, LV_DIR_NONE);}
     
     // Row Object Widths
-    label_width_0 = 80;
-    label_width_1 = 80;
-    value_width_0 = ((width_px/2) - label_width_0) - padding*2;
-    value_width_1 = ((width_px/2) - label_width_1) - padding*2;
+    label_width_0 = 35;
+    value_width_0 = ((width_px/3) - label_width_0) - padding*2 - 10;
+    label_width_1 = 0;
+    value_width_1 = ((width_px/3) - label_width_1) - padding*2 + 20;
+    label_width_2 = 35;
+    value_width_2 = ((width_px/3) - label_width_2) - padding*2 -10;
 
     // Map Slot Label
     result.label_map_slot = lv_label_create(row_port);
-    lv_label_set_text(result.label_map_slot, "Map Slot");
+    lv_label_set_text(result.label_map_slot, "Map");
     lv_obj_set_size(result.label_map_slot, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_map_slot, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_map_slot, default_title_hue, LV_PART_MAIN);
@@ -3719,18 +3765,46 @@ matrix_function_container_t create_matrix_function_container(
     lv_dropdown_set_selected(result.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
     lv_obj_add_event_cb(result.dd_map_slot, dd_link_map_slot_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
-    // Output Port Label
+    // Output Label
+    result.label_output_mode = lv_label_create(row_port);
+    lv_label_set_text(result.label_output_mode, "Out");
+    lv_obj_set_size(result.label_output_mode, label_width_1, row_height);
+    lv_obj_set_style_text_font(result.label_output_mode, font_title, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_output_mode, default_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_align(result.label_output_mode, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+
+    // Output Value
+    result.dd_output_mode = create_dropdown_menu(
+        row_port,
+        NULL,
+        0,
+        value_width_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        font_sub
+    );
+    char dd_output_mode_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_OUTPUT_MODES; i++) {
+        snprintf(dd_output_mode_name, sizeof(dd_output_mode_name), "%s", matrixData.output_mode_names[i]);
+        lv_dropdown_add_option(result.dd_output_mode, dd_output_mode_name, LV_DROPDOWN_POS_LAST);
+    }
+    lv_dropdown_set_selected(result.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
+    lv_obj_add_event_cb(result.dd_output_mode, dd_output_mode_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    // Port Label
     result.label_port_map = lv_label_create(row_port);
-    lv_label_set_text(result.label_port_map, "Port");
-    lv_obj_set_size(result.label_port_map, label_width_1, row_height);
+    lv_label_set_text(result.label_port_map, "Pin");
+    lv_obj_set_size(result.label_port_map, label_width_2, row_height);
     lv_obj_set_style_text_font(result.label_port_map, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label_port_map, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_port_map, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
-    // Output Port Value
+    // Port Value
     result.ta_port_map = create_textarea(
         row_port,     // lv_obj_t
-        value_width_1,             // width px
+        value_width_2,             // width px
         row_height,              // height px
         LV_ALIGN_CENTER, // alignment
         0,            // pos x
@@ -3751,8 +3825,12 @@ matrix_function_container_t create_matrix_function_container(
     // Critical for alignment
     lv_obj_set_size(result.label_map_slot, label_width_0, LV_SIZE_CONTENT);
     lv_obj_set_size(result.dd_map_slot, value_width_0, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.label_port_map, label_width_1, LV_SIZE_CONTENT);
-    lv_obj_set_size(result.ta_port_map, value_width_1, LV_SIZE_CONTENT);
+
+    lv_obj_set_size(result.label_output_mode, label_width_1, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.dd_output_mode, value_width_1, LV_SIZE_CONTENT);
+
+    lv_obj_set_size(result.label_port_map, label_width_2, LV_SIZE_CONTENT);
+    lv_obj_set_size(result.ta_port_map, value_width_2, LV_SIZE_CONTENT);
 
     /* ------------- Switches  ------------------------------- */
 
@@ -4735,16 +4813,27 @@ void display_loading_screen() {
     lv_scr_load(loading_screen);
 }
 
+/** ------------------------------------------------------------------
+ * @brief Home Screen
+ * 
+ */
 void display_home_screen() {
 
+    // Set Display Flag
+    flag_display_home_screen = false;
+
+    // Check Current Screen
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == home_screen) {return;}
 
-    // Always create a fresh screen - the old home_screen may have been 
-    // auto-deleted when switching away, making the pointer stale
+    // Always create a fresh screen
     home_screen = lv_obj_create(NULL);
 
+    // Defaults
     default_screen_objects(home_screen);
+    
+    // Load screen before creating more objects (smoother, faster load)
+    lv_scr_load_anim(home_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // -------------------------------- Astro Clock ----------------------------------- //
 
@@ -4759,21 +4848,31 @@ void display_home_screen() {
         90               // angle offset
     );
 
-    lv_scr_load_anim(home_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
-
-    flag_display_home_screen = false;
+    lv_obj_invalidate(home_screen);  // Force redraw
+    lv_timer_handler();  // Process events/render
 }
 
+/** ------------------------------------------------------------------
+ * @brief Matrix Screen
+ * 
+ */
 void display_matrix_screen() {
+
+    // Set Display Flag
+    flag_display_matrix_screen = false;
+
+    // Check Current Screen
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == matrix_screen) {return;}
 
-    // Always create a fresh screen - the old screen may have been auto-deleted
+    // Always create a fresh screen
     matrix_screen = lv_obj_create(NULL);
 
+    // Defaults
     default_screen_objects(matrix_screen);
-    
-    lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
+
+    // Load screen before creating more objects (smoother, faster load)
+    lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     matrix_overview_grid_1 = create_menu_grid(
         matrix_screen,        // parent screen
@@ -4958,115 +5057,169 @@ void display_matrix_screen() {
 
     lv_obj_invalidate(matrix_screen);  // Force redraw
     lv_timer_handler();  // Process events/render
-
-    // lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
-    flag_display_matrix_screen = false;
 }
 
+/** ------------------------------------------------------------------
+ * @brief GPS Screen
+ * 
+ */
 void display_gps_screen() {
 
+    // Set Display Flag
+    flag_display_gps_screen = false;
+
+    // Check Current Screen
     lv_obj_t * current_screen = lv_scr_act();
-    if (current_screen == gps_screen) return;
+    if (current_screen == gps_screen) {return;}
 
     // Always create a fresh screen
     gps_screen = lv_obj_create(NULL);
 
+    // Defaults
     default_screen_objects(gps_screen);
 
-    lv_scr_load_anim(gps_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
-    flag_display_gps_screen = false;
+    // Load screen before creating more objects (smoother, faster load)
+    lv_scr_load_anim(gps_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 }
 
+/** ------------------------------------------------------------------
+ * @brief Gyro Screen
+ * 
+ */
 void display_gyro_screen() {
 
+    // Set Display Flag
+    flag_display_gyro_screen = false;
+
+    // Check Current Screen
     lv_obj_t * current_screen = lv_scr_act();
-    if (current_screen == gyro_screen) return;
+    if (current_screen == gyro_screen) {return;}
 
     // Always create a fresh screen
     gyro_screen = lv_obj_create(NULL);
 
+    // Defaults
     default_screen_objects(gyro_screen);
 
-    lv_scr_load_anim(gyro_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
-    flag_display_gyro_screen = false;
+    // Load screen before creating more objects (smoother, faster load)
+    lv_scr_load_anim(gyro_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);    
 }
 
+/** ------------------------------------------------------------------
+ * @brief Display Screen
+ * 
+ */
 void display_disp_screen() {
 
+    // Set Display Flag
+    flag_display_disp_screen = false;
+
+    // Check Current Screen
     lv_obj_t * current_screen = lv_scr_act();
-    if (current_screen == disp_screen) return;
+    if (current_screen == disp_screen) {return;}
 
     // Always create a fresh screen
     disp_screen = lv_obj_create(NULL);
 
+    // Defaults
     default_screen_objects(disp_screen);
 
-    lv_scr_load_anim(disp_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
-    flag_display_disp_screen = false;
+    // Load screen before creating more objects (smoother, faster load)
+    lv_scr_load_anim(disp_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);   
 }
 
+/** ------------------------------------------------------------------
+ * @brief System Screen
+ * 
+ */
 void display_system_screen() {
 
+    // Set Display Flag
+    flag_display_system_screen = false;
+
+    // Check Current Screen
     lv_obj_t * current_screen = lv_scr_act();
-    if (current_screen == system_screen) return;
+    if (current_screen == system_screen) {return;}
 
     // Always create a fresh screen
     system_screen = lv_obj_create(NULL);
 
+    // Defaults
     default_screen_objects(system_screen);
 
-    lv_scr_load_anim(system_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
-    flag_display_system_screen = false;
+    // Load screen before creating more objects (smoother, faster load)
+    lv_scr_load_anim(system_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);   
 }
 
+/** ------------------------------------------------------------------
+ * @brief UAP Screen
+ * 
+ */
 void display__screen() {
 
+    // Set Display Flag
+    flag_display_uap_screen = false;
+
+    // Check Current Screen
     lv_obj_t * current_screen = lv_scr_act();
-    if (current_screen == _screen) return;
+    if (current_screen == uap_screen) {return;}
 
     // Always create a fresh screen
-    _screen = lv_obj_create(NULL);
+    uap_screen = lv_obj_create(NULL);
 
-    default_screen_objects(_screen);
+    // Defaults
+    default_screen_objects(uap_screen);
 
-    lv_scr_load_anim(_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);  // last param = auto_del
-    flag_display__screen = false;
+    // Load screen before creating more objects (smoother, faster load)
+    lv_scr_load_anim(uap_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true); 
 }
 
-/** ---------------------------------------------------------------------------------------
- * @brief Update display
+/** ------------------------------------------------------------------
+ * @brief Update Display Timer
+ * 
  */
-char ui_buf_matrix[256];
-
 void update_display_on_timer(lv_timer_t * timer) {
     LV_UNUSED(timer);
     update_display();
 };
 
+/** ------------------------------------------------------------------
+ * @brief Update Display
+ * 
+ */
 void update_display() {
 
     // Pause timer
     lv_timer_pause(display_timer);
 
-    // Increment Hue
-    current_hue = (current_hue + 1) % 360;
-
-    // Major
-    // main_bg_hue      = lv_color_make(0,0,0); // leave default
-    main_outline_hue = lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100);
-    // main_border_hue  = lv_color_make(0,0,0); // leave default
-    // main_shadow_hue  = lv_color_make(0,0,0); // leave default
-    main_title_hue   = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
-    main_value_hue   = lv_color_hsv_to_rgb((current_hue + 200) % 360, 100, 100);
-
-    // Minor
-    // main_contrast_bg_hue      = lv_color_make(10,10,10); // leave default
-    main_contrast_outline_hue = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
-    // main_contrast_border_hue  = lv_color_make(0,0,0); // leave default
-    // main_contrast_shadow_hue  = lv_color_make(0,0,0); // leave default
-    main_contrast_title_hue   = lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100);
-    main_contrast_value_hue   = lv_color_hsv_to_rgb((current_hue + 50) % 360, 100, 100);
+    // ---------------------
+    // Rainbow Effect
+    // ---------------------
+    if (enable_rainbow_effect==true) {
+        // Increment Hue
+        current_hue = (current_hue + 1) % 360;
+        // Major
+        // main_bg_hue      = lv_color_make(0,0,0); // unused
+        main_outline_hue = lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100);
+        // main_border_hue  = lv_color_make(0,0,0); // unused
+        // main_shadow_hue  = lv_color_make(0,0,0); // unused
+        main_title_hue   = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
+        main_value_hue   = lv_color_hsv_to_rgb((current_hue + 200) % 360, 100, 100);
+        // Minor
+        // main_contrast_bg_hue      = lv_color_make(10,10,10); // unused
+        main_contrast_outline_hue = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
+        // main_contrast_border_hue  = lv_color_make(0,0,0); // unused
+        // main_contrast_shadow_hue  = lv_color_make(0,0,0); // unused
+        main_contrast_title_hue   = lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100);
+        main_contrast_value_hue   = lv_color_hsv_to_rgb((current_hue + 50) % 360, 100, 100);
+    }
+    else {
+        setColorsDefault();
+    }
     
+    // ---------------------
+    // KB Alnumsym
+    // ---------------------
     if (kb_alnumsym.kb != NULL && lv_obj_is_valid(kb_alnumsym.kb)) {
         if (!lv_obj_has_flag(kb_alnumsym.kb, LV_OBJ_FLAG_HIDDEN)) {
             // Rainbow keyboard full outline
@@ -5081,7 +5234,9 @@ void update_display() {
             lv_obj_set_style_text_color(kb_alnumsym.ta, main_value_hue, LV_PART_MAIN);
         }
     }
-
+    // ---------------------
+    // KB Numdedc
+    // ---------------------
     if (kb_numdec.kb != NULL && lv_obj_is_valid(kb_numdec.kb)) {
         if (!lv_obj_has_flag(kb_numdec.kb, LV_OBJ_FLAG_HIDDEN)) {
             // Rainbow keyboard numdec full outline
@@ -5100,7 +5255,6 @@ void update_display() {
     // ---------------------
     // Title Bar
     // ---------------------
-
     if (main_title_bar.panel) {
         vTaskDelay(5 / portTICK_PERIOD_MS);
 
@@ -5255,7 +5409,7 @@ void update_display() {
     else if (flag_display_gyro_screen==true) {display_gyro_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
     else if (flag_display_disp_screen==true) {display_disp_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
     else if (flag_display_system_screen==true) {display_system_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
-    else if (flag_display__screen==true) {display__screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
+    else if (flag_display_uap_screen==true) {display__screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
 
     // loading screen
     if (lv_scr_act() == loading_screen) {
@@ -5303,36 +5457,36 @@ void update_display() {
                 }
             }
             lv_dropdown_set_selected(dd_matrix_file_slot_select, current_matrix_function_i);
-            lv_obj_set_style_outline_color(dd_matrix_file_slot_select, main_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(dd_matrix_file_slot_select, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(dd_matrix_file_slot_select, main_contrast_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(dd_matrix_file_slot_select, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
             lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
         }
 
         // Matrix New
         if (matrix_new.panel) {
-            lv_obj_set_style_outline_color(matrix_new.panel, main_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_new.label, main_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_new.panel, main_contrast_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_new.label, main_contrast_title_hue, LV_PART_MAIN);
         }
 
         // Matrix Save
         if (matrix_save.panel) {
-            lv_obj_set_style_outline_color(matrix_save.panel, main_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_save.label, main_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_save.panel, main_contrast_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_save.label, main_contrast_title_hue, LV_PART_MAIN);
         }
 
         // Matrix Load
         if (matrix_load.panel) {
-            lv_obj_set_style_outline_color(matrix_load.panel, main_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_load.label, main_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_load.panel, main_contrast_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_load.label, main_contrast_title_hue, LV_PART_MAIN);
         }
 
         // Matrix Delete
         if (matrix_delete.panel) {
-            lv_obj_set_style_outline_color(matrix_delete.panel, main_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_delete.label, main_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_delete.panel, main_contrast_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_delete.label, main_contrast_title_hue, LV_PART_MAIN);
         }
 
         // Switch Main Matrix Panel (Matrix/Mapping)
@@ -5340,7 +5494,7 @@ void update_display() {
             if (current_matrix_panel_view==0) {lv_label_set_text(switch_matrix_mapping_panel.label, "MATRIX");}
             else if (current_matrix_panel_view==1) {lv_label_set_text(switch_matrix_mapping_panel.label, "MAP");}
             else {lv_label_set_text(switch_matrix_mapping_panel.label, "");}
-            lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
             lv_obj_set_style_text_color(switch_matrix_mapping_panel.label, main_contrast_title_hue, LV_PART_MAIN);
         }
         
@@ -5364,7 +5518,7 @@ void update_display() {
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Panel
-                lv_obj_set_style_outline_color(mfc.panel, main_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // Label Current Switch (Remeains Static Color For Emphasis)
                 // lv_obj_set_style_text_color(mfc.label_switch_index_select, main_contrast_title_hue, LV_PART_MAIN);
@@ -5494,14 +5648,14 @@ void update_display() {
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                // Output Mode
-                lv_obj_set_style_text_color(mfc.label_output_mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_dropdown_set_selected(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
-                lv_obj_set_style_text_color(mfc.dd_output_mode, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                // Inverted
+                lv_obj_set_style_text_color(mfc.label_inverted_logic, main_contrast_title_hue, LV_PART_MAIN);
+                lv_dropdown_set_selected(mfc.dd_inverted_logic, matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i]);
+                lv_obj_set_style_text_color(mfc.dd_inverted_logic, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // PWM Off
                 lv_obj_set_style_text_color(mfc.label_output_pwm_0, main_contrast_title_hue, LV_PART_MAIN);
@@ -5521,6 +5675,15 @@ void update_display() {
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
+                // Output Mode
+                lv_obj_set_style_text_color(mfc.label_output_mode, main_contrast_title_hue, LV_PART_MAIN);
+                lv_dropdown_set_selected(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
+                lv_obj_set_style_text_color(mfc.dd_output_mode, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Output Port
                 lv_obj_set_style_text_color(mfc.label_port_map, lv_color_make(255, 0, 0), LV_PART_MAIN);
@@ -5580,7 +5743,7 @@ void update_display() {
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Panel
-                lv_obj_set_style_outline_color(mcc.panel, main_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // Map Slot (Remeains Static Color For Emphasis)
                 // lv_obj_set_style_text_color(mcc.slot, main_contrast_title_hue, LV_PART_MAIN);
@@ -5688,6 +5851,40 @@ void update_display() {
     lv_timer_resume(display_timer);
 }
 
+void setColorsDefault() {
+    // Major
+    main_bg_hue      = default_bg_hue;
+    main_outline_hue = default_outline_hue;
+    main_border_hue  = default_border_hue;
+    main_shadow_hue  = default_shadow_hue;
+    main_title_hue   = default_title_hue;
+    main_value_hue   = default_value_hue;
+    // Minor
+    main_contrast_bg_hue      = default_contrast_bg_hue;
+    main_contrast_outline_hue = default_contrast_outline_hue;
+    main_contrast_border_hue  = default_contrast_border_hue;
+    main_contrast_shadow_hue  = default_contrast_shadow_hue;
+    main_contrast_title_hue   = default_contrast_title_hue;
+    main_contrast_value_hue   = default_contrast_value_hue;
+}
+
+void setColorsCustom() {
+    // Major
+    main_bg_hue      = custom_bg_hue;
+    main_outline_hue = custom_outline_hue;
+    main_border_hue  = custom_border_hue;
+    main_shadow_hue  = custom_shadow_hue;
+    main_title_hue   = custom_title_hue;
+    main_value_hue   = custom_value_hue;
+    // Minor
+    main_contrast_bg_hue      = custom_contrast_bg_hue;
+    main_contrast_outline_hue = custom_contrast_outline_hue;
+    main_contrast_border_hue  = custom_contrast_border_hue;
+    main_contrast_shadow_hue  = custom_contrast_shadow_hue;
+    main_contrast_title_hue   = custom_contrast_title_hue;
+    main_contrast_value_hue   = custom_contrast_value_hue;
+}
+
 void initSatIOUI() {
     // --------------------------------------------------------------
     // LVGL Initialization
@@ -5713,7 +5910,7 @@ void initSatIOUI() {
     gyro_screen = lv_obj_create(NULL);
     disp_screen = lv_obj_create(NULL);
     system_screen = lv_obj_create(NULL);
-    _screen = lv_obj_create(NULL);
+    uap_screen = lv_obj_create(NULL);
     
     // Initialize display brightness and backlight
     bsp_display_brightness_init();
@@ -5725,15 +5922,14 @@ void initSatIOUI() {
     font_menu_title = &cobalt_alien_25;
     font_menu_item = &cobalt_alien_17;
 
-    // Default Text Only (Only Change Here, Once)
+    // Default Major
     default_bg_hue      = lv_color_make(0,0,0);
     default_outline_hue = lv_color_make(0,0,0); // used instead of border
     default_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
     default_shadow_hue  = lv_color_make(0,0,0);
     default_title_hue   = lv_color_make(0,0, 255);
     default_value_hue   = lv_color_make(0,255,0);
-
-    // Default Text Only (Only Change Here, Once)
+    // Default Minor
     default_contrast_bg_hue      = lv_color_make(0,0,0);
     default_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
     default_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
@@ -5741,22 +5937,22 @@ void initSatIOUI() {
     default_contrast_title_hue   = lv_color_make(0,0, 255);
     default_contrast_value_hue   = lv_color_make(0,255,0);
 
-    // Default Text Only (Change wherever as required for emphasis to importance)
-    main_bg_hue      = lv_color_make(0,0,0);
-    main_outline_hue = lv_color_make(0,0,0); // used instead of border
-    main_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
-    main_shadow_hue  = lv_color_make(0,0,0);
-    main_title_hue   = lv_color_make(0,0, 255);
-    main_value_hue   = lv_color_make(0,255,0);
+    // Custom Major (can be changed by user)
+    custom_bg_hue      = lv_color_make(0,0,0);
+    custom_outline_hue = lv_color_make(0,0,0); // used instead of border
+    custom_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
+    custom_shadow_hue  = lv_color_make(0,0,0);
+    custom_title_hue   = lv_color_make(0,0, 255);
+    custom_value_hue   = lv_color_make(0,255,0);
+    // Custom Minor (can be changed by user)
+    custom_contrast_bg_hue      = lv_color_make(0,0,0);
+    custom_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
+    custom_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
+    custom_contrast_shadow_hue  = lv_color_make(0,0,0);
+    custom_contrast_title_hue   = lv_color_make(0,0, 255);
+    custom_contrast_value_hue   = lv_color_make(0,255,0);
 
-    // Default Text Only (Change wherever as required for emphasis to importance)
-    main_contrast_bg_hue      = lv_color_make(10,10,10);
-    main_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
-    main_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
-    main_contrast_shadow_hue  = lv_color_make(0,0,0);
-    main_contrast_title_hue   = lv_color_make(0,0, 255);
-    main_contrast_value_hue   = lv_color_make(0,255,0);
-    main_contrast_bg_hue = lv_color_make(10,10,10);
+    setColorsDefault();
 
     // --------------------------------------------------------------
     // SD Card Initialization

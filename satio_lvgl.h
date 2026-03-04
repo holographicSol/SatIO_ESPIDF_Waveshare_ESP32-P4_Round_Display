@@ -457,7 +457,10 @@ matrix_function_container_t create_matrix_function_container(
     const lv_font_t * font_title,
     const lv_font_t * font_sub
 );
-    
+
+void setColorsDefault();
+void setColorsCustom();
+
 void cleanup_loading_image();
 void delete_screen_and_nullify(lv_obj_t * screen);
 void display_loading_screen();

@@ -162,6 +162,11 @@ struct MatrixStruct matrixData = {
       {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}  // 60-69
     }
   },
+  .inverted_logic_names=
+  {
+    "Standard", // 0
+    "Inverted"   // 1
+  },
   .matrix_switch_inverted_logic={
     {
       {false, false, false, false, false, false, false, false, false, false}, // 0
