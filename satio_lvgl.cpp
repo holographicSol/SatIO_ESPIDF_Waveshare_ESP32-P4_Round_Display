@@ -3313,7 +3313,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_mode_y_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_XYZ_MODES; i++) {
-        snprintf(dd_mode_y_name, sizeof(dd_mode_y_name), "%s", String(i).c_str());
+        snprintf(dd_mode_y_name, sizeof(dd_mode_y_name), "%s", String(matrixData.matrix_function_mode_xyz_name[i]).c_str());
         lv_dropdown_add_option(result.dd_mode_y, dd_mode_y_name, LV_DROPDOWN_POS_LAST);
     }
     lv_dropdown_set_selected(result.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
@@ -3397,10 +3397,10 @@ matrix_function_container_t create_matrix_function_container(
         0,
         font_sub
     );
-    char dd_z_name[MAX_GLOBAL_ELEMENT_SIZE];
-    for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
-        snprintf(dd_z_name, sizeof(dd_z_name), "%s", matrixData.matrix_function_names[i]);
-        lv_dropdown_add_option(result.dd_z, dd_z_name, LV_DROPDOWN_POS_LAST);
+    char dd_mode_z_name[MAX_GLOBAL_ELEMENT_SIZE];
+    for (int i = 0; i < MAX_MATRIX_FUNCTION_XYZ_MODES; i++) {
+        snprintf(dd_mode_z_name, sizeof(dd_mode_z_name), "%s", String(matrixData.matrix_function_mode_xyz_name[i]).c_str());
+        lv_dropdown_add_option(result.dd_mode_z, dd_mode_z_name, LV_DROPDOWN_POS_LAST);
     }
     lv_dropdown_set_selected(result.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
     lv_obj_add_event_cb(result.dd_z, dd_z_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
