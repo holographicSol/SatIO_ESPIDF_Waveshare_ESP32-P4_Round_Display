@@ -233,6 +233,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define MAX_MATRIX_FUNCTION_NAMES 113 // should match length matrixData.matrix_function_names[]
 #define MAX_MATRIX_OPERATORS 5
 #define MAX_MATRIX_FUNCTION_XYZ_MODES 2
+#define MAX_MATRIX_FUNCTION_INVERTED_LOGIC_MODES 2
 #define INDEX_MATRIX_FUNTION_X 0
 #define INDEX_MATRIX_FUNTION_Y 1
 #define INDEX_MATRIX_FUNTION_Z 2

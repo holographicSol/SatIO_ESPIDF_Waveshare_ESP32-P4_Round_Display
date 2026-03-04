@@ -45,7 +45,7 @@ struct MatrixStruct {
   bool computer_intention[1][MAX_MATRIX_SWITCHES];
 
   // Matrix switch ports. Values should correspond to pins on the port controller.
-  volatile signed int matrix_port_map[1][MAX_MATRIX_SWITCHES];
+  volatile int16_t matrix_port_map[1][MAX_MATRIX_SWITCHES];
 
   // Output values. Values that will be sent to the port controller (digital/mapped).
   int32_t output_value[1][MAX_MATRIX_SWITCHES];

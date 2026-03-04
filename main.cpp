@@ -363,9 +363,8 @@ extern "C" void app_main(void)
     // --------------------------------------------------------------
     // Display Home screen
     // --------------------------------------------------------------
-    printf("displaying home screen");
-    display_home_screen();
     printf("starting SatIO UI");
+    display_home_screen();
     satio_ui_begin();
 
     // --------------------------------------------------------------

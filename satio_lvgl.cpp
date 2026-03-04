@@ -285,7 +285,7 @@ static kb_ctx_t matrix_value_y_ctx = { .target = KB_MATRIX_VALUE_Y, .strval_type
 static kb_ctx_t matrix_value_z_ctx = { .target = KB_MATRIX_VALUE_Z, .strval_type = STRVAL_DOUBLE };
 static kb_ctx_t matrix_output_pwm_0_ctx = { .target = KB_MATRIX_OUTPUT_PWM_0, .strval_type = STRVAL_UINT32 };
 static kb_ctx_t matrix_output_pwm_1_ctx = { .target = KB_MATRIX_OUTPUT_PWM_1, .strval_type = STRVAL_UINT32 };
-static kb_ctx_t matrix_port_map_ctx = { .target = KB_MATRIX_PORT_MAP, .strval_type = STRVAL_INT8 };
+static kb_ctx_t matrix_port_map_ctx = { .target = KB_MATRIX_PORT_MAP, .strval_type = STRVAL_INT16 };
 
 static kb_ctx_t mapping_c1_ctx = { .target = KB_MAPPING_C1, .strval_type = STRVAL_INT32 };
 static kb_ctx_t mapping_c2_ctx = { .target = KB_MAPPING_C2, .strval_type = STRVAL_INT32 };
@@ -415,6 +415,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting MATRIX_VALUE_X to: %f\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
@@ -427,6 +428,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting MATRIX_VALUE_Y to: %f\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
@@ -439,6 +441,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting MATRIX_VALUE_Z to: %f\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
@@ -451,6 +454,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting MATRIX_OUTPUT_PWM_0 to: %lu\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid uint32_t: %s\n", input);
@@ -463,6 +467,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting MATRIX_OUTPUT_PWM_1 to: %lu\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid uint32_t: %s\n", input);
@@ -471,10 +476,11 @@ static void keyboard_event_cb(lv_event_t * e)
         
         case KB_MATRIX_PORT_MAP:
             if (strval_validate(ctx->strval_type, input)) {
-                int8_t val = atoi(input);
+                int16_t val = atoi(input);
                 printf("[keyboard_event_cb] Setting MATRIX_PORT_MAP to: %d\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.matrix_port_map[0][current_matrix_i] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int8_t: %s\n", input);
@@ -487,6 +493,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C1 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C1] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -499,6 +506,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C2 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C2] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -511,6 +519,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C3 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C3] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -523,6 +532,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C4 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C4] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -535,6 +545,7 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C5 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C5] = val;
+                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
