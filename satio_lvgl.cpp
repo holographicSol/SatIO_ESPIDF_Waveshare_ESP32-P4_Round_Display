@@ -2904,19 +2904,15 @@ matrix_function_container_t create_matrix_function_container(
     int32_t pos_x,
     int32_t pos_y,
     int32_t radius,
+    int32_t padding,
+    int32_t row_height,
+    int32_t row_spacing,
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
 ) {
     matrix_function_container_t result = {0};
-    
-    // Layout constants
-    const int32_t padding = 4;
-    const int32_t row_spacing = 0;
-    const int32_t row_height = 32;
-    const int32_t label_width = 80;
-    const int32_t value_width = width_px-label_width-2*padding;
 
     // Row Object Widths
     int32_t label_width_0 = 80;
@@ -3140,7 +3136,7 @@ matrix_function_container_t create_matrix_function_container(
     // Row Object Widths
     label_width_0 = 20;
     label_width_1 = 120;
-    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*2;
+    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*3;
     value_width_1 = NULL;
     
     result.label_x = lv_label_create(row_value_x);
@@ -3247,7 +3243,7 @@ matrix_function_container_t create_matrix_function_container(
     // Row Object Widths
     label_width_0 = 20;
     label_width_1 = 120;
-    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*2;
+    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*3;
     value_width_1 = NULL;
 
     result.label_y = lv_label_create(row_value_y);
@@ -3354,7 +3350,7 @@ matrix_function_container_t create_matrix_function_container(
     // Row Object Widths
     label_width_0 = 20;
     label_width_1 = 120;
-    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*2;
+    value_width_0 = (width_px - label_width_1 - label_width_0) - padding*3;
     value_width_1 = NULL;
     
     result.label_z = lv_label_create(row_value_z);
@@ -3751,7 +3747,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_set_style_pad_all(row_switches_0, 0, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(row_switches_0, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(row_switches_0, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_switches_0, padding*4, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_switches_0, padding*2, LV_PART_MAIN);
 
     // Critical for alignment
     lv_obj_set_flex_align(
@@ -3775,7 +3771,7 @@ matrix_function_container_t create_matrix_function_container(
         80,                  // width px
         28,                   // height px
         LV_ALIGN_BOTTOM_MID,  // alignment
-        0,                    // pos x
+        20,                    // pos x
         0,                    // pos y
         "ASSIST",             // label text
         LV_TEXT_ALIGN_CENTER, // text align
@@ -3811,7 +3807,7 @@ matrix_function_container_t create_matrix_function_container(
         100,                  // width px
         28,                   // height px
         LV_ALIGN_BOTTOM_MID,  // alignment
-        0,                    // pos x
+        -20,                    // pos x
         0,                    // pos y
         "OVERRIDE",           // label text
         LV_TEXT_ALIGN_CENTER, // text align
@@ -3854,19 +3850,15 @@ mapping_config_container_t create_mapping_config_container(
     int32_t pos_x,
     int32_t pos_y,
     int32_t radius,
+    int32_t padding,
+    int32_t row_height,
+    int32_t row_spacing,
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
 ) {
     mapping_config_container_t result = {0};
-    
-    // Layout constants
-    const int32_t padding = 4;
-    const int32_t row_spacing = 0;
-    const int32_t row_height = 36;
-    const int32_t label_width = 200;
-    const int32_t value_width = width_px-label_width-2*padding;
 
     // Row Object Widths
     int32_t label_width_0 = 80;
@@ -4805,6 +4797,9 @@ void display_matrix_screen() {
         0,                // pos x
         105,              // pos y
         radius_rounded,   // radius
+        8,                // padding
+        32,               // row height
+        0,                // ror spacing
         false,            // show scrollbar
         false,            // enable scrolling
         &cobalt_alien_17, // font for titles,
@@ -4818,11 +4813,14 @@ void display_matrix_screen() {
     mcc = create_mapping_config_container(
         matrix_screen,    // parent
         400,              // width px
-        360,              // height px
+        350,              // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        105,               // pos y
+        105,              // pos y
         radius_rounded,   // radius
+        8,                // padding
+        32,               // row height
+        0,                // ror spacing
         false,            // show scrollbar
         false,            // enable scrolling
         &cobalt_alien_17, // font for titles
@@ -4836,9 +4834,9 @@ void display_matrix_screen() {
         matrix_screen,        // parent
         80,                   // width
         56,                   // height
-        LV_ALIGN_LEFT_MID,    // alignment
-        20,                   // pos x
-        -54,                  // pos y
+        LV_ALIGN_TOP_LEFT,    // alignment
+        lv_obj_get_x(mfc.panel) - 110, // pos x
+        lv_obj_get_y(mfc.panel),       // pos y
         "MATRIX",             // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
