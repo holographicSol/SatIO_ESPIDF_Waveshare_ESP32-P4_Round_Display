@@ -140,7 +140,6 @@ button_t matrix_save;
 button_t matrix_load;
 button_t matrix_delete;
 lv_obj_t * dd_matrix_file_slot_select;
-lv_obj_t * label_current_matrix_switch;
 button_t switch_matrix_mapping_panel;
 int current_matrix_panel_view=0;
 #define MAX_MATRIX_PANEL_VIEWS 2
@@ -151,23 +150,39 @@ int current_matrix_panel_view=0;
 // ---------------------------
 // Color
 // ---------------------------
+
+// Current Hue
 uint32_t current_hue=0;
-lv_color_t menu_bg_color;
-lv_color_t menu_border_color;
-lv_color_t menu_outline_color;
-lv_color_t menu_shadow_color;
-lv_color_t menu_text_color;
-lv_color_t system_tray_bg_color;
 
-lv_color_t matrix_contrast_outline_color;
-lv_color_t matrix_value_title_text_color;
-lv_color_t matrix_value_text_color;
-lv_color_t matrix_contrast_value_text_color;
+// Default Color Default
+lv_color_t default_bg_hue;
+lv_color_t default_outline_hue;
+lv_color_t default_border_hue;
+lv_color_t default_shadow_hue;
+lv_color_t default_title_hue;
+lv_color_t default_value_hue;
+// Default Color Minor
+lv_color_t default_contrast_bg_hue;
+lv_color_t default_contrast_outline_hue;
+lv_color_t default_contrast_border_hue;
+lv_color_t default_contrast_shadow_hue;
+lv_color_t default_contrast_title_hue;
+lv_color_t default_contrast_value_hue;
 
-lv_color_t map_contrast_outline_color;
-lv_color_t map_value_title_text_color;
-lv_color_t map_value_text_color;
-lv_color_t map_contrast_value_text_color;
+// Color Major
+lv_color_t main_bg_hue;
+lv_color_t main_outline_hue;
+lv_color_t main_border_hue;
+lv_color_t main_shadow_hue;
+lv_color_t main_title_hue;
+lv_color_t main_value_hue;
+// Color Minor
+lv_color_t main_contrast_bg_hue;
+lv_color_t main_contrast_outline_hue;
+lv_color_t main_contrast_border_hue;
+lv_color_t main_contrast_shadow_hue;
+lv_color_t main_contrast_title_hue;
+lv_color_t main_contrast_value_hue;
 
 // ---------------------------
 // Size
@@ -1117,35 +1132,35 @@ lv_obj_t * create_slider(
 
     // Main style: outline
     lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(slider, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_MAIN);
     
     // Main style: border
     lv_obj_set_style_border_width(slider, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(slider, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_MAIN);
     
     // Main style: background
-    lv_obj_set_style_bg_color(slider, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(slider, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_MAIN);
 
     // ---------------------------------------- SLIDER LV_PART_INDICATOR -----------------------------------------*/
 
     // Indicator style: outline
     lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_INDICATOR);
-    lv_obj_set_style_outline_color(slider, menu_outline_color, LV_PART_INDICATOR);
+    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_INDICATOR);
     
     // Indicator style: border
     lv_obj_set_style_border_width(slider, border_width, LV_PART_INDICATOR);
-    lv_obj_set_style_border_color(slider, menu_border_color, LV_PART_INDICATOR);
+    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_INDICATOR);
 
     // Indicator style: background
-    lv_obj_set_style_bg_color(slider, menu_bg_color, LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_INDICATOR);
 
     // Indicator style: shadow
     lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_INDICATOR);
-    lv_obj_set_style_shadow_color(slider, menu_shadow_color, LV_PART_INDICATOR);
+    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_INDICATOR);
 
     // Indicator style: radius (set last to square off indicator so main outline does not bleed though on left edge)
     lv_obj_set_style_radius(slider, general_radius, LV_PART_INDICATOR);
@@ -1157,18 +1172,18 @@ lv_obj_t * create_slider(
 
     // Knob style: outline
     lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_KNOB);
-    lv_obj_set_style_outline_color(slider, menu_outline_color, LV_PART_KNOB);
+    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_KNOB);
     
     // Knob style: border
     lv_obj_set_style_border_width(slider, border_width, LV_PART_KNOB);
-    lv_obj_set_style_border_color(slider, menu_border_color, LV_PART_KNOB);
+    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_KNOB);
 
     // Knob style: background
-    lv_obj_set_style_bg_color(slider, menu_bg_color, LV_PART_KNOB);
+    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_KNOB);
 
     // Knob style: shadow
     lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_KNOB);
-    lv_obj_set_style_shadow_color(slider, menu_shadow_color, LV_PART_KNOB);
+    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_KNOB);
 
 
     return slider;   
@@ -1347,23 +1362,23 @@ title_bar_t create_title_bar(
     
     // Main style: outline
     lv_obj_set_style_outline_width(title_bar.panel, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(title_bar.panel, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(title_bar.panel, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(title_bar.panel, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(title_bar.panel, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(title_bar.panel, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(title_bar.panel, system_tray_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(title_bar.panel, default_contrast_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(title_bar.panel, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(title_bar.panel, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(title_bar.panel, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(title_bar.panel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(title_bar.panel, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(title_bar.panel, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(title_bar.panel, default_title_hue, LV_PART_MAIN);
 
     // -------------------------------- Objects --------------------------------- //
 
@@ -1498,23 +1513,23 @@ system_tray_t create_system_tray(lv_obj_t * scr)
     
     // Main style: outline
     lv_obj_set_style_outline_width(tray.panel, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(tray.panel, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(tray.panel, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(tray.panel, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(tray.panel, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(tray.panel, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(tray.panel, system_tray_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tray.panel, default_contrast_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(tray.panel, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(tray.panel, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(tray.panel, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(tray.panel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(tray.panel, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(tray.panel, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(tray.panel, default_title_hue, LV_PART_MAIN);
 
     /* ---------------------------------- TRAY BRIGHTNESS ------------------------------- */
     
@@ -1676,7 +1691,7 @@ system_tray_t create_system_tray(lv_obj_t * scr)
         lv_obj_t * btn = lv_obj_get_child(tray.grid_menu_1, i);
         // Add callback
         lv_obj_add_event_cb(btn, system_tray_grid_menu_1_event_cb, LV_EVENT_CLICKED, NULL);
-        lv_obj_set_style_outline_color(btn, lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_outline_color(btn, default_outline_hue, LV_PART_MAIN);
         // Get label
         lv_obj_t * label = lv_obj_get_child(btn, 0);
         if(label && lv_obj_has_class(label, &lv_label_class)) {
@@ -1769,40 +1784,40 @@ lv_obj_t * create_label(
     if (transparent_bg) {
         // Main style: outline
         lv_obj_set_style_outline_width(result, 0, LV_PART_MAIN);
-        lv_obj_set_style_outline_color(result, menu_outline_color, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(result, default_outline_hue, LV_PART_MAIN);
         
         // Main style: border
         lv_obj_set_style_border_width(result, 0, LV_PART_MAIN);
-        lv_obj_set_style_border_color(result, menu_border_color, LV_PART_MAIN);
+        lv_obj_set_style_border_color(result, default_border_hue, LV_PART_MAIN);
 
         // Main style: background
         lv_obj_set_style_bg_opa(result, LV_OPA_TRANSP, LV_PART_MAIN);
 
         // Main style: shadow
         lv_obj_set_style_shadow_width(result, 0, LV_PART_MAIN);
-        lv_obj_set_style_shadow_color(result, menu_shadow_color, LV_PART_MAIN);
+        lv_obj_set_style_shadow_color(result, default_shadow_hue, LV_PART_MAIN);
     }
     else {
         // Main style: outline
         lv_obj_set_style_outline_width(result, outline_width, LV_PART_MAIN);
-        lv_obj_set_style_outline_color(result, menu_outline_color, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(result, default_outline_hue, LV_PART_MAIN);
         
         // Main style: border
         lv_obj_set_style_border_width(result, 0, LV_PART_MAIN);
-        lv_obj_set_style_border_color(result, menu_border_color, LV_PART_MAIN);
+        lv_obj_set_style_border_color(result, default_border_hue, LV_PART_MAIN);
 
         // Main style: background
-        lv_obj_set_style_bg_color(result, menu_bg_color, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(result, default_bg_hue, LV_PART_MAIN);
 
         // Main style: shadow
         lv_obj_set_style_shadow_width(result, shadow_width, LV_PART_MAIN);
-        lv_obj_set_style_shadow_color(result, menu_shadow_color, LV_PART_MAIN);
+        lv_obj_set_style_shadow_color(result, default_shadow_hue, LV_PART_MAIN);
     }
 
     // Main style: text
     lv_obj_set_style_text_align(result, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(result, font, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result, main_title_hue, LV_PART_MAIN);
     lv_label_set_text(result, text);
 
     return result;
@@ -1884,40 +1899,40 @@ lv_obj_t * create_textarea(
     if (transparent_bg) {
         // Main style: outline
         lv_obj_set_style_outline_width(ta, 0, LV_PART_MAIN);
-        lv_obj_set_style_outline_color(ta, menu_outline_color, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(ta, default_outline_hue, LV_PART_MAIN);
         
         // Main style: border
         lv_obj_set_style_border_width(ta, 0, LV_PART_MAIN);
-        lv_obj_set_style_border_color(ta, menu_border_color, LV_PART_MAIN);
+        lv_obj_set_style_border_color(ta, default_border_hue, LV_PART_MAIN);
 
         // Main style: background
         lv_obj_set_style_bg_opa(ta, LV_OPA_TRANSP, LV_PART_MAIN);
 
         // Main style: shadow
         lv_obj_set_style_shadow_width(ta, 0, LV_PART_MAIN);
-        lv_obj_set_style_shadow_color(ta, menu_shadow_color, LV_PART_MAIN);
+        lv_obj_set_style_shadow_color(ta, default_shadow_hue, LV_PART_MAIN);
     }
     else {
         // Main style: outline
         lv_obj_set_style_outline_width(ta, outline_width, LV_PART_MAIN);
-        lv_obj_set_style_outline_color(ta, menu_outline_color, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(ta, default_outline_hue, LV_PART_MAIN);
         
         // Main style: border
         lv_obj_set_style_border_width(ta, border_width, LV_PART_MAIN);
-        lv_obj_set_style_border_color(ta, menu_border_color, LV_PART_MAIN);
+        lv_obj_set_style_border_color(ta, default_border_hue, LV_PART_MAIN);
 
         // Main style: background
-        lv_obj_set_style_bg_color(ta, menu_bg_color, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(ta, default_bg_hue, LV_PART_MAIN);
 
         // Main style: shadow
         lv_obj_set_style_shadow_width(ta, shadow_width, LV_PART_MAIN);
-        lv_obj_set_style_shadow_color(ta, menu_shadow_color, LV_PART_MAIN);
+        lv_obj_set_style_shadow_color(ta, default_shadow_hue, LV_PART_MAIN);
     }
 
     // Main style: text
     lv_obj_set_style_text_align(ta, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(ta, font, LV_PART_MAIN);
-    lv_obj_set_style_text_color(ta, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(ta, default_title_hue, LV_PART_MAIN);
 
     return ta;
 }
@@ -1983,23 +1998,23 @@ keyboard_t create_keyboard(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.kb, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.kb, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.kb, default_outline_hue, LV_PART_MAIN);
     
     // Main style: border
     lv_obj_set_style_border_width(result.kb, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.kb, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.kb, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.kb, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.kb, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.kb, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.kb, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.kb, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.kb, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.kb, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.kb, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.kb, default_title_hue, LV_PART_MAIN);
 
     /*-------------------------------------- KEYBOARD LV_PART_ITEMS ---------------------------------------*/
 
@@ -2008,31 +2023,31 @@ keyboard_t create_keyboard(
 
     // Item style: outline
     lv_obj_set_style_outline_width(result.kb, outline_width, LV_PART_ITEMS);
-    lv_obj_set_style_outline_color(result.kb, menu_outline_color, LV_PART_ITEMS);
+    lv_obj_set_style_outline_color(result.kb, default_outline_hue, LV_PART_ITEMS);
 
     // Item style: border
     lv_obj_set_style_border_width(result.kb, border_width, LV_PART_ITEMS);
-    lv_obj_set_style_border_color(result.kb, menu_border_color, LV_PART_ITEMS);
+    lv_obj_set_style_border_color(result.kb, default_border_hue, LV_PART_ITEMS);
 
     // Item style: background
-    lv_obj_set_style_bg_color(result.kb, menu_bg_color, LV_PART_ITEMS);
+    lv_obj_set_style_bg_color(result.kb, default_bg_hue, LV_PART_ITEMS);
 
     // Item style: shadow
     lv_obj_set_style_shadow_width(result.kb, shadow_width, LV_PART_ITEMS);
-    lv_obj_set_style_shadow_color(result.kb, menu_shadow_color, LV_PART_ITEMS);
+    lv_obj_set_style_shadow_color(result.kb, default_shadow_hue, LV_PART_ITEMS);
 
     // Item style: text
     lv_obj_set_style_text_align(result.kb, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.kb, font_menu_item, LV_PART_ITEMS);
-    lv_obj_set_style_text_color(result.kb, menu_text_color, LV_PART_ITEMS);
+    lv_obj_set_style_text_color(result.kb, default_title_hue, LV_PART_ITEMS);
     
     // Item style: background checked
-    lv_obj_set_style_bg_color(result.kb, menu_border_color, LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(result.kb, default_border_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
     
     // Item style: text checked
     lv_obj_set_style_text_align(result.kb, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.kb, font_menu_item, LV_PART_ITEMS | LV_STATE_CHECKED);
-    lv_obj_set_style_text_color(result.kb, menu_text_color, LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(result.kb, default_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
 
     /*---------------------------------------------- TEXTAREA -----------------------------------------------*/
 
@@ -2059,23 +2074,23 @@ keyboard_t create_keyboard(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.ta, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.ta, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.ta, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.ta, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.ta, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.ta, default_border_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.ta, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.ta, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.ta, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.ta, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.ta, default_bg_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.ta, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.ta, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.ta, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.ta, default_title_hue, LV_PART_MAIN);
 
     return result;
 }
@@ -2112,19 +2127,19 @@ void create_menu_item(menu_struct * menu, int page_index, const char * title) {
 
     // Main style: border
     lv_obj_set_style_border_width(container, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(container, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(container, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(container, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(container, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(container, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(container, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(container, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(container, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(container, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(container, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(container, default_title_hue, LV_PART_MAIN);
 
     /*----------------------------------------------- LABEL -----------------------------------------------*/
     
@@ -2147,18 +2162,18 @@ void create_menu_item(menu_struct * menu, int page_index, const char * title) {
 
     // Main style: border
     lv_obj_set_style_border_width(label, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(label, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(label, default_border_hue, LV_PART_MAIN);
     
     // Main style: background
-    lv_obj_set_style_bg_color(label, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(label, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(label, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(label, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(label, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(label, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(label, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_font(label, font_menu_item, LV_PART_MAIN);
     lv_label_set_text(label, title);
 
@@ -2198,22 +2213,22 @@ lv_obj_t * create_menu_page(lv_obj_t * menu_x, const char * title) {
 
     // Main style: outline
     lv_obj_set_style_outline_width(menu_page, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(menu_page, lv_color_make(0,0,0), LV_PART_MAIN);
+    lv_obj_set_style_outline_color(menu_page, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(menu_page, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(menu_page, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(menu_page, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(menu_page, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(menu_page, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(menu_page, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(menu_page, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(menu_page, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(menu_page, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(menu_page, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(menu_page, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_font(menu_page, font_menu_item, LV_PART_MAIN);
 
     return menu_page;
@@ -2283,22 +2298,22 @@ menu_struct create_menu(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.menu, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.menu, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.menu, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.menu, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.menu, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.menu, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.menu, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.menu, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.menu, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.menu, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.menu, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.menu, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.menu, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.menu, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.menu, font_menu_item, LV_PART_MAIN);
 
     /* --- MENU LV_PART_ITEMS ---------------------------------------------------------- */
@@ -2320,22 +2335,22 @@ menu_struct create_menu(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.main_header, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.main_header, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.main_header, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.main_header, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.main_header, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.main_header, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.main_header, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.main_header, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.main_header, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.main_header, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.main_header, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.main_header, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.main_header, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.main_header, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.main_header, font_menu_title, LV_PART_MAIN);
 
     /* --- ROOT BACK BUTTON ------------------------------------------------------------ */
@@ -2359,22 +2374,22 @@ menu_struct create_menu(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.back_button, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.back_button, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.back_button, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.back_button, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.back_button, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.back_button, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.back_button, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.back_button, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.back_button, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.back_button, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.back_button, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.back_button, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.back_button, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.back_button, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.back_button, font_menu_item, LV_PART_MAIN);
 
     /* --- ROOT BACK BUTTON LABEL LV_PART_MAIN ----------------------------------------- */
@@ -2384,22 +2399,22 @@ menu_struct create_menu(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.back_label, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.back_label, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.back_label, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.back_label, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.back_label, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.back_label, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.back_label, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.back_label, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.back_label, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.back_label, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.back_label, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.back_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.back_label, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.back_label, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.back_label, font_menu_item, LV_PART_MAIN);
 
     /* --- CREATE PAGES ----------------------------------------------------------------- */
@@ -2523,18 +2538,18 @@ lv_obj_t * create_menu_grid(
 
     // Main style: outline
     lv_obj_set_style_outline_width(grid_menu, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(grid_menu, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(grid_menu, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(grid_menu, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(grid_menu, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(grid_menu, default_border_hue, LV_PART_MAIN);
     
     // Main style: background
-    lv_obj_set_style_bg_color(grid_menu, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(grid_menu, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(grid_menu, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(grid_menu, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(grid_menu, default_shadow_hue, LV_PART_MAIN);
     
     // Set layout to grid
     lv_obj_set_layout(grid_menu, LV_LAYOUT_GRID);
@@ -2573,18 +2588,18 @@ lv_obj_t * create_menu_grid(
 
         // Button style: outline
         lv_obj_set_style_outline_width(grid_menu_x_btn, outline_width, LV_PART_MAIN);
-        lv_obj_set_style_outline_color(grid_menu_x_btn, menu_outline_color, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(grid_menu_x_btn, default_outline_hue, LV_PART_MAIN);
 
         // Button style: border
         lv_obj_set_style_border_width(grid_menu_x_btn, 0, LV_PART_MAIN);
-        lv_obj_set_style_border_color(grid_menu_x_btn, menu_border_color, LV_PART_MAIN);
+        lv_obj_set_style_border_color(grid_menu_x_btn, default_border_hue, LV_PART_MAIN);
 
         // Button style: background
-        lv_obj_set_style_bg_color(grid_menu_x_btn, menu_bg_color, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(grid_menu_x_btn, default_bg_hue, LV_PART_MAIN);
 
         // Button style: shadow
         lv_obj_set_style_shadow_width(grid_menu_x_btn, 0, LV_PART_MAIN);
-        lv_obj_set_style_shadow_color(grid_menu_x_btn, menu_shadow_color, LV_PART_MAIN);
+        lv_obj_set_style_shadow_color(grid_menu_x_btn, default_shadow_hue, LV_PART_MAIN);
 
         /* --- CELL LABEL ----------------------------------------------------------------------- */
         
@@ -2605,7 +2620,7 @@ lv_obj_t * create_menu_grid(
         // Label style: text
         lv_obj_set_style_text_align(grid_menu_x_label, text_align, LV_PART_MAIN);
         lv_obj_set_style_text_font(grid_menu_x_label, font, LV_PART_MAIN);
-        lv_obj_set_style_text_color(grid_menu_x_label, menu_text_color, LV_PART_MAIN);
+        lv_obj_set_style_text_color(grid_menu_x_label, default_title_hue, LV_PART_MAIN);
         
     }
     return grid_menu;
@@ -2669,23 +2684,23 @@ lv_obj_t * create_dropdown_menu(
 
     // Main style: outline
     lv_obj_set_style_outline_width(ddlist, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(ddlist, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(ddlist, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(ddlist, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(ddlist, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(ddlist, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(ddlist, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ddlist, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(ddlist, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(ddlist, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(ddlist, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(ddlist, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     lv_obj_set_style_text_font(ddlist, font, LV_PART_MAIN);
-    lv_obj_set_style_text_color(ddlist, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(ddlist, default_title_hue, LV_PART_MAIN);
 
     /* --- DROPDOWN LIST --------------------------------------------------------------- */
 
@@ -2699,27 +2714,27 @@ lv_obj_t * create_dropdown_menu(
 
     // List style: outline
     lv_obj_set_style_outline_width(list, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(list, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(list, default_outline_hue, LV_PART_MAIN);
 
     // List style: border
     lv_obj_set_style_border_width(list, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(list, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(list, default_border_hue, LV_PART_MAIN);
 
     // List style: background
-    lv_obj_set_style_bg_color(list, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(list, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(list, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(list, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(list, default_shadow_hue, LV_PART_MAIN);
 
     // List style: text
     lv_obj_set_style_text_align(list, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     lv_obj_set_style_text_font(list, font, LV_PART_MAIN);
-    lv_obj_set_style_text_color(list, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(list, default_title_hue, LV_PART_MAIN);
 
     // List style: background checked
-    lv_obj_set_style_bg_color(list, menu_border_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(list, menu_border_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(list, default_border_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(list, default_border_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
     return ddlist;
 }
@@ -2783,23 +2798,23 @@ button_t create_button(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.panel, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.panel, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.panel, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.panel, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.panel, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.panel, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.panel, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.panel, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.panel, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.panel, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.panel, default_title_hue, LV_PART_MAIN);
 
     // ---- Button Style ----
 
@@ -2814,24 +2829,24 @@ button_t create_button(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.button, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.button, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.button, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.button, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.button, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.button, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.button, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.button, default_bg_hue, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(result.button, LV_OPA_0, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.button, 0, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.button, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.button, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.button, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.button, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.button, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.button, default_title_hue, LV_PART_MAIN);
 
     // ---- Label Style ----
     
@@ -2844,24 +2859,24 @@ button_t create_button(
     lv_obj_set_style_radius(result.label, radius, LV_PART_MAIN);
 
     // Main style: outline
-    lv_obj_set_style_outline_width(result.label, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.label, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.label, 0, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.label, default_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.label, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.label, menu_border_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.label, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.label, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.label, default_bg_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.label, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.label, menu_shadow_color, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.label, default_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.label, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.label, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label, default_title_hue, LV_PART_MAIN);
 
     // Size and position (Center the (now auto-sized) label inside panel)
     lv_obj_center(result.label);
@@ -2937,10 +2952,10 @@ matrix_function_container_t create_matrix_function_container(
     // Panel style
     lv_obj_set_style_radius(result.panel, general_radius, LV_PART_MAIN);
     lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.panel, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
     lv_obj_set_style_border_width(result.panel, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.panel, menu_border_color, LV_PART_MAIN);
-    lv_obj_set_style_bg_color(result.panel, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.panel, default_bg_hue, LV_PART_MAIN);
     lv_obj_set_style_pad_all(result.panel, padding, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
     lv_obj_set_flex_flow(result.panel, LV_FLEX_FLOW_COLUMN);
@@ -2988,7 +3003,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_switch_index_select, "Switch");
     lv_obj_set_size(result.label_switch_index_select, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_switch_index_select, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_switch_index_select, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_switch_index_select, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_switch_index_select, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
 
     // Switch Value
@@ -3016,7 +3031,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_function_index_select, "Function");
     lv_obj_set_size(result.label_function_index_select, label_width_1, row_height);
     lv_obj_set_style_text_font(result.label_function_index_select, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_function_index_select, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_function_index_select, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_function_index_select, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     // Function Value
@@ -3081,7 +3096,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_function_name, "In");
     lv_obj_set_size(result.label_function_name, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_function_name, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_function_name, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_function_name, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_function_name, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.dd_function_name = create_dropdown_menu(
@@ -3143,7 +3158,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_x, "X");
     lv_obj_set_size(result.label_x, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_x, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_x, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_x, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_x, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     // User X
@@ -3250,7 +3265,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_y, "Y");
     lv_obj_set_size(result.label_y, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_y, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_y, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_y, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_y, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     // User Y
@@ -3357,7 +3372,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_z, "Z");
     lv_obj_set_size(result.label_z, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_z, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_z, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_z, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_z, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     // User Z
@@ -3464,7 +3479,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_operator, "Operator");
     lv_obj_set_size(result.label_operator, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_operator, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_operator, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_operator, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_operator, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.dd_operator = create_dropdown_menu(
@@ -3490,7 +3505,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_output_mode, "Output");
     lv_obj_set_size(result.label_output_mode, label_width_1, row_height);
     lv_obj_set_style_text_font(result.label_output_mode, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_output_mode, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_output_mode, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_output_mode, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.dd_output_mode = create_dropdown_menu(
@@ -3554,7 +3569,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_output_pwm_0, "PWM0");
     lv_obj_set_size(result.label_output_pwm_0, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_output_pwm_0, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_output_pwm_0, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_output_pwm_0, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_output_pwm_0, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_pwm_0 = create_textarea(
@@ -3617,7 +3632,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_output_pwm_1, "PWM1");
     lv_obj_set_size(result.label_output_pwm_1, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_output_pwm_1, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_output_pwm_1, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_output_pwm_1, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_output_pwm_1, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_pwm_1 = create_textarea(
@@ -3681,7 +3696,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_map_slot, "Map Slot");
     lv_obj_set_size(result.label_map_slot, label_width_0, row_height);
     lv_obj_set_style_text_font(result.label_map_slot, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_map_slot, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_map_slot, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_map_slot, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     // Map Slot Value
@@ -3709,7 +3724,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_label_set_text(result.label_port_map, "Port");
     lv_obj_set_size(result.label_port_map, label_width_1, row_height);
     lv_obj_set_style_text_font(result.label_port_map, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label_port_map, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label_port_map, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.label_port_map, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     // Output Port Value
@@ -3883,10 +3898,10 @@ mapping_config_container_t create_mapping_config_container(
     // Panel style
     lv_obj_set_style_radius(result.panel, general_radius, LV_PART_MAIN);
     lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.panel, menu_outline_color, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
     lv_obj_set_style_border_width(result.panel, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.panel, menu_border_color, LV_PART_MAIN);
-    lv_obj_set_style_bg_color(result.panel, menu_bg_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.panel, default_bg_hue, LV_PART_MAIN);
     lv_obj_set_style_pad_all(result.panel, padding, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
     lv_obj_set_flex_flow(result.panel, LV_FLEX_FLOW_COLUMN);
@@ -3929,7 +3944,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.slot, "Map Slot");
     lv_obj_set_size(result.slot, label_width_0, row_height);
     lv_obj_set_style_text_font(result.slot, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.slot, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.slot, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.slot, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
 
     // Select Map Mode
@@ -3992,7 +4007,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.c0, "C0");
     lv_obj_set_size(result.c0, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c0, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.c0, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.c0, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c0, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     // Select C0
@@ -4054,7 +4069,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.c1, "C1");
     lv_obj_set_size(result.c1, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c1, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.c1, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.c1, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c1, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c1 = create_textarea(
@@ -4116,7 +4131,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.c2, "C2");
     lv_obj_set_size(result.c2, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c2, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.c2, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.c2, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c2, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c2 = create_textarea(
@@ -4178,7 +4193,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.c3, "C3");
     lv_obj_set_size(result.c3, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c3, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.c3, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.c3, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c3, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c3 = create_textarea(
@@ -4240,7 +4255,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.c4, "C4");
     lv_obj_set_size(result.c4, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c4, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.c4, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.c4, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c4, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c4 = create_textarea(
@@ -4302,7 +4317,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.c5, "C5");
     lv_obj_set_size(result.c5, label_width_0, row_height);
     lv_obj_set_style_text_font(result.c5, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.c5, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.c5, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.c5, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.ta_c5 = create_textarea(
@@ -4365,7 +4380,7 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.mode, "Map Mode");
     lv_obj_set_size(result.mode, label_width_0, row_height);
     lv_obj_set_style_text_font(result.mode, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.mode, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.mode, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.mode, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     // Select Map Mode
@@ -4427,14 +4442,14 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.input_value, "Input Value");
     lv_obj_set_size(result.input_value, label_width_0, row_height);
     lv_obj_set_style_text_font(result.input_value, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.input_value, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.input_value, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.input_value, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.value_input = lv_label_create(row9);
     lv_label_set_text(result.value_input, " - - -");
     lv_obj_set_size(result.value_input, value_width_0, row_height);
     lv_obj_set_style_text_font(result.value_input, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.value_input, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.value_input, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.value_input, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
 
     // Critical for alignment
@@ -4476,14 +4491,14 @@ mapping_config_container_t create_mapping_config_container(
     lv_label_set_text(result.map_result, "Output Value");
     lv_obj_set_size(result.map_result, label_width_0, row_height);
     lv_obj_set_style_text_font(result.map_result, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.map_result, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.map_result, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.map_result, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     
     result.value_map_result = lv_label_create(row10);
     lv_label_set_text(result.value_map_result, String(mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]).c_str());
     lv_obj_set_size(result.value_map_result, value_width_0, row_height);
     lv_obj_set_style_text_font(result.value_map_result, font_title, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.value_map_result, menu_text_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.value_map_result, default_title_hue, LV_PART_MAIN);
     lv_obj_set_style_text_align(result.value_map_result, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
 
     // Critical for alignment
@@ -5030,36 +5045,55 @@ void update_display_on_timer(lv_timer_t * timer) {
 
 void update_display() {
 
-    // pause timer...
+    // Pause timer
     lv_timer_pause(display_timer);
+
+    // Increment Hue
+    current_hue = (current_hue + 1) % 360;
+
+    // Major
+    // main_bg_hue      = lv_color_make(0,0,0); // leave default
+    main_outline_hue = lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100);
+    // main_border_hue  = lv_color_make(0,0,0); // leave default
+    // main_shadow_hue  = lv_color_make(0,0,0); // leave default
+    main_title_hue   = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
+    main_value_hue   = lv_color_hsv_to_rgb((current_hue + 200) % 360, 100, 100);
+
+    // Minor
+    // main_contrast_bg_hue      = lv_color_make(10,10,10); // leave default
+    main_contrast_outline_hue = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
+    // main_contrast_border_hue  = lv_color_make(0,0,0); // leave default
+    // main_contrast_shadow_hue  = lv_color_make(0,0,0); // leave default
+    main_contrast_title_hue   = lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100);
+    main_contrast_value_hue   = lv_color_hsv_to_rgb((current_hue + 50) % 360, 100, 100);
     
     if (kb_alnumsym.kb != NULL && lv_obj_is_valid(kb_alnumsym.kb)) {
         if (!lv_obj_has_flag(kb_alnumsym.kb, LV_OBJ_FLAG_HIDDEN)) {
             // Rainbow keyboard full outline
-            lv_obj_set_style_outline_color(kb_alnumsym.kb, lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(kb_alnumsym.kb, main_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard full keys
-            lv_obj_set_style_text_color(kb_alnumsym.kb, lv_color_hsv_to_rgb((current_hue + 75) % 360, 100, 100), LV_PART_ITEMS);
+            lv_obj_set_style_text_color(kb_alnumsym.kb, main_title_hue, LV_PART_ITEMS);
             // Rainbow keyboard full checked keys
-            lv_obj_set_style_text_color(kb_alnumsym.kb, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_ITEMS | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(kb_alnumsym.kb, main_contrast_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
             // Rainbow keyboard full text area outline
-            lv_obj_set_style_outline_color(kb_alnumsym.ta, lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(kb_alnumsym.ta, main_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard full text area text
-            lv_obj_set_style_text_color(kb_alnumsym.ta, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_text_color(kb_alnumsym.ta, main_value_hue, LV_PART_MAIN);
         }
     }
 
     if (kb_numdec.kb != NULL && lv_obj_is_valid(kb_numdec.kb)) {
         if (!lv_obj_has_flag(kb_numdec.kb, LV_OBJ_FLAG_HIDDEN)) {
             // Rainbow keyboard numdec full outline
-            lv_obj_set_style_outline_color(kb_numdec.kb, lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(kb_numdec.kb, main_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard numdec full keys
-            lv_obj_set_style_text_color(kb_numdec.kb, lv_color_hsv_to_rgb((current_hue + 75) % 360, 100, 100), LV_PART_ITEMS);
+            lv_obj_set_style_text_color(kb_numdec.kb, main_title_hue, LV_PART_ITEMS);
             // Rainbow keyboard numdec full checked keys
-            lv_obj_set_style_text_color(kb_numdec.kb, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_ITEMS | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(kb_numdec.kb, main_contrast_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
             // Rainbow keyboard numdec full text area outline
-            lv_obj_set_style_outline_color(kb_numdec.ta, lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(kb_numdec.ta, main_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard numdec full text area text
-            lv_obj_set_style_text_color(kb_numdec.ta, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_text_color(kb_numdec.ta, main_value_hue, LV_PART_MAIN);
         }
     }
     
@@ -5071,15 +5105,15 @@ void update_display() {
         vTaskDelay(5 / portTICK_PERIOD_MS);
 
         // Title Bar Outline
-        lv_obj_set_style_outline_color(main_title_bar.panel, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_outline_color(main_title_bar.panel, main_outline_hue, LV_PART_MAIN);
 
         // Title Bar Local Time
         lv_label_set_text(main_title_bar.time_label, satioData.formatted_local_time_HHMMSS);
-        lv_obj_set_style_text_color(main_title_bar.time_label, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_text_color(main_title_bar.time_label, main_title_hue, LV_PART_MAIN);
 
         // Title Bar Local Date
         lv_label_set_text(main_title_bar.date_label, satioData.formatted_local_short_date_DDMMYY);
-        lv_obj_set_style_text_color(main_title_bar.date_label, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_text_color(main_title_bar.date_label, main_title_hue, LV_PART_MAIN);
 
         // GPS Sync
         if (satioData.gps_sync) {
@@ -5093,8 +5127,8 @@ void update_display() {
             lv_obj_add_flag(main_title_bar.datetime_sync, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_flag(main_title_bar.gps_signal_strength, LV_OBJ_FLAG_HIDDEN);
             String gps_signal_text = "" + String(gnggaData.satellite_count) + ":" + String(gnggaData.gps_precision_factor) + "";
-            lv_obj_set_style_outline_color(main_title_bar.gps_signal_strength, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(main_title_bar.gps_signal_strength, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(main_title_bar.gps_signal_strength, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(main_title_bar.gps_signal_strength, main_title_hue, LV_PART_MAIN);
             lv_label_set_text(main_title_bar.gps_signal_strength, gps_signal_text.c_str());
         }
 
@@ -5111,13 +5145,13 @@ void update_display() {
         }
         else {
             if (sdcardData.sdcard_mounted) {
-                lv_obj_set_style_outline_color(main_title_bar.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
-                lv_obj_set_style_text_color(main_title_bar.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_outline_color(main_title_bar.sdcard_mounted, main_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(main_title_bar.sdcard_mounted, main_title_hue, LV_PART_MAIN);
                 lv_label_set_text(main_title_bar.sdcard_mounted, "SD");
             }
             else {
-                lv_obj_set_style_outline_color(main_title_bar.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
-                lv_obj_set_style_text_color(main_title_bar.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_outline_color(main_title_bar.sdcard_mounted, main_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(main_title_bar.sdcard_mounted, main_title_hue, LV_PART_MAIN);
                 lv_label_set_text(main_title_bar.sdcard_mounted, "SD!");
             }
         }
@@ -5130,30 +5164,30 @@ void update_display() {
         vTaskDelay(5 / portTICK_PERIOD_MS);
 
         // Rainbow System Tray Outline
-        lv_obj_set_style_outline_color(system_tray.panel, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_outline_color(system_tray.panel, main_outline_hue, LV_PART_MAIN);
 
         // Rainbow System Tray Brightness Slider Outline
-        lv_obj_set_style_outline_color(system_tray.slider_brightness, lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_outline_color(system_tray.slider_brightness, main_contrast_outline_hue, LV_PART_MAIN);
 
         // Rainbow System Tray Brightness Slider Knob
-        lv_obj_set_style_bg_color(system_tray.slider_brightness, lv_color_hsv_to_rgb((current_hue + 200) % 360, 100, 100), LV_PART_KNOB);
+        lv_obj_set_style_bg_color(system_tray.slider_brightness, main_contrast_bg_hue, LV_PART_KNOB);
 
         // Rainbow System Tray Brightness Slider Indicator
-        lv_obj_set_style_outline_color(system_tray.slider_brightness, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_INDICATOR);
+        lv_obj_set_style_outline_color(system_tray.slider_brightness, main_outline_hue, LV_PART_INDICATOR);
 
         // System Tray Local Time
         lv_label_set_text(system_tray.local_time, satioData.formatted_local_time_HHMMSS);
-        lv_obj_set_style_text_color(system_tray.local_time, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_text_color(system_tray.local_time, main_title_hue, LV_PART_MAIN);
 
         // System Tray Local Date
         lv_label_set_text(system_tray.local_date, satioData.formatted_local_short_date_DDMMYY);
-        lv_obj_set_style_text_color(system_tray.local_date, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_text_color(system_tray.local_date, main_title_hue, LV_PART_MAIN);
 
         // System Tray Human Date
         String human_date = String(satioData.local_wday_name) + " " + String(satioData.local_mday) + " " + String(satioData.local_month_name);
         // printf("human date: %s\n", human_date.c_str());
         lv_label_set_text(system_tray.human_date, human_date.c_str());
-        lv_obj_set_style_text_color(system_tray.human_date, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+        lv_obj_set_style_text_color(system_tray.human_date, main_title_hue, LV_PART_MAIN);
 
         // GPS Sync
         if (satioData.gps_sync) {
@@ -5167,8 +5201,8 @@ void update_display() {
             lv_obj_add_flag(system_tray.datetime_sync, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_flag(system_tray.gps_signal_strength, LV_OBJ_FLAG_HIDDEN);
             String gps_signal_text = "" + String(gnggaData.satellite_count) + ":" + String(gnggaData.gps_precision_factor) + "";
-            lv_obj_set_style_outline_color(system_tray.gps_signal_strength, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(system_tray.gps_signal_strength, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(system_tray.gps_signal_strength, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(system_tray.gps_signal_strength, main_title_hue, LV_PART_MAIN);
             lv_label_set_text(system_tray.gps_signal_strength, gps_signal_text.c_str());
         }
 
@@ -5185,13 +5219,13 @@ void update_display() {
         }
         else {
             if (sdcardData.sdcard_mounted) {
-                lv_obj_set_style_outline_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
-                lv_obj_set_style_text_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_outline_color(system_tray.sdcard_mounted, main_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(system_tray.sdcard_mounted, main_title_hue, LV_PART_MAIN);
                 lv_label_set_text(system_tray.sdcard_mounted, "SD");
             }
             else {
-                lv_obj_set_style_outline_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100), LV_PART_MAIN);
-                lv_obj_set_style_text_color(system_tray.sdcard_mounted, lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_outline_color(system_tray.sdcard_mounted, main_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(system_tray.sdcard_mounted, main_title_hue, LV_PART_MAIN);
                 lv_label_set_text(system_tray.sdcard_mounted, "SD!");
             }
         }
@@ -5203,7 +5237,7 @@ void update_display() {
             uint32_t grid_child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
             for(uint32_t i = 0; i < grid_child_cnt; i++) {
                 lv_obj_t * btn = lv_obj_get_child(system_tray.grid_menu_1, i);
-                lv_obj_set_style_outline_color(btn, lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_outline_color(btn, main_contrast_outline_hue, LV_PART_MAIN);
                 // Get label
                 lv_obj_t * label = lv_obj_get_child(btn, 0);
                 if(label && lv_obj_has_class(label, &lv_label_class)) {
@@ -5233,15 +5267,6 @@ void update_display() {
 
     // matrix screen
     else if (lv_scr_act() == matrix_screen) {
-
-        matrix_contrast_outline_color = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
-        matrix_value_title_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
-        matrix_value_text_color = lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100);
-        matrix_contrast_value_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
-
-        map_value_title_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
-        map_value_text_color = lv_color_hsv_to_rgb((current_hue + 0) % 360, 100, 100);
-        map_contrast_value_text_color = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
 
         // Matrix Overview Grid 1
         if (matrix_overview_grid_1) {
@@ -5278,36 +5303,36 @@ void update_display() {
                 }
             }
             lv_dropdown_set_selected(dd_matrix_file_slot_select, current_matrix_function_i);
-            lv_obj_set_style_outline_color(dd_matrix_file_slot_select, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(dd_matrix_file_slot_select, map_value_text_color, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(lv_dropdown_get_list(dd_matrix_file_slot_select), matrix_contrast_outline_color, LV_PART_MAIN);
-            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), map_value_text_color, LV_PART_MAIN);
-            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+            lv_obj_set_style_outline_color(dd_matrix_file_slot_select, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(dd_matrix_file_slot_select, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
         }
 
         // Matrix New
         if (matrix_new.panel) {
-            lv_obj_set_style_outline_color(matrix_new.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_new.label, lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_new.panel, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_new.label, main_title_hue, LV_PART_MAIN);
         }
 
         // Matrix Save
         if (matrix_save.panel) {
-            lv_obj_set_style_outline_color(matrix_save.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_save.label, lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_save.panel, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_save.label, main_title_hue, LV_PART_MAIN);
         }
 
         // Matrix Load
         if (matrix_load.panel) {
-            lv_obj_set_style_outline_color(matrix_load.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_load.label, lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_load.panel, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_load.label, main_title_hue, LV_PART_MAIN);
         }
 
         // Matrix Delete
         if (matrix_delete.panel) {
-            lv_obj_set_style_outline_color(matrix_delete.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_delete.label, lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_delete.panel, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_delete.label, main_title_hue, LV_PART_MAIN);
         }
 
         // Switch Main Matrix Panel (Matrix/Mapping)
@@ -5315,8 +5340,8 @@ void update_display() {
             if (current_matrix_panel_view==0) {lv_label_set_text(switch_matrix_mapping_panel.label, "MATRIX");}
             else if (current_matrix_panel_view==1) {lv_label_set_text(switch_matrix_mapping_panel.label, "MAP");}
             else {lv_label_set_text(switch_matrix_mapping_panel.label, "");}
-            lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
-            lv_obj_set_style_text_color(switch_matrix_mapping_panel.label, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
+            lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(switch_matrix_mapping_panel.label, main_contrast_title_hue, LV_PART_MAIN);
         }
         
         // Matrix Configuration Panel
@@ -5339,158 +5364,168 @@ void update_display() {
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Panel
-                lv_obj_set_style_outline_color(mfc.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.panel, main_outline_hue, LV_PART_MAIN);
 
-                // Label Current Function
-                lv_obj_set_style_text_color(mfc.label_function_index_select, matrix_value_title_text_color, LV_PART_MAIN);
-                // Value Current Function
-                lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
-                lv_obj_set_style_text_color(mfc.dd_function_index_select, matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                // Label Current Switch (Remeains Static Color For Emphasis)
+                // lv_obj_set_style_text_color(mfc.label_switch_index_select, main_contrast_title_hue, LV_PART_MAIN);
+                // // Value Current Switch
+                // lv_dropdown_set_selected(mfc.dd_switch_index_select, current_matrix_function_i);
+                // lv_obj_set_style_text_color(mfc.dd_switch_index_select, main_contrast_value_hue, LV_PART_MAIN);
+                // lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_outline_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
+                // Label Current Function (Remeains Static Color For Emphasis)
+                // lv_obj_set_style_text_color(mfc.label_function_index_select, main_contrast_title_hue, LV_PART_MAIN);
+                // // Value Current Function
+                // lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
+                // lv_obj_set_style_text_color(mfc.dd_function_index_select, main_contrast_value_hue, LV_PART_MAIN);
+                // lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_outline_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Label Primary Function Comparotor
-                lv_obj_set_style_text_color(mfc.label_function_name, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_function_name, main_contrast_title_hue, LV_PART_MAIN);
                 // Value Primary Function Comparotor
                 lv_dropdown_set_selected(mfc.dd_function_name, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
-                lv_obj_set_style_text_color(mfc.dd_function_name, matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mfc.dd_function_name, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // X
-                lv_obj_set_style_text_color(mfc.label_x, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_x, main_contrast_title_hue, LV_PART_MAIN);
 
                 // X Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
-                lv_obj_set_style_text_color(mfc.dd_mode_x, matrix_value_title_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_value_title_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mfc.dd_mode_x, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 // X Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]==0) {
                     // Mode 0: User Defined
                     lv_textarea_set_text(mfc.ta_x, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]).c_str());
                     lv_obj_add_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_text_color(mfc.ta_x, matrix_value_text_color, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.ta_x, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
                     lv_obj_add_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_text_color(mfc.dd_x, matrix_value_text_color, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_x), matrix_contrast_outline_color, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_value_text_color, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_color(mfc.dd_x, main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 }
 
                 // Y
-                lv_obj_set_style_text_color(mfc.label_y, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_y, main_contrast_title_hue, LV_PART_MAIN);
 
                 // Y Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
-                lv_obj_set_style_text_color(mfc.dd_mode_y, matrix_value_title_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_value_title_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mfc.dd_mode_y, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 // Y Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]==0) {
                     // Mode 0: User Defined
                     lv_textarea_set_text(mfc.ta_y, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]).c_str());
                     lv_obj_add_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_text_color(mfc.ta_y, matrix_value_text_color, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.ta_y, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_y, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
                     lv_obj_add_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_text_color(mfc.dd_y, matrix_value_text_color, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_y), matrix_contrast_outline_color, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_value_text_color, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_color(mfc.dd_y, main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 }
 
                 // Z
-                lv_obj_set_style_text_color(mfc.label_z, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_z, main_contrast_title_hue, LV_PART_MAIN);
                 // Z Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
-                lv_obj_set_style_text_color(mfc.dd_mode_z, matrix_value_title_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_value_title_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mfc.dd_mode_z, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 // Z Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]==0) {
                     // Mode 0: User Defined
                     lv_textarea_set_text(mfc.ta_z, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]).c_str());
                     lv_obj_add_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_text_color(mfc.ta_z, matrix_value_text_color, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.ta_z, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
                     lv_obj_add_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_text_color(mfc.dd_z, matrix_value_text_color, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_z), matrix_contrast_outline_color, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_value_text_color, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_color(mfc.dd_z, main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 }
 
                 // Operator
-                lv_obj_set_style_text_color(mfc.label_operator, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_operator, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_operator, matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i]);
-                lv_obj_set_style_text_color(mfc.dd_operator, matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_operator), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mfc.dd_operator, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Output Mode
-                lv_obj_set_style_text_color(mfc.label_output_mode, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_output_mode, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
-                lv_obj_set_style_text_color(mfc.dd_output_mode, matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mfc.dd_output_mode, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // PWM Off
-                lv_obj_set_style_text_color(mfc.label_output_pwm_0, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_output_pwm_0, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mfc.ta_pwm_0, String(matrixData.output_pwm[0][current_matrix_i][0]).c_str());
-                lv_obj_set_style_text_color(mfc.ta_pwm_0, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.ta_pwm_0, main_contrast_value_hue, LV_PART_MAIN);
 
                 // PWM On
-                lv_obj_set_style_text_color(mfc.label_output_pwm_1, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_output_pwm_1, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mfc.ta_pwm_1, String(matrixData.output_pwm[0][current_matrix_i][1]).c_str());
-                lv_obj_set_style_text_color(mfc.ta_pwm_1, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.ta_pwm_1, main_contrast_value_hue, LV_PART_MAIN);
 
                 // Connected Map Slot
-                lv_obj_set_style_text_color(mfc.label_map_slot, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_map_slot, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
-                lv_obj_set_style_text_color(mfc.dd_map_slot, matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mfc.dd_map_slot, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Output Port
-                lv_obj_set_style_text_color(mfc.label_port_map, matrix_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_port_map, lv_color_make(255, 0, 0), LV_PART_MAIN);
                 lv_textarea_set_text(mfc.ta_port_map, String(matrixData.matrix_port_map[0][current_matrix_i]).c_str());
-                lv_obj_set_style_text_color(mfc.ta_port_map, matrix_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.ta_port_map, lv_color_make(255, 0, 0), LV_PART_MAIN);
 
                 // Computer Assist
                 if (mfc.matrix_switch_computer_assist.panel) {
@@ -5512,7 +5547,7 @@ void update_display() {
 
                 // Output Value
                 if (mfc.matrix_switch_output_value) {
-                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, main_outline_hue, LV_PART_MAIN);
                     lv_label_set_text(mfc.matrix_switch_output_value, String(String("") + String(matrixData.output_value[0][current_matrix_i])).c_str());
                     /* Text Color: Switch Intention (blue) */
                     if (matrixData.switch_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);}
@@ -5545,17 +5580,17 @@ void update_display() {
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Panel
-                lv_obj_set_style_outline_color(mcc.panel, lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100), LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.panel, main_outline_hue, LV_PART_MAIN);
 
-                // Map Slot
-                lv_obj_set_style_text_color(mcc.slot, map_value_title_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mcc.dd_slot, matrix_value_title_text_color, LV_PART_MAIN);
-                lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
-                lv_obj_set_style_text_color(mcc.dd_slot, matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_slot), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), matrix_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), matrix_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                // Map Slot (Remeains Static Color For Emphasis)
+                // lv_obj_set_style_text_color(mcc.slot, main_contrast_title_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(mcc.dd_slot, main_contrast_title_hue, LV_PART_MAIN);
+                // lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
+                // lv_obj_set_style_text_color(mcc.dd_slot, main_contrast_value_hue, LV_PART_MAIN);
+                // lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_slot), main_contrast_outline_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), main_contrast_value_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                // lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Map Mode 0
                 if (mappingData.map_mode[0][current_mapping_i]==MAP_MODE_MIN_TO_MAX) {
@@ -5603,55 +5638,52 @@ void update_display() {
                     lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C5]).c_str());
                 }
 
-                lv_obj_set_style_text_color(mcc.c0, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.c0, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_c0, (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
-                lv_obj_set_style_text_color(mcc.dd_c0, map_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_c0), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mcc.dd_c0, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                lv_obj_set_style_text_color(mcc.c1, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.c1, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c1, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C1]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c1, map_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.ta_c1, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(mcc.c2, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.c2, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c2, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C2]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c2, map_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.ta_c2, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(mcc.c3, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.c3, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c3, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C3]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c3, map_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.ta_c3, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(mcc.c4, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.c4, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c4, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C4]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c4, map_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.ta_c4, main_contrast_value_hue, LV_PART_MAIN);
                 
-                lv_obj_set_style_text_color(mcc.c5, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.c5, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c5, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C5]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c5, map_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.ta_c5, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(mcc.mode, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.mode, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_mode, mappingData.map_mode[0][current_mapping_i]);
-                lv_obj_set_style_text_color(mcc.dd_mode, map_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_mode), matrix_contrast_outline_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_value_text_color, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), map_contrast_value_text_color, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(mcc.dd_mode, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                lv_obj_set_style_text_color(mcc.input_value, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.input_value, main_contrast_title_hue, LV_PART_MAIN);
                 lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_mapping_i)).c_str());
-                lv_obj_set_style_text_color(mcc.value_input, map_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.value_input, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(mcc.map_result, map_value_title_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.map_result, main_contrast_title_hue, LV_PART_MAIN);
                 lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][current_mapping_i]).c_str());
-                lv_obj_set_style_text_color(mcc.value_map_result, map_value_text_color, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.value_map_result, main_contrast_value_hue, LV_PART_MAIN);
             }
         }
     }
-
-    // Increment
-    current_hue = (current_hue + 1) % 360;
 
     lv_timer_resume(display_timer);
 }
@@ -5692,12 +5724,39 @@ void initSatIOUI() {
     // Menu styling (menus are bootstrapped for consistant reproducibility so minimal styling is needed here)
     font_menu_title = &cobalt_alien_25;
     font_menu_item = &cobalt_alien_17;
-    system_tray_bg_color = lv_color_make(10,10,10);
-    menu_bg_color        = lv_color_make(0,0,0);
-    menu_border_color    = lv_color_make(0,0,0); // hidden by making same as bg
-    menu_outline_color   = lv_color_make(0,0,0);    // used instead of border
-    menu_shadow_color    = lv_color_make(0,0,0);
-    menu_text_color      = lv_color_make(0,255,0);
+
+    // Default Text Only (Only Change Here, Once)
+    default_bg_hue      = lv_color_make(0,0,0);
+    default_outline_hue = lv_color_make(0,0,0); // used instead of border
+    default_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
+    default_shadow_hue  = lv_color_make(0,0,0);
+    default_title_hue   = lv_color_make(0,0, 255);
+    default_value_hue   = lv_color_make(0,255,0);
+
+    // Default Text Only (Only Change Here, Once)
+    default_contrast_bg_hue      = lv_color_make(0,0,0);
+    default_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
+    default_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
+    default_contrast_shadow_hue  = lv_color_make(0,0,0);
+    default_contrast_title_hue   = lv_color_make(0,0, 255);
+    default_contrast_value_hue   = lv_color_make(0,255,0);
+
+    // Default Text Only (Change wherever as required for emphasis to importance)
+    main_bg_hue      = lv_color_make(0,0,0);
+    main_outline_hue = lv_color_make(0,0,0); // used instead of border
+    main_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
+    main_shadow_hue  = lv_color_make(0,0,0);
+    main_title_hue   = lv_color_make(0,0, 255);
+    main_value_hue   = lv_color_make(0,255,0);
+
+    // Default Text Only (Change wherever as required for emphasis to importance)
+    main_contrast_bg_hue      = lv_color_make(10,10,10);
+    main_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
+    main_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
+    main_contrast_shadow_hue  = lv_color_make(0,0,0);
+    main_contrast_title_hue   = lv_color_make(0,0, 255);
+    main_contrast_value_hue   = lv_color_make(0,255,0);
+    main_contrast_bg_hue = lv_color_make(10,10,10);
 
     // --------------------------------------------------------------
     // SD Card Initialization
