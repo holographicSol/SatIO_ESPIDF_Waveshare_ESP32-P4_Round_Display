@@ -66,9 +66,9 @@ struct CustomMappingStruct mappingData={
     "Dual Axis 1",
   },
   .char_map_mode_config_names={
-    {"Input Value", "In Min", "In Max",              "Out Min",            "Out Max", "N/A"},
-    {"Input Value", "In Center", "In Min to Center", "In Max - Neg Range", "Out Max", "DEAD ZONE"},
-    {"Input Value", "In Center", "In Min to Center", "In Max - Neg Range", "Out Max", "DEAD ZONE"},
+    {"(C0) Input Value", "(C1) In Min",    "(C2) In Max",           "(C3) Out Min",     "(C4) Out Max", "(C5) N/A"},
+    {"(C0) Input Value", "(C1) In Center", "(C2) In Min to Center", "(C3) In Max - C2", "(C4) Out Max", "(C5) DEAD ZONE"},
+    {"(C0) Input Value", "(C1) In Center", "(C2) In Min to Center", "(C3) In Max - C2", "(C4) Out Max", "(C5) DEAD ZONE"},
   },
   .mapping_config={
     {

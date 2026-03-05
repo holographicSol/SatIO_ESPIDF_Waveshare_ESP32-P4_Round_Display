@@ -225,16 +225,19 @@ typedef struct {
     lv_obj_t * label_x;                  // X label
     lv_obj_t * ta_x;                     // X textarea
     lv_obj_t * dd_x;
+    lv_obj_t * label_mode_x;
     lv_obj_t * dd_mode_x;
     
     lv_obj_t * label_y;                  // Y label
     lv_obj_t * ta_y;                     // Y textarea
     lv_obj_t * dd_y;
+    lv_obj_t * label_mode_y;
     lv_obj_t * dd_mode_y;
     
     lv_obj_t * label_z;                  // Z label
     lv_obj_t * ta_z;                     // Z textarea
     lv_obj_t * dd_z;
+    lv_obj_t * label_mode_z;
     lv_obj_t * dd_mode_z;
     
     // Operator
