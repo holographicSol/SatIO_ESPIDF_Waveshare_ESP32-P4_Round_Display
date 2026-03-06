@@ -303,6 +303,214 @@ typedef struct {
     lv_obj_t * value_map_result;
 } mapping_config_container_t;
 
+/** ---------------------------------------------------------------------------------------
+ * @brief GNGGA Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel; // Main container panel
+    lv_obj_t * lbl_utc_time;
+    lv_obj_t * val_utc_time;
+    lv_obj_t * lbl_latitude;
+    lv_obj_t * val_latitude;
+    lv_obj_t * lbl_longitude;
+    lv_obj_t * val_longitude;
+    lv_obj_t * lbl_solution_status;
+    lv_obj_t * val_solution_status;
+    lv_obj_t * lbl_sat_count;
+    lv_obj_t * val_sat_count;
+    lv_obj_t * lbl_gps_precision_factor;
+    lv_obj_t * val_gps_precision_factor;
+    lv_obj_t * lbl_altitude;
+    lv_obj_t * val_altitude;
+    lv_obj_t * lbl_geoidal;
+    lv_obj_t * val_geoidal;
+    lv_obj_t * lbl_differential_delay;
+    lv_obj_t * val_differential_delay;
+    lv_obj_t * lbl_bad_element_count;
+    lv_obj_t * val_bad_element_count;
+} gngga_container_t;
+
+/** ---------------------------------------------------------------------------------------
+ * @brief GNRMC Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel; // Main container panel
+    lv_obj_t * lbl_utc_time;
+    lv_obj_t * val_utc_time;
+    lv_obj_t * lbl_positioning_status;
+    lv_obj_t * val_positioning_status;
+    lv_obj_t * lbl_latitude;
+    lv_obj_t * val_latitude;
+    lv_obj_t * lbl_longitude;
+    lv_obj_t * val_longitude;
+    lv_obj_t * lbl_ground_speed;
+    lv_obj_t * val_ground_speed;
+    lv_obj_t * lbl_ground_heading;
+    lv_obj_t * val_ground_heading;
+    lv_obj_t * lbl_utc_date;
+    lv_obj_t * val_utc_date;
+    lv_obj_t * lbl_installation_angle;
+    lv_obj_t * val_installation_angle;
+    lv_obj_t * lbl_installation_angle_direction;
+    lv_obj_t * val_installation_angle_direction;
+    lv_obj_t * lbl_mode_indication;
+    lv_obj_t * val_mode_indication;
+    lv_obj_t * lbl_bad_element_count;
+    lv_obj_t * val_bad_element_count;
+} gnrmc_container_t;
+
+/** ---------------------------------------------------------------------------------------
+ * @brief GPATT Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel; // Main container panel
+    lv_obj_t * lbl_pith;
+    lv_obj_t * val_pitch;
+    lv_obj_t * lbl_roll;
+    lv_obj_t * val_roll;
+    lv_obj_t * lbl_yaw;
+    lv_obj_t * val_yaw;
+    lv_obj_t * lbl_software_version;
+    lv_obj_t * val_software_version;
+    lv_obj_t * lbl_product_id;
+    lv_obj_t * val_product_id;
+    lv_obj_t * lbl_ins;
+    lv_obj_t * val_ins;
+    lv_obj_t * lbl_hardware_version;
+    lv_obj_t * val_hardware_version;
+    lv_obj_t * lbl_run_state_flag;
+    lv_obj_t * val_run_state_flag;
+    lv_obj_t * lbl_mis_angle_num;
+    lv_obj_t * val_mis_angle_num;
+    lv_obj_t * lbl_static_flag;
+    lv_obj_t * val_static_flag;
+    lv_obj_t * lbl_user_code;
+    lv_obj_t * val_user_code;
+    lv_obj_t * lbl_gst_data;
+    lv_obj_t * val_gst_data;
+    lv_obj_t * lbl_line_flag;
+    lv_obj_t * val_line_flag;
+    lv_obj_t * lbl_mis_att_flag;
+    lv_obj_t * val_mis_att_flag;
+    lv_obj_t * lbl_imu_kind;
+    lv_obj_t * val_imu_kind;
+    lv_obj_t * lbl_ubi_car_kind;
+    lv_obj_t * val_ubi_car_kind;
+    lv_obj_t * lbl_mileage;
+    lv_obj_t * val_mileage;
+    lv_obj_t * lbl_run_inetial_flag;
+    lv_obj_t * val_run_inetial_flag;
+    lv_obj_t * lbl_speed_num;
+    lv_obj_t * val_speed_num;
+    lv_obj_t * lbl_scalable;
+    lv_obj_t * val_scalable;
+    lv_obj_t * lbl_bad_element_count;
+    lv_obj_t * val_bad_element_count;
+} gpatt_container_t;
+
+/** ---------------------------------------------------------------------------------------
+ * @brief SATIO Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel; // Main container panel
+    lv_obj_t * lbl_local_yday;
+    lv_obj_t * val_local_yday;
+    lv_obj_t * lbl_local_wday_name;
+    lv_obj_t * val_local_wday_name;
+    lv_obj_t * lbl_local_month_name;
+    lv_obj_t * val_local_month_name;
+    lv_obj_t * lbl_formatted_local_time;
+    lv_obj_t * val_formatted_local_time;
+    lv_obj_t * lbl_formatted_local_date;
+    lv_obj_t * val_formatted_local_date;
+    lv_obj_t * lbl_local_unixtime_us;
+    lv_obj_t * val_local_unixtime_us;
+    lv_obj_t * lbl_formatted_rtc_sync_time;
+    lv_obj_t * val_formatted_rtc_sync_time;
+    lv_obj_t * lbl_formatted_rtc_sync_date;
+    lv_obj_t * val_formatted_rtc_sync_date;
+    lv_obj_t * lbl_rtcsync_latitude;
+    lv_obj_t * val_rtcsync_latitude;
+    lv_obj_t * lbl_rtcsync_longitude;
+    lv_obj_t * val_rtcsync_longitude;
+    lv_obj_t * lbl_rtcsync_altitude;
+    lv_obj_t * val_rtcsync_altitude;
+    lv_obj_t * lbl_formatted_rtc_time;
+    lv_obj_t * val_formatted_rtc_time;
+    lv_obj_t * lbl_formatted_rtc_date;
+    lv_obj_t * val_formatted_rtc_date;
+    lv_obj_t * lbl_rtc_unixtime;
+    lv_obj_t * val_rtc_unixtime;
+    lv_obj_t * lbl_utc_second_offset;
+    lv_obj_t * val_utc_second_offset;
+    lv_obj_t * lbl_utc_auto_offset_flag;
+    lv_obj_t * val_utc_auto_offset_flag;
+    lv_obj_t * lbl_set_time_automatically;
+    lv_obj_t * val_set_time_automatically;
+    lv_obj_t * lbl_altitude;
+    lv_obj_t * val_altitude;
+    lv_obj_t * lbl_altitude_converted;
+    lv_obj_t * val_altitude_converted;
+    lv_obj_t * lbl_altitude_unit_mode;
+    lv_obj_t * val_altitude_unit_mode;
+    lv_obj_t * lbl_altitude_conversion_mode;
+    lv_obj_t * val_altitude_conversion_mode;
+    lv_obj_t * lbl_speed;
+    lv_obj_t * val_speed;
+    lv_obj_t * lbl_speed_converted;
+    lv_obj_t * val_speed_converted;
+    lv_obj_t * lbl_speed_unit_mode;
+    lv_obj_t * val_speed_unit_mode;
+    lv_obj_t * lbl_speed_conversion_mode;
+    lv_obj_t * val_speed_conversion_mode;
+    lv_obj_t * lbl_ground_heading_name;
+    lv_obj_t * val_ground_heading_name;
+    lv_obj_t * lbl_ground_heading;
+    lv_obj_t * val_ground_heading;
+    lv_obj_t * lbl_ground_heading_mode;
+    lv_obj_t * val_ground_heading_mode;
+    lv_obj_t * lbl_mileage;
+    lv_obj_t * val_mileage;
+} satio_container_t;
+
+/** ---------------------------------------------------------------------------------------
+ * @brief GYRO Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel; // Main container panel
+    
+    lv_obj_t * lbl_gyro_0_ang_x;
+    lv_obj_t * val_gyro_0_ang_x;
+    lv_obj_t * lbl_gyro_0_ang_y;
+    lv_obj_t * val_gyro_0_ang_y;
+    lv_obj_t * lbl_gyro_0_ang_z;
+    lv_obj_t * val_gyro_0_ang_z;
+    
+    lv_obj_t * lbl_gyro_0_acc_x;
+    lv_obj_t * val_gyro_0_acc_x;
+    lv_obj_t * lbl_gyro_0_acc_y;
+    lv_obj_t * val_gyro_0_acc_y;
+    lv_obj_t * lbl_gyro_0_acc_z;
+    lv_obj_t * val_gyro_0_acc_z;
+    
+    lv_obj_t * lbl_gyro_0_gyr_x;
+    lv_obj_t * val_gyro_0_gyr_x;
+    lv_obj_t * lbl_gyro_0_gyr_y;
+    lv_obj_t * val_gyro_0_gyr_y;
+    lv_obj_t * lbl_gyro_0_gyr_z;
+    lv_obj_t * val_gyro_0_gyr_z;
+    
+    lv_obj_t * lbl_gyro_0_mag_x;
+    lv_obj_t * val_gyro_0_mag_x;
+    lv_obj_t * lbl_gyro_0_mag_y;
+    lv_obj_t * val_gyro_0_mag_y;
+    lv_obj_t * lbl_gyro_0_mag_z;
+    lv_obj_t * val_gyro_0_mag_z;
+    
+    lv_obj_t * lbl_gyro_0_current_uiBaud;
+    lv_obj_t * val_gyro_0_current_uiBaud;
+} gyro_0_container_t;
+
 /** --------------------------------------------------------------------------------------- 
  * Function initializations.
 */
@@ -340,6 +548,7 @@ static void matrix_delete_event_cb(lv_event_t * e);
 static void current_matrix_computer_assist_event_cb(lv_event_t * e);
 static void switch_matrix_mapping_panel_event_cb(lv_event_t * e);
 static void current_matrix_override_off_event_cb(lv_event_t * e);
+static void switch_gps_panel_event_cb(lv_event_t * e);
 
 system_tray_t create_system_tray(lv_obj_t * scr);
 
@@ -552,7 +761,7 @@ void display_gps_screen();
 void display_gyro_screen();
 void display_disp_screen();
 void display_system_screen();
-void display__screen();
+void display_uap_screen();
 
 extern bool flag_display_loading_screen;
 extern bool flag_display_home_screen;
