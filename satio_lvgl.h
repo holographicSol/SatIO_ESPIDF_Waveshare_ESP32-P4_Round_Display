@@ -552,6 +552,15 @@ void display_disp_screen();
 void display_system_screen();
 void display__screen();
 
+extern bool flag_display_loading_screen;
+extern bool flag_display_home_screen;
+extern bool flag_display_matrix_screen;
+extern bool flag_display_gps_screen;
+extern bool flag_display_gyro_screen;
+extern bool flag_display_disp_screen;
+extern bool flag_display_system_screen;
+extern bool flag_display_uap_screen;
+
 void update_display();
 void update_display_on_timer(
     lv_timer_t * timer

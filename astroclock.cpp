@@ -153,7 +153,9 @@ static lv_obj_t * create_planet(lv_obj_t * parent, int radius, lv_color_t color)
 // CREATE ORBIT ARC
 // ============================================================================
 static lv_obj_t * create_orbit(lv_obj_t * parent, int radius, lv_color_t color) {
+    printf("DEBUG: creating arc arc\n");
     lv_obj_t * arc = lv_arc_create(parent);
+    if (!arc) {printf("ERROR: Failed to create arc\n"); return NULL;}
     lv_obj_remove_style_all(arc);
     lv_obj_set_size(arc, radius * 2, radius * 2);
     lv_obj_set_style_arc_color(arc, color, LV_PART_MAIN);
@@ -171,20 +173,15 @@ static lv_obj_t * create_orbit(lv_obj_t * parent, int radius, lv_color_t color) 
 // ============================================================================
 // CREATE TARGET BOX
 // ============================================================================
-static __attribute__((noinline)) lv_obj_t * create_target_box(lv_obj_t * parent, int size) {
+static lv_obj_t * create_target_box(lv_obj_t * parent, int size) {
     if (!parent || !lv_obj_is_valid(parent)) {
-        printf("ERROR: create_target_box called with invalid parent (ptr=%p)\n", (void*)parent);
-        fflush(stdout);
-        return NULL;
+        printf("ERROR: create_target_box called with invalid parent (ptr=%p)\n", (void*)parent); return NULL;
     }
+    
     printf("DEBUG: create_target_box parent=%p size=%d\n", (void*)parent, size);
-    fflush(stdout);
     lv_obj_t * box = lv_obj_create(parent);
-    if (!box) {
-        printf("ERROR: Failed to create target box\n");
-        fflush(stdout);
-        return NULL;
-    }
+    if (!box) {printf("ERROR: Failed to create target box\n"); return NULL;}
+
     lv_obj_remove_style_all(box);
     lv_obj_set_size(box, size + 8, size + 8);
     lv_obj_set_style_border_width(box, 2, 0);
@@ -194,7 +191,7 @@ static __attribute__((noinline)) lv_obj_t * create_target_box(lv_obj_t * parent,
     lv_obj_remove_flag(box, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(box, LV_OBJ_FLAG_CLICKABLE);
     printf("DEBUG: create_target_box created box=%p\n", (void*)box);
-    fflush(stdout);
+    vTaskDelay(5 / portTICK_PERIOD_MS);
     return box;
 }
 
@@ -1113,11 +1110,7 @@ void astro_clock_begin(
         return;
     }
     
-    // Guard: if already initialized, clean up first
-    if (astro_container != NULL) {
-        printf("WARN: astro_clock already running, cleaning up first\n");
-        astro_clock_end();
-    }
+    astro_clock_end();
     
     // Angle offset for positioning
     ANGLE_OFFSET = angle_offset;
@@ -1175,13 +1168,23 @@ void astro_clock_begin(
     saturn.color = lv_color_make(210, 210, 0);
     uranus.color = lv_color_make(0, 255, 255);
     neptune.color = lv_color_make(255, 0, 255);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Container
+    printf("DEBUG: Creating astro_container\n");
     astro_container = lv_obj_create(parent);
-    if (!astro_container) {
-        printf("ERROR: Failed to create astro_container\n");
-        return;
-    }
+    if (!astro_container) { printf("ERROR: Failed to create astro_container\n"); return;}
+    printf("DEBUG: astro_container done\n");
+    // Target boxes - debug print before potentially crashing
+    // size_t free_heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
+    // printf("DEBUG: Creating target boxes. astro_container=%p sun.radius=%d free_heap=%u\n", 
+    //        (void*)astro_container, sun.radius, free_heap);
+    // // Validate astro_container before using it
+    // if (!astro_container || !lv_obj_is_valid(astro_container)) {
+    //     printf("ERROR: astro_container invalid before creating target boxes!\n");
+    //     return;
+    // }
     lv_obj_remove_style_all(astro_container);
     lv_obj_set_size(astro_container, ASTRO_WIDTH, ASTRO_HEIGHT);
     lv_obj_align(astro_container, alignment, pos_x, pos_y);
@@ -1192,22 +1195,62 @@ void astro_clock_begin(
     lv_obj_set_style_outline_width(astro_container, 0, 0);
     lv_obj_set_style_outline_color(astro_container, COLOR_ZODIAC, 0);
     lv_obj_remove_flag(astro_container, LV_OBJ_FLAG_SCROLLABLE);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Zodiac lines
     create_zodiac(astro_container);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Orbits (outer to inner)
+    printf("DEBUG: Creating neptune.orbit\n");
     neptune.orbit = create_orbit(astro_container, neptune.orbit_radius, COLOR_ORBIT_BELOW);
+    if (!neptune.orbit) { printf("ERROR: Failed to create neptune.orbit\n"); return;}
+    printf("DEBUG: neptune.orbit done\n");
+
+    printf("DEBUG: Creating uranus.orbit\n");
     uranus.orbit = create_orbit(astro_container, uranus.orbit_radius, COLOR_ORBIT_BELOW);
+    if (!uranus.orbit) { printf("ERROR: Failed to create uranus.orbit\n"); return;}
+    printf("DEBUG: uranus.orbit done\n");
+
+    printf("DEBUG: Creating saturn.orbit\n");
     saturn.orbit = create_orbit(astro_container, saturn.orbit_radius, COLOR_ORBIT_BELOW);
+    if (!saturn.orbit) { printf("ERROR: Failed to create saturn.orbit\n"); return;}
+    printf("DEBUG: saturn.orbit done\n");
+
+    printf("DEBUG: Creating jupiter.orbit\n");
     jupiter.orbit = create_orbit(astro_container, jupiter.orbit_radius, COLOR_ORBIT_BELOW);
+    if (!jupiter.orbit) { printf("ERROR: Failed to create jupiter.orbit\n"); return;}
+    printf("DEBUG: jupiter.orbit done\n");
+
+    printf("DEBUG: Creating mars.orbit\n");
     mars.orbit = create_orbit(astro_container, mars.orbit_radius, COLOR_ORBIT_BELOW);
+    if (!mars.orbit) { printf("ERROR: Failed to create mars.orbit\n"); return;}
+    printf("DEBUG: mars.orbit done\n");
+
+    printf("DEBUG: Creating earth.orbit\n");
     earth.orbit = create_orbit(astro_container, earth.orbit_radius, COLOR_ORBIT_MOON_ABOVE);
+    if (!earth.orbit) { printf("ERROR: Failed to create earth.orbit\n"); return;}
+    printf("DEBUG: earth.orbit done\n");
+
+    printf("DEBUG: Creating venus.orbit\n");
     venus.orbit = create_orbit(astro_container, venus.orbit_radius, COLOR_ORBIT_BELOW);
+    if (!venus.orbit) { printf("ERROR: Failed to create venus.orbit\n"); return;}
+    printf("DEBUG: venus.orbit done\n");
+
+    printf("DEBUG: Creating mercury.orbit\n");
     mercury.orbit = create_orbit(astro_container, mercury.orbit_radius, COLOR_ORBIT_BELOW);
+    if (!mercury.orbit) { printf("ERROR: Failed to create mercury.orbit\n"); return;}
+    printf("DEBUG: mercury.orbit done\n");
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // Zenith line (red line from Earth to edge showing local zenith)
+    printf("DEBUG: Creating zenith_line\n");
     zenith_line = lv_line_create(astro_container);
+    if (!zenith_line) { printf("ERROR: Failed to create zenith_line\n"); return;}
+    printf("DEBUG: zenith_line done\n");
     lv_obj_set_style_line_color(zenith_line, lv_color_make(128, 0, 0), 0);
     lv_obj_set_style_line_width(zenith_line, 2, 0);
     lv_obj_set_style_line_rounded(zenith_line, true, 0);
@@ -1215,14 +1258,15 @@ void astro_clock_begin(
     zenith_points[0].y = 0;
     zenith_points[1].x = 0;
     zenith_points[1].y = 0;
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
     
-    // Moon orbit (will be repositioned relative to Earth)
-    // Set moon orbit radius: Earth radius + spacing + moon radius
-    // This ensures moon orbits outside Earth with reasonable gap
     int moon_spacing = SIZE_UNIT;  // Gap between Earth surface and Moon orbit
     moon.orbit_radius = earth.radius + moon_spacing + moon.radius;
     moon.orbit = create_orbit(astro_container, moon.orbit_radius, COLOR_ORBIT_MOON_BELOW);
     lv_obj_add_flag(moon.orbit, LV_OBJ_FLAG_HIDDEN);  // Hide until first update positions it
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Sun
     sun.obj = create_planet(astro_container, sun.radius, sun.color);
@@ -1232,19 +1276,18 @@ void astro_clock_begin(
     neptune.obj = create_planet(astro_container, neptune.radius, neptune.color);
     uranus.obj = create_planet(astro_container, uranus.radius, uranus.color);
     saturn.obj = create_planet(astro_container, saturn.radius, saturn.color);
-    
-    // Saturn rings (edge-on view)
     saturn_ring = lv_line_create(astro_container);
     lv_obj_set_style_line_color(saturn_ring, lv_color_hex(0xC0A060), LV_PART_MAIN);  // Tan color
     lv_obj_set_style_line_width(saturn_ring, 2, LV_PART_MAIN);
     lv_obj_set_style_line_rounded(saturn_ring, true, LV_PART_MAIN);
-    
     jupiter.obj = create_planet(astro_container, jupiter.radius, jupiter.color);
     mars.obj = create_planet(astro_container, mars.radius, mars.color);
     earth.obj = create_planet(astro_container, earth.radius, earth.color);
     venus.obj = create_planet(astro_container, venus.radius, venus.color);
     mercury.obj = create_planet(astro_container, mercury.radius, mercury.color);
     moon.obj = create_planet(astro_container, moon.radius, moon.color);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Moon shadow arc for phase visualization
     moon_shadow = lv_arc_create(astro_container);
@@ -1258,73 +1301,58 @@ void astro_clock_begin(
     lv_obj_set_style_arc_opa(moon_shadow, LV_OPA_TRANSP, LV_PART_INDICATOR);
     lv_obj_set_style_bg_opa(moon_shadow, LV_OPA_TRANSP, LV_PART_KNOB);
     lv_obj_remove_flag(moon_shadow, LV_OBJ_FLAG_CLICKABLE);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
     
-    // Target boxes - debug print before potentially crashing
-    size_t free_heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
-    printf("DEBUG: Creating target boxes. astro_container=%p sun.radius=%d free_heap=%u\n", 
-           (void*)astro_container, sun.radius, free_heap);
-    
-    // Validate astro_container before using it
-    if (!astro_container || !lv_obj_is_valid(astro_container)) {
-        printf("ERROR: astro_container invalid before creating target boxes!\n");
-        return;
-    }
-    
-    // // Test basic access to astro_container
-    // int32_t child_cnt = lv_obj_get_child_cnt(astro_container);
-    // printf("DEBUG: astro_container has %ld children before target boxes\n", (long)child_cnt);
-    
-    // // Try creating a simple test object first
-    // printf("DEBUG: Creating test object...\n");
-    // lv_obj_t * test_obj = lv_obj_create(astro_container);
-    // if (!test_obj) {
-    //     printf("ERROR: Failed to create test object!\n");
-    //     return;
-    // }
-    // printf("DEBUG: Test object created successfully at %p\n", (void*)test_obj);
-    // lv_obj_del(test_obj);
-    // printf("DEBUG: Test object deleted\n"); fflush(stdout);
-    
-    // printf("DEBUG: Creating sun.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating sun.target_box\n");
     sun.target_box = create_target_box(astro_container, sun.radius * 2);
-    // if (!sun.target_box) { printf("ERROR: Failed to create sun.target_box\n"); return; }
-    // printf("DEBUG: sun.target_box done\n"); fflush(stdout);
+    if (!sun.target_box) { printf("ERROR: Failed to create sun.target_box\n"); return;}
+    printf("DEBUG: sun.target_box done\n");
     
-    // printf("DEBUG: Creating mercury.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating mercury.target_box\n");
     mercury.target_box = create_target_box(astro_container, mercury.radius * 2);
-    // printf("DEBUG: mercury.target_box done\n"); fflush(stdout);
+    if (!mercury.target_box) { printf("ERROR: Failed to create mercury.target_box\n"); return;}
+    printf("DEBUG: mercury.target_box done\n");
     
-    // printf("DEBUG: Creating venus.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating venus.target_box\n");
     venus.target_box = create_target_box(astro_container, venus.radius * 2);
-    // printf("DEBUG: venus.target_box done\n"); fflush(stdout);
+    if (!venus.target_box) { printf("ERROR: Failed to create venus.target_box\n"); return;}
+    printf("DEBUG: venus.target_box done\n");
     
-    // printf("DEBUG: Creating earth.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating earth.target_box\n");
     earth.target_box = create_target_box(astro_container, earth.radius * 2);
-    // printf("DEBUG: earth.target_box done\n"); fflush(stdout);
+    if (!earth.target_box) { printf("ERROR: Failed to create earth.target_box\n"); return;}
+    printf("DEBUG: earth.target_box done\n");
     
-    // printf("DEBUG: Creating moon.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating moon.target_box\n");
     moon.target_box = create_target_box(astro_container, moon.radius * 2);
-    // printf("DEBUG: moon.target_box done\n"); fflush(stdout);
+    if (!moon.target_box) { printf("ERROR: Failed to create moon.target_box\n"); return;}
+    printf("DEBUG: moon.target_box done\n");
     
-    // printf("DEBUG: Creating mars.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating mars.target_box\n");
     mars.target_box = create_target_box(astro_container, mars.radius * 2);
-    // printf("DEBUG: mars.target_box done\n"); fflush(stdout);
+    if (!mars.target_box) { printf("ERROR: Failed to create mars.target_box\n"); return;}
+    printf("DEBUG: mars.target_box done\n");
     
-    // printf("DEBUG: Creating jupiter.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating jupiter.target_box\n");
     jupiter.target_box = create_target_box(astro_container, jupiter.radius * 2);
-    // printf("DEBUG: jupiter.target_box done\n"); fflush(stdout);
+    if (!jupiter.target_box) { printf("ERROR: Failed to create jupiter.target_box\n"); return;}
+    printf("DEBUG: jupiter.target_box done\n");
     
-    // printf("DEBUG: Creating saturn.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating saturn.target_box\n");
     saturn.target_box = create_target_box(astro_container, saturn.radius * 2);
-    // printf("DEBUG: saturn.target_box done\n"); fflush(stdout);
+    if (!saturn.target_box) { printf("ERROR: Failed to create saturn.target_box\n"); return;}
+    printf("DEBUG: saturn.target_box done\n");
     
-    // printf("DEBUG: Creating uranus.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating uranus.target_box\n");
     uranus.target_box = create_target_box(astro_container, uranus.radius * 2);
-    // printf("DEBUG: uranus.target_box done\n"); fflush(stdout);
+    if (!uranus.target_box) { printf("ERROR: Failed to create uranus.target_box\n"); return;}
+    printf("DEBUG: uranus.target_box done\n");
     
-    // printf("DEBUG: Creating neptune.target_box\n"); fflush(stdout);
+    printf("DEBUG: Creating neptune.target_box\n");
     neptune.target_box = create_target_box(astro_container, neptune.radius * 2);
-    // printf("DEBUG: neptune.target_box done\n"); fflush(stdout);
+    if (!neptune.target_box) { printf("ERROR: Failed to create neptune.target_box\n"); return;}
+    printf("DEBUG: neptune.target_box done\n");
 
     // -----------------------------------------------------------------
     // Target data box (displays object information when selected)
@@ -1378,43 +1406,50 @@ void astro_clock_begin(
 }
 
 void astro_clock_end() {
-    // Stop timer first
+
+    // // Stop timer first
+    // if (astro_timer) {
+    //     lv_timer_pause(astro_timer);
+    //     lv_timer_del(astro_timer);
+    //     astro_timer = NULL;
+    // }
+    
+    // // Delete container (this deletes all children automatically)
+    // if (astro_container && lv_obj_is_valid(astro_container)) {
+    //     lv_obj_del(astro_container);
+    //     astro_container = NULL;
+    // }
+
     if (astro_timer) {
         lv_timer_pause(astro_timer);
-        lv_timer_del(astro_timer);
+        lv_timer_delete(astro_timer);
         astro_timer = NULL;
     }
     
-    // Delete container (this deletes all children automatically)
-    if (astro_container) {
-        lv_obj_del(astro_container);
-        astro_container = NULL;
-    }
+    // // Reset all object pointers to prevent dangling references
+    // // Planet objects
+    // sun.obj = NULL; sun.orbit = NULL; sun.target_box = NULL;
+    // mercury.obj = NULL; mercury.orbit = NULL; mercury.target_box = NULL;
+    // venus.obj = NULL; venus.orbit = NULL; venus.target_box = NULL;
+    // earth.obj = NULL; earth.orbit = NULL; earth.target_box = NULL;
+    // moon.obj = NULL; moon.orbit = NULL; moon.target_box = NULL;
+    // mars.obj = NULL; mars.orbit = NULL; mars.target_box = NULL;
+    // jupiter.obj = NULL; jupiter.orbit = NULL; jupiter.target_box = NULL;
+    // saturn.obj = NULL; saturn.orbit = NULL; saturn.target_box = NULL;
+    // uranus.obj = NULL; uranus.orbit = NULL; uranus.target_box = NULL;
+    // neptune.obj = NULL; neptune.orbit = NULL; neptune.target_box = NULL;
     
-    // Reset all object pointers to prevent dangling references
-    // Planet objects
-    sun.obj = NULL; sun.orbit = NULL; sun.target_box = NULL;
-    mercury.obj = NULL; mercury.orbit = NULL; mercury.target_box = NULL;
-    venus.obj = NULL; venus.orbit = NULL; venus.target_box = NULL;
-    earth.obj = NULL; earth.orbit = NULL; earth.target_box = NULL;
-    moon.obj = NULL; moon.orbit = NULL; moon.target_box = NULL;
-    mars.obj = NULL; mars.orbit = NULL; mars.target_box = NULL;
-    jupiter.obj = NULL; jupiter.orbit = NULL; jupiter.target_box = NULL;
-    saturn.obj = NULL; saturn.orbit = NULL; saturn.target_box = NULL;
-    uranus.obj = NULL; uranus.orbit = NULL; uranus.target_box = NULL;
-    neptune.obj = NULL; neptune.orbit = NULL; neptune.target_box = NULL;
+    // // Other global objects
+    // zenith_line = NULL;
+    // moon_shadow = NULL;
+    // saturn_ring = NULL;
+    // target_data_box = NULL;
+    // target_connector_line = NULL;
     
-    // Other global objects
-    zenith_line = NULL;
-    moon_shadow = NULL;
-    saturn_ring = NULL;
-    target_data_box = NULL;
-    target_connector_line = NULL;
-    
-    // Zodiac lines
-    for (int i = 0; i < 12; i++) {
-        zodiac_lines[i] = NULL;
-    }
+    // // Zodiac lines
+    // for (int i = 0; i < 12; i++) {
+    //     zodiac_lines[i] = NULL;
+    // }
     
     // Reset target selection
     current_target = 0;

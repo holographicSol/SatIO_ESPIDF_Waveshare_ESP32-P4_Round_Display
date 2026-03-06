@@ -304,7 +304,7 @@ extern "C" void app_main(void)
     // --------------------------------------------------------------
     // Initialize Serial 1 (for GPS).
     // --------------------------------------------------------------
-    printf("[Serial1] (GPS)");
+    printf("[Serial1] (GPS)\n");
     int8_t serial_1_rxd = 34;
     int8_t serial_1_txd = -1;
     Serial1.setPins(serial_1_rxd, serial_1_txd, -1, -1);
@@ -312,7 +312,7 @@ extern "C" void app_main(void)
     Serial1.setTimeout(10);
     Serial1.begin(115200); while(!Serial1);
     Serial1.flush();
-    printf("[Serial1] Baud rate: 115200");
+    printf("[Serial1] Baud rate: 115200\n");
     printf("[Serial1] (hardware serial remap: Rx=%d Tx=%d)\n", serial_1_rxd, serial_1_txd);
     
     // --------------------------------------------------------------
@@ -320,12 +320,12 @@ extern "C" void app_main(void)
     // --------------------------------------------------------------
     
     // GPS
-    printf("creating GPS task");
+    printf("creating GPS task\n");
     createTaskGPS();                 // (target: 10/ps)   Time & location
     
     // Gyro
     initWT901();
-    printf("creating gyro task");
+    printf("creating gyro task\n");
     createTaskGyro();                // (target: 200/ps)  Attitude
 
     // Auxillary Input
@@ -333,38 +333,39 @@ extern "C" void app_main(void)
     // createTaskPortControllerInput(); // (target: 1/ps)    Slow general input
 
     // Auxillary Output
-    printf("creating auxillary output task");
+    printf("creating auxillary output task\n");
     createTaskSwitches();            // (target: approx. max 1000/ps) Fast general output
 
     // Universe
-    printf("creating universe task");
+    printf("creating universe task\n");
     myAstroBegin();
     createTaskUniverse();            // (target: 1/ps)    Star tracking
 
     // Storage
     sdcardFlagData.load_system=true; // Set load system flag ready for sdcard flag handler
-    printf("creating storage task");
+    printf("creating storage task\n");
     createTaskStorage();             // (target: 2/ps)    SD card
-    printf("creating logging task");
+    printf("creating logging task\n");
     createTaskLogging();             // (target: n/ps)    Log to sdcard
 
     // Info/Command
-    printf("creating info command task");
+    printf("creating info command task\n");
     createTaskSerialInfoCMD();
 
     // Attempt to approximately syncronize tasks
-    printf("attempting to syncronize tasks");
+    printf("attempting to syncronize tasks\n");
     syncTasks();
 
-    printf("waiting a moment...");
+    printf("waiting a moment...\n");
     delay(5000); // current
     // delay(1000); // temp
 
     // --------------------------------------------------------------
     // Display Home screen
     // --------------------------------------------------------------
-    printf("starting SatIO UI");
-    display_home_screen();
+    printf("starting SatIO UI\n");
+    // initSatIOUI();
+    flag_display_home_screen=true;
     satio_ui_begin();
 
     // --------------------------------------------------------------

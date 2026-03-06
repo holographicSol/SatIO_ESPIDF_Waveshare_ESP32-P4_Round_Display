@@ -4928,33 +4928,64 @@ void cleanup_loading_image() {
     }
 }
 
+void lvgl_cleanup_all() {
+    // Ensure no pending events
+    lv_timer_handler();
+    
+    // // Clean up specific objects safely
+    // if (loading_image && lv_obj_is_valid(loading_image)) {
+    //     lv_obj_del(loading_image);
+    //     loading_image = NULL;
+    // }
+    // cleanup_loading_image();
+    
+    // Call your existing cleanup functions
+    astro_clock_end();
+    
+    // Clean the current screen
+    // lv_obj_clean(lv_scr_act());
+    
+    // Clear any pending animations
+    // lv_anim_del(NULL, NULL);
+}
+
 void create_default_screen_objects(lv_obj_t * scr)
 {
 
-    cleanup_loading_image();
+    lvgl_cleanup_all();
 
-    // Clean up title bar
-    if (main_title_bar.panel) {
-        // lv_obj_del(main_title_bar.panel);
-        main_title_bar = {0};  // Reset struct
-    }
-    // Clean up system tray
-    if (system_tray.panel) {
-        // lv_obj_del(system_tray.panel);
-        system_tray = {0};  // Reset struct
-    }
-    // Clean up keyboards
-    if (kb_numdec.kb) {
-        // lv_obj_del(kb_numdec.kb);
-        kb_numdec = {0};  // Reset struct
-    }
-    if (kb_alnumsym.kb) {
-        // lv_obj_del(kb_alnumsym.kb);
-        kb_alnumsym = {0};  // Reset struct
-    }
+    // // Clean up title bar
+    // if (main_title_bar.panel && lv_obj_is_valid(main_title_bar.panel)) {
+    //     lv_obj_del(main_title_bar.panel);
+    //     main_title_bar = {0};  // Reset struct
+    // }
+    // // Clean up system tray
+    // if (system_tray.panel && lv_obj_is_valid(system_tray.panel)) {
+    //     lv_obj_del(system_tray.panel);
+    //     system_tray = {0};  // Reset struct
+    // }
 
-    // Clean up astro clock
-    astro_clock_end();
+    // // Clean up numdec kb
+    // if (kb_numdec.kb && lv_obj_is_valid(kb_numdec.kb)) {
+    //     lv_obj_del(kb_numdec.kb);
+    //     kb_numdec = {0};  // Reset struct
+    // }
+    // // Clean up numdec ta
+    // if (kb_numdec.ta && lv_obj_is_valid(kb_numdec.ta)) {
+    //     lv_obj_del(kb_numdec.ta);
+    //     kb_numdec = {0};  // Reset struct
+    // }
+
+    // // Clean up alnumsym kb
+    // if (kb_alnumsym.kb && lv_obj_is_valid(kb_alnumsym.kb)) {
+    //     lv_obj_del(kb_alnumsym.kb);
+    //     kb_alnumsym = {0};  // Reset struct
+    // }
+    // // Clean up alnumsym ta
+    // if (kb_alnumsym.ta && lv_obj_is_valid(kb_alnumsym.ta)) {
+    //     lv_obj_del(kb_alnumsym.ta);
+    //     kb_alnumsym = {0};  // Reset struct
+    // }
 
     // Set background color for main part of the screen
     lv_obj_set_style_bg_color(scr, lv_color_make(0, 0, 0), LV_PART_MAIN);
@@ -5055,26 +5086,40 @@ void display_loading_screen() {
  */
 void display_home_screen()
 {
-
     // Set Display Flag
+    printf("[display_home_screen] setting display flag\n");
     flag_display_home_screen = false;
 
     // Check Current Screen
+    printf("[display_home_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
-    if (current_screen == home_screen) {return;}
+    if (current_screen == home_screen) {
+        printf("[display_home_screen] screen already active, returning\n");
+        return;
+    }
+    printf("[display_home_screen] selected new screen, attempting to load new screen\n");
 
     // Always create a fresh screen
+    printf("[display_home_screen] creating screen object\n");
     home_screen = lv_obj_create(NULL);
-
-    // Defaults
-    create_default_screen_objects(home_screen);
     
     // Load screen before creating more objects (smoother, faster load)
+    printf("[display_home_screen] loading screen\n");
     lv_scr_load_anim(home_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+
+    // Defaults
+    printf("[display_home_screen] creating default screen objects\n");
+    create_default_screen_objects(home_screen);
+
+    printf("[display_home_screen] invalidating display\n");
+    lv_obj_invalidate(home_screen);  // Force redraw
+    printf("[display_home_screen] calling timer handler\n");
+    lv_timer_handler();  // Process events/render
 
     // -------------------------------- Astro Clock ----------------------------------- //
 
     // Initialize astro clock on main screen
+    printf("[display_home_screen] starting astro clocks\n");
     astro_clock_begin(
         home_screen,
         556,             // width px
@@ -5085,7 +5130,9 @@ void display_home_screen()
         90               // angle offset
     );
 
+    printf("[display_home_screen] invalidating display\n");
     lv_obj_invalidate(home_screen);  // Force redraw
+    printf("[display_home_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -5095,22 +5142,35 @@ void display_home_screen()
  */
 void display_matrix_screen()
 {
-
     // Set Display Flag
+    printf("[display_matrix_screen] setting display flag\n");
     flag_display_matrix_screen = false;
 
     // Check Current Screen
+    printf("[display_matrix_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
-    if (current_screen == matrix_screen) {return;}
+    if (current_screen == matrix_screen) {
+        printf("[display_matrix_screen] screen already active, returning\n");
+        return;
+    }
+    printf("[display_matrix_screen] selected new screen, attempting to load new screen\n");
 
     // Always create a fresh screen
+    printf("[display_matrix_screen] creating screen object\n");
     matrix_screen = lv_obj_create(NULL);
+    
+    // Load screen before creating more objects (smoother, faster load)
+    printf("[display_matrix_screen] loading screen\n");
+    lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
+    printf("[display_matrix_screen] creating default screen objects\n");
     create_default_screen_objects(matrix_screen);
 
-    // Load screen before creating more objects (smoother, faster load)
-    lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    printf("[display_matrix_screen] invalidating display\n");
+    lv_obj_invalidate(matrix_screen);  // Force redraw
+    printf("[display_matrix_screen] calling timer handler\n");
+    lv_timer_handler();  // Process events/render
 
     matrix_overview_grid_1 = create_menu_grid(
         matrix_screen,        // parent screen
@@ -5137,7 +5197,9 @@ void display_matrix_screen()
         lv_obj_add_event_cb(btn, matrix_overview_grid_1_event_cb, LV_EVENT_CLICKED, NULL);
     }
 
+    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
+    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Create Function Panel
@@ -5158,7 +5220,9 @@ void display_matrix_screen()
         &cobalt_alien_17  // font for text,
     );
 
+    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
+    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Create Mapping Panel
@@ -5198,7 +5262,9 @@ void display_matrix_screen()
     );
     lv_obj_add_event_cb(switch_matrix_mapping_panel.button, switch_matrix_mapping_panel_event_cb, LV_EVENT_ALL, NULL);
 
+    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
+    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Select Matrix File Slot
@@ -5221,7 +5287,9 @@ void display_matrix_screen()
     }
     lv_obj_add_event_cb(dd_matrix_file_slot_select, dd_matrix_file_slot_select_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
+    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
+    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // New Matrix
@@ -5292,8 +5360,9 @@ void display_matrix_screen()
     );
     lv_obj_add_event_cb(matrix_delete.button, matrix_delete_event_cb, LV_EVENT_ALL, NULL);
 
-
+    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
+    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -6205,6 +6274,8 @@ void initSatIOUI() {
     // LVGL Initialization
     // --------------------------------------------------------------
     ESP_LOGI("LVGL", "Version: %d.%d.%d", LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH);
+
+    delay(1000);
     
     // Initialize LVGL display object via BSP
     lv_display_t *disp = bsp_display_start();
