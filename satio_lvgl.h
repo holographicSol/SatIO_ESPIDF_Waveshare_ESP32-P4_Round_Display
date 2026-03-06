@@ -210,12 +210,12 @@ typedef struct {
     lv_obj_t * panel;                    // Main container panel
 
     // Switch selection
-    lv_obj_t * label_switch_index_select; // Function index select label
-    lv_obj_t * dd_switch_index_select;     // Matrix function index select
+    lv_obj_t * label_switch_index_select;   // Function index select label
+    lv_obj_t * dd_switch_index_select;      // Matrix function index select
 
     // Function selection
     lv_obj_t * label_function_index_select; // Function index select label
-    lv_obj_t * dd_function_index_select;     // Matrix function index select
+    lv_obj_t * dd_function_index_select;    // Matrix function index select
     
     // Function info
     lv_obj_t * label_function_name;      // Function name label
@@ -260,7 +260,7 @@ typedef struct {
     
     // Invert Function Logic
     lv_obj_t * label_inverted_logic;     // Inverted logic label
-    lv_obj_t * dd_inverted_logic;    // Inverted logic switch
+    lv_obj_t * dd_inverted_logic;        // Inverted logic switch
     
     // Map Slot
     lv_obj_t * label_map_slot;           // Map slot label
@@ -306,21 +306,59 @@ typedef struct {
 /** --------------------------------------------------------------------------------------- 
  * Function initializations.
 */
+
+static void tray_close_ready_cb(lv_anim_t * a);
 static void set_keyboard_context_cb(lv_event_t * e);
-
 static void keyboard_event_cb(lv_event_t * e);
-
-static void menu_x_event_cb(lv_event_t * e);
-
+static void screen_swipe_cb(lv_event_t * e);
+static void screen_tap_cb(lv_event_t * e);
+void slider_brightness_event_cb(lv_event_t * e);
+static void tray_close_ready_cb(lv_anim_t * a);
 static void system_tray_grid_menu_1_event_cb(lv_event_t * e);
+static void matrix_overview_grid_1_event_cb(lv_event_t * e);
+static void dd_function_index_select_event_cb(lv_event_t * e);
+static void dd_switch_index_select_event_cb(lv_event_t * e);
+static void dd_current_map_slot_event_cb(lv_event_t * e);
+static void dd_function_name_event_cb(lv_event_t * e);
+static void dd_c0_event_cb(lv_event_t * e);
+static void dd_mode_event_cb(lv_event_t * e);
+static void dd_mode_x_event_cb(lv_event_t * e);
+static void dd_mode_y_event_cb(lv_event_t * e);
+static void dd_mode_z_event_cb(lv_event_t * e);
+static void dd_inverted_logic_event_cb(lv_event_t * e);
+static void dd_x_event_cb(lv_event_t * e);
+static void dd_y_event_cb(lv_event_t * e);
+static void dd_z_event_cb(lv_event_t * e);
+static void dd_operator_event_cb(lv_event_t * e);
+static void dd_output_mode_event_cb(lv_event_t * e);
+static void dd_matrix_file_slot_select_event_cb(lv_event_t * e);
+static void dd_link_map_slot_event_cb(lv_event_t * e);
+static void matrix_new_event_cb(lv_event_t * e);
+static void matrix_save_event_cb(lv_event_t * e);
+static void matrix_load_event_cb(lv_event_t * e);
+static void matrix_delete_event_cb(lv_event_t * e);
+static void current_matrix_computer_assist_event_cb(lv_event_t * e);
+static void switch_matrix_mapping_panel_event_cb(lv_event_t * e);
+static void current_matrix_override_off_event_cb(lv_event_t * e);
 
-static void dropdown_menu_x_event_cb(lv_event_t * e);
+system_tray_t create_system_tray(lv_obj_t * scr);
+
+title_bar_t create_title_bar (
+    lv_obj_t * scr,
+    int32_t size_w_px,
+    int32_t size_h_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    bool show_scrollbar,
+    bool enable_scrolling
+    );
 
 lv_obj_t * create_slider(
     lv_obj_t * scr,
     int32_t size_w_px,
     int32_t size_h_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     int32_t range_min,
@@ -328,21 +366,11 @@ lv_obj_t * create_slider(
     int32_t range_value
     );
 
-void slider_brightness_event_cb(lv_event_t * e);
-
-static void tray_close_ready_cb(lv_anim_t * a);
-
-static void screen_swipe_cb(lv_event_t * e);
-
-static void screen_tap_cb(lv_event_t * e);
-
-system_tray_t create_system_tray(lv_obj_t * scr);
-
 lv_obj_t * create_label(
     lv_obj_t * scr,
-    int32_t size_width_px,
-    int32_t size_height_px,
-    int alignment,
+    int32_t size_w_px,
+    int32_t size_h_px,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     char * text,
@@ -360,7 +388,7 @@ lv_obj_t * create_textarea(
     lv_obj_t * scr,
     int32_t size_w_px,
     int32_t size_h_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     bool one_line,
@@ -377,7 +405,7 @@ keyboard_t create_keyboard(
     lv_obj_t * scr,
     int32_t size_w_px,
     int32_t size_h_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     int32_t kb_ta_padding_px,
@@ -385,9 +413,16 @@ keyboard_t create_keyboard(
     lv_keyboard_mode_t keyboard_mode
     );
 
-void create_menu_item(menu_struct * menu, int page_index, const char * title);
+void create_menu_item(
+    menu_struct * menu,
+    int page_index,
+    const char * title
+    );
 
-lv_obj_t * create_menu_page(lv_obj_t * menu_x, const char * title);
+lv_obj_t * create_menu_page(
+    lv_obj_t * menu_x,
+    const char * title
+    );
 
 menu_struct create_menu(
     lv_obj_t *scr,
@@ -396,7 +431,7 @@ menu_struct create_menu(
     const char ** main_menu_items,
     int32_t size_w_px,
     int32_t size_h_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y
     );
@@ -410,7 +445,7 @@ lv_obj_t * create_menu_grid(
     const int32_t inner_padding,
     const int32_t pos_x,
     const int32_t pos_y,
-    const int lv_alignment,
+    lv_align_t lv_alignment,
     int32_t item_radius,
     int32_t max_cols_visible,
     int32_t max_rows_visible,
@@ -426,10 +461,65 @@ lv_obj_t * create_dropdown_menu(
     int option_count,
     int32_t width_px,
     int32_t height_px,
-    int alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     const lv_font_t * font
+    );
+
+lv_obj_t * create_switch(
+    lv_obj_t *scr,
+    int32_t size_w_px,
+    int32_t size_h_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y
+    );
+
+button_t create_button(
+    lv_obj_t *scr,
+    int32_t size_w_px,
+    int32_t size_h_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    char * text,
+    lv_text_align_t text_align,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font,
+    int32_t radius
+    );
+
+matrix_function_container_t create_matrix_function_container(
+    lv_obj_t * scr,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    );
+
+mapping_config_container_t create_mapping_config_container(
+    lv_obj_t * scr,
+    int32_t width_px,
+    int32_t height_px,
+    int32_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t padding,
+    int32_t row_height,
+    int32_t row_spacing,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
     );
 
 sdcard_image_t * create_image_from_sdcard(
@@ -440,32 +530,19 @@ sdcard_image_t * create_image_from_sdcard(
     uint32_t color_depth_bits,
     uint32_t pos_x,
     uint32_t pos_y,
-    int32_t alignment,
-    bool discard_after_display);
+    lv_align_t alignment,
+    bool discard_after_display
+    );
 
-static void uart0_event_task(void *pvParameters);
+void create_default_screen_objects(
+    lv_obj_t * scr
+    );
 
-void intervalBreach1Second(void);
-
-matrix_function_container_t create_matrix_function_container(
-    lv_obj_t * scr,
-    int32_t width_px,
-    int32_t height_px,
-    int32_t alignment,
-    int32_t pos_x,
-    int32_t pos_y,
-    int32_t radius,
-    bool show_scrollbar,
-    bool enable_scrolling,
-    const lv_font_t * font_title,
-    const lv_font_t * font_sub
-);
+void cleanup_loading_image();
 
 void setColorsDefault();
 void setColorsCustom();
 
-void cleanup_loading_image();
-void delete_screen_and_nullify(lv_obj_t * screen);
 void display_loading_screen();
 void display_home_screen();
 void display_matrix_screen();
@@ -475,10 +552,10 @@ void display_disp_screen();
 void display_system_screen();
 void display__screen();
 
-// update display
 void update_display();
-// timer update display
-void update_display_on_timer(lv_timer_t * timer);
+void update_display_on_timer(
+    lv_timer_t * timer
+    );
 
 void initSatIOUI();
 void satio_ui_begin();

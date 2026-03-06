@@ -243,7 +243,7 @@ static const lv_font_t * font_menu_item;
  * @param level LVGL log level.
  * @param buf Log message buffer.
  */
-static void my_lv_log_cb(lv_log_level_t level, const char * buf)
+static void lv_log_cb(lv_log_level_t level, const char * buf)
 {
     static const char * level_prefix[] = {"TRACE", "INFO", "WARN", "ERROR", "USER"};
 
@@ -586,695 +586,6 @@ static void keyboard_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void menu_x_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    
-    if(code == LV_EVENT_CLICKED) {
-        lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);     // Get clicked object
-        lv_obj_t * label = lv_obj_get_child(obj, 0); // Get object's label (if any)
-        
-        // Find which page this object belongs to
-        int page_index = -1;
-        for(int p = 0; p < menu_x.page_count; p++) {
-            uint32_t child_cnt = lv_obj_get_child_cnt(menu_x.pages[p]);
-            for(uint32_t i = 0; i < child_cnt; i++) {
-                if(lv_obj_get_child(menu_x.pages[p], i) == obj) {
-                    page_index = p;
-                    uint32_t item_index = i;
-                    
-                    const char * text = label ? lv_label_get_text(label) : "no label";
-                    printf("Menu X: Page %d, Item %lu (%s) clicked!\n", 
-                           page_index, item_index, text);
-                    
-                    // Your custom logic
-                    // handle_menu_item_click(page_index, item_index, obj);
-                    return;
-                }
-            }
-        }
-        
-        printf("Menu X: Unknown object clicked\n");
-    }
-}
-
-/** ---------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void system_tray_grid_menu_1_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-
-    if(code == LV_EVENT_CLICKED) {
-
-        lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);     // Get clicked button
-        lv_obj_t * grid = (lv_obj_t *)lv_event_get_user_data(e); // Get grid container (if passed)
-        lv_obj_t * label = lv_obj_get_child(btn, 0); // Get button's label
-        
-        uint32_t btn_index = 0;
-        uint32_t child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
-        for(uint32_t i = 0; i < child_cnt; i++) {
-            if(lv_obj_get_child(system_tray.grid_menu_1, i) == btn) {
-                btn_index = i;
-                break;
-            }
-        }
-        
-        const char * text = lv_label_get_text(label);
-        printf("System Tray Grid Menu 1: Button %lu (%s) clicked!\n", btn_index, text);
-        
-        // Switch logic
-        switch(btn_index) {
-            case 0:  flag_display_home_screen=true; break;
-            case 1:  flag_display_matrix_screen=true; break;
-            case 2:  flag_display_gps_screen=true; break;
-            case 3:  flag_display_gyro_screen=true; break;
-            case 4:  flag_display_disp_screen=true; break;
-            case 5:  flag_display_system_screen=true; break;
-            case 6:  flag_display_uap_screen=true; break;
-            default: break;
-        }
-    }
-}
-
-/** ---------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void matrix_overview_grid_1_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-
-    if(code == LV_EVENT_CLICKED) {
-
-        lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);     // Get clicked button
-        lv_obj_t * grid = (lv_obj_t *)lv_event_get_user_data(e); // Get grid container (if passed)
-        lv_obj_t * label = lv_obj_get_child(btn, 0); // Get button's label
-        
-        uint32_t btn_index = 0;
-        uint32_t child_cnt = lv_obj_get_child_cnt(matrix_overview_grid_1);
-        for(uint32_t i = 0; i < child_cnt; i++) {
-            if(lv_obj_get_child(matrix_overview_grid_1, i) == btn) {
-                btn_index = i;
-                break;
-            }
-        }
-        
-        const char * text = lv_label_get_text(label);
-        printf("Matrix Overview Grid 1: Button %lu (%s) clicked!\n", btn_index, text);
-        
-        if (btn_index <= 44) {current_matrix_i = btn_index;}
-    }
-}
-
-/** ---------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dropdown_menu_x_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    
-    if(code == LV_EVENT_CLICKED) {
-        lv_obj_t * option = (lv_obj_t *)lv_event_get_target(e);
-        lv_obj_t * dropdown = (lv_obj_t *)lv_event_get_user_data(e);
-        lv_obj_t * label = lv_obj_get_child(option, 0);
-        
-        uint32_t option_index = 0;
-        uint32_t child_cnt = lv_obj_get_child_cnt(drop_down_menu_x);
-        for(uint32_t i = 0; i < child_cnt; i++) {
-            if(lv_obj_get_child(drop_down_menu_x, i) == option) {
-                option_index = i;
-                break;
-            }
-        }
-        
-        const char * text = lv_label_get_text(label);
-        printf("Dropdown: Option %lu (%s) clicked!\n", option_index, text);
-        
-        // Custom logic
-        switch(option_index) {
-            case 0: /* Option 1 */ break;
-            case 1: /* Option 2 */ break;
-        }
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_function_index_select_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        current_matrix_function_i = (int)sel;
-        printf("[dd_function_index_select_event_cb] Function index set to: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_switch_index_select_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        current_matrix_i = (int)sel;
-        printf("[dd_switch_index_select_event_cb] Switch index set to: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_current_map_slot_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        current_mapping_i = (int)sel;
-        printf("[dd_current_map_slot_event_cb] Map slot index set to: %ld\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_function_name_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i] = (int)sel;
-        printf("[dd_function_name_event_cb] Function set to: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_c0_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C0] = (int)sel;
-        printf("[dd_c0_event_cb] Set map function: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_mode_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        mappingData.map_mode[0][matrixData.index_mapped_value[0][current_matrix_i]] = (int)sel;
-        printf("[dd_mode_event_cb] Set map mode: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_mode_x_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        // Safety: Reset to 0
-        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]=0;
-        // Set mode
-        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = (int)sel;
-        printf("[dd_mode_x_event_cb] Set mode x: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_mode_y_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        // Safety: Reset to 0
-        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]=0;
-        // Set mode
-        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = (int)sel;
-        printf("[dd_mode_y_event_cb] Set mode y: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_mode_z_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        // Safety: Reset to 0
-        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]=0;
-        // Set mode
-        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
-        printf("[dd_mode_z_event_cb] Set mode z: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_inverted_logic_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        // Set mode
-        matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i] = (int)sel;
-        printf("[dd_inverted_logic_event_cb] Set switch standard/inverted: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_x_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = (int)sel;
-        printf("[dd_x_event_cb] Function X set to value index: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback for dd_y_event_cb dropdown.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_y_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = (int)sel;
-        printf("[dd_y_event_cb] Function Y set to value index: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_z_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
-        printf("[dd_z_event_cb] Function Z set to value index: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_operator_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i] = (int)sel;
-        printf("[dd_operator_event_cb] Operator set to: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_output_mode_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        matrixData.output_mode[0][current_matrix_i] = (int)sel;
-        printf("[dd_output_mode_event_cb] Output mode set to: %lu\n", sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_matrix_file_slot_select_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        memset(satioFileData.current_matrix_filepath, 0, sizeof(satioFileData.current_matrix_filepath));
-        lv_dropdown_get_selected_str(dd_matrix_file_slot_select, satioFileData.current_matrix_filepath, sizeof(satioFileData.current_matrix_filepath));
-        // strcpy(satioFileData.current_matrix_filepath, lv_dropdown_get_selected_str(dd_matrix_file_slot_select));
-        printf("[dd_matrix_file_slot_select_event_cb] Matrix slot set to: %s\n", satioFileData.current_matrix_filepath);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void dd_link_map_slot_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
-        uint32_t sel = lv_dropdown_get_selected(dd);
-        matrixData.index_mapped_value[0][current_matrix_i] = (int)sel;
-        printf("[dd_link_map_slot_event_cb] Matrix %d will use map slot: %ld\n", current_matrix_i, sel);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void matrix_new_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[matrix_new_event_cb] event code: %d\n", code);}
-
-    if(code == LV_EVENT_CLICKED) {
-        printf("[matrix_new_event_cb] Setting new matrix.\n");
-        override_all_computer_assists();
-        set_all_matrix_default();
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void matrix_save_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[matrix_save_event_cb] event code: %d\n", code);}
-
-    if(code == LV_EVENT_CLICKED) {
-        if (sdcardData.sdcard_mounted==true) {
-            printf("[matrix_save_event_cb] Saving matrix to slot: %s\n", satioFileData.current_matrix_filepath);
-            sdcardFlagData.save_matrix=true;
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-            sdcardFlagData.save_mapping=true;
-        }
-        else {
-            printf("[matrix_save_event_cb] sdcard is not mounted.");
-        }
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void matrix_load_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[matrix_load_event_cb] event code: %d\n", code);}
-
-    if(code == LV_EVENT_CLICKED) {
-        if (sdcardData.sdcard_mounted==true) {
-            printf("[matrix_load_event_cb] Loading matrix from slot: %s\n", satioFileData.current_matrix_filepath);
-            sdcardFlagData.load_mapping=true;
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-            sdcardFlagData.load_matrix=true;
-        }
-        else {
-            printf("[matrix_load_event_cb] sdcard is not mounted.");
-        }
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void matrix_delete_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[matrix_delete_event_cb] event code: %d\n", code);}
-
-    if(code == LV_EVENT_CLICKED) {
-        if (sdcardData.sdcard_mounted==true) {
-            printf("[matrix_delete_event_cb] Deleting matrix in slot: %s\n", satioFileData.current_matrix_filepath);
-            sdcardFlagData.delete_matrix=true;
-        }
-        else {
-            printf("[matrix_delete_event_cb] sdcard is not mounted.");
-        }
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void current_matrix_computer_assist_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[current_matrix_computer_assist_event_cb] event code: %d\n", code);}
-
-    if(code == LV_EVENT_CLICKED) {
-        bool toggle = !matrixData.computer_assist[0][current_matrix_i];
-        matrixData.computer_assist[0][current_matrix_i] = toggle;
-        printf("[current_matrix_computer_assist_event_cb] Setting computer assist for matrix switch %d to: %s\n", current_matrix_i, toggle ? "true" : "false");
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void switch_matrix_mapping_panel_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[switch_matrix_mapping_panel_event_cb] event code: %d\n", code);}
-
-    if(code == LV_EVENT_CLICKED) {
-        current_matrix_panel_view+=1;
-        if (current_matrix_panel_view>=MAX_MATRIX_PANEL_VIEWS) {current_matrix_panel_view=0;}
-        printf("[switch_matrix_mapping_panel_event_cb] Switching matrix panel view: %d\n", current_matrix_panel_view);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Event callback.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void current_matrix_override_off_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[current_matrix_override_off_event_cb] event code: %d\n", code);}
-
-    if(code == LV_EVENT_CLICKED) {
-        printf("[current_matrix_override_off_event_cb] OVERRIDING matrix switch %d\n", current_matrix_i);
-        setOverrideOutputValue((int)current_matrix_i, (uint32_t)0);
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Create Slider
- */
-lv_obj_t * create_slider(
-    lv_obj_t * scr,
-    int32_t size_w_px,
-    int32_t size_h_px,
-    int32_t alignment,
-    int32_t pos_x,
-    int32_t pos_y,
-    int32_t range_min,
-    int32_t range_max,
-    int32_t range_value
-    )
-{
-    /*----------------------------------------------- SLIDER -----------------------------------------------*/
-
-    // Create slider
-    lv_obj_t * slider = lv_slider_create(scr);
-
-    // Set range and initial value
-    lv_slider_set_range(slider, range_min, range_max);
-    lv_slider_set_value(slider, range_value, LV_ANIM_OFF);
-
-    // Size and position
-    lv_obj_set_size(slider, size_w_px, size_h_px);
-    lv_obj_align(slider, (lv_align_t)alignment, pos_x, pos_y);
-
-    /*---------------------------------------- SLIDER LV_PART_MAIN -----------------------------------------*/
-
-    // Main style: radius
-    lv_obj_set_style_radius(slider, general_radius, LV_PART_MAIN);
-
-    // Main style: outline
-    lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_MAIN);
-    
-    // Main style: border
-    lv_obj_set_style_border_width(slider, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_MAIN);
-    
-    // Main style: background
-    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_MAIN);
-
-    // Main style: shadow
-    lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_MAIN);
-
-    // ---------------------------------------- SLIDER LV_PART_INDICATOR -----------------------------------------*/
-
-    // Indicator style: outline
-    lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_INDICATOR);
-    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_INDICATOR);
-    
-    // Indicator style: border
-    lv_obj_set_style_border_width(slider, border_width, LV_PART_INDICATOR);
-    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_INDICATOR);
-
-    // Indicator style: background
-    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_INDICATOR);
-
-    // Indicator style: shadow
-    lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_INDICATOR);
-    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_INDICATOR);
-
-    // Indicator style: radius (set last to square off indicator so main outline does not bleed though on left edge)
-    lv_obj_set_style_radius(slider, general_radius, LV_PART_INDICATOR);
-
-    // ----------------------------------------- SLIDER LV_PART_KNOB -----------------------------------------*/
-
-    // Indicator style: radius
-    lv_obj_set_style_radius(slider, radius_circle, LV_PART_KNOB);
-
-    // Knob style: outline
-    lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_KNOB);
-    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_KNOB);
-    
-    // Knob style: border
-    lv_obj_set_style_border_width(slider, border_width, LV_PART_KNOB);
-    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_KNOB);
-
-    // Knob style: background
-    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_KNOB);
-
-    // Knob style: shadow
-    lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_KNOB);
-    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_KNOB);
-
-
-    return slider;   
-}
-
-/** ---------------------------------------------------------------------------------------
- * @brief Event callback for brightness slider value change.
- * 
- * Updates the global brightness value and applies it to the display.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-void slider_brightness_event_cb(lv_event_t * e)
-{
-    lv_obj_t * slider = (lv_obj_t *)lv_event_get_target(e);
-    slider_brightness_value = lv_slider_get_value(slider);
-    printf("Brightness set to: %lu\n", slider_brightness_value);
-    bsp_display_brightness_set(slider_brightness_value);
-}
-
-/** ---------------------------------------------------------------------------------------
- * @brief Event callback for system tray swipe gestures.
- * 
- * Swipe down from top to open, swipe up from anywhere to close.
- * 
- * @param e Pointer to the LVGL event structure.
- */
-static void tray_close_ready_cb(lv_anim_t * a)
-{
-    lv_obj_t * panel = (lv_obj_t *)a->var;
-    lv_obj_add_flag(panel, LV_OBJ_FLAG_HIDDEN);
-}
-
-/** ---------------------------------------------------------------------------------------
- * @brief Event callback for system tray swipe gestures.
- * 
- * Add gestures here as required.
- * 
- * @param e Pointer to the LVGL event structure.
- */
 static void screen_swipe_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -1339,6 +650,11 @@ static void screen_swipe_cb(lv_event_t * e)
     }
 }
 
+/** ---------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
 static void screen_tap_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -1375,9 +691,557 @@ static void screen_tap_cb(lv_event_t * e)
 }
 
 /** ---------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+void slider_brightness_event_cb(lv_event_t * e)
+{
+    lv_obj_t * slider = (lv_obj_t *)lv_event_get_target(e);
+    slider_brightness_value = lv_slider_get_value(slider);
+    printf("Brightness set to: %lu\n", slider_brightness_value);
+    bsp_display_brightness_set(slider_brightness_value);
+}
+
+/** ---------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void tray_close_ready_cb(lv_anim_t * a)
+{
+    lv_obj_t * panel = (lv_obj_t *)a->var;
+    lv_obj_add_flag(panel, LV_OBJ_FLAG_HIDDEN);
+}
+
+/** ---------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void system_tray_grid_menu_1_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if(code == LV_EVENT_CLICKED) {
+
+        lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);     // Get clicked button
+        lv_obj_t * grid = (lv_obj_t *)lv_event_get_user_data(e); // Get grid container (if passed)
+        lv_obj_t * label = lv_obj_get_child(btn, 0); // Get button's label
+        
+        uint32_t btn_index = 0;
+        uint32_t child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
+        for(uint32_t i = 0; i < child_cnt; i++) {
+            if(lv_obj_get_child(system_tray.grid_menu_1, i) == btn) {
+                btn_index = i;
+                break;
+            }
+        }
+        
+        const char * text = lv_label_get_text(label);
+        printf("System Tray Grid Menu 1: Button %lu (%s) clicked!\n", btn_index, text);
+        
+        // Switch logic
+        switch(btn_index) {
+            case 0:  flag_display_home_screen=true; break;
+            case 1:  flag_display_matrix_screen=true; break;
+            case 2:  flag_display_gps_screen=true; break;
+            case 3:  flag_display_gyro_screen=true; break;
+            case 4:  flag_display_disp_screen=true; break;
+            case 5:  flag_display_system_screen=true; break;
+            case 6:  flag_display_uap_screen=true; break;
+            default: break;
+        }
+    }
+}
+
+/** ---------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void matrix_overview_grid_1_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if(code == LV_EVENT_CLICKED) {
+
+        lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);     // Get clicked button
+        lv_obj_t * grid = (lv_obj_t *)lv_event_get_user_data(e); // Get grid container (if passed)
+        lv_obj_t * label = lv_obj_get_child(btn, 0); // Get button's label
+        
+        uint32_t btn_index = 0;
+        uint32_t child_cnt = lv_obj_get_child_cnt(matrix_overview_grid_1);
+        for(uint32_t i = 0; i < child_cnt; i++) {
+            if(lv_obj_get_child(matrix_overview_grid_1, i) == btn) {
+                btn_index = i;
+                break;
+            }
+        }
+        
+        const char * text = lv_label_get_text(label);
+        printf("Matrix Overview Grid 1: Button %lu (%s) clicked!\n", btn_index, text);
+        
+        if (btn_index <= 44) {current_matrix_i = btn_index;}
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_function_index_select_event_cb(lv_event_t * e) 
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        current_matrix_function_i = (int)sel;
+        printf("[dd_function_index_select_event_cb] Function index set to: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_switch_index_select_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        current_matrix_i = (int)sel;
+        printf("[dd_switch_index_select_event_cb] Switch index set to: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_current_map_slot_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        current_mapping_i = (int)sel;
+        printf("[dd_current_map_slot_event_cb] Map slot index set to: %ld\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_function_name_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i] = (int)sel;
+        printf("[dd_function_name_event_cb] Function set to: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_c0_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C0] = (int)sel;
+        printf("[dd_c0_event_cb] Set map function: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_mode_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        mappingData.map_mode[0][matrixData.index_mapped_value[0][current_matrix_i]] = (int)sel;
+        printf("[dd_mode_event_cb] Set map mode: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_mode_x_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        // Safety: Reset to 0
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]=0;
+        // Set mode
+        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = (int)sel;
+        printf("[dd_mode_x_event_cb] Set mode x: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_mode_y_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        // Safety: Reset to 0
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]=0;
+        // Set mode
+        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = (int)sel;
+        printf("[dd_mode_y_event_cb] Set mode y: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_mode_z_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        // Safety: Reset to 0
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]=0;
+        // Set mode
+        matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
+        printf("[dd_mode_z_event_cb] Set mode z: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_inverted_logic_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        // Set mode
+        matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i] = (int)sel;
+        printf("[dd_inverted_logic_event_cb] Set switch standard/inverted: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_x_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = (int)sel;
+        printf("[dd_x_event_cb] Function X set to value index: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback for dd_y_event_cb dropdown.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_y_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = (int)sel;
+        printf("[dd_y_event_cb] Function Y set to value index: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_z_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
+        printf("[dd_z_event_cb] Function Z set to value index: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_operator_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i] = (int)sel;
+        printf("[dd_operator_event_cb] Operator set to: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_output_mode_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.output_mode[0][current_matrix_i] = (int)sel;
+        printf("[dd_output_mode_event_cb] Output mode set to: %lu\n", sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_matrix_file_slot_select_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        memset(satioFileData.current_matrix_filepath, 0, sizeof(satioFileData.current_matrix_filepath));
+        lv_dropdown_get_selected_str(dd_matrix_file_slot_select, satioFileData.current_matrix_filepath, sizeof(satioFileData.current_matrix_filepath));
+        // strcpy(satioFileData.current_matrix_filepath, lv_dropdown_get_selected_str(dd_matrix_file_slot_select));
+        printf("[dd_matrix_file_slot_select_event_cb] Matrix slot set to: %s\n", satioFileData.current_matrix_filepath);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void dd_link_map_slot_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
+        uint32_t sel = lv_dropdown_get_selected(dd);
+        matrixData.index_mapped_value[0][current_matrix_i] = (int)sel;
+        printf("[dd_link_map_slot_event_cb] Matrix %d will use map slot: %ld\n", current_matrix_i, sel);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void matrix_new_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[matrix_new_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        printf("[matrix_new_event_cb] Setting new matrix.\n");
+        override_all_computer_assists();
+        set_all_matrix_default();
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void matrix_save_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[matrix_save_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        if (sdcardData.sdcard_mounted==true) {
+            printf("[matrix_save_event_cb] Saving matrix to slot: %s\n", satioFileData.current_matrix_filepath);
+            sdcardFlagData.save_matrix=true;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            sdcardFlagData.save_mapping=true;
+        }
+        else {
+            printf("[matrix_save_event_cb] sdcard is not mounted.");
+        }
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void matrix_load_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[matrix_load_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        if (sdcardData.sdcard_mounted==true) {
+            printf("[matrix_load_event_cb] Loading matrix from slot: %s\n", satioFileData.current_matrix_filepath);
+            sdcardFlagData.load_mapping=true;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            sdcardFlagData.load_matrix=true;
+        }
+        else {
+            printf("[matrix_load_event_cb] sdcard is not mounted.");
+        }
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void matrix_delete_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[matrix_delete_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        if (sdcardData.sdcard_mounted==true) {
+            printf("[matrix_delete_event_cb] Deleting matrix in slot: %s\n", satioFileData.current_matrix_filepath);
+            sdcardFlagData.delete_matrix=true;
+        }
+        else {
+            printf("[matrix_delete_event_cb] sdcard is not mounted.");
+        }
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void current_matrix_computer_assist_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[current_matrix_computer_assist_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        bool toggle = !matrixData.computer_assist[0][current_matrix_i];
+        matrixData.computer_assist[0][current_matrix_i] = toggle;
+        printf("[current_matrix_computer_assist_event_cb] Setting computer assist for matrix switch %d to: %s\n", current_matrix_i, toggle ? "true" : "false");
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[switch_matrix_mapping_panel_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        current_matrix_panel_view+=1;
+        if (current_matrix_panel_view>=MAX_MATRIX_PANEL_VIEWS) {current_matrix_panel_view=0;}
+        printf("[switch_matrix_mapping_panel_event_cb] Switching matrix panel view: %d\n", current_matrix_panel_view);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void current_matrix_override_off_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[current_matrix_override_off_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        printf("[current_matrix_override_off_event_cb] OVERRIDING matrix switch %d\n", current_matrix_i);
+        setOverrideOutputValue((int)current_matrix_i, (uint32_t)0);
+    }
+}
+
+/** ---------------------------------------------------------------------------------------
  * Title Bar
  */
-title_bar_t create_title_bar(
+title_bar_t create_title_bar (
     lv_obj_t * scr,
     int32_t size_w_px,
     int32_t size_h_px,
@@ -1766,14 +1630,106 @@ system_tray_t create_system_tray(lv_obj_t * scr)
     return tray;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Slider
+ */
+lv_obj_t * create_slider(
+    lv_obj_t * scr,
+    int32_t size_w_px,
+    int32_t size_h_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t range_min,
+    int32_t range_max,
+    int32_t range_value
+    )
+{
+    /*----------------------------------------------- SLIDER -----------------------------------------------*/
+
+    // Create slider
+    lv_obj_t * slider = lv_slider_create(scr);
+
+    // Set range and initial value
+    lv_slider_set_range(slider, range_min, range_max);
+    lv_slider_set_value(slider, range_value, LV_ANIM_OFF);
+
+    // Size and position
+    lv_obj_set_size(slider, size_w_px, size_h_px);
+    lv_obj_align(slider, alignment, pos_x, pos_y);
+
+    /*---------------------------------------- SLIDER LV_PART_MAIN -----------------------------------------*/
+
+    // Main style: radius
+    lv_obj_set_style_radius(slider, general_radius, LV_PART_MAIN);
+
+    // Main style: outline
+    lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_MAIN);
+    
+    // Main style: border
+    lv_obj_set_style_border_width(slider, border_width, LV_PART_MAIN);
+    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_MAIN);
+    
+    // Main style: background
+    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_MAIN);
+
+    // Main style: shadow
+    lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_MAIN);
+
+    // ---------------------------------------- SLIDER LV_PART_INDICATOR -----------------------------------------*/
+
+    // Indicator style: outline
+    lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_INDICATOR);
+    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_INDICATOR);
+    
+    // Indicator style: border
+    lv_obj_set_style_border_width(slider, border_width, LV_PART_INDICATOR);
+    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_INDICATOR);
+
+    // Indicator style: background
+    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_INDICATOR);
+
+    // Indicator style: shadow
+    lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_INDICATOR);
+    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_INDICATOR);
+
+    // Indicator style: radius (set last to square off indicator so main outline does not bleed though on left edge)
+    lv_obj_set_style_radius(slider, general_radius, LV_PART_INDICATOR);
+
+    // ----------------------------------------- SLIDER LV_PART_KNOB -----------------------------------------*/
+
+    // Indicator style: radius
+    lv_obj_set_style_radius(slider, radius_circle, LV_PART_KNOB);
+
+    // Knob style: outline
+    lv_obj_set_style_outline_width(slider, slider_outline_width, LV_PART_KNOB);
+    lv_obj_set_style_outline_color(slider, default_outline_hue, LV_PART_KNOB);
+    
+    // Knob style: border
+    lv_obj_set_style_border_width(slider, border_width, LV_PART_KNOB);
+    lv_obj_set_style_border_color(slider, default_border_hue, LV_PART_KNOB);
+
+    // Knob style: background
+    lv_obj_set_style_bg_color(slider, default_bg_hue, LV_PART_KNOB);
+
+    // Knob style: shadow
+    lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_KNOB);
+    lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_KNOB);
+
+
+    return slider;   
+}
+
 /** ---------------------------------------------------------------------------------------
  * @brief Create Label
  * 
  * Intention is to be resusable, flexible & while providing a consistent style.
  * 
  * @param scr Pointer to the parent screen object.
- * @param size_width_px Width of the label in pixels.
- * @param size_height_px Height of the label in pixels.
+ * @param size_w_px Width of the label in pixels.
+ * @param size_h_px Height of the label in pixels.
  * @param alignment Alignment of the label within its parent/screen.
  * @param pos_x X position of the label within its parent/screen.
  * @param pos_y Y position of the label within its parent/screen.
@@ -1787,9 +1743,9 @@ system_tray_t create_system_tray(lv_obj_t * scr)
  */
 lv_obj_t * create_label(
     lv_obj_t * scr,
-    int32_t size_width_px,
-    int32_t size_height_px,
-    int alignment,
+    int32_t size_w_px,
+    int32_t size_h_px,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     char * text,
@@ -1817,8 +1773,8 @@ lv_obj_t * create_label(
     else {lv_obj_set_scroll_dir(result, LV_DIR_NONE);}
 
     // Size and position
-    lv_obj_set_size(result, size_width_px, size_height_px);
-    lv_obj_align(result, (lv_align_t)alignment, pos_x, pos_y);
+    lv_obj_set_size(result, size_w_px, size_h_px);
+    lv_obj_align(result, alignment, pos_x, pos_y);
 
     /*---------------------------------------- LABEL LV_PART_MAIN -----------------------------------------*/
 
@@ -1827,7 +1783,7 @@ lv_obj_t * create_label(
 
     // Vertical centering: calculate top padding based on font height
     int32_t font_line_height = lv_font_get_line_height(font) * expected_number_of_lines;
-    int32_t pad_top = (size_height_px - font_line_height) / 2;
+    int32_t pad_top = (size_h_px - font_line_height) / 2;
     if (pad_top > 0) {
         lv_obj_set_style_pad_top(result, pad_top, LV_PART_MAIN);
     }
@@ -1896,7 +1852,7 @@ lv_obj_t * create_textarea(
     lv_obj_t * scr,
     int32_t size_w_px,
     int32_t size_h_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     bool one_line,
@@ -1940,7 +1896,7 @@ lv_obj_t * create_textarea(
 
     // Size, position & shape
     lv_obj_set_size(ta, size_w_px, size_h_px);
-    lv_obj_align(ta, (lv_align_t)alignment, pos_x, pos_y);
+    lv_obj_align(ta, alignment, pos_x, pos_y);
 
     /*----------------------------------- LV_PART_MAIN --------------------------------- */
 
@@ -2020,7 +1976,7 @@ keyboard_t create_keyboard(
     lv_obj_t * scr,
     int32_t size_w_px,
     int32_t size_h_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     int32_t kb_ta_padding_px,
@@ -2043,7 +1999,7 @@ keyboard_t create_keyboard(
 
     // Size and position
     lv_obj_set_size(result.kb, size_w_px, size_h_px);
-    lv_obj_align(result.kb, (lv_align_t)alignment, pos_x, pos_y);
+    lv_obj_align(result.kb, alignment, pos_x, pos_y);
 
     /*---------------------------------------- KEYBOARD LV_PART_MAIN ---------------------------------------*/
 
@@ -2311,7 +2267,7 @@ menu_struct create_menu(
     const char ** main_menu_items,
     int32_t size_w_px,
     int32_t size_h_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y
     )
@@ -2338,7 +2294,7 @@ menu_struct create_menu(
 
     // Size and position
     lv_obj_set_size(result.menu, size_w_px, size_h_px);
-    lv_obj_align(result.menu, (lv_align_t)alignment, pos_x, pos_y);
+    lv_obj_align(result.menu, alignment, pos_x, pos_y);
 
     /* --- MENU LV_PART_MAIN ----------------------------------------------------------- */
 
@@ -2506,7 +2462,7 @@ menu_struct create_menu(
  * @param inner_padding Padding between cells in pixels.
  * @param pos_x X position of the grid within its parent/screen.
  * @param pos_y Y position of the grid within its parent/screen.
- * @param lv_alignment Alignment of the grid within its parent/screen.
+ * @param alignment Alignment of the grid within its parent/screen.
  * @param item_radius Radius of the grid items in pixels.
  * @param max_cols_visible Maximum number of columns visible.
  * @param max_rows_visible Maximum number of rows visible.
@@ -2524,7 +2480,7 @@ lv_obj_t * create_menu_grid(
     const int32_t inner_padding,
     const int32_t pos_x,
     const int32_t pos_y,
-    const int lv_alignment,
+    lv_align_t alignment,
     int32_t item_radius,
     int32_t max_cols_visible,
     int32_t max_rows_visible,
@@ -2582,7 +2538,7 @@ lv_obj_t * create_menu_grid(
     /* ---- GRID MENU ------------------------------------------------------------------ */
 
     // Size and position
-    lv_obj_align(grid_menu, (lv_align_t)lv_alignment, pos_x, pos_y);
+    lv_obj_align(grid_menu, alignment, pos_x, pos_y);
 
     /* ---- GRID MENU LV_PART_MAIN ----------------------------------------------------- */
 
@@ -2700,7 +2656,7 @@ lv_obj_t * create_dropdown_menu(
     int option_count,
     int32_t width_px,
     int32_t height_px,
-    int alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     const lv_font_t * font
@@ -2729,7 +2685,7 @@ lv_obj_t * create_dropdown_menu(
 
     // Size and position
     lv_obj_set_size(ddlist, width_px, height_px);
-    lv_obj_align(ddlist, (lv_align_t)alignment, pos_x, pos_y);
+    lv_obj_align(ddlist, alignment, pos_x, pos_y);
 
     /* --- DROPDOWN LV_PART_MAIN ------------------------------------------------------- */
 
@@ -2816,8 +2772,8 @@ lv_obj_t * create_switch(
 
 button_t create_button(
     lv_obj_t *scr,
-    int32_t size_width_px,
-    int32_t size_height_px,
+    int32_t size_w_px,
+    int32_t size_h_px,
     lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
@@ -2844,7 +2800,7 @@ button_t create_button(
     else {lv_obj_set_scroll_dir(result.panel, LV_DIR_NONE);}
 
     // Size and position
-    lv_obj_set_size(result.panel, size_width_px, size_height_px);
+    lv_obj_set_size(result.panel, size_w_px, size_h_px);
     lv_obj_align(result.panel, alignment, pos_x, pos_y);
 
     // Main style: radius
@@ -2875,7 +2831,7 @@ button_t create_button(
     result.button = lv_btn_create(result.panel);
 
     // Size and position
-    lv_obj_set_size(result.button, size_width_px, size_height_px);
+    lv_obj_set_size(result.button, size_w_px, size_h_px);
     lv_obj_center(result.button);
 
     // Main style: radius
@@ -2969,7 +2925,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_t * scr,
     int32_t width_px,
     int32_t height_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     int32_t radius,
@@ -2997,7 +2953,7 @@ matrix_function_container_t create_matrix_function_container(
     
     result.panel = lv_obj_create(scr);
     lv_obj_set_size(result.panel, width_px, height_px);
-    lv_obj_align(result.panel, (lv_align_t)alignment, pos_x, pos_y);
+    lv_obj_align(result.panel, alignment, pos_x, pos_y);
 
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);}
@@ -3184,7 +3140,7 @@ matrix_function_container_t create_matrix_function_container(
         LV_ALIGN_CENTER,      // parent alignment
         0,                    // pos x
         0,                    // pos y
-        "Function",           // initial text
+        "Input",              // initial text
         LV_TEXT_ALIGN_LEFT,   // font alignment
         &cobalt_alien_17,     // font
         false,                // transparent background
@@ -3636,7 +3592,7 @@ matrix_function_container_t create_matrix_function_container(
         0,
         value_width_0,
         obj_height,
-        LV_TEXT_ALIGN_CENTER,
+        LV_ALIGN_CENTER,
         0,
         0,
         font_sub
@@ -4098,7 +4054,8 @@ mapping_config_container_t create_mapping_config_container(
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-) {
+    )
+{
     mapping_config_container_t result = {0};
 
     // Row Object Widths
@@ -4265,7 +4222,7 @@ mapping_config_container_t create_mapping_config_container(
         0,
         value_width_0,
         obj_height,
-        LV_TEXT_ALIGN_LEFT,
+        LV_ALIGN_CENTER,
         0,
         0,
         font_sub
@@ -4887,7 +4844,7 @@ sdcard_image_t * create_image_from_sdcard(
     uint32_t color_depth_bits,
     uint32_t pos_x,
     uint32_t pos_y,
-    int32_t alignment,
+    lv_align_t alignment,
     bool discard_after_display
 ) {
 
@@ -4971,7 +4928,8 @@ void cleanup_loading_image() {
     }
 }
 
-void default_screen_objects(lv_obj_t * scr) {
+void create_default_screen_objects(lv_obj_t * scr)
+{
 
     cleanup_loading_image();
 
@@ -5095,7 +5053,8 @@ void display_loading_screen() {
  * @brief Home Screen
  * 
  */
-void display_home_screen() {
+void display_home_screen()
+{
 
     // Set Display Flag
     flag_display_home_screen = false;
@@ -5108,7 +5067,7 @@ void display_home_screen() {
     home_screen = lv_obj_create(NULL);
 
     // Defaults
-    default_screen_objects(home_screen);
+    create_default_screen_objects(home_screen);
     
     // Load screen before creating more objects (smoother, faster load)
     lv_scr_load_anim(home_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
@@ -5134,7 +5093,8 @@ void display_home_screen() {
  * @brief Matrix Screen
  * 
  */
-void display_matrix_screen() {
+void display_matrix_screen()
+{
 
     // Set Display Flag
     flag_display_matrix_screen = false;
@@ -5147,7 +5107,7 @@ void display_matrix_screen() {
     matrix_screen = lv_obj_create(NULL);
 
     // Defaults
-    default_screen_objects(matrix_screen);
+    create_default_screen_objects(matrix_screen);
 
     // Load screen before creating more objects (smoother, faster load)
     lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
@@ -5341,7 +5301,8 @@ void display_matrix_screen() {
  * @brief GPS Screen
  * 
  */
-void display_gps_screen() {
+void display_gps_screen()
+{
 
     // Set Display Flag
     flag_display_gps_screen = false;
@@ -5354,7 +5315,7 @@ void display_gps_screen() {
     gps_screen = lv_obj_create(NULL);
 
     // Defaults
-    default_screen_objects(gps_screen);
+    create_default_screen_objects(gps_screen);
 
     // Load screen before creating more objects (smoother, faster load)
     lv_scr_load_anim(gps_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
@@ -5364,7 +5325,8 @@ void display_gps_screen() {
  * @brief Gyro Screen
  * 
  */
-void display_gyro_screen() {
+void display_gyro_screen()
+{
 
     // Set Display Flag
     flag_display_gyro_screen = false;
@@ -5377,7 +5339,7 @@ void display_gyro_screen() {
     gyro_screen = lv_obj_create(NULL);
 
     // Defaults
-    default_screen_objects(gyro_screen);
+    create_default_screen_objects(gyro_screen);
 
     // Load screen before creating more objects (smoother, faster load)
     lv_scr_load_anim(gyro_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);    
@@ -5387,7 +5349,8 @@ void display_gyro_screen() {
  * @brief Display Screen
  * 
  */
-void display_disp_screen() {
+void display_disp_screen()
+{
 
     // Set Display Flag
     flag_display_disp_screen = false;
@@ -5400,7 +5363,7 @@ void display_disp_screen() {
     disp_screen = lv_obj_create(NULL);
 
     // Defaults
-    default_screen_objects(disp_screen);
+    create_default_screen_objects(disp_screen);
 
     // Load screen before creating more objects (smoother, faster load)
     lv_scr_load_anim(disp_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);   
@@ -5410,7 +5373,8 @@ void display_disp_screen() {
  * @brief System Screen
  * 
  */
-void display_system_screen() {
+void display_system_screen()
+{
 
     // Set Display Flag
     flag_display_system_screen = false;
@@ -5423,7 +5387,7 @@ void display_system_screen() {
     system_screen = lv_obj_create(NULL);
 
     // Defaults
-    default_screen_objects(system_screen);
+    create_default_screen_objects(system_screen);
 
     // Load screen before creating more objects (smoother, faster load)
     lv_scr_load_anim(system_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);   
@@ -5433,7 +5397,8 @@ void display_system_screen() {
  * @brief UAP Screen
  * 
  */
-void display__screen() {
+void display__screen()
+{
 
     // Set Display Flag
     flag_display_uap_screen = false;
@@ -5446,7 +5411,7 @@ void display__screen() {
     uap_screen = lv_obj_create(NULL);
 
     // Defaults
-    default_screen_objects(uap_screen);
+    create_default_screen_objects(uap_screen);
 
     // Load screen before creating more objects (smoother, faster load)
     lv_scr_load_anim(uap_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true); 
@@ -5465,7 +5430,8 @@ void update_display_on_timer(lv_timer_t * timer) {
  * @brief Update Display
  * 
  */
-void update_display() {
+void update_display()
+{
 
     // Pause timer
     lv_timer_pause(display_timer);
@@ -6198,7 +6164,8 @@ void update_display() {
     lv_timer_resume(display_timer);
 }
 
-void setColorsDefault() {
+void setColorsDefault()
+{
     // Major
     main_bg_hue      = default_bg_hue;
     main_outline_hue = default_outline_hue;
@@ -6215,7 +6182,8 @@ void setColorsDefault() {
     main_contrast_value_hue   = default_contrast_value_hue;
 }
 
-void setColorsCustom() {
+void setColorsCustom()
+{
     // Major
     main_bg_hue      = custom_bg_hue;
     main_outline_hue = custom_outline_hue;
