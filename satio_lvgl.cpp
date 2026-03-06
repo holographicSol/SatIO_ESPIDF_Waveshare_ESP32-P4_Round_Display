@@ -12309,7 +12309,7 @@ void update_display()
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(satio_c.val_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_deg_lat, String(satioData.degrees_latitude).c_str());
+                lv_label_set_text(satio_c.val_deg_lat, String(satioData.degrees_latitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.val_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
@@ -12317,7 +12317,7 @@ void update_display()
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(satio_c.val_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_deg_lon, String(satioData.degrees_longitude).c_str());
+                lv_label_set_text(satio_c.val_deg_lon, String(satioData.degrees_longitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.val_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
