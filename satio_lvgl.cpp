@@ -6006,6 +6006,130 @@ satio_container_t create_satio_panel(
     lv_obj_set_style_outline_pad(result.panel, padding, LV_PART_MAIN);
 
     /* ---------------------------------------------------------- */
+    /* Row Degrees Latitude                                       */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_lat = lv_obj_create(result.panel);
+    lv_obj_set_size(row_lat, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_lat, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_lat, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_lat, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_lat, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_lat, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_lat,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_lat, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_lat, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_lat, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_lat, LV_DIR_NONE);
+
+    result.lbl_deg_lat= create_label(
+        row_lat,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Degrees Latitude",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_deg_lat = create_label(
+        row_lat,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_deg_lat, label_width_0, obj_height);
+    lv_obj_set_size(result.val_deg_lat, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Degrees Longitude                                      */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_lon = lv_obj_create(result.panel);
+    lv_obj_set_size(row_lon, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_lon, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_lon, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_lon, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_lon, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_lon, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_lon,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_lon, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_lon, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_lon, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_lon, LV_DIR_NONE);
+
+    result.lbl_deg_lon = create_label(
+        row_lon,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Degrees Longitude",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_deg_lon = create_label(
+        row_lon,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_deg_lon, label_width_0, obj_height);
+    lv_obj_set_size(result.val_deg_lon, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
     /* Row 0: Local Year Day                                      */
     /* ---------------------------------------------------------- */
 
@@ -6035,7 +6159,7 @@ satio_container_t create_satio_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "Local YDay",
+        "Local Year Day",
         LV_TEXT_ALIGN_LEFT,
         &cobalt_alien_17,
         false,
@@ -6097,7 +6221,7 @@ satio_container_t create_satio_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "Weekday",
+        "Local Weekday",
         LV_TEXT_ALIGN_LEFT,
         &cobalt_alien_17,
         false,
@@ -6159,7 +6283,7 @@ satio_container_t create_satio_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "Month",
+        "Local Month",
         LV_TEXT_ALIGN_LEFT,
         &cobalt_alien_17,
         false,
@@ -6531,7 +6655,7 @@ satio_container_t create_satio_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "RTC Lat",
+        "RTC Sync Lat",
         LV_TEXT_ALIGN_LEFT,
         &cobalt_alien_17,
         false,
@@ -6593,7 +6717,7 @@ satio_container_t create_satio_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "RTC Lon",
+        "RTC Sync Lon",
         LV_TEXT_ALIGN_LEFT,
         &cobalt_alien_17,
         false,
@@ -6655,7 +6779,7 @@ satio_container_t create_satio_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "RTC Alt",
+        "RTC Sync Alt",
         LV_TEXT_ALIGN_LEFT,
         &cobalt_alien_17,
         false,
@@ -12179,6 +12303,22 @@ void update_display()
 
                 // Panel
                 lv_obj_set_style_outline_color(satio_c.panel, main_contrast_outline_hue, LV_PART_MAIN);
+
+                // ────────────────────────────────────────────────
+                // Degrees Latitude
+                // ────────────────────────────────────────────────
+                lv_obj_set_style_text_color(satio_c.lbl_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
+                lv_label_set_text(satio_c.val_deg_lat, String(satioData.degrees_latitude).c_str());
+                lv_obj_set_style_text_color(satio_c.val_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
+
+                // ────────────────────────────────────────────────
+                // Degrees Longitude
+                // ────────────────────────────────────────────────
+                lv_obj_set_style_text_color(satio_c.lbl_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
+                lv_label_set_text(satio_c.val_deg_lon, String(satioData.degrees_longitude).c_str());
+                lv_obj_set_style_text_color(satio_c.val_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Local Year Day

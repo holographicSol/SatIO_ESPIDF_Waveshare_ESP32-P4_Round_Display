@@ -413,6 +413,10 @@ typedef struct {
  */
 typedef struct {
     lv_obj_t * panel; // Main container panel
+    lv_obj_t * lbl_deg_lat;
+    lv_obj_t * val_deg_lat;
+    lv_obj_t * lbl_deg_lon;
+    lv_obj_t * val_deg_lon;
     lv_obj_t * lbl_local_yday;
     lv_obj_t * val_local_yday;
     lv_obj_t * lbl_local_wday_name;
