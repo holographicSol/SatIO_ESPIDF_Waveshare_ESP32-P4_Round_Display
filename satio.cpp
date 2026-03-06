@@ -530,10 +530,10 @@ void storeLocalTime(void) {
     satioData.local_minute = timeinfo->tm_min;
     satioData.local_second = timeinfo->tm_sec;
     satioData.local_year = timeinfo->tm_year + LAST_EPOCH; // Adjust from timeinfo's year (since 1900)
-    satioData.local_month = timeinfo->tm_mon + 1;    // Adjust from 0-based to 1-based
+    satioData.local_month = timeinfo->tm_mon + 1; // Adjust from 0
     satioData.local_wday = timeinfo->tm_wday;
     satioData.local_mday = timeinfo->tm_mday;
-    satioData.local_yday = timeinfo->tm_yday;
+    satioData.local_yday = timeinfo->tm_yday + 1; // Adjust from 0
 
     // Copy weekday name
     memset(satioData.local_wday_name, 0, sizeof(satioData.local_wday_name));
