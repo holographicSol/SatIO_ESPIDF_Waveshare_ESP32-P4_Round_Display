@@ -1304,7 +1304,7 @@ title_bar_t create_title_bar (
         24,                   // height
         LV_ALIGN_TOP_MID,     // parent alignment
         0,                    // pos x
-        0,                    // pos y
+        -10,                    // pos y
         "00:00:00",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_25,     // font
@@ -1323,7 +1323,7 @@ title_bar_t create_title_bar (
         24,                   // height
         LV_ALIGN_TOP_MID,     // parent alignment
         0,                    // pos x
-        24,                   // pos y
+        15,                   // pos y
         "00/00/00",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_25,     // font
@@ -1342,7 +1342,7 @@ title_bar_t create_title_bar (
         20,                   // height
         LV_ALIGN_TOP_MID,     // parent alignment
         120,                  // pos x
-        24,                   // pos y
+        14,                   // pos y
         "GPS SYNC",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
@@ -1361,7 +1361,7 @@ title_bar_t create_title_bar (
         20,                   // height
         LV_ALIGN_TOP_MID,     // parent alignment
         120,                  // pos x
-        24,                   // pos y
+        14,                   // pos y
         "0:0",                // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
@@ -1380,7 +1380,7 @@ title_bar_t create_title_bar (
         20,                   // height
         LV_ALIGN_TOP_MID,     // parent alignment
         -140,                 // pos x
-        24,                   // pos y
+        14,                   // pos y
         "SD",                 // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
@@ -1598,7 +1598,9 @@ system_tray_t create_system_tray(lv_obj_t * scr)
         false,               // show scrollbar
         false,               // enable scrolling
         LV_TEXT_ALIGN_CENTER,// font alignment
-        &cobalt_alien_17     // font
+        &cobalt_alien_17,    // font
+        true,
+        true
     );
     // Grid Menu 1 Configuration
     uint32_t grid_child_cnt = lv_obj_get_child_cnt(tray.grid_menu_1);
@@ -2487,7 +2489,9 @@ lv_obj_t * create_menu_grid(
     bool show_scrollbar,
     bool enable_scrolling,
     lv_text_align_t text_align,
-    const lv_font_t * font
+    const lv_font_t * font,
+    bool transparent_bg,
+    bool transparent_outline
     )
 {
     /* ---- GRID MENU CONFIGURATION ---------------------------------------------------- */
@@ -2549,6 +2553,7 @@ lv_obj_t * create_menu_grid(
     // Main style: outline
     lv_obj_set_style_outline_width(grid_menu, outline_width, LV_PART_MAIN);
     lv_obj_set_style_outline_color(grid_menu, default_outline_hue, LV_PART_MAIN);
+    if (transparent_outline) {lv_obj_set_style_outline_opa(grid_menu, LV_OPA_TRANSP, LV_PART_MAIN);}
 
     // Main style: border
     lv_obj_set_style_border_width(grid_menu, 0, LV_PART_MAIN);
@@ -2556,6 +2561,7 @@ lv_obj_t * create_menu_grid(
     
     // Main style: background
     lv_obj_set_style_bg_color(grid_menu, default_bg_hue, LV_PART_MAIN);
+    if (transparent_bg) {lv_obj_set_style_bg_opa(grid_menu, LV_OPA_TRANSP, LV_PART_MAIN);}
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(grid_menu, shadow_width, LV_PART_MAIN);
@@ -4932,60 +4938,13 @@ void lvgl_cleanup_all() {
     // Ensure no pending events
     lv_timer_handler();
     
-    // // Clean up specific objects safely
-    // if (loading_image && lv_obj_is_valid(loading_image)) {
-    //     lv_obj_del(loading_image);
-    //     loading_image = NULL;
-    // }
-    // cleanup_loading_image();
-    
-    // Call your existing cleanup functions
     astro_clock_end();
-    
-    // Clean the current screen
-    // lv_obj_clean(lv_scr_act());
-    
-    // Clear any pending animations
-    // lv_anim_del(NULL, NULL);
 }
 
 void create_default_screen_objects(lv_obj_t * scr)
 {
 
     lvgl_cleanup_all();
-
-    // // Clean up title bar
-    // if (main_title_bar.panel && lv_obj_is_valid(main_title_bar.panel)) {
-    //     lv_obj_del(main_title_bar.panel);
-    //     main_title_bar = {0};  // Reset struct
-    // }
-    // // Clean up system tray
-    // if (system_tray.panel && lv_obj_is_valid(system_tray.panel)) {
-    //     lv_obj_del(system_tray.panel);
-    //     system_tray = {0};  // Reset struct
-    // }
-
-    // // Clean up numdec kb
-    // if (kb_numdec.kb && lv_obj_is_valid(kb_numdec.kb)) {
-    //     lv_obj_del(kb_numdec.kb);
-    //     kb_numdec = {0};  // Reset struct
-    // }
-    // // Clean up numdec ta
-    // if (kb_numdec.ta && lv_obj_is_valid(kb_numdec.ta)) {
-    //     lv_obj_del(kb_numdec.ta);
-    //     kb_numdec = {0};  // Reset struct
-    // }
-
-    // // Clean up alnumsym kb
-    // if (kb_alnumsym.kb && lv_obj_is_valid(kb_alnumsym.kb)) {
-    //     lv_obj_del(kb_alnumsym.kb);
-    //     kb_alnumsym = {0};  // Reset struct
-    // }
-    // // Clean up alnumsym ta
-    // if (kb_alnumsym.ta && lv_obj_is_valid(kb_alnumsym.ta)) {
-    //     lv_obj_del(kb_alnumsym.ta);
-    //     kb_alnumsym = {0};  // Reset struct
-    // }
 
     // Set background color for main part of the screen
     lv_obj_set_style_bg_color(scr, lv_color_make(0, 0, 0), LV_PART_MAIN);
@@ -5035,7 +4994,7 @@ void create_default_screen_objects(lv_obj_t * scr)
     main_title_bar = create_title_bar(
         scr, // parent
         720, // width px
-        80,  // height px
+        64,  // height px
         LV_ALIGN_TOP_MID,
         0, // pos x
         0, // pos y
@@ -5122,8 +5081,8 @@ void display_home_screen()
     printf("[display_home_screen] starting astro clocks\n");
     astro_clock_begin(
         home_screen,
-        556,             // width px
-        556,             // height px
+        582,             // width px
+        582,             // height px
         LV_ALIGN_CENTER, // alignment
         0,               // pos x
         0,               // pos y
@@ -5188,7 +5147,9 @@ void display_matrix_screen()
         false,                // show scrollbar
         false,                // enable scrolling
         LV_TEXT_ALIGN_CENTER, // text align
-        &cobalt_alien_17      // font for labels
+        &cobalt_alien_17,     // font for labels
+        true,
+        false
     );
     // Plug in general event callback handler
     uint32_t grid_menu_x_count = lv_obj_get_child_cnt(matrix_overview_grid_1);
@@ -5512,17 +5473,17 @@ void update_display()
         // Increment Hue
         current_hue = (current_hue + 1) % 360;
         // Major
-        // main_bg_hue      = lv_color_make(0,0,0); // unused
+        // main_bg_hue      = lv_color_make(0,0,0); // unused here
         main_outline_hue = lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100);
-        // main_border_hue  = lv_color_make(0,0,0); // unused
-        // main_shadow_hue  = lv_color_make(0,0,0); // unused
+        // main_border_hue  = lv_color_make(0,0,0); // unused here
+        // main_shadow_hue  = lv_color_make(0,0,0); // unused here
         main_title_hue   = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
         main_value_hue   = lv_color_hsv_to_rgb((current_hue + 200) % 360, 100, 100);
         // Minor
-        // main_contrast_bg_hue      = lv_color_make(10,10,10); // unused
+        // main_contrast_bg_hue      = lv_color_make(10,10,10); // unused here
         main_contrast_outline_hue = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
-        // main_contrast_border_hue  = lv_color_make(0,0,0); // unused
-        // main_contrast_shadow_hue  = lv_color_make(0,0,0); // unused
+        // main_contrast_border_hue  = lv_color_make(0,0,0); // unused here
+        // main_contrast_shadow_hue  = lv_color_make(0,0,0); // unused here
         main_contrast_title_hue   = lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100);
         main_contrast_value_hue   = lv_color_hsv_to_rgb((current_hue + 50) % 360, 100, 100);
     }
@@ -5648,7 +5609,7 @@ void update_display()
         lv_obj_set_style_outline_color(system_tray.slider_brightness, main_contrast_outline_hue, LV_PART_MAIN);
 
         // Rainbow System Tray Brightness Slider Knob
-        lv_obj_set_style_bg_color(system_tray.slider_brightness, main_contrast_bg_hue, LV_PART_KNOB);
+        lv_obj_set_style_bg_color(system_tray.slider_brightness, main_contrast_value_hue, LV_PART_KNOB);
 
         // Rainbow System Tray Brightness Slider Indicator
         lv_obj_set_style_outline_color(system_tray.slider_brightness, main_outline_hue, LV_PART_INDICATOR);
@@ -6316,11 +6277,12 @@ void initSatIOUI() {
     default_title_hue   = lv_color_make(0,0, 255);
     default_value_hue   = lv_color_make(0,255,0);
     // Default Minor
-    default_contrast_bg_hue      = lv_color_make(0,0,0);
+    default_contrast_bg_hue      = lv_color_make(14,14,14);
     default_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
     default_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
     default_contrast_shadow_hue  = lv_color_make(0,0,0);
     default_contrast_title_hue   = lv_color_make(0,0, 255);
+
     default_contrast_value_hue   = lv_color_make(0,255,0);
 
     // Custom Major (can be changed by user)

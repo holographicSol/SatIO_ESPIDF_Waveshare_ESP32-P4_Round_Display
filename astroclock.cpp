@@ -17,7 +17,7 @@ extern "C" {
 LV_FONT_DECLARE(cobalt_alien_17);
 
 // ============================================================================
-// CONFIGURATION - 556x556 display
+// CONFIGURATION
 // ============================================================================
 
 // Angle offset for positioning
@@ -49,13 +49,14 @@ lv_timer_t * astro_timer = NULL;
 // ============================================================================
 // COLORS
 // ============================================================================
-#define COLOR_ORBIT_BELOW      lv_color_make(0, 0, 96)
-#define COLOR_ORBIT_ABOVE      lv_color_make(0, 112, 0)
-#define COLOR_ORBIT_MOON_BELOW lv_color_make(0, 0, 144)
-#define COLOR_ORBIT_MOON_ABOVE lv_color_make(0, 156, 0)
-#define COLOR_TARGET           lv_color_make(255, 0, 0)
-#define COLOR_ZODIAC           lv_color_make(0, 0, 96)
-#define COLOR_ZENITH           lv_color_make(0, 164, 0)
+#define COLOR_ORBIT_BELOW      lv_color_make(  0,   0,  96)
+#define COLOR_ORBIT_ABOVE      lv_color_make(  0, 128,   0)
+#define COLOR_SUN_BELOW        lv_color_make(128,   0,   0)
+#define COLOR_SUN_ABOVE        lv_color_make(128,   0,   0)
+#define COLOR_ORBIT_MOON_BELOW lv_color_make(  0,   0,  96)
+#define COLOR_ORBIT_MOON_ABOVE lv_color_make(  0, 128,   0)
+#define COLOR_TARGET           lv_color_make(255,   0,   0)
+#define COLOR_ZODIAC           lv_color_make(  0,   0,  96)
 
 // ============================================================================
 // PLANET DATA STRUCTURE
@@ -70,6 +71,19 @@ typedef struct {
     lv_obj_t * target_box;
     bool tracking;
 } Planet;
+
+
+#define ZODIAC_LINE_WIDTH     2
+#define TARGET_BOX_LINE_WIDTH 2
+
+#define ORBIT_ARC_WIDTH_BELOW 2
+#define ORBIT_ARC_WIDTH_ABOVE 2
+
+#define MOON_ORBIT_ARC_WIDTH_BELOW 3
+#define MOON_ORBIT_ARC_WIDTH_ABOVE 3
+
+#define SUN_ALTITUDE_LINE_WIDTH_BELOW 3
+#define SUN_ALTITUDE_LINE_WIDTH_AVOVE 3
 
 // ============================================================================
 // PLANETS (orbits and sizes calculated from available space)
@@ -93,8 +107,37 @@ static Planet neptune = {ORBIT_STEP * 8, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NU
 static lv_obj_t * volatile astro_container = NULL;
 static lv_obj_t * zodiac_lines[12] = {NULL};
 static lv_point_precise_t zodiac_points[12][2];
-static lv_obj_t * zenith_line = NULL;
-static lv_point_precise_t zenith_points[2];
+
+static lv_obj_t * sun_altitude_line = NULL;
+lv_point_precise_t sun_altitude_points[2];
+
+static lv_obj_t * mercury_altitude_line = NULL;
+lv_point_precise_t mercury_altitude_points[2];
+
+static lv_obj_t * venus_altitude_line = NULL;
+lv_point_precise_t venus_altitude_points[2];
+
+static lv_obj_t * earth_altitude_line = NULL;
+lv_point_precise_t earth_altitude_points[2];
+
+static lv_obj_t * moon_altitude_line = NULL;
+lv_point_precise_t moon_altitude_points[2];
+
+static lv_obj_t * mars_altitude_line = NULL;
+lv_point_precise_t mars_altitude_points[2];
+
+static lv_obj_t * jupiter_altitude_line = NULL;
+lv_point_precise_t jupiter_altitude_points[2];
+
+static lv_obj_t * saturn_altitude_line = NULL;
+lv_point_precise_t saturn_altitude_points[2];
+
+static lv_obj_t * uranus_altitude_line = NULL;
+lv_point_precise_t uranus_altitude_points[2];
+
+static lv_obj_t * neptune_altitude_line = NULL;
+lv_point_precise_t neptune_altitude_points[2];
+
 static lv_obj_t * moon_shadow = NULL;  // Shadow overlay for moon phase
 static lv_obj_t * saturn_ring = NULL;  // Saturn's rings
 static lv_point_precise_t saturn_ring_points[2];
@@ -137,7 +180,9 @@ static void container_click_cb(lv_event_t * e) {
 // CREATE PLANET CIRCLE
 // ============================================================================
 static lv_obj_t * create_planet(lv_obj_t * parent, int radius, lv_color_t color) {
+    printf("DEBUG: creating planet\n");
     lv_obj_t * obj = lv_obj_create(parent);
+    if (!obj) {printf("ERROR: Failed to create planet\n"); return NULL;}
     lv_obj_remove_style_all(obj);
     lv_obj_set_size(obj, radius * 2, radius * 2);
     lv_obj_set_style_radius(obj, LV_RADIUS_CIRCLE, 0);
@@ -153,13 +198,13 @@ static lv_obj_t * create_planet(lv_obj_t * parent, int radius, lv_color_t color)
 // CREATE ORBIT ARC
 // ============================================================================
 static lv_obj_t * create_orbit(lv_obj_t * parent, int radius, lv_color_t color) {
-    printf("DEBUG: creating arc arc\n");
+    printf("DEBUG: creating arc\n");
     lv_obj_t * arc = lv_arc_create(parent);
     if (!arc) {printf("ERROR: Failed to create arc\n"); return NULL;}
     lv_obj_remove_style_all(arc);
     lv_obj_set_size(arc, radius * 2, radius * 2);
     lv_obj_set_style_arc_color(arc, color, LV_PART_MAIN);
-    lv_obj_set_style_arc_width(arc, 2, LV_PART_MAIN);  // Slightly wider for smoother appearance
+    lv_obj_set_style_arc_width(arc, ORBIT_ARC_WIDTH_BELOW, LV_PART_MAIN);  // Slightly wider for smoother appearance
     lv_obj_set_style_arc_rounded(arc, true, LV_PART_MAIN);
     lv_arc_set_bg_angles(arc, 0, 360);
     lv_arc_set_value(arc, 0);
@@ -177,14 +222,14 @@ static lv_obj_t * create_target_box(lv_obj_t * parent, int size) {
     if (!parent || !lv_obj_is_valid(parent)) {
         printf("ERROR: create_target_box called with invalid parent (ptr=%p)\n", (void*)parent); return NULL;
     }
-    
+
     printf("DEBUG: create_target_box parent=%p size=%d\n", (void*)parent, size);
     lv_obj_t * box = lv_obj_create(parent);
     if (!box) {printf("ERROR: Failed to create target box\n"); return NULL;}
 
     lv_obj_remove_style_all(box);
     lv_obj_set_size(box, size + 8, size + 8);
-    lv_obj_set_style_border_width(box, 2, 0);
+    lv_obj_set_style_border_width(box, TARGET_BOX_LINE_WIDTH, 0);
     lv_obj_set_style_border_color(box, COLOR_TARGET, 0);
     lv_obj_set_style_bg_opa(box, LV_OPA_TRANSP, 0);
     lv_obj_add_flag(box, LV_OBJ_FLAG_HIDDEN);
@@ -216,7 +261,7 @@ static void create_zodiac(lv_obj_t * parent) {
     for (int i = 0; i < 12; i++) {
         zodiac_lines[i] = lv_line_create(parent);
         lv_obj_set_style_line_color(zodiac_lines[i], COLOR_ZODIAC, 0);
-        lv_obj_set_style_line_width(zodiac_lines[i], 2, 0);
+        lv_obj_set_style_line_width(zodiac_lines[i], ZODIAC_LINE_WIDTH, 0);
         zodiac_points[i][0].x = 0;
         zodiac_points[i][0].y = 0;
         zodiac_points[i][1].x = 0;
@@ -283,31 +328,31 @@ static void update_zodiac(int earth_x, int earth_y) {
 }
 
 // ============================================================================
-// ZENITH
+// Altitude
 // ============================================================================
 /**
- * Display Zenith at users earth cooridantes (approx. direction facing
+ * Display altitde at users earth cooridantes (approx. direction facing
  * directly outwards into 2D space, relative to the sun).
  * 
  * Should account for extreme latitues (months of daylight/night time)
  * by using sun azimuth which is calculated using current position.
  * 
  * Due to scale, shape & perspective, this line may only accurately reflect
- * Zenith direction relative to the sun, rather than also accurately
+ * altitde direction relative to the sun, rather than also accurately
  * reflecting direction relative to all other planets.
  * 
  * Orbital path lines reflect objects that are actually above the
  * horizon (altitude > 0).
  */
-static void update_zenith_line(float zenith_angle) {
-    if (!zenith_line) return;
+static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle, lv_point_precise_t * altitude_points, float intersection) {
+    if (!altitude_line) return;
     
-    float rad = deg2rad(zenith_angle);
+    float rad = deg2rad(altitude_angle);
     float dx = cosf(rad);
     float dy = sinf(rad);
     
     // Calculate intersection with Neptune's orbit circle (same as zodiac lines)
-    const float neptune_r = (float)neptune.orbit_radius;
+    // const float neptune_r = (float)neptune.orbit_radius;
     
     float ex = (float)((earth.x + earth.radius) - SOLAR_CENTER_X);
     float ey = (float)((earth.y + earth.radius) - SOLAR_CENTER_Y);
@@ -315,7 +360,7 @@ static void update_zenith_line(float zenith_angle) {
     // Quadratic coefficients: a*t^2 + b*t + c = 0
     float a = dx * dx + dy * dy;  // = 1 for unit direction
     float b = 2.0f * (ex * dx + ey * dy);
-    float c = ex * ex + ey * ey - neptune_r * neptune_r;
+    float c = ex * ex + ey * ey - intersection * intersection;
     
     float discriminant = b * b - 4.0f * a * c;
     float r = 0.0f;
@@ -333,13 +378,13 @@ static void update_zenith_line(float zenith_angle) {
             r = t2;
         }
     }
-    // Set points for zenith line (from Earth's center outwards)
-    zenith_points[0].x = (earth.x + earth.radius);
-    zenith_points[0].y = (earth.y + earth.radius);
-    zenith_points[1].x = (earth.x + earth.radius) + (int)(dx * r);
-    zenith_points[1].y = (earth.y + earth.radius) + (int)(dy * r);
+    // Set points for altitde line (from Earth's center outwards)
+    altitude_points[0].x = (earth.x + earth.radius);
+    altitude_points[0].y = (earth.y + earth.radius);
+    altitude_points[1].x = (earth.x + earth.radius) + (int)(dx * r);
+    altitude_points[1].y = (earth.y + earth.radius) + (int)(dy * r);
     
-    lv_line_set_points(zenith_line, zenith_points, 2);
+    lv_line_set_points(altitude_line, altitude_points, 2);
 }
 
 // ============================================================================
@@ -358,6 +403,8 @@ void astro_clock_update(void) {
         if (mercury.orbit) {
             lv_color_t color = (siderealPlanetData.mercury_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
             lv_obj_set_style_arc_color(mercury.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.mercury_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(mercury.orbit, width, LV_PART_MAIN);
         }
         lv_obj_clear_flag(mercury.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(mercury.obj, LV_OBJ_FLAG_HIDDEN);
@@ -376,6 +423,8 @@ void astro_clock_update(void) {
         if (venus.orbit) {
             lv_color_t color = (siderealPlanetData.venus_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
             lv_obj_set_style_arc_color(venus.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.venus_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(venus.orbit, width, LV_PART_MAIN);
         }
         lv_obj_clear_flag(venus.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(venus.obj, LV_OBJ_FLAG_HIDDEN); 
@@ -404,10 +453,46 @@ void astro_clock_update(void) {
         // Draw Zodiac lines from earth
         update_zodiac((earth.x + earth.radius), (earth.y + earth.radius));
 
-        // Draw Zenith device line from earth
-        float toward_sun = -siderealPlanetData.earth_ecliptic_long;
-        float zenith_angle = toward_sun - siderealPlanetData.sun_az + 180.0f;
-        update_zenith_line(zenith_angle);
+        float ecliptic_long;
+        float altitde_angle;
+
+        ecliptic_long = -siderealPlanetData.earth_ecliptic_long; // points directly at the sun
+        altitde_angle = ecliptic_long - siderealPlanetData.sun_az + 180.0f; // rotate by az = deg relative to local pos, sun pos
+        lv_color_t color = (siderealPlanetData.sun_alt <= 0) ? COLOR_SUN_BELOW : COLOR_SUN_ABOVE;
+        lv_obj_set_style_line_color(sun_altitude_line, color, 0);
+        update_altitude_line(sun_altitude_line, altitde_angle, sun_altitude_points, neptune.orbit_radius);
+
+        // ecliptic_long = -siderealPlanetData.mercury_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.mercury_az + 180.0f);
+        // update_altitude_line(mercury_altitude_line, altitde_angle, mercury_altitude_points, mercury.orbit_radius);
+
+        // ecliptic_long = -siderealPlanetData.venus_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.venus_az + 180.0f);
+        // update_altitude_line(venus_altitude_line, altitde_angle, venus_altitude_points, venus.orbit_radius);
+
+        // ecliptic_long = -siderealPlanetData.moon_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.moon_az + 180.0f);
+        // update_altitude_line(moon_altitude_line, altitde_angle, moon_altitude_points, moon.orbit_radius);
+
+        // ecliptic_long = -siderealPlanetData.mars_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.mars_az + 180.0f);
+        // update_altitude_line(mars_altitude_line, altitde_angle, mars_altitude_points, mars.orbit_radius);
+
+        // ecliptic_long = -siderealPlanetData.jupiter_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.jupiter_az + 180.0f);
+        // update_altitude_line(jupiter_altitude_line, altitde_angle, jupiter_altitude_points, jupiter.orbit_radius);
+
+        // ecliptic_long = -siderealPlanetData.saturn_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.saturn_az + 180.0f);
+        // update_altitude_line(saturn_altitude_line, altitde_angle, saturn_altitude_points, saturn.orbit_radius);
+
+        // ecliptic_long = -siderealPlanetData.uranus_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.uranus_az + 180.0f);
+        // update_altitude_line(uranus_altitude_line, altitde_angle, uranus_altitude_points, uranus.orbit_radius);
+
+        // ecliptic_long = -siderealPlanetData.neptune_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.neptune_az + 180.0f);
+        // update_altitude_line(neptune_altitude_line, altitde_angle, neptune_altitude_points, neptune.orbit_radius);
 
         lv_obj_clear_flag(earth.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(earth.obj, LV_OBJ_FLAG_HIDDEN);
@@ -488,6 +573,8 @@ void astro_clock_update(void) {
             lv_obj_align_to(moon.orbit, earth.obj, LV_ALIGN_CENTER, 0, 0);
             lv_color_t color = (siderealPlanetData.moon_alt <= 0) ? COLOR_ORBIT_MOON_BELOW : COLOR_ORBIT_MOON_ABOVE;
             lv_obj_set_style_arc_color(moon.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.moon_alt <= 0) ? MOON_ORBIT_ARC_WIDTH_BELOW : MOON_ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(moon.orbit, width, LV_PART_MAIN);
         }
         lv_obj_clear_flag(moon.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(moon.obj, LV_OBJ_FLAG_HIDDEN);
@@ -509,6 +596,8 @@ void astro_clock_update(void) {
         if (mars.orbit) {
             lv_color_t color = (siderealPlanetData.mars_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
             lv_obj_set_style_arc_color(mars.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.mars_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(mars.orbit, width, LV_PART_MAIN);
         }
         lv_obj_clear_flag(mars.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(mars.obj, LV_OBJ_FLAG_HIDDEN);
@@ -528,6 +617,8 @@ void astro_clock_update(void) {
         if (jupiter.orbit) {
             lv_color_t color = (siderealPlanetData.jupiter_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
             lv_obj_set_style_arc_color(jupiter.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.jupiter_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(jupiter.orbit, width, LV_PART_MAIN);
         }
         lv_obj_clear_flag(jupiter.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(jupiter.obj, LV_OBJ_FLAG_HIDDEN);
@@ -547,6 +638,8 @@ void astro_clock_update(void) {
         if (saturn.orbit) {
             lv_color_t color = (siderealPlanetData.saturn_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
             lv_obj_set_style_arc_color(saturn.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.saturn_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(saturn.orbit, width, LV_PART_MAIN);
         }
         // Update Saturn rings position
         if (saturn_ring) {
@@ -577,6 +670,8 @@ void astro_clock_update(void) {
         if (uranus.orbit) {
             lv_color_t color = (siderealPlanetData.uranus_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
             lv_obj_set_style_arc_color(uranus.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.uranus_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(uranus.orbit, width, LV_PART_MAIN);
         }
         lv_obj_clear_flag(uranus.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(uranus.obj, LV_OBJ_FLAG_HIDDEN);
@@ -596,6 +691,8 @@ void astro_clock_update(void) {
         if (neptune.orbit) {
             lv_color_t color = (siderealPlanetData.neptune_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
             lv_obj_set_style_arc_color(neptune.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.neptune_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(neptune.orbit, width, LV_PART_MAIN);
         }
         lv_obj_clear_flag(neptune.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(neptune.obj, LV_OBJ_FLAG_HIDDEN);
@@ -1246,18 +1343,147 @@ void astro_clock_begin(
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    // Zenith line (red line from Earth to edge showing local zenith)
-    printf("DEBUG: Creating zenith_line\n");
-    zenith_line = lv_line_create(astro_container);
-    if (!zenith_line) { printf("ERROR: Failed to create zenith_line\n"); return;}
-    printf("DEBUG: zenith_line done\n");
-    lv_obj_set_style_line_color(zenith_line, lv_color_make(128, 0, 0), 0);
-    lv_obj_set_style_line_width(zenith_line, 2, 0);
-    lv_obj_set_style_line_rounded(zenith_line, true, 0);
-    zenith_points[0].x = 0;
-    zenith_points[0].y = 0;
-    zenith_points[1].x = 0;
-    zenith_points[1].y = 0;
+    // sun.color = lv_color_make(255, 255, 0);
+    // mercury.color = lv_color_make(255, 0, 255);
+    // venus.color = lv_color_make(180, 180, 0);
+    // earth.color = lv_color_make(0, 0, 255);
+    // moon.color = lv_color_make(128, 128, 128);
+    // mars.color = lv_color_make(255, 0, 0);
+    // jupiter.color = lv_color_make(128, 128, 128);
+    // saturn.color = lv_color_make(210, 210, 0);
+    // uranus.color = lv_color_make(0, 255, 255);
+    // neptune.color = lv_color_make(255, 0, 255);
+
+    // Sun altitde line (line from Earth to edge showing local altitde relative to sun)
+    printf("DEBUG: Creating sun_altitude_line\n");
+    sun_altitude_line = lv_line_create(astro_container);
+    if (!sun_altitude_line) { printf("ERROR: Failed to create sun_altitude_line\n"); return;}
+    printf("DEBUG: sun_altitude_line done\n");
+    lv_obj_set_style_line_color(sun_altitude_line, lv_color_make(128, 0, 0), 0);
+    lv_obj_set_style_line_width(sun_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    lv_obj_set_style_line_rounded(sun_altitude_line, true, 0);
+
+    // // Mercury altitde line
+    // printf("DEBUG: Creating mercury_altitude_line\n");
+    // mercury_altitude_line = lv_line_create(astro_container);
+    // if (!mercury_altitude_line) { printf("ERROR: Failed to create mercury_altitude_line\n"); return;}
+    // printf("DEBUG: mercury_altitude_line done\n");
+    // lv_obj_set_style_line_color(mercury_altitude_line, lv_color_make(128, 128, 0), 0);
+    // lv_obj_set_style_line_width(mercury_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(mercury_altitude_line, true, 0);
+
+    // // Venus altitde line
+    // printf("DEBUG: Creating venus_altitude_line\n");
+    // venus_altitude_line = lv_line_create(astro_container);
+    // if (!venus_altitude_line) { printf("ERROR: Failed to create venus_altitude_line\n"); return;}
+    // printf("DEBUG: venus_altitude_line done\n");
+    // lv_obj_set_style_line_color(venus_altitude_line, lv_color_make(0, 0, 128), 0);
+    // lv_obj_set_style_line_width(venus_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(venus_altitude_line, true, 0);
+
+    // Moon altitde line
+    // printf("DEBUG: Creating moon_altitude_line\n");
+    // moon_altitude_line = lv_line_create(astro_container);
+    // if (!moon_altitude_line) { printf("ERROR: Failed to create moon_altitude_line\n"); return;}
+    // printf("DEBUG: moon_altitude_line done\n");
+    // lv_obj_set_style_line_color(moon_altitude_line, lv_color_make(128, 128, 128), 0);
+    // lv_obj_set_style_line_width(moon_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(moon_altitude_line, true, 0);
+
+    // // Mars altitde line (line from Earth to edge showing local altitde relative to mars)
+    // printf("DEBUG: Creating mars_altitude_line\n");
+    // mars_altitude_line = lv_line_create(astro_container);
+    // if (!mars_altitude_line) { printf("ERROR: Failed to create mars_altitude_line\n"); return;}
+    // printf("DEBUG: mars_altitude_line done\n");
+    // lv_obj_set_style_line_color(mars_altitude_line, lv_color_make(128, 0, 0), 0);
+    // lv_obj_set_style_line_width(mars_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(mars_altitude_line, true, 0);
+
+    // // Jupiter altitde line
+    // printf("DEBUG: Creating jupiter_altitude_line\n");
+    // jupiter_altitude_line = lv_line_create(astro_container);
+    // if (!jupiter_altitude_line) { printf("ERROR: Failed to create jupiter_altitude_line\n"); return;}
+    // printf("DEBUG: jupiter_altitude_line done\n");
+    // lv_obj_set_style_line_color(jupiter_altitude_line, lv_color_make(128, 128, 128), 0);
+    // lv_obj_set_style_line_width(jupiter_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(jupiter_altitude_line, true, 0);
+
+    // // Saturn altitde line
+    // printf("DEBUG: Creating saturn_altitude_line\n");
+    // saturn_altitude_line = lv_line_create(astro_container);
+    // if (!saturn_altitude_line) { printf("ERROR: Failed to create saturn_altitude_line\n"); return;}
+    // printf("DEBUG: saturn_altitude_line done\n");
+    // lv_obj_set_style_line_color(saturn_altitude_line, lv_color_make(128, 128, 0), 0);
+    // lv_obj_set_style_line_width(saturn_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(saturn_altitude_line, true, 0);
+
+    // // Uranus altitde line
+    // printf("DEBUG: Creating uranus_altitude_line\n");
+    // uranus_altitude_line = lv_line_create(astro_container);
+    // if (!uranus_altitude_line) { printf("ERROR: Failed to create uranus_altitude_line\n"); return;}
+    // printf("DEBUG: uranus_altitude_line done\n");
+    // lv_obj_set_style_line_color(uranus_altitude_line, lv_color_make(0, 128, 128), 0);
+    // lv_obj_set_style_line_width(uranus_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(uranus_altitude_line, true, 0);
+
+    // // Neptune altitde line
+    // printf("DEBUG: Creating neptune_altitude_line\n");
+    // neptune_altitude_line = lv_line_create(astro_container);
+    // if (!neptune_altitude_line) { printf("ERROR: Failed to create neptune_altitude_line\n"); return;}
+    // printf("DEBUG: neptune_altitude_line done\n");
+    // lv_obj_set_style_line_color(neptune_altitude_line, lv_color_make(128, 0, 128), 0);
+    // lv_obj_set_style_line_width(neptune_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(neptune_altitude_line, true, 0);
+
+    sun_altitude_points[0].x = 0;
+    sun_altitude_points[0].y = 0;
+    sun_altitude_points[1].x = 0;
+    sun_altitude_points[1].y = 0;
+
+    // mercury_altitude_points[0].x = 0;
+    // mercury_altitude_points[0].y = 0;
+    // mercury_altitude_points[1].x = 0;
+    // mercury_altitude_points[1].y = 0;
+
+    // venus_altitude_points[0].x = 0;
+    // venus_altitude_points[0].y = 0;
+    // venus_altitude_points[1].x = 0;
+    // venus_altitude_points[1].y = 0;
+
+    // earth_altitude_points[0].x = 0;
+    // earth_altitude_points[0].y = 0;
+    // earth_altitude_points[1].x = 0;
+    // earth_altitude_points[1].y = 0;
+
+    // moon_altitude_points[0].x = 0;
+    // moon_altitude_points[0].y = 0;
+    // moon_altitude_points[1].x = 0;
+    // moon_altitude_points[1].y = 0;
+
+    // mars_altitude_points[0].x = 0;
+    // mars_altitude_points[0].y = 0;
+    // mars_altitude_points[1].x = 0;
+    // mars_altitude_points[1].y = 0;
+
+    // jupiter_altitude_points[0].x = 0;
+    // jupiter_altitude_points[0].y = 0;
+    // jupiter_altitude_points[1].x = 0;
+    // jupiter_altitude_points[1].y = 0;
+
+    // saturn_altitude_points[0].x = 0;
+    // saturn_altitude_points[0].y = 0;
+    // saturn_altitude_points[1].x = 0;
+    // saturn_altitude_points[1].y = 0;
+
+    // uranus_altitude_points[0].x = 0;
+    // uranus_altitude_points[0].y = 0;
+    // uranus_altitude_points[1].x = 0;
+    // uranus_altitude_points[1].y = 0;
+
+    // neptune_altitude_points[0].x = 0;
+    // neptune_altitude_points[0].y = 0;
+    // neptune_altitude_points[1].x = 0;
+    // neptune_altitude_points[1].y = 0;
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
     
@@ -1360,7 +1586,7 @@ void astro_clock_begin(
     target_data_box = lv_obj_create(astro_container);
     lv_obj_remove_style_all(target_data_box);
     lv_obj_set_size(target_data_box, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_obj_set_style_border_width(target_data_box, 2, 0);
+    lv_obj_set_style_border_width(target_data_box, TARGET_BOX_LINE_WIDTH, 0);
     lv_obj_set_style_border_color(target_data_box, COLOR_TARGET, 0);
     lv_obj_set_style_bg_color(target_data_box, lv_color_black(), 0);
     lv_obj_set_style_bg_opa(target_data_box, LV_OPA_80, 0);
@@ -1374,7 +1600,7 @@ void astro_clock_begin(
     // -----------------------------------------------------------------
     target_connector_line = lv_line_create(astro_container);
     lv_obj_set_style_line_color(target_connector_line, COLOR_TARGET, 0);
-    lv_obj_set_style_line_width(target_connector_line, 2, 0);
+    lv_obj_set_style_line_width(target_connector_line, TARGET_BOX_LINE_WIDTH, 0);
     lv_obj_set_style_line_rounded(target_connector_line, true, 0);
     lv_obj_add_flag(target_connector_line, LV_OBJ_FLAG_HIDDEN);
     connector_points[0].x = 0;
@@ -1440,7 +1666,7 @@ void astro_clock_end() {
     // neptune.obj = NULL; neptune.orbit = NULL; neptune.target_box = NULL;
     
     // // Other global objects
-    // zenith_line = NULL;
+    // altitde_line = NULL;
     // moon_shadow = NULL;
     // saturn_ring = NULL;
     // target_data_box = NULL;

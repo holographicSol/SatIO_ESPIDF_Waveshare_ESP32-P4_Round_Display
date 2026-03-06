@@ -452,7 +452,9 @@ lv_obj_t * create_menu_grid(
     bool show_scrollbar,
     bool enable_scrolling,
     lv_text_align_t text_align,
-    const lv_font_t * font
+    const lv_font_t * font,
+    bool transparent_bg,
+    bool transparent_outline
     ) ;
 
 lv_obj_t * create_dropdown_menu(
