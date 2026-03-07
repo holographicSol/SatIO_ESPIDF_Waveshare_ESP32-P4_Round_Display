@@ -413,10 +413,68 @@ typedef struct {
  */
 typedef struct {
     lv_obj_t * panel; // Main container panel
-    lv_obj_t * lbl_deg_lat;
-    lv_obj_t * val_deg_lat;
-    lv_obj_t * lbl_deg_lon;
-    lv_obj_t * val_deg_lon;
+
+    /* ---------------------------------------------------------- */
+    /* Title Positioning                                          */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * lbl_title_location;
+
+    lv_obj_t * lbl_deg_lat;      // GPS Latitude
+    lv_obj_t * val_deg_lat;      // GPS Longitude
+    lv_obj_t * lbl_user_deg_lat; // User Latitude
+    lv_obj_t * ta_user_deg_lat;  // User Latitude
+
+    lv_obj_t * lbl_deg_lon;      // GPS Longitude
+    lv_obj_t * val_deg_lon;      // GPS Longitude
+    lv_obj_t * lbl_user_deg_lon; // User Longitude
+    lv_obj_t * ta_user_deg_lon;  // User Longitude
+
+    /* ---------------------------------------------------------- */
+    /* Title Altitude                                             */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * lbl_title_altitude;
+
+    lv_obj_t * lbl_altitude;      // GPS Altitude
+    lv_obj_t * val_altitude;      // GPS Altitude    
+    lv_obj_t * lbl_user_altitude; // User Altitude
+    lv_obj_t * ta_user_altitude;  // User Altitude
+
+    /* ---------------------------------------------------------- */
+    /* Title Speed                                                */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * lbl_title_speed;
+
+    lv_obj_t * lbl_speed;      // GPS Speed
+    lv_obj_t * val_speed;      // GPS Speed
+    lv_obj_t * lbl_user_speed; // User Speed
+    lv_obj_t * ta_user_speed;  // User Speed
+
+    /* ---------------------------------------------------------- */
+    /* Title Heading                                              */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * lbl_title_heading;
+
+    lv_obj_t * lbl_ground_heading_name; // NNW, etc.
+    lv_obj_t * val_ground_heading_name; // NNW, etc
+    lv_obj_t * lbl_ground_heading;      // GPS Ground Heading
+    lv_obj_t * val_ground_heading;      // GPS Ground Heading
+    lv_obj_t * lbl_user_ground_heading; // User Ground Heading
+    lv_obj_t * ta_user_ground_heading;  // User Ground Heading
+
+    /* ---------------------------------------------------------- */
+    /* Title Mileage                                              */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * lbl_title_mileage;
+    lv_obj_t * lbl_mileage;
+    lv_obj_t * val_mileage;
+
+    /* ---------------------------------------------------------- */
+    /* Title Local Time                                           */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * lbl_title_local_time;
+
+    lv_obj_t * lbl_local_unixtime_us;
+    lv_obj_t * val_local_unixtime_us;
     lv_obj_t * lbl_local_yday;
     lv_obj_t * val_local_yday;
     lv_obj_t * lbl_local_wday_name;
@@ -427,8 +485,32 @@ typedef struct {
     lv_obj_t * val_formatted_local_time;
     lv_obj_t * lbl_formatted_local_date;
     lv_obj_t * val_formatted_local_date;
-    lv_obj_t * lbl_local_unixtime_us;
-    lv_obj_t * val_local_unixtime_us;
+
+    lv_obj_t * lbl_utc_second_offset;
+    lv_obj_t * ta_utc_second_offset;
+    
+    lv_obj_t * lbl_utc_auto_offset_flag;
+    lv_obj_t * val_utc_auto_offset_flag;
+    lv_obj_t * lbl_set_time_automatically;
+    lv_obj_t * val_set_time_automatically;
+
+    /* ---------------------------------------------------------- */
+    /* Title RTC Time                                             */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * lbl_title_rtc_time;
+
+    lv_obj_t * lbl_rtc_unixtime;
+    lv_obj_t * val_rtc_unixtime;
+    lv_obj_t * lbl_formatted_rtc_time;
+    lv_obj_t * val_formatted_rtc_time;
+    lv_obj_t * lbl_formatted_rtc_date;
+    lv_obj_t * val_formatted_rtc_date;
+
+    /* ---------------------------------------------------------- */
+    /* Title RTC Sync                                             */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * lbl_title_rtc_sync;
+
     lv_obj_t * lbl_formatted_rtc_sync_time;
     lv_obj_t * val_formatted_rtc_sync_time;
     lv_obj_t * lbl_formatted_rtc_sync_date;
@@ -439,42 +521,7 @@ typedef struct {
     lv_obj_t * val_rtcsync_longitude;
     lv_obj_t * lbl_rtcsync_altitude;
     lv_obj_t * val_rtcsync_altitude;
-    lv_obj_t * lbl_formatted_rtc_time;
-    lv_obj_t * val_formatted_rtc_time;
-    lv_obj_t * lbl_formatted_rtc_date;
-    lv_obj_t * val_formatted_rtc_date;
-    lv_obj_t * lbl_rtc_unixtime;
-    lv_obj_t * val_rtc_unixtime;
-    lv_obj_t * lbl_utc_second_offset;
-    lv_obj_t * val_utc_second_offset;
-    lv_obj_t * lbl_utc_auto_offset_flag;
-    lv_obj_t * val_utc_auto_offset_flag;
-    lv_obj_t * lbl_set_time_automatically;
-    lv_obj_t * val_set_time_automatically;
-    lv_obj_t * lbl_altitude;
-    lv_obj_t * val_altitude;
-    lv_obj_t * lbl_altitude_converted;
-    lv_obj_t * val_altitude_converted;
-    lv_obj_t * lbl_altitude_unit_mode;
-    lv_obj_t * val_altitude_unit_mode;
-    lv_obj_t * lbl_altitude_conversion_mode;
-    lv_obj_t * val_altitude_conversion_mode;
-    lv_obj_t * lbl_speed;
-    lv_obj_t * val_speed;
-    lv_obj_t * lbl_speed_converted;
-    lv_obj_t * val_speed_converted;
-    lv_obj_t * lbl_speed_unit_mode;
-    lv_obj_t * val_speed_unit_mode;
-    lv_obj_t * lbl_speed_conversion_mode;
-    lv_obj_t * val_speed_conversion_mode;
-    lv_obj_t * lbl_ground_heading_name;
-    lv_obj_t * val_ground_heading_name;
-    lv_obj_t * lbl_ground_heading;
-    lv_obj_t * val_ground_heading;
-    lv_obj_t * lbl_ground_heading_mode;
-    lv_obj_t * val_ground_heading_mode;
-    lv_obj_t * lbl_mileage;
-    lv_obj_t * val_mileage;
+
 } satio_container_t;
 
 /** ---------------------------------------------------------------------------------------

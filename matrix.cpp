@@ -1417,7 +1417,7 @@ bool matrixSwitch(void) {
         handle_digit=true;
       }
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_HEADING)) {
-        tmp_x = strtod(gnrmcData.ground_heading, &xyzptr);
+        tmp_x = strtod(gnrmcData.ground_heading, NULL);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;

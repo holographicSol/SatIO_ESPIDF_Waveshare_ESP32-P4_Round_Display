@@ -403,9 +403,9 @@ extern "C" void app_main(void)
                 "sat=%s "
                 "lat=%.7f "
                 "lon=%.7f "
-                "alt=%.2f_%s "
-                "ghd=%.2f_%s"
-                "spd=%.2f_%s  "
+                "alt=%.2f "
+                "ghd=%.2f "
+                "spd=%.2f "
                 
                 "ang_x=%.2f "
                 "ang_y=%.2f "
@@ -439,12 +439,9 @@ extern "C" void app_main(void)
                 gnggaData.satellite_count,
                 satioData.degrees_latitude,
                 satioData.degrees_longitude,
-                satioData.altitude_converted,
-                satioData.char_altitude_unit_mode[satioData.altitude_unit_mode],
+                satioData.altitude,
                 satioData.ground_heading,
-                satioData.char_altitude_unit_mode[satioData.altitude_unit_mode],
-                satioData.speed_converted,
-                satioData.char_speed_unit_mode[satioData.speed_unit_mode],
+                satioData.speed,
 
                 gyroData.gyro_0_ang_x,
                 gyroData.gyro_0_ang_y,

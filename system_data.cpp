@@ -136,12 +136,6 @@ void restore_system_defaults(void) {
   satioData.utc_auto_offset_flag = false;
   satioData.set_time_automatically = true;
   satioData.sync_rtc_immediately_flag = true;
-  satioData.coordinate_conversion_mode = COORDINATE_CONVERSION_MODE_GPS;
-  satioData.altitude_unit_mode = ALTITUDE_UNIT_MODE_METERS;
-  satioData.altitude_conversion_mode = ALTITUDE_CONVERSION_MODE_GPS;
-  satioData.speed_unit_mode = SPEED_UNIT_MODE_KTS;
-  satioData.speed_conversion_mode = SPEED_CONVERSION_MODE_GPS;
-  satioData.ground_heading_mode = GROUND_HEADING_MODE_GPS;
 
   insData.INS_REQ_GPS_PRECISION = 0.5;
   insData.INS_REQ_MIN_SPEED = 0.1;

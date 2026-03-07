@@ -306,9 +306,9 @@ void taskGPS(void * pvParameters) {
         // --------------------------------------------
         set_ins(satioData.degrees_latitude,
                 satioData.degrees_longitude,
-                satioData.altitude_converted,
+                satioData.altitude,
                 satioData.ground_heading,
-                satioData.speed_converted,
+                satioData.speed,
                 atof(gnggaData.gps_precision_factor),
                 gyroData.gyro_0_ang_z);
         esp_task_wdt_reset();
@@ -366,7 +366,7 @@ void taskGyro(void * pvParameters) {
       if (ins_estimate_position(gyroData.gyro_0_ang_y,
                           gyroData.gyro_0_ang_z,
                           satioData.ground_heading,
-                          satioData.speed_converted,
+                          satioData.speed,
                           satioData.local_unixtime_uS)==true) {
                           systemData.i_count_read_ins++;
                           systemData.interval_breach_ins=1;

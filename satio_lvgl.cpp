@@ -281,6 +281,12 @@ typedef enum {
     KB_MAPPING_C3,
     KB_MAPPING_C4,
     KB_MAPPING_C5,
+    KB_USER_LATITUDE,
+    KB_USER_LONGITUDE,
+    KB_USER_ALTITUDE,
+    KB_USER_SPEED,
+    KB_USER_GROUND_HEADING,
+    KB_UTC_OFFSET_SECONDS,
     /* ... add other objects as required (does not have to be a lv_textarea) */
 } kb_target_t;
 
@@ -319,6 +325,13 @@ static kb_ctx_t mapping_c2_ctx = { .target = KB_MAPPING_C2, .strval_type = STRVA
 static kb_ctx_t mapping_c3_ctx = { .target = KB_MAPPING_C3, .strval_type = STRVAL_INT32 };
 static kb_ctx_t mapping_c4_ctx = { .target = KB_MAPPING_C4, .strval_type = STRVAL_INT32 };
 static kb_ctx_t mapping_c5_ctx = { .target = KB_MAPPING_C5, .strval_type = STRVAL_INT32 };
+
+static kb_ctx_t user_latitude_ctx = { .target = KB_USER_LATITUDE, .strval_type = STRVAL_DOUBLE };
+static kb_ctx_t user_longitude_ctx = { .target = KB_USER_LONGITUDE, .strval_type = STRVAL_DOUBLE };
+static kb_ctx_t user_altitude_ctx = { .target = KB_USER_ALTITUDE, .strval_type = STRVAL_DOUBLE };
+static kb_ctx_t user_speed_ctx = { .target = KB_USER_SPEED, .strval_type = STRVAL_DOUBLE };
+static kb_ctx_t user_ground_heading_ctx = { .target = KB_USER_GROUND_HEADING, .strval_type = STRVAL_DOUBLE };
+static kb_ctx_t user_utc_offset_seconds_ctx = { .target = KB_UTC_OFFSET_SECONDS, .strval_type = STRVAL_INT64 };
 
 /* ... add other contexts as required (does not have to be a lv_textarea) */
 
@@ -359,6 +372,13 @@ static void set_keyboard_context_cb(lv_event_t * e)
         case KB_MAPPING_C3: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_MAPPING_C3\n"); break;
         case KB_MAPPING_C4: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_MAPPING_C4\n"); break;
         case KB_MAPPING_C5: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_MAPPING_C5\n"); break;
+
+        case KB_USER_LATITUDE: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_LATITUDE\n"); break;
+        case KB_USER_LONGITUDE: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_LONGITUDE\n"); break;
+        case KB_USER_ALTITUDE: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_ALTITUDE\n"); break;
+        case KB_USER_SPEED: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_SPEED\n"); break;
+        case KB_USER_GROUND_HEADING: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_GROUND_HEADING\n"); break;
+        case KB_UTC_OFFSET_SECONDS: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_UTC_OFFSET_SECONDS\n"); break;
 
         /* ... add other cases as required */
         default: printf("[set_keyboard_context_cb] Unknown keyboard target: %d\n", ctx->target); return;
@@ -578,7 +598,80 @@ static void keyboard_event_cb(lv_event_t * e)
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
             }
             break;
+
+        case KB_USER_LATITUDE:
+            if (strval_validate(ctx->strval_type, input)) {
+                double val = strtod(input, NULL);
+                printf("[keyboard_event_cb] Setting KB_USER_LATITUDE to: %f\n", val);
+                // lv_textarea_set_text(...); // Update relevant object if needed
+                satioData.user_degrees_latitude = val;
+            }
+            else {
+                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
+            }
+            break;
+
+        case KB_USER_LONGITUDE:
+            if (strval_validate(ctx->strval_type, input)) {
+                double val = strtod(input, NULL);
+                printf("[keyboard_event_cb] Setting KB_USER_LONGITUDE to: %f\n", val);
+                // lv_textarea_set_text(...); // Update relevant object if needed
+                satioData.user_degrees_longitude = val;
+            }
+            else {
+                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
+            }
+            break;
+
+        case KB_USER_ALTITUDE:
+            if (strval_validate(ctx->strval_type, input)) {
+                double val = strtod(input, NULL);
+                printf("[keyboard_event_cb] Setting KB_USER_ALTITUDE to: %f\n", val);
+                // lv_textarea_set_text(...); // Update relevant object if needed
+                satioData.user_altitude = val;
+            }
+            else {
+                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
+            }
+            break;
+
+        case KB_USER_SPEED:
+            if (strval_validate(ctx->strval_type, input)) {
+                double val = strtod(input, NULL);
+                printf("[keyboard_event_cb] Setting KB_USER_SPEED to: %f\n", val);
+                // lv_textarea_set_text(...); // Update relevant object if needed
+                satioData.user_speed= val;
+            }
+            else {
+                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
+            }
+            break;
+
+        case KB_USER_GROUND_HEADING:
+            if (strval_validate(ctx->strval_type, input)) {
+                double val = strtod(input, NULL);
+                printf("[keyboard_event_cb] Setting KB_USER_GROUND_HEADING to: %f\n", val);
+                // lv_textarea_set_text(...); // Update relevant object if needed
+                satioData.user_ground_heading= val;
+            }
+            else {
+                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
+            }
+            break;
+
+        case KB_UTC_OFFSET_SECONDS:
+            if (strval_validate(ctx->strval_type, input)) {
+                int64_t val = atoll(input);
+                printf("[keyboard_event_cb] Setting KB_UTC_OFFSET_SECONDS to: %lld\n", val);
+                // lv_textarea_set_text(...); // Update relevant object if needed
+                satioData.utc_second_offset = val;
+            }
+            else {
+                printf("[keyboard_event_cb] Input is not a valid int64_t: %s\n", input);
+            }
+            break;
         
+        // DEFAULT
         default:
             printf("[keyboard_event_cb] No case for context target: %d\n", ctx->target);
             break;
@@ -5971,7 +6064,7 @@ satio_container_t create_satio_panel(
 {
     satio_container_t result = {0};
 
-    int32_t label_width_0 = 200;
+    int32_t label_width_0 = 250;
     int32_t value_width_0 = (width_px - label_width_0) - padding * 4;
     int32_t obj_height = row_height - 6;
 
@@ -6006,7 +6099,52 @@ satio_container_t create_satio_panel(
     lv_obj_set_style_outline_pad(result.panel, padding, LV_PART_MAIN);
 
     /* ---------------------------------------------------------- */
-    /* Row Degrees Latitude                                       */
+    /* Title Location                                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_title_positioning = lv_obj_create(result.panel);
+    lv_obj_set_size(row_title_positioning, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_title_positioning, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_title_positioning, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_title_positioning, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_title_positioning, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_title_positioning, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_title_positioning,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_title_positioning, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_title_positioning, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_title_positioning, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_title_positioning, LV_DIR_NONE);
+
+    label_width_0 = width_px - padding * 4;
+
+    result.lbl_title_location= create_label(
+        row_title_positioning,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "POSITIONING",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_title_location, label_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row GPS Degrees Latitude                                   */
     /* ---------------------------------------------------------- */
 
     lv_obj_t * row_lat = lv_obj_create(result.panel);
@@ -6028,6 +6166,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_lat, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_lat, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
+
     result.lbl_deg_lat= create_label(
         row_lat,
         label_width_0,
@@ -6035,7 +6177,7 @@ satio_container_t create_satio_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "Degrees Latitude",
+        "[GPS] Degrees Latitude",
         LV_TEXT_ALIGN_LEFT,
         &cobalt_alien_17,
         false,
@@ -6068,7 +6210,7 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.val_deg_lat, value_width_0, obj_height);
 
     /* ---------------------------------------------------------- */
-    /* Row Degrees Longitude                                      */
+    /* Row GPS Degrees Longitude                                  */
     /* ---------------------------------------------------------- */
 
     lv_obj_t * row_lon = lv_obj_create(result.panel);
@@ -6097,7 +6239,7 @@ satio_container_t create_satio_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "Degrees Longitude",
+        "[GPS] Degrees Longitude",
         LV_TEXT_ALIGN_LEFT,
         &cobalt_alien_17,
         false,
@@ -6128,6 +6270,1059 @@ satio_container_t create_satio_panel(
 
     lv_obj_set_size(result.lbl_deg_lon, label_width_0, obj_height);
     lv_obj_set_size(result.val_deg_lon, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Degrees User Latitude                                  */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_user_lat = lv_obj_create(result.panel);
+    lv_obj_set_size(row_user_lat, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_user_lat, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_user_lat, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_user_lat, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_user_lat, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_user_lat, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_user_lat,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_user_lat, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_user_lat, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_user_lat, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_user_lat, LV_DIR_NONE);
+
+    result.lbl_user_deg_lat= create_label(
+        row_user_lat,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[USER] Degrees Latitude",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.ta_user_deg_lat = create_textarea(
+        row_user_lat,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        true,
+        "0123456789.-",
+        "0",
+        false,
+        false,
+        false,
+        &cobalt_alien_17,
+        LV_TEXT_ALIGN_CENTER
+    );
+    lv_obj_add_event_cb(result.ta_user_deg_lat, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_set_user_data(result.ta_user_deg_lat, &user_latitude_ctx);
+
+    lv_obj_set_size(result.lbl_user_deg_lat, label_width_0, obj_height);
+    lv_obj_set_size(result.ta_user_deg_lat, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Degrees User Longitude                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_user_lon = lv_obj_create(result.panel);
+    lv_obj_set_size(row_user_lon, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_user_lon, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_user_lon, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_user_lon, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_user_lon, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_user_lon, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_user_lon,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_user_lon, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_user_lon, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_user_lon, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_user_lon, LV_DIR_NONE);
+
+    result.lbl_user_deg_lon = create_label(
+        row_user_lon,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[USER] Degrees Longitude",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.ta_user_deg_lon = create_textarea(
+        row_user_lon,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        true,
+        "0123456789.-",
+        "0",
+        false,
+        false,
+        false,
+        &cobalt_alien_17,
+        LV_TEXT_ALIGN_CENTER
+    );
+    lv_obj_add_event_cb(result.ta_user_deg_lon, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_set_user_data(result.ta_user_deg_lon, &user_longitude_ctx);
+
+    lv_obj_set_size(result.lbl_user_deg_lon, label_width_0, obj_height);
+    lv_obj_set_size(result.ta_user_deg_lon, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Title Altitude                                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_title_altitude = lv_obj_create(result.panel);
+    lv_obj_set_size(row_title_altitude, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_title_altitude, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_title_altitude, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_title_altitude, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_title_altitude, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_title_altitude, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_title_altitude,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_title_altitude, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_title_altitude, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_title_altitude, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_title_altitude, LV_DIR_NONE);
+
+    label_width_0 = width_px - padding * 4;
+
+    result.lbl_title_altitude= create_label(
+        row_title_altitude,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "ALTITUDE",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_title_altitude, label_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row GPS Altitude                                           */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_17 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_17, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_17, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_17, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_17, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_17, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_17, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_17,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_17, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_17, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_17, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_17, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
+
+    result.lbl_altitude = create_label(
+        row_17,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[GPS] Altitude",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_altitude = create_label(
+        row_17,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_altitude, label_width_0, obj_height);
+    lv_obj_set_size(result.val_altitude, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row User Altitude                                          */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_user_alt = lv_obj_create(result.panel);
+    lv_obj_set_size(row_user_alt, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_user_alt, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_user_alt, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_user_alt, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_user_alt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_user_alt, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_user_alt,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_user_alt, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_user_alt, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_user_alt, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_user_alt, LV_DIR_NONE);
+
+    result.lbl_user_altitude = create_label(
+        row_user_alt,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[USER] Altitude",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.ta_user_altitude = create_textarea(
+        row_user_alt,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        true,
+        "0123456789.-",
+        "0",
+        false,
+        false,
+        false,
+        &cobalt_alien_17,
+        LV_TEXT_ALIGN_CENTER
+    );
+    lv_obj_add_event_cb(result.ta_user_altitude, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_set_user_data(result.ta_user_altitude, &user_altitude_ctx);
+
+    lv_obj_set_size(result.lbl_user_altitude, label_width_0, obj_height);
+    lv_obj_set_size(result.ta_user_altitude, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Title Speed                                                */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * row_title_speed = lv_obj_create(result.panel);
+    lv_obj_set_size(row_title_speed, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_title_speed, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_title_speed, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_title_speed, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_title_speed, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_title_speed, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_title_speed,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_title_speed, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_title_speed, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_title_speed, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_title_speed, LV_DIR_NONE);
+
+    label_width_0 = width_px - padding * 4;
+
+    result.lbl_title_speed= create_label(
+        row_title_speed,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "SPEED",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_title_speed, label_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row GPS Speed                                              */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_21 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_21, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_21, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_21, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_21, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_21, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_21, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_21,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_21, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_21, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_21, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_21, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
+
+    result.lbl_speed = create_label(
+        row_21,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[GPS] Speed",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_speed = create_label(
+        row_21,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_speed, label_width_0, obj_height);
+    lv_obj_set_size(result.val_speed, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row User Speed                                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_user_speed = lv_obj_create(result.panel);
+    lv_obj_set_size(row_user_speed, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_user_speed, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_user_speed, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_user_speed, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_user_speed, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_user_speed, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_user_speed,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_user_speed, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_user_speed, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_user_speed, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_user_speed, LV_DIR_NONE);
+
+    result.lbl_user_speed = create_label(
+        row_user_speed,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[USER] Speed",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.ta_user_speed = create_textarea(
+        row_user_speed,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        true,
+        "0123456789.-",
+        "0",
+        false,
+        false,
+        false,
+        &cobalt_alien_17,
+        LV_TEXT_ALIGN_CENTER
+    );
+    lv_obj_add_event_cb(result.ta_user_speed, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_set_user_data(result.ta_user_speed, &user_speed_ctx);
+
+    lv_obj_set_size(result.lbl_user_speed, label_width_0, obj_height);
+    lv_obj_set_size(result.ta_user_speed, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Title Heading                                              */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * row_title_heading = lv_obj_create(result.panel);
+    lv_obj_set_size(row_title_heading, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_title_heading, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_title_heading, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_title_heading, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_title_heading, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_title_heading, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_title_heading,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_title_heading, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_title_heading, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_title_heading, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_title_heading, LV_DIR_NONE);
+
+    label_width_0 = width_px - padding * 4;
+
+    result.lbl_title_heading= create_label(
+        row_title_heading,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "HEADING",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_title_heading, label_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row GPS Ground Heading Name                                */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_25 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_25, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_25, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_25, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_25, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_25, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_25, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_25,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_25, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_25, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_25, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_25, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
+
+    result.lbl_ground_heading_name = create_label(
+        row_25,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[GPS] GH Name",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_ground_heading_name = create_label(
+        row_25,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_ground_heading_name, label_width_0, obj_height);
+    lv_obj_set_size(result.val_ground_heading_name, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row GPS Ground Heading                                     */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_26 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_26, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_26, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_26, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_26, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_26, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_26, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_26,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_26, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_26, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_26, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_26, LV_DIR_NONE);
+
+    result.lbl_ground_heading = create_label(
+        row_26,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[GPS] Ground Heading",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_ground_heading = create_label(
+        row_26,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_ground_heading, label_width_0, obj_height);
+    lv_obj_set_size(result.val_ground_heading, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row User Ground Heading                                    */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_user_gh = lv_obj_create(result.panel);
+    lv_obj_set_size(row_user_gh, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_user_gh, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_user_gh, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_user_gh, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_user_gh, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_user_gh, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_user_gh,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_user_gh, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_user_gh, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_user_gh, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_user_gh, LV_DIR_NONE);
+
+    result.lbl_user_ground_heading = create_label(
+        row_user_gh,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "[USER] Ground Heading",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.ta_user_ground_heading = create_textarea(
+        row_user_gh,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        true,
+        "0123456789.-",
+        "0",
+        false,
+        false,
+        false,
+        &cobalt_alien_17,
+        LV_TEXT_ALIGN_CENTER
+    );
+    lv_obj_add_event_cb(result.ta_user_ground_heading, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_set_user_data(result.ta_user_ground_heading, &user_ground_heading_ctx);
+
+    lv_obj_set_size(result.lbl_user_ground_heading, label_width_0, obj_height);
+    lv_obj_set_size(result.ta_user_ground_heading, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Title Mileage                                              */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * row_title_mileage = lv_obj_create(result.panel);
+    lv_obj_set_size(row_title_mileage, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_title_mileage, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_title_mileage, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_title_mileage, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_title_mileage, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_title_mileage, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_title_mileage,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_title_mileage, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_title_mileage, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_title_mileage, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_title_mileage, LV_DIR_NONE);
+
+    label_width_0 = width_px - padding * 4;
+
+    result.lbl_title_mileage= create_label(
+        row_title_mileage,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "MILEAGE",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_title_mileage, label_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row 28: Mileage                                            */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_28 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_28, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_28, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_28, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_28, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_28, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_28, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_28,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_28, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_28, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_28, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_28, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
+
+    result.lbl_mileage = create_label(
+        row_28,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Mileage",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_mileage = create_label(
+        row_28,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_mileage, label_width_0, obj_height);
+    lv_obj_set_size(result.val_mileage, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Title Local Time                                           */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * row_title_local_time = lv_obj_create(result.panel);
+    lv_obj_set_size(row_title_local_time, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_title_local_time, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_title_local_time, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_title_local_time, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_title_local_time, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_title_local_time, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_title_local_time,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_title_local_time, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_title_local_time, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_title_local_time, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_title_local_time, LV_DIR_NONE);
+
+    label_width_0 = width_px - padding * 4;
+
+    result.lbl_title_local_time= create_label(
+        row_title_local_time,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LOCAL TIME",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_title_local_time, label_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row 14: UTC Second Offset                                  */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_14 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_14, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_14, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_14, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_14, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_14, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_14, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_14,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_14, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_14, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_14, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_14, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
+
+    result.lbl_utc_second_offset = create_label(
+        row_14,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "UTC Offset (s)",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.ta_utc_second_offset = create_textarea(
+        row_14,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        true,
+        "0123456789-",
+        "0",
+        false,
+        false,
+        false,
+        &cobalt_alien_17,
+        LV_TEXT_ALIGN_CENTER
+    );
+    lv_obj_add_event_cb(result.ta_utc_second_offset, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_set_user_data(result.ta_utc_second_offset, &user_utc_offset_seconds_ctx);
+
+    lv_obj_set_size(result.lbl_utc_second_offset, label_width_0, obj_height);
+    lv_obj_set_size(result.ta_utc_second_offset, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row 15: UTC Auto Offset Flag                               */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_15 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_15, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_15, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_15, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_15, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_15, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_15, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_15,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_15, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_15, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_15, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_15, LV_DIR_NONE);
+
+    result.lbl_utc_auto_offset_flag = create_label(
+        row_15,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Auto UTC Offset",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_utc_auto_offset_flag = create_label(
+        row_15,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_utc_auto_offset_flag, label_width_0, obj_height);
+    lv_obj_set_size(result.val_utc_auto_offset_flag, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row 16: Set Time Automatically                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_16 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_16, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_16, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_16, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_16, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_16, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_16, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_16,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_16, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_16, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_16, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_16, LV_DIR_NONE);
+
+    result.lbl_set_time_automatically = create_label(
+        row_16,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Auto Time Set",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_set_time_automatically = create_label(
+        row_16,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_set_time_automatically, label_width_0, obj_height);
+    lv_obj_set_size(result.val_set_time_automatically, value_width_0, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row 0: Local Year Day                                      */
@@ -6502,6 +7697,284 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.val_local_unixtime_us, value_width_0, obj_height);
 
     /* ---------------------------------------------------------- */
+    /* Title RTC                                                  */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * row_title_rtc_time = lv_obj_create(result.panel);
+    lv_obj_set_size(row_title_rtc_time, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_title_rtc_time, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_title_rtc_time, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_title_rtc_time, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_title_rtc_time, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_title_rtc_time, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_title_rtc_time,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_title_rtc_time, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_title_rtc_time, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_title_rtc_time, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_title_rtc_time, LV_DIR_NONE);
+
+    label_width_0 = width_px - padding * 4;
+
+    result.lbl_title_rtc_time= create_label(
+        row_title_rtc_time,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "RTC TIME",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_title_rtc_time, label_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row 11: Formatted RTC Time                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_11 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_11, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_11, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_11, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_11, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_11, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_11, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_11,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_11, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_11, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_11, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_11, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
+
+    result.lbl_formatted_rtc_time = create_label(
+        row_11,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "RTC Time",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_formatted_rtc_time = create_label(
+        row_11,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_formatted_rtc_time, label_width_0, obj_height);
+    lv_obj_set_size(result.val_formatted_rtc_time, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row 12: Formatted RTC Date                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_12 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_12, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_12, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_12, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_12, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_12, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_12, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_12,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_12, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_12, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_12, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_12, LV_DIR_NONE);
+
+    result.lbl_formatted_rtc_date = create_label(
+        row_12,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "RTC Date",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_formatted_rtc_date = create_label(
+        row_12,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_formatted_rtc_date, label_width_0, obj_height);
+    lv_obj_set_size(result.val_formatted_rtc_date, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row 13: RTC Unix Time                                      */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_13 = lv_obj_create(result.panel);
+    lv_obj_set_size(row_13, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_13, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_13, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_13, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_13, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_13, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_13,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_13, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_13, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_13, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_13, LV_DIR_NONE);
+
+    result.lbl_rtc_unixtime = create_label(
+        row_13,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "RTC Unix",
+        LV_TEXT_ALIGN_LEFT,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    result.val_rtc_unixtime = create_label(
+        row_13,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_rtc_unixtime, label_width_0, obj_height);
+    lv_obj_set_size(result.val_rtc_unixtime, value_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Title RTC Sync                                             */
+    /* ---------------------------------------------------------- */
+    lv_obj_t * row_title_rtc_sync = lv_obj_create(result.panel);
+    lv_obj_set_size(row_title_rtc_sync, LV_PCT(100), row_height);
+    lv_obj_set_flex_flow(row_title_rtc_sync, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_all(row_title_rtc_sync, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(row_title_rtc_sync, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(row_title_rtc_sync, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_title_rtc_sync, padding, LV_PART_MAIN);
+
+    lv_obj_set_flex_align(row_title_rtc_sync,
+                          LV_FLEX_ALIGN_START,
+                          LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+
+    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_title_rtc_sync, LV_SCROLLBAR_MODE_AUTO);
+    else lv_obj_set_scrollbar_mode(row_title_rtc_sync, LV_SCROLLBAR_MODE_OFF);
+
+    if (enable_scrolling) lv_obj_set_scroll_dir(row_title_rtc_sync, LV_DIR_ALL);
+    else lv_obj_set_scroll_dir(row_title_rtc_sync, LV_DIR_NONE);
+
+    label_width_0 = width_px - padding * 4;
+
+    result.lbl_title_rtc_sync= create_label(
+        row_title_rtc_sync,
+        label_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "RTC SYNC",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1
+    );
+
+    lv_obj_set_size(result.lbl_title_rtc_sync, label_width_0, obj_height);
+
+    /* ---------------------------------------------------------- */
     /* Row 6: Formatted RTC Sync Time                             */
     /* ---------------------------------------------------------- */
 
@@ -6523,6 +7996,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_6, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_6, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
 
     result.lbl_formatted_rtc_sync_time = create_label(
         row_6,
@@ -6810,1122 +8287,6 @@ satio_container_t create_satio_panel(
 
     lv_obj_set_size(result.lbl_rtcsync_altitude, label_width_0, obj_height);
     lv_obj_set_size(result.val_rtcsync_altitude, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 11: Formatted RTC Time                                 */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_11 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_11, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_11, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_11, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_11, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_11, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_11, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_11,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_11, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_11, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_11, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_11, LV_DIR_NONE);
-
-    result.lbl_formatted_rtc_time = create_label(
-        row_11,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "RTC Time",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_formatted_rtc_time = create_label(
-        row_11,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_formatted_rtc_time, label_width_0, obj_height);
-    lv_obj_set_size(result.val_formatted_rtc_time, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 12: Formatted RTC Date                                 */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_12 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_12, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_12, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_12, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_12, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_12, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_12, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_12,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_12, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_12, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_12, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_12, LV_DIR_NONE);
-
-    result.lbl_formatted_rtc_date = create_label(
-        row_12,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "RTC Date",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_formatted_rtc_date = create_label(
-        row_12,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_formatted_rtc_date, label_width_0, obj_height);
-    lv_obj_set_size(result.val_formatted_rtc_date, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 13: RTC Unix Time                                      */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_13 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_13, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_13, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_13, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_13, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_13, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_13, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_13,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_13, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_13, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_13, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_13, LV_DIR_NONE);
-
-    result.lbl_rtc_unixtime = create_label(
-        row_13,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "RTC Unix",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_rtc_unixtime = create_label(
-        row_13,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_rtc_unixtime, label_width_0, obj_height);
-    lv_obj_set_size(result.val_rtc_unixtime, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 14: UTC Second Offset                                  */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_14 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_14, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_14, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_14, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_14, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_14, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_14, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_14,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_14, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_14, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_14, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_14, LV_DIR_NONE);
-
-    result.lbl_utc_second_offset = create_label(
-        row_14,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "UTC Offset (s)",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_utc_second_offset = create_label(
-        row_14,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_utc_second_offset, label_width_0, obj_height);
-    lv_obj_set_size(result.val_utc_second_offset, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 15: UTC Auto Offset Flag                               */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_15 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_15, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_15, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_15, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_15, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_15, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_15, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_15,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_15, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_15, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_15, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_15, LV_DIR_NONE);
-
-    result.lbl_utc_auto_offset_flag = create_label(
-        row_15,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Auto UTC Offset",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_utc_auto_offset_flag = create_label(
-        row_15,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_utc_auto_offset_flag, label_width_0, obj_height);
-    lv_obj_set_size(result.val_utc_auto_offset_flag, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 16: Set Time Automatically                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_16 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_16, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_16, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_16, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_16, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_16, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_16, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_16,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_16, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_16, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_16, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_16, LV_DIR_NONE);
-
-    result.lbl_set_time_automatically = create_label(
-        row_16,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Auto Time Set",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_set_time_automatically = create_label(
-        row_16,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_set_time_automatically, label_width_0, obj_height);
-    lv_obj_set_size(result.val_set_time_automatically, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 17: Altitude                                           */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_17 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_17, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_17, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_17, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_17, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_17, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_17, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_17,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_17, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_17, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_17, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_17, LV_DIR_NONE);
-
-    result.lbl_altitude = create_label(
-        row_17,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Altitude",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_altitude = create_label(
-        row_17,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_altitude, label_width_0, obj_height);
-    lv_obj_set_size(result.val_altitude, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 18: Altitude Converted                                 */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_18 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_18, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_18, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_18, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_18, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_18, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_18, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_18,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_18, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_18, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_18, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_18, LV_DIR_NONE);
-
-    result.lbl_altitude_converted = create_label(
-        row_18,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Alt Converted",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_altitude_converted = create_label(
-        row_18,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_altitude_converted, label_width_0, obj_height);
-    lv_obj_set_size(result.val_altitude_converted, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 19: Altitude Unit Mode                                 */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_19 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_19, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_19, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_19, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_19, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_19, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_19, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_19,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_19, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_19, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_19, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_19, LV_DIR_NONE);
-
-    result.lbl_altitude_unit_mode = create_label(
-        row_19,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Alt Unit",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_altitude_unit_mode = create_label(
-        row_19,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_altitude_unit_mode, label_width_0, obj_height);
-    lv_obj_set_size(result.val_altitude_unit_mode, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 20: Altitude Conversion Mode                           */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_20 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_20, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_20, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_20, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_20, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_20, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_20, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_20,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_20, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_20, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_20, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_20, LV_DIR_NONE);
-
-    result.lbl_altitude_conversion_mode = create_label(
-        row_20,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Alt Conv Mode",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_altitude_conversion_mode = create_label(
-        row_20,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_altitude_conversion_mode, label_width_0, obj_height);
-    lv_obj_set_size(result.val_altitude_conversion_mode, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 21: Speed                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_21 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_21, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_21, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_21, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_21, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_21, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_21, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_21,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_21, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_21, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_21, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_21, LV_DIR_NONE);
-
-    result.lbl_speed = create_label(
-        row_21,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Speed",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_speed = create_label(
-        row_21,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_speed, label_width_0, obj_height);
-    lv_obj_set_size(result.val_speed, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 22: Speed Converted                                    */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_22 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_22, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_22, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_22, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_22, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_22, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_22, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_22,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_22, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_22, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_22, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_22, LV_DIR_NONE);
-
-    result.lbl_speed_converted = create_label(
-        row_22,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Speed Conv",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_speed_converted = create_label(
-        row_22,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_speed_converted, label_width_0, obj_height);
-    lv_obj_set_size(result.val_speed_converted, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 23: Speed Unit Mode                                    */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_23 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_23, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_23, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_23, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_23, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_23, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_23, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_23,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_23, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_23, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_23, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_23, LV_DIR_NONE);
-
-    result.lbl_speed_unit_mode = create_label(
-        row_23,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Speed Unit",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_speed_unit_mode = create_label(
-        row_23,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_speed_unit_mode, label_width_0, obj_height);
-    lv_obj_set_size(result.val_speed_unit_mode, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 24: Speed Conversion Mode                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_24 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_24, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_24, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_24, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_24, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_24, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_24, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_24,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_24, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_24, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_24, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_24, LV_DIR_NONE);
-
-    result.lbl_speed_conversion_mode = create_label(
-        row_24,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Speed Conv Mode",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_speed_conversion_mode = create_label(
-        row_24,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_speed_conversion_mode, label_width_0, obj_height);
-    lv_obj_set_size(result.val_speed_conversion_mode, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 25: Ground Heading Name                                */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_25 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_25, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_25, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_25, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_25, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_25, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_25, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_25,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_25, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_25, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_25, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_25, LV_DIR_NONE);
-
-    result.lbl_ground_heading_name = create_label(
-        row_25,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Heading Name",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_ground_heading_name = create_label(
-        row_25,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_ground_heading_name, label_width_0, obj_height);
-    lv_obj_set_size(result.val_ground_heading_name, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 26: Ground Heading                                     */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_26 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_26, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_26, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_26, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_26, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_26, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_26, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_26,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_26, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_26, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_26, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_26, LV_DIR_NONE);
-
-    result.lbl_ground_heading = create_label(
-        row_26,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Heading",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_ground_heading = create_label(
-        row_26,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_ground_heading, label_width_0, obj_height);
-    lv_obj_set_size(result.val_ground_heading, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 27: Ground Heading Mode                                */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_27 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_27, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_27, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_27, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_27, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_27, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_27, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_27,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_27, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_27, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_27, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_27, LV_DIR_NONE);
-
-    result.lbl_ground_heading_mode = create_label(
-        row_27,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Heading Mode",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_ground_heading_mode = create_label(
-        row_27,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_ground_heading_mode, label_width_0, obj_height);
-    lv_obj_set_size(result.val_ground_heading_mode, value_width_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 28: Mileage                                            */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_28 = lv_obj_create(result.panel);
-    lv_obj_set_size(row_28, LV_PCT(100), row_height);
-    lv_obj_set_flex_flow(row_28, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(row_28, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(row_28, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(row_28, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(row_28, padding, LV_PART_MAIN);
-
-    lv_obj_set_flex_align(row_28,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-
-    if (show_scrollbar) lv_obj_set_scrollbar_mode(row_28, LV_SCROLLBAR_MODE_AUTO);
-    else lv_obj_set_scrollbar_mode(row_28, LV_SCROLLBAR_MODE_OFF);
-
-    if (enable_scrolling) lv_obj_set_scroll_dir(row_28, LV_DIR_ALL);
-    else lv_obj_set_scroll_dir(row_28, LV_DIR_NONE);
-
-    result.lbl_mileage = create_label(
-        row_28,
-        label_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Mileage",
-        LV_TEXT_ALIGN_LEFT,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    result.val_mileage = create_label(
-        row_28,
-        value_width_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_mileage, label_width_0, obj_height);
-    lv_obj_set_size(result.val_mileage, value_width_0, obj_height);
 
     return result;
 }
@@ -11248,17 +11609,21 @@ void display_gps_screen()
     printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
+    int32_t menu_w_px = 550;
+    int32_t menu_h_px = 400;
+    int32_t menu_row_h_px = 34;
+
     // SATIO
     satio_c = create_satio_panel(
         gps_screen,       // parent
-        480,              // width px
-        400,              // height px
+        menu_w_px,        // width px
+        menu_h_px,        // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        50,                // pos y
+        0,                // pos y
         radius_rounded,   // radius
         8,                // padding
-        34,               // row height
+        menu_row_h_px,    // row height
         6,                // row spacing
         true,             // show scrollbar
         true,             // enable scrolling
@@ -11274,17 +11639,17 @@ void display_gps_screen()
     // GNGGA
     gngga_c = create_gngga_panel(
         gps_screen,       // parent
-        480,              // width px
-        400,              // height px
+        menu_w_px,        // width px
+        menu_h_px,        // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        50,                // pos y
+        0,                // pos y
         radius_rounded,   // radius
         8,                // padding
-        34,               // row height
+        menu_row_h_px,    // row height
         6,                // row spacing
-        true,            // show scrollbar
-        true,            // enable scrolling
+        true,             // show scrollbar
+        true,             // enable scrolling
         &cobalt_alien_17, // font for titles,
         &cobalt_alien_17  // font for text,
     );
@@ -11297,17 +11662,17 @@ void display_gps_screen()
     // GNRMC
     gnrmc_c = create_gnrmc_panel(
         gps_screen,       // parent
-        480,              // width px
-        400,              // height px
+        menu_w_px,        // width px
+        menu_h_px,        // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        50,                // pos y
+        0,                // pos y
         radius_rounded,   // radius
         8,                // padding
-        34,               // row height
+        menu_row_h_px,    // row height
         6,                // row spacing
-        true,            // show scrollbar
-        true,            // enable scrolling
+        true,             // show scrollbar
+        true,             // enable scrolling
         &cobalt_alien_17, // font for titles,
         &cobalt_alien_17  // font for text,
     );
@@ -11320,17 +11685,17 @@ void display_gps_screen()
     // GPATT
     gpatt_c = create_gpatt_panel(
         gps_screen,       // parent
-        480,              // width px
-        400,              // height px
+        menu_w_px,        // width px
+        menu_h_px,        // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        50,                // pos y
+        0,                // pos y
         radius_rounded,   // radius
         8,                // padding
-        34,               // row height
+        menu_row_h_px,    // row height
         6,                // row spacing
-        true,            // show scrollbar
-        true,            // enable scrolling
+        true,             // show scrollbar
+        true,             // enable scrolling
         &cobalt_alien_17, // font for titles,
         &cobalt_alien_17  // font for text,
     );
@@ -11343,11 +11708,11 @@ void display_gps_screen()
     // Switch Panel View
     switch_gps_panel = create_button(
         gps_screen,           // parent
-        80,                   // width
-        50,                   // height
-        LV_ALIGN_LEFT_MID,    // alignment
-        20, // pos x
-        0, // pos y
+        200,                  // width
+        48,                   // height
+        LV_ALIGN_TOP_MID,     // alignment
+        0,                    // pos x
+        85,                   // pos y
         "GPS",                // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
@@ -12321,6 +12686,22 @@ void update_display()
                 lv_obj_set_style_text_color(satio_c.val_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
+                // Degrees User Latitude
+                // ────────────────────────────────────────────────
+                lv_obj_set_style_text_color(satio_c.lbl_user_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
+                lv_textarea_set_text(satio_c.ta_user_deg_lat, String(satioData.user_degrees_latitude, 7).c_str());
+                lv_obj_set_style_text_color(satio_c.ta_user_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
+
+                // ────────────────────────────────────────────────
+                // Degrees User Longitude
+                // ────────────────────────────────────────────────
+                lv_obj_set_style_text_color(satio_c.lbl_user_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
+                lv_textarea_set_text(satio_c.ta_user_deg_lon, String(satioData.user_degrees_longitude, 7).c_str());
+                lv_obj_set_style_text_color(satio_c.ta_user_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
+
+                // ────────────────────────────────────────────────
                 // Local Year Day
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_local_yday, main_contrast_title_hue, LV_PART_MAIN);
@@ -12440,9 +12821,9 @@ void update_display()
                 // UTC Second Offset
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_utc_second_offset, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_utc_second_offset, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_utc_second_offset, String(satioData.utc_second_offset).c_str());
-                lv_obj_set_style_text_color(satio_c.val_utc_second_offset, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_utc_second_offset, main_contrast_value_hue, LV_PART_MAIN);
+                lv_textarea_set_text(satio_c.ta_utc_second_offset, String(satioData.utc_second_offset).c_str());
+                lv_obj_set_style_text_color(satio_c.ta_utc_second_offset, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // UTC Auto Offset Flag
@@ -12469,28 +12850,12 @@ void update_display()
                 lv_obj_set_style_text_color(satio_c.val_altitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
-                // Altitude Converted
+                // User Altitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_altitude_converted, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_altitude_converted, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_altitude_converted, String(satioData.altitude_converted).c_str());
-                lv_obj_set_style_text_color(satio_c.val_altitude_converted, main_contrast_value_hue, LV_PART_MAIN);
-
-                // ────────────────────────────────────────────────
-                // Altitude Unit Mode
-                // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_altitude_unit_mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_altitude_unit_mode, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_altitude_unit_mode, String(satioData.altitude_unit_mode).c_str());
-                lv_obj_set_style_text_color(satio_c.val_altitude_unit_mode, main_contrast_value_hue, LV_PART_MAIN);
-
-                // ────────────────────────────────────────────────
-                // Altitude Conversion Mode
-                // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_altitude_conversion_mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_altitude_conversion_mode, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_altitude_conversion_mode, String(satioData.altitude_conversion_mode).c_str());
-                lv_obj_set_style_text_color(satio_c.val_altitude_conversion_mode, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(satio_c.lbl_user_altitude, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_altitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_textarea_set_text(satio_c.ta_user_altitude, String(satioData.user_altitude, 7).c_str());
+                lv_obj_set_style_text_color(satio_c.ta_user_altitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Speed
@@ -12501,28 +12866,12 @@ void update_display()
                 lv_obj_set_style_text_color(satio_c.val_speed, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
-                // Speed Converted
+                // User Speed
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_speed_converted, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_speed_converted, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_speed_converted, String(satioData.speed_converted).c_str());
-                lv_obj_set_style_text_color(satio_c.val_speed_converted, main_contrast_value_hue, LV_PART_MAIN);
-
-                // ────────────────────────────────────────────────
-                // Speed Unit Mode
-                // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_speed_unit_mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_speed_unit_mode, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_speed_unit_mode, String(satioData.speed_unit_mode).c_str());
-                lv_obj_set_style_text_color(satio_c.val_speed_unit_mode, main_contrast_value_hue, LV_PART_MAIN);
-
-                // ────────────────────────────────────────────────
-                // Speed Conversion Mode
-                // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_speed_conversion_mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_speed_conversion_mode, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_speed_conversion_mode, String(satioData.speed_conversion_mode).c_str());
-                lv_obj_set_style_text_color(satio_c.val_speed_conversion_mode, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(satio_c.lbl_user_speed, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_speed, main_contrast_value_hue, LV_PART_MAIN);
+                lv_textarea_set_text(satio_c.ta_user_speed, String(satioData.user_speed, 7).c_str());
+                lv_obj_set_style_text_color(satio_c.ta_user_speed, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Ground Heading Name
@@ -12541,12 +12890,12 @@ void update_display()
                 lv_obj_set_style_text_color(satio_c.val_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
-                // Ground Heading Mode
+                // User Ground Heading
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_ground_heading_mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_ground_heading_mode, main_contrast_value_hue, LV_PART_MAIN);
-                lv_label_set_text(satio_c.val_ground_heading_mode, String(satioData.ground_heading_mode).c_str());
-                lv_obj_set_style_text_color(satio_c.val_ground_heading_mode, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(satio_c.lbl_user_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
+                lv_textarea_set_text(satio_c.ta_user_ground_heading, String(satioData.user_ground_heading, 7).c_str());
+                lv_obj_set_style_text_color(satio_c.ta_user_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Mileage

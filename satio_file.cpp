@@ -96,9 +96,9 @@ struct satioFileStruct satioFileData = {
         "OUTPUT_URANUS",                // 17
         "OUTPUT_NEPTUNE",               // 18
         "OUTPUT_METEORS",               // 19
-        "COORDINATE_CONVERSION_MODE",   // 20
-        "SPEED_CONVERSION_MODE",        // 21
-        "ALTITUDE_CONVERSION_MODE",     // 22
+        // "COORDINATE_UPDATE_MODE",   // 20
+        // "SPEED_UPDATE_MODE",        // 21
+        // "ALTITUDE_UPDATE_MODE",     // 22
         "UTC_SECOND_OFFSET",            // 23
         "UTC_AUTO_OFFSET_FLAG",         // 24
         "SET_DATETIME_AUTOMATICALLY",   // 25
@@ -109,9 +109,9 @@ struct satioFileStruct satioFileData = {
         "INS_USE_GYRO_HEADING",         // 30
         "MATRIX_FILE",                  // 31
         "LOAD_MATRIX_ON_STARTUP",       // 32
-        "SPEED_UNIT_MODE",              // 33
-        "ALTITUDE_UNIT_MODE",           // 34
-        "GROUND_HEADING_MODE",          // 35
+        // "SPEED_UNIT_MODE",              // 33
+        // "ALTITUDE_UNIT_MODE",           // 34
+        // "GROUND_HEADING_UPDATE_MODE",          // 35
         "ALTITUDE",                     // 36
         "COORDINATES_LATITUDE",         // 37
         "COORDINATES_LONGITUDE",        // 38
@@ -481,16 +481,10 @@ bool writeLog() {
     line=line+ String(satioData.padded_local_time_HHMMSS) + ",";
     line=line+ String(satioData.padded_local_date_DDMMYYYY) + ",";
     line=line+ String(systemData.uptime_seconds) + ",";
-    line=line+ String(satioData.char_coordinate_conversion_mode[satioData.coordinate_conversion_mode]) + ",";
     line=line+ String(satioData.degrees_latitude) + ",";
     line=line+ String(satioData.degrees_longitude) + ",";
-    line=line+ String(satioData.char_altitude_conversion_mode[satioData.altitude_conversion_mode]) + ",";
-    line=line+ String(satioData.altitude_converted) + ",";
-    line=line+ String(satioData.char_altitude_unit_mode[satioData.altitude_unit_mode]) + ",";
-    line=line+ String(satioData.char_speed_conversion_mode[satioData.speed_conversion_mode]) + ",";
-    line=line+ String(satioData.speed_converted, 7) + ",";
-    line=line+ String(satioData.char_speed_unit_mode[satioData.speed_unit_mode]) + ",";
-    line=line+ String(satioData.char_ground_heading_mode[satioData.ground_heading_mode]) + ",";
+    line=line+ String(satioData.altitude) + ",";
+    line=line+ String(satioData.speed, 7) + ",";
     line=line+ String(satioData.ground_heading, 7) + ",";
     line=line+ String(insData.ins_latitude, 7) + ",";
     line=line+ String(insData.ins_longitude, 7) + ",";
@@ -876,46 +870,40 @@ bool saveSystemFile(const char *filepath) {
     WRITE_INT_TAG(17, systemData.output_uranus_enabled);
     WRITE_INT_TAG(18, systemData.output_neptune_enabled);
     WRITE_INT_TAG(19, systemData.output_meteors_enabled);
-    WRITE_INT_TAG(20, satioData.coordinate_conversion_mode);
-    WRITE_INT_TAG(21, satioData.speed_conversion_mode);
-    WRITE_INT_TAG(22, satioData.altitude_conversion_mode);
-    WRITE_LONG_TAG(23, satioData.utc_second_offset);
-    WRITE_INT_TAG(24, satioData.utc_auto_offset_flag);
-    WRITE_INT_TAG(25, satioData.set_time_automatically);
-    WRITE_INT_TAG(26, insData.INS_REQ_GPS_PRECISION);
-    WRITE_DBL_TAG(27, insData.INS_REQ_MIN_SPEED);
-    WRITE_DBL_TAG(28, insData.INS_REQ_HEADING_RANGE_DIFF);
-    WRITE_INT_TAG(29, insData.INS_MODE);
-    WRITE_INT_TAG(30, insData.INS_USE_GYRO_HEADING);
-    WRITE_STR_TAG(31, satioFileData.current_matrix_filepath);
-    WRITE_INT_TAG(32, matrixData.load_matrix_on_startup);
-    WRITE_INT_TAG(33, satioData.speed_unit_mode);
-    WRITE_INT_TAG(34, satioData.altitude_unit_mode);
-    WRITE_INT_TAG(35, satioData.ground_heading_mode);
-    WRITE_DBL_TAG(36, satioData.altitude);
-    WRITE_DBL_TAG(37, satioData.degrees_latitude);
-    WRITE_DBL_TAG(38, satioData.degrees_longitude);
-    WRITE_DBL_TAG(39, satioData.speed);
-    WRITE_DBL_TAG(40, satioData.ground_heading);
-    WRITE_LONG_TAG(41, DELAY_TASK_SERIAL_INFOCMD);
-    WRITE_INT_TAG(42, TICK_DELAY_TASK_SERIAL_INFOCMD);
-    WRITE_LONG_TAG(43, DELAY_TASK_MULTIPLEXERS);
-    WRITE_INT_TAG(44, TICK_DELAY_TASK_MULTIPLEXERS);
-    WRITE_LONG_TAG(45, DELAY_TASK_GYRO0);
-    WRITE_INT_TAG(46, TICK_DELAY_TASK_GYRO0);
-    WRITE_LONG_TAG(47, DELAY_TASK_UNIVERSE);
-    WRITE_INT_TAG(48, TICK_DELAY_TASK_UNIVERSE);
-    WRITE_LONG_TAG(49, DELAY_TASK_GPS);
-    WRITE_INT_TAG(50, TICK_DELAY_TASK_GPS);
-    WRITE_LONG_TAG(51, DELAY_TASK_SWITCHES);
-    WRITE_INT_TAG(52, TICK_DELAY_TASK_SWITCHES);
-    WRITE_LONG_TAG(53, DELAY_TASK_PORTCONTROLLER_INPUT);
-    WRITE_INT_TAG(54, TICK_DELAY_TASK_PORTCONTROLLER_INPUT);
-    WRITE_LONG_TAG(55, DELAY_TASK_STORAGE);
-    WRITE_INT_TAG(56, TICK_DELAY_TASK_STORAGE);
-    WRITE_LONG_TAG(57, DELAY_TASK_LOGGING);
-    WRITE_INT_TAG(58, TICK_DELAY_TASK_LOGGING);
-    WRITE_INT_TAG(59, systemData.logging_enabled);
+    WRITE_LONG_TAG(20, satioData.utc_second_offset);
+    WRITE_INT_TAG(21, satioData.utc_auto_offset_flag);
+    WRITE_INT_TAG(22, satioData.set_time_automatically);
+    WRITE_INT_TAG(23, insData.INS_REQ_GPS_PRECISION);
+    WRITE_DBL_TAG(24, insData.INS_REQ_MIN_SPEED);
+    WRITE_DBL_TAG(25, insData.INS_REQ_HEADING_RANGE_DIFF);
+    WRITE_INT_TAG(26, insData.INS_MODE);
+    WRITE_INT_TAG(27, insData.INS_USE_GYRO_HEADING);
+    WRITE_STR_TAG(28, satioFileData.current_matrix_filepath);
+    WRITE_INT_TAG(29, matrixData.load_matrix_on_startup);
+    WRITE_DBL_TAG(30, satioData.altitude);
+    WRITE_DBL_TAG(31, satioData.degrees_latitude);
+    WRITE_DBL_TAG(32, satioData.degrees_longitude);
+    WRITE_DBL_TAG(33, satioData.speed);
+    WRITE_DBL_TAG(34, satioData.ground_heading);
+    WRITE_LONG_TAG(35, DELAY_TASK_SERIAL_INFOCMD);
+    WRITE_INT_TAG(36, TICK_DELAY_TASK_SERIAL_INFOCMD);
+    WRITE_LONG_TAG(37, DELAY_TASK_MULTIPLEXERS);
+    WRITE_INT_TAG(38, TICK_DELAY_TASK_MULTIPLEXERS);
+    WRITE_LONG_TAG(39, DELAY_TASK_GYRO0);
+    WRITE_INT_TAG(40, TICK_DELAY_TASK_GYRO0);
+    WRITE_LONG_TAG(41, DELAY_TASK_UNIVERSE);
+    WRITE_INT_TAG(42, TICK_DELAY_TASK_UNIVERSE);
+    WRITE_LONG_TAG(43, DELAY_TASK_GPS);
+    WRITE_INT_TAG(44, TICK_DELAY_TASK_GPS);
+    WRITE_LONG_TAG(45, DELAY_TASK_SWITCHES);
+    WRITE_INT_TAG(46, TICK_DELAY_TASK_SWITCHES);
+    WRITE_LONG_TAG(47, DELAY_TASK_PORTCONTROLLER_INPUT);
+    WRITE_INT_TAG(48, TICK_DELAY_TASK_PORTCONTROLLER_INPUT);
+    WRITE_LONG_TAG(49, DELAY_TASK_STORAGE);
+    WRITE_INT_TAG(50, TICK_DELAY_TASK_STORAGE);
+    WRITE_LONG_TAG(51, DELAY_TASK_LOGGING);
+    WRITE_INT_TAG(52, TICK_DELAY_TASK_LOGGING);
+    WRITE_INT_TAG(53, systemData.logging_enabled);
     
     #undef WRITE_INT_TAG
     #undef WRITE_LONG_TAG
@@ -978,46 +966,41 @@ bool loadSystemFile(const char *filepath) {
             else if (tag_index==17) {if (str_is_bool(data_0.c_str())) {systemData.output_uranus_enabled=atoi(data_0.c_str());}}
             else if (tag_index==18) {if (str_is_bool(data_0.c_str())) {systemData.output_neptune_enabled=atoi(data_0.c_str());}}
             else if (tag_index==19) {if (str_is_bool(data_0.c_str())) {systemData.output_meteors_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==20) {if (str_is_uint8(data_0.c_str())) {if (atoi(data_0.c_str())<MAX_COORDINATE_CONVERSION_CONVERSION_MODES) {satioData.coordinate_conversion_mode=atoi(data_0.c_str());}}}
-            else if (tag_index==21) {if (str_is_uint8(data_0.c_str())) {if (atoi(data_0.c_str())<MAX_SPEED_CONVERSIO_MODES) {satioData.speed_conversion_mode=atoi(data_0.c_str());}}}
-            else if (tag_index==22) {if (str_is_uint8(data_0.c_str())) {if (atoi(data_0.c_str())<MAX_ALTITUDE_CONVERSION_MODES) {satioData.altitude_conversion_mode=atoi(data_0.c_str());}}}
-            else if (tag_index==23) {if (str_is_long(data_0.c_str())) {satioData.utc_second_offset=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==24) {if (str_is_bool(data_0.c_str())) {satioData.utc_auto_offset_flag=atoi(data_0.c_str());}}
-            else if (tag_index==25) {if (str_is_bool(data_0.c_str())) {satioData.set_time_automatically=atoi(data_0.c_str());}}
-            else if (tag_index==26) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_GPS_PRECISION=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==27) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_MIN_SPEED=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==28) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_HEADING_RANGE_DIFF=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==29) {if (str_is_double(data_0.c_str())) {insData.INS_MODE=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==30) {if (str_is_double(data_0.c_str())) {insData.INS_USE_GYRO_HEADING=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==31) {memset(satioFileData.current_matrix_filepath, 0, sizeof(satioFileData.current_matrix_filepath)); strcpy(satioFileData.current_matrix_filepath, data_0.c_str());}
-            else if (tag_index==32) {if (str_is_bool(data_0.c_str())) {matrixData.load_matrix_on_startup=atoi(data_0.c_str());}}
-            else if (tag_index==33) {if (str_is_uint8(data_0.c_str())) {if (atoi(data_0.c_str())<MAX_SPEED_UNIT_MODES) {satioData.speed_unit_mode=atoi(data_0.c_str());}}}
-            else if (tag_index==34) {if (str_is_uint8(data_0.c_str())) {if (atoi(data_0.c_str())<MAX_ALTITUDE_UNIT_MODES) {satioData.altitude_unit_mode=atoi(data_0.c_str());}}}
-            else if (tag_index==35) {if (str_is_uint8(data_0.c_str())) {if (atoi(data_0.c_str())<MAX_GROUND_HEADING_MODES) {satioData.ground_heading_mode=atoi(data_0.c_str());}}}
-            else if (tag_index==36) {if (str_is_double(data_0.c_str())) {satioData.altitude=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==37) {if (str_is_double(data_0.c_str())) {satioData.degrees_latitude=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==38) {if (str_is_double(data_0.c_str())) {satioData.degrees_longitude=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==39) {if (str_is_double(data_0.c_str())) {satioData.speed=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==40) {if (str_is_double(data_0.c_str())) {satioData.ground_heading=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==41) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SERIAL_INFOCMD=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==42) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_SERIAL_INFOCMD=atoi(data_0.c_str());}}
-            else if (tag_index==43) {if (str_is_long(data_0.c_str())) {DELAY_TASK_MULTIPLEXERS=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==44) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_MULTIPLEXERS=atoi(data_0.c_str());}}
-            else if (tag_index==45) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GYRO0=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==46) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_GYRO0=atoi(data_0.c_str());}}
-            else if (tag_index==47) {if (str_is_long(data_0.c_str())) {DELAY_TASK_UNIVERSE=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==48) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_UNIVERSE=atoi(data_0.c_str());}}
-            else if (tag_index==49) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GPS=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==50) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_GPS=atoi(data_0.c_str());}}
-            else if (tag_index==51) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SWITCHES=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==52) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_SWITCHES=atoi(data_0.c_str());}}
-            else if (tag_index==53) {if (str_is_long(data_0.c_str())) {DELAY_TASK_PORTCONTROLLER_INPUT=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==54) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_PORTCONTROLLER_INPUT=atoi(data_0.c_str());}}
-            else if (tag_index==55) {if (str_is_long(data_0.c_str())) {DELAY_TASK_STORAGE=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==56) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_STORAGE=atoi(data_0.c_str());}}
-            else if (tag_index==57) {if (str_is_long(data_0.c_str())) {DELAY_TASK_LOGGING=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==58) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_LOGGING=atoi(data_0.c_str());}}
-            else if (tag_index==59) {if (str_is_bool(data_0.c_str())) {systemData.logging_enabled=atoi(data_0.c_str());}}
+            else if (tag_index==20) {if (str_is_long(data_0.c_str())) {satioData.utc_second_offset=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==21) {if (str_is_bool(data_0.c_str())) {satioData.utc_auto_offset_flag=atoi(data_0.c_str());}}
+            else if (tag_index==22) {if (str_is_bool(data_0.c_str())) {satioData.set_time_automatically=atoi(data_0.c_str());}}
+            else if (tag_index==23) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_GPS_PRECISION=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==24) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_MIN_SPEED=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==25) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_HEADING_RANGE_DIFF=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==26) {if (str_is_double(data_0.c_str())) {insData.INS_MODE=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==27) {if (str_is_double(data_0.c_str())) {insData.INS_USE_GYRO_HEADING=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==28) {memset(satioFileData.current_matrix_filepath, 0, sizeof(satioFileData.current_matrix_filepath)); strcpy(satioFileData.current_matrix_filepath, data_0.c_str());}
+            else if (tag_index==29) {if (str_is_bool(data_0.c_str())) {matrixData.load_matrix_on_startup=atoi(data_0.c_str());}}
+            else if (tag_index==30) {if (str_is_double(data_0.c_str())) {satioData.altitude=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==31) {if (str_is_double(data_0.c_str())) {satioData.degrees_latitude=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==32) {if (str_is_double(data_0.c_str())) {satioData.degrees_longitude=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==33) {if (str_is_double(data_0.c_str())) {satioData.speed=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==34) {if (str_is_double(data_0.c_str())) {satioData.ground_heading=strtod(data_0.c_str(), &endptr);}}
+            else if (tag_index==35) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SERIAL_INFOCMD=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==36) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_SERIAL_INFOCMD=atoi(data_0.c_str());}}
+            else if (tag_index==37) {if (str_is_long(data_0.c_str())) {DELAY_TASK_MULTIPLEXERS=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==38) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_MULTIPLEXERS=atoi(data_0.c_str());}}
+            else if (tag_index==39) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GYRO0=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==40) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_GYRO0=atoi(data_0.c_str());}}
+            else if (tag_index==41) {if (str_is_long(data_0.c_str())) {DELAY_TASK_UNIVERSE=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==42) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_UNIVERSE=atoi(data_0.c_str());}}
+            else if (tag_index==43) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GPS=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==44) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_GPS=atoi(data_0.c_str());}}
+            else if (tag_index==45) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SWITCHES=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==46) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_SWITCHES=atoi(data_0.c_str());}}
+            else if (tag_index==47) {if (str_is_long(data_0.c_str())) {DELAY_TASK_PORTCONTROLLER_INPUT=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==48) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_PORTCONTROLLER_INPUT=atoi(data_0.c_str());}}
+            else if (tag_index==49) {if (str_is_long(data_0.c_str())) {DELAY_TASK_STORAGE=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==50) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_STORAGE=atoi(data_0.c_str());}}
+            else if (tag_index==51) {if (str_is_long(data_0.c_str())) {DELAY_TASK_LOGGING=strtol(data_0.c_str(), &endptr, 10);}}
+            else if (tag_index==52) {if (str_is_bool(data_0.c_str())) {TICK_DELAY_TASK_LOGGING=atoi(data_0.c_str());}}
+            else if (tag_index==53) {if (str_is_bool(data_0.c_str())) {systemData.logging_enabled=atoi(data_0.c_str());}}
+
             currentTag++;
     }
     fclose(f);

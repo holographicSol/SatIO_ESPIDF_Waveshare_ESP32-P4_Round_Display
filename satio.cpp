@@ -17,6 +17,9 @@
 RTC_DS3231 rtc;
 
 struct SATIOStruct satioData = {
+    // ------------------------------------------------------------------------------------
+    // INTERNAL
+    // ------------------------------------------------------------------------------------
     .satio_sentence = {0},
     .latitude_meter = 0.0000100,
     .longitude_meter = 0.0000100,
@@ -36,8 +39,6 @@ struct SATIOStruct satioData = {
     .secondsLong = 0.0,
     .millisecondsLat = 0.0,
     .millisecondsLong = 0.0,
-    .degrees_latitude = 0.0,
-    .degrees_longitude = 0.0,
     .degreesLat = 0.0,
     .degreesLong = 0.0,
     .tmp_year_int = 0,
@@ -56,6 +57,39 @@ struct SATIOStruct satioData = {
     .tmp_millisecond = {0},
     .week_day_names = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"},
     .month_names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"},
+
+    // ------------------------------------------------------------------------------------
+    // LOCATION
+    // ------------------------------------------------------------------------------------
+    .degrees_latitude=0.0,                            // Converted latitude in degrees
+    .degrees_longitude=0.0,                           // Converted longitude in degrees
+    .user_degrees_latitude=0.0,
+    .user_degrees_longitude=0.0,
+    // ------------------------------------------------------------------------------------
+    // ALTITUDE SETTINGS
+    // ------------------------------------------------------------------------------------
+    .altitude = 0,
+    .user_altitude = 0,
+    // ------------------------------------------------------------------------------------
+    // SPEED SETTINGS
+    // ------------------------------------------------------------------------------------
+    .speed = 0.0,
+    .user_speed = 0.0,
+    // ------------------------------------------------------------------------------------
+    // HEADING SETTINGS
+    // ------------------------------------------------------------------------------------
+    .ground_heading = 0.0,
+    .user_ground_heading = 0.0,
+    .ground_heading_name = {0},
+    // ------------------------------------------------------------------------------------
+    // MILEAGE
+    // ------------------------------------------------------------------------------------
+    .mileage = "pending",
+
+    // ------------------------------------------------------------------------------------
+    // LOCAL TIME ITEMS
+    // ------------------------------------------------------------------------------------
+    .local_unixtime_uS = 0,
     .local_hour = 0,
     .local_minute = 0,
     .local_second = 0,
@@ -66,43 +100,31 @@ struct SATIOStruct satioData = {
     .local_wday = 1,
     .local_wday_name = {0},
     .local_month_name = {0},
-
+    .utc_second_offset = 0,
+    .utc_auto_offset_flag = false,
+    .set_time_automatically = true,
+    // ------------------------------------------------------------------------------------
+    // LOCAL TIME FORMATTED (FOR USER)
+    // ------------------------------------------------------------------------------------
     .formatted_local_time_HHMMSS = "00:00:00",
     .formatted_local_date_DDMMYYYY = "00/00/0000",
     .formatted_local_short_date_DDMMYY = "00/00/00",
-
+    // ------------------------------------------------------------------------------------
+    // LOCAL TIME PADDED (FOR CALC)
+    // ------------------------------------------------------------------------------------
     .padded_local_time_HHMMSS = "000000",
     .padded_local_hour = "00",
     .padded_local_minute = "00",
     .padded_local_second = "00",
-
     .padded_local_date_DDMMYYYY = "00000000",
     .padded_local_short_date_DDMMYY = "000000",
     .padded_local_day = "00",
     .padded_local_month = "00",
     .padded_local_year = "00",
-
-    .local_unixtime_uS = 0,
-    
-    .rtcsync_hour = 0,
-    .rtcsync_minute = 0,
-    .rtcsync_second = 0,
-    .rtcsync_year = 0,
-    .rtcsync_month = 0,
-    .rtcsync_day = 0,
-
-    .formatted_rtc_sync_time = "00:00:00",
-    .formatted_rtc_sync_date_DDMMYYYY = "00/00/00",
-    .formatted_rtc_sync_short_date_DDMMYY = "00/00/00",
-
-    .padded_rtc_sync_time_HHMMSS = "000000",
-    .padded_rtc_sync_date_DDMMYYYY = "00000000",
-
-    .rtcsync_unixtime = 0,
-    .rtcsync_latitude = "0.0",
-    .rtcsync_longitude = "0.0",
-    .rtcsync_altitude = "0.0",
-
+    // ------------------------------------------------------------------------------------
+    // RTC ITEMS
+    // ------------------------------------------------------------------------------------
+    .rtc_unixtime = 0,
     .rtc_hour = 0,
     .rtc_minute = 0,
     .rtc_second = 0,
@@ -111,41 +133,43 @@ struct SATIOStruct satioData = {
     .rtc_mday = 1,
     .rtc_wday = 1,
     .rtc_wday_name = {0},
+    // ------------------------------------------------------------------------------------
+    // RTC FORMATTED (FOR USER)
+    // ------------------------------------------------------------------------------------
     .formatted_rtc_time = "00:00:00",
     .formatted_rtc_date = "00/00/00",
     .padded_rtc_time_HHMMSS = "000000",
     .padded_rtc_date_DDMMYYYY = "00000000",
-    .rtc_unixtime = 0,
+    // ------------------------------------------------------------------------------------
+    // RTC SYNC ITEMS
+    // ------------------------------------------------------------------------------------
+    .rtcsync_unixtime = 0,
+    .rtcsync_hour = 0,
+    .rtcsync_minute = 0,
+    .rtcsync_second = 0,
+    .rtcsync_year = 0,
+    .rtcsync_month = 0,
+    .rtcsync_day = 0,
+    .rtcsync_latitude = "0.0",
+    .rtcsync_longitude = "0.0",
+    .rtcsync_altitude = "0.0",
+    // ------------------------------------------------------------------------------------
+    // RTC SYNC FORMATTED (FOR USER)
+    // ------------------------------------------------------------------------------------
+    .formatted_rtc_sync_time = "00:00:00",
+    .formatted_rtc_sync_date_DDMMYYYY = "00/00/00",
+    .formatted_rtc_sync_short_date_DDMMYY = "00/00/00",
+    // ------------------------------------------------------------------------------------
+    // RTC SYNC PADDED (FOR CALC)
+    // ------------------------------------------------------------------------------------
+    .padded_rtc_sync_time_HHMMSS = "000000",
+    .padded_rtc_sync_date_DDMMYYYY = "00000000",
 
-    .utc_second_offset = 0,
-    .utc_auto_offset_flag = false,
-    .set_time_automatically = true,
+    // ------------------------------------------------------------------------------------
+    // FLAGS
+    // ------------------------------------------------------------------------------------
     .set_rtc_datetime_flag = false,
-    .sync_rtc_immediately_flag = true, // default true to attempt sync immediately on starttup
-
-    .coordinate_conversion_mode = COORDINATE_CONVERSION_MODE_GPS,
-    .char_coordinate_conversion_mode = {"STATIC", "GPS"},
-
-    .altitude = 0,
-    .altitude_converted = 0,
-    .altitude_unit_mode = ALTITUDE_UNIT_MODE_METERS,
-    .char_altitude_unit_mode = {"m", "M", "KM"},
-    .altitude_conversion_mode = ALTITUDE_CONVERSION_MODE_GPS,
-    .char_altitude_conversion_mode = {"STATIC", "GPS"},
-
-    .speed = 0.0,
-    .speed_converted = 0,
-    .speed_unit_mode = SPEED_UNIT_MODE_KTS,
-    .char_speed_unit_mode = {"m/S", "M/PH", "K/PH", "KTS"},
-    .speed_conversion_mode = SPEED_CONVERSION_MODE_GPS,
-    .char_speed_conversion_mode = {"STATIC", "GPS"},
-
-    .ground_heading_name = {0},
-    .ground_heading = 0.0,
-    .ground_heading_mode = GROUND_HEADING_MODE_GPS,
-    .char_ground_heading_mode = {"STATIC", "GPS"},
-    .mileage = "pending",
-
+    .sync_rtc_immediately_flag = true, // attempt sync immediately on starttup
     .gps_sync = false,
 };
 
@@ -170,52 +194,39 @@ struct SpeedStruct speedData = {
     .speed = 0.0
 };
 
+/**
+ * Set SatIO Altitude According To Update Mode. (The following should either be set or not set. If not set then conditions the be checked elsewhere)
+ */
 void setSatIOAltitude() {
-  double altitude=satioData.altitude;
-  char *endptr;
+  /* set converted values */
+  // ...
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
   // ---------------------------------------------------------------------
-  if      (ALTITUDE_CONVERSION_MODE_STATIC) {} // is set elsewhere or remains static
-  else if (satioData.altitude_conversion_mode==ALTITUDE_CONVERSION_MODE_GPS) {altitude=strtod(gnggaData.altitude, &endptr);}
-  satioData.altitude=altitude;
-  // ---------------------------------------------------------------------
-  // Convert selected value.
-  // ---------------------------------------------------------------------
-  if      (satioData.altitude_unit_mode==ALTITUDE_UNIT_MODE_METERS) {}
-  else if (satioData.altitude_unit_mode==ALTITUDE_UNIT_MODE_MILES) {altitude=altitude*METERS_TO_MILES_RATIO;}
-  else if (satioData.altitude_unit_mode==ALTITUDE_UNIT_MODE_KILOMETERS) {altitude=altitude*METERS_TO_KILOMETERS_RATIO;}
-  satioData.altitude_converted=altitude;
+  // if      (satioData.altitude_update_mode==ALTITUDE_UPDATE_MODE_USER) {satioData.altitude = satioData.user_altitude;}
+  // else if (satioData.altitude_update_mode==ALTITUDE_UPDATE_MODE_GPS)  {satioData.altitude = strtod(gnggaData.altitude, NULL);}
 }
 
+/**
+ * Set SatIO Speed According To Update Mode. (The following should either be set or not set. If not set then conditions the be checked elsewhere)
+ */
 void setSatIOSspeed() {
-  double speed=satioData.speed;
-  char *endptr;
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
   // ---------------------------------------------------------------------
-  if      (satioData.speed_conversion_mode==SPEED_CONVERSION_MODE_STATIC) {} // is set elsewhere or remains static
-  else if (satioData.speed_conversion_mode==SPEED_CONVERSION_MODE_GPS) {speed=strtod(gnrmcData.ground_speed, &endptr);}
-  satioData.speed=speed;
-  // ---------------------------------------------------------------------
-  // Convert selected value.
-  // ---------------------------------------------------------------------
-  if      (satioData.speed_unit_mode==SPEED_UNIT_MODE_KTS) {}
-  else if (satioData.speed_unit_mode==SPEED_UNIT_MODE_MPH) {speed=speed*KNOTS_TO_MPH;}
-  else if (satioData.speed_unit_mode==SPEED_UNIT_MODE_KPH) {speed=speed*KNOTS_TO_MPH;}
-  else if (satioData.speed_unit_mode==SPEED_UNIT_MODE_METERS_A_SECOND) {speed=speed*KNOTS_TO_METERS_PER_SECOND;}
-  satioData.speed_converted=speed;
+  // if      (satioData.speed_update_mode==SPEED_UPDATE_MODE_USER) {satioData.speed = satioData.user_speed;}
+  // else if (satioData.speed_update_mode==SPEED_UPDATE_MODE_GPS)  {satioData.speed = strtod(gnrmcData.ground_speed, NULL);}
 }
 
+/**
+ * Set SatIO Ground Heading According To Update Mode. (The following should either be set or not set. If not set then conditions the be checked elsewhere)
+ */
 void setSatIOGroundHeading() {
-  double ground_heading=satioData.ground_heading;
-  char *endptr;
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
   // ---------------------------------------------------------------------
-  if      (satioData.ground_heading_mode==GROUND_HEADING_MODE_STATIC) {} // is set elsewhere or remains static
-  else if (satioData.ground_heading_mode==GROUND_HEADING_MODE_GPS) {ground_heading=strtod(gnrmcData.ground_heading, &endptr);}
-  satioData.ground_heading=ground_heading;
+  // if      (satioData.ground_heading_update_mode==GROUND_HEADING_UPDATE_MODE_USER) {satioData.ground_heading = satioData.user_ground_heading;}
+  // else if (satioData.ground_heading_update_mode==GROUND_HEADING_UPDATE_MODE_GPS)  {satioData.ground_heading = strtod(gnrmcData.ground_heading, NULL);}
 }
 
 // ----------------------------------------------------------------------------------------
@@ -249,14 +260,21 @@ void setGroundHeadingName(float num) {
 //                                                                                                         CONVERT COORDINTE DATA
 // ------------------------------------------------------------------------------------------------------------------------------
 void setSatioCoordinates(){
-  if (satioData.coordinate_conversion_mode==COORDINATE_CONVERSION_MODE_STATIC) {} // is set elsewhere or remains static
+  // ----------------------------------------------------------------------------------------------------------------------------
+  //                                                                                                     USER DEFINED COORDINATES
+  // ----------------------------------------------------------------------------------------------------------------------------
+  // if (satioData.coordinate_update_mode==COORDINATE_UPDATE_MODE_USER) {
+  //   satioData.degrees_latitude = satioData.user_degrees_latitude; // (The following should either be set or not set. If not set then conditions the be checked elsewhere)
+  //   satioData.degrees_longitude = satioData.user_degrees_longitude; // (The following should either be set or not set. If not set then conditions the be checked elsewhere)
+  // }
+
   // ----------------------------------------------------------------------------------------------------------------------------
   //                                                                                                  GNGGA COORDINATE CONVERSION
   // ----------------------------------------------------------------------------------------------------------------------------
   // ----------------------------------------------------------------------------------------------------------------------------
   // Convert GNGGA latitude & longitude strings to decimal degrees and format into hours, minutes, seconds, milliseconds.
   // ----------------------------------------------------------------------------------------------------------------------------
-  else if (satioData.coordinate_conversion_mode==COORDINATE_CONVERSION_MODE_GPS) {
+  // else if (satioData.coordinate_update_mode==COORDINATE_UPDATE_MODE_GPS) {
     // -----------------------------------------------------------------------------------------
     // Extract absolute latitude value from GNGGA data as decimal degrees.
     // -----------------------------------------------------------------------------------------
@@ -345,7 +363,7 @@ void setSatioCoordinates(){
     // Save formatted latitude value as a string for later use.
     // -----------------------------------------------------------------------------------------
     scanf("%lf17", &satioData.degrees_longitude);
-  }
+  // }
 }
 
  double calculateSpeedFromLocationData(LocPoint p1, LocPoint p2) {
@@ -487,10 +505,6 @@ void storeRTCTime(void) {
     memset(satioData.rtc_wday_name, 0, sizeof(satioData.rtc_wday_name));
     strcpy(satioData.rtc_wday_name, satioData.week_day_names[satioData.rtc_wday]);
 
-    // Copy month name
-    memset(satioData.local_month_name, 0, sizeof(satioData.local_month_name));
-    strcpy(satioData.local_month_name, satioData.month_names[satioData.local_month-1]);
-
     // Format time (HH:MM:SS)
     char hour_str[3], min_str[3], sec_str[3];
     padDigitsZero(satioData.rtc_hour, hour_str, sizeof(hour_str));
@@ -538,6 +552,10 @@ void storeLocalTime(void) {
     // Copy weekday name
     memset(satioData.local_wday_name, 0, sizeof(satioData.local_wday_name));
     strcpy(satioData.local_wday_name, satioData.week_day_names[satioData.local_wday]);
+
+    // Copy month name
+    memset(satioData.local_month_name, 0, sizeof(satioData.local_month_name));
+    strcpy(satioData.local_month_name, satioData.month_names[satioData.local_month-1]);
 
     // Format time (HH:MM:SS)
     char hour_str[3], min_str[3], sec_str[3];

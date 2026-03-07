@@ -14,7 +14,7 @@
 #define MAX_MATRIX_TAGS   16
 #define MAX_MATRIX_SLOTS  10
 #define MAX_MAPPING_TAGS  7
-#define MAX_SYSTEM_TAGS   60
+#define MAX_SYSTEM_TAGS   54
 #define MAX_LOG_FILES     3     // maximum number of log files to be kept.
 /*
   Maximum log file size in bytes.
