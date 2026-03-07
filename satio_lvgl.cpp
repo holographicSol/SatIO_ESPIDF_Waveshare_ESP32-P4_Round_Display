@@ -1535,6 +1535,111 @@ static void btn_ground_heading_mode_user_event_cb(lv_event_t * e)
     }
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void btn_auto_set_user_lat_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[btn_auto_set_user_lat_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        satioData.user_degrees_latitude = satioData.degrees_latitude;
+        printf("[btn_auto_set_user_lat_event_cb] Auto set data.");
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void btn_auto_set_user_lon_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[btn_auto_set_user_lon_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        satioData.user_degrees_longitude = satioData.degrees_longitude;
+        printf("[btn_auto_set_user_lon_event_cb] Auto set data.");
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void btn_auto_set_user_altitude_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[btn_auto_set_user_altitude_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        satioData.user_altitude = satioData.altitude;
+        printf("[btn_auto_set_user_altitude_event_cb] Auto set data.");
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void btn_auto_set_user_speed_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[btn_auto_set_user_speed_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        satioData.user_speed = satioData.speed;
+        printf("[btn_auto_set_user_speed_event_cb] Auto set data.");
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[btn_auto_set_user_ground_heading_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        satioData.user_ground_heading = satioData.ground_heading;
+        printf("[btn_auto_set_user_ground_heading_event_cb] Auto set data.");
+    }
+}
+
 /** ---------------------------------------------------------------------------------------
  * Title Bar
  */
@@ -6406,6 +6511,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_lon, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_lon, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
+
     result.lbl_deg_lon = create_label(
         row_lon,
         label_width_0,
@@ -6468,6 +6577,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_user_lat, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_user_lat, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_1 = 32;
+    value_width_0 = ((width_px) - label_width_0 - value_width_1) - padding * 5;
+
     result.lbl_user_deg_lat= create_label(
         row_user_lat,
         label_width_0,
@@ -6505,8 +6618,25 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.ta_user_deg_lat, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_user_deg_lat, &user_latitude_ctx);
 
+    result.btn_auto_set_user_lat = create_button(
+        row_user_lat,         // parent
+        value_width_1,        // width px
+        obj_height,           // height px
+        LV_ALIGN_CENTER,      // alignment
+        0,                    // pos x
+        0,                    // pos y
+        "+",                  // label text
+        LV_TEXT_ALIGN_CENTER, // text align
+        false,                // show scrollbar
+        false,                // enable scrolling
+        &cobalt_alien_17,     // font for labels,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.btn_auto_set_user_lat.button, btn_auto_set_user_lat_event_cb, LV_EVENT_CLICKED, NULL);
+
     lv_obj_set_size(result.lbl_user_deg_lat, label_width_0, obj_height);
     lv_obj_set_size(result.ta_user_deg_lat, value_width_0, obj_height);
+    lv_obj_set_size(result.btn_auto_set_user_lat.panel, value_width_1, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row Degrees User Longitude                                 */
@@ -6530,6 +6660,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_user_lon, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_user_lon, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_1 = 32;
+    value_width_0 = ((width_px) - label_width_0 - value_width_1) - padding * 5;
 
     result.lbl_user_deg_lon = create_label(
         row_user_lon,
@@ -6568,8 +6702,25 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.ta_user_deg_lon, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_user_deg_lon, &user_longitude_ctx);
 
+    result.btn_auto_set_user_lon = create_button(
+        row_user_lon,         // parent
+        value_width_1,        // width px
+        obj_height,           // height px
+        LV_ALIGN_CENTER,      // alignment
+        0,                    // pos x
+        0,                    // pos y
+        "+",                  // label text
+        LV_TEXT_ALIGN_CENTER, // text align
+        false,                // show scrollbar
+        false,                // enable scrolling
+        &cobalt_alien_17,     // font for labels,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.btn_auto_set_user_lon.button, btn_auto_set_user_lon_event_cb, LV_EVENT_CLICKED, NULL);
+
     lv_obj_set_size(result.lbl_user_deg_lon, label_width_0, obj_height);
     lv_obj_set_size(result.ta_user_deg_lon, value_width_0, obj_height);
+    lv_obj_set_size(result.btn_auto_set_user_lon.panel, value_width_1, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row System Degrees Latitude                                */
@@ -6593,6 +6744,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_sys_lat, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_sys_lat, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
 
     result.lbl_sys_deg_lat= create_label(
         row_sys_lat,
@@ -6655,6 +6810,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_sys_lon, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_sys_lon, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;
 
     result.lbl_sys_deg_lon = create_label(
         row_sys_lon,
@@ -6909,6 +7068,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_user_alt, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_user_alt, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_1 = 32;
+    value_width_0 = ((width_px) - label_width_0 - value_width_1) - padding * 5;
+
     result.lbl_user_altitude = create_label(
         row_user_alt,
         label_width_0,
@@ -6946,8 +7109,25 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.ta_user_altitude, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_user_altitude, &user_altitude_ctx);
 
+    result.btn_auto_set_user_altitude = create_button(
+        row_user_alt,         // parent
+        value_width_1,        // width px
+        obj_height,           // height px
+        LV_ALIGN_CENTER,      // alignment
+        0,                    // pos x
+        0,                    // pos y
+        "+",                  // label text
+        LV_TEXT_ALIGN_CENTER, // text align
+        false,                // show scrollbar
+        false,                // enable scrolling
+        &cobalt_alien_17,     // font for labels,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.btn_auto_set_user_altitude.button, btn_auto_set_user_altitude_event_cb, LV_EVENT_CLICKED, NULL);
+
     lv_obj_set_size(result.lbl_user_altitude, label_width_0, obj_height);
     lv_obj_set_size(result.ta_user_altitude, value_width_0, obj_height);
+    lv_obj_set_size(result.btn_auto_set_user_altitude.panel, value_width_1, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row System Altitude                                        */
@@ -6971,6 +7151,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_sys_alt, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_sys_alt, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
 
     result.lbl_sys_altitude = create_label(
         row_sys_alt,
@@ -7228,6 +7412,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_user_speed, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_user_speed, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_1 = 32;
+    value_width_0 = ((width_px) - label_width_0 - value_width_1) - padding * 5;
+
     result.lbl_user_speed = create_label(
         row_user_speed,
         label_width_0,
@@ -7265,8 +7453,25 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.ta_user_speed, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_user_speed, &user_speed_ctx);
 
+    result.btn_auto_set_user_speed = create_button(
+        row_user_speed,        // parent
+        value_width_1,        // width px
+        obj_height,           // height px
+        LV_ALIGN_CENTER,      // alignment
+        0,                    // pos x
+        0,                    // pos y
+        "+",                  // label text
+        LV_TEXT_ALIGN_CENTER, // text align
+        false,                // show scrollbar
+        false,                // enable scrolling
+        &cobalt_alien_17,     // font for labels,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.btn_auto_set_user_speed.button, btn_auto_set_user_speed_event_cb, LV_EVENT_CLICKED, NULL);
+
     lv_obj_set_size(result.lbl_user_speed, label_width_0, obj_height);
     lv_obj_set_size(result.ta_user_speed, value_width_0, obj_height);
+    lv_obj_set_size(result.btn_auto_set_user_speed.panel, value_width_1, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row System Speed                                           */
@@ -7290,6 +7495,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_sys_speed, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_sys_speed, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
 
     result.lbl_sys_speed = create_label(
         row_sys_speed,
@@ -7543,6 +7752,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_26, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_26, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
+
     result.lbl_ground_heading = create_label(
         row_26,
         label_width_0,
@@ -7605,6 +7818,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_user_gh, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_user_gh, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_1 = 32;
+    value_width_0 = ((width_px) - label_width_0 - value_width_1) - padding * 5;
+
     result.lbl_user_ground_heading = create_label(
         row_user_gh,
         label_width_0,
@@ -7642,8 +7859,25 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.ta_user_ground_heading, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_user_ground_heading, &user_ground_heading_ctx);
 
+    result.btn_auto_set_user_ground_heading = create_button(
+        row_user_gh,         // parent
+        value_width_1,        // width px
+        obj_height,           // height px
+        LV_ALIGN_CENTER,      // alignment
+        0,                    // pos x
+        0,                    // pos y
+        "+",                  // label text
+        LV_TEXT_ALIGN_CENTER, // text align
+        false,                // show scrollbar
+        false,                // enable scrolling
+        &cobalt_alien_17,     // font for labels,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.btn_auto_set_user_ground_heading.button, btn_auto_set_user_ground_heading_event_cb, LV_EVENT_CLICKED, NULL);
+
     lv_obj_set_size(result.lbl_user_ground_heading, label_width_0, obj_height);
     lv_obj_set_size(result.ta_user_ground_heading, value_width_0, obj_height);
+    lv_obj_set_size(result.btn_auto_set_user_ground_heading.panel, value_width_1, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row System Ground Heading                                  */
@@ -7667,6 +7901,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_sys_gh, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_sys_gh, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
 
     result.lbl_sys_ground_heading = create_label(
         row_sys_gh,
@@ -8031,6 +8269,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_15, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_15, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
+
     result.lbl_utc_auto_offset_flag = create_label(
         row_15,
         label_width_0,
@@ -8092,6 +8334,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_16, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_16, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
 
     result.lbl_set_time_automatically = create_label(
         row_16,
@@ -8155,6 +8401,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_0, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_0, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
+
     result.lbl_local_yday = create_label(
         row_0,
         label_width_0,
@@ -8216,6 +8466,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_1, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_1, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
 
     result.lbl_local_wday_name = create_label(
         row_1,
@@ -8279,6 +8533,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_2, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_2, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
+
     result.lbl_local_month_name = create_label(
         row_2,
         label_width_0,
@@ -8340,6 +8598,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_3, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_3, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
 
     result.lbl_formatted_local_time = create_label(
         row_3,
@@ -8403,6 +8665,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_4, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_4, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
+
     result.lbl_formatted_local_date = create_label(
         row_4,
         label_width_0,
@@ -8465,6 +8731,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_5, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_5, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
+
     result.lbl_local_unixtime_us = create_label(
         row_5,
         label_width_0,
@@ -8525,6 +8795,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_title_rtc_time, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_title_rtc_time, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
 
     label_width_0 = width_px - padding * 4;
 
@@ -8637,6 +8911,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_12, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_12, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;        
+
     result.lbl_formatted_rtc_date = create_label(
         row_12,
         label_width_0,
@@ -8698,6 +8976,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_13, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_13, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;        
 
     result.lbl_rtc_unixtime = create_label(
         row_13,
@@ -8871,6 +9153,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_7, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_7, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;        
+
     result.lbl_formatted_rtc_sync_date = create_label(
         row_7,
         label_width_0,
@@ -8932,6 +9218,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_8, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_8, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
 
     result.lbl_rtcsync_latitude = create_label(
         row_8,
@@ -8995,6 +9285,10 @@ satio_container_t create_satio_panel(
     if (enable_scrolling) lv_obj_set_scroll_dir(row_9, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_9, LV_DIR_NONE);
 
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;    
+
     result.lbl_rtcsync_longitude = create_label(
         row_9,
         label_width_0,
@@ -9056,6 +9350,10 @@ satio_container_t create_satio_panel(
 
     if (enable_scrolling) lv_obj_set_scroll_dir(row_10, LV_DIR_ALL);
     else lv_obj_set_scroll_dir(row_10, LV_DIR_NONE);
+
+    label_width_0 = 250;
+    value_width_0 = ((width_px) - label_width_0) - padding * 4;
+    obj_height = row_height - 6;        
 
     result.lbl_rtcsync_altitude = create_label(
         row_10,
@@ -13517,6 +13815,7 @@ void update_display()
                 lv_obj_set_style_outline_color(satio_c.ta_user_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_deg_lat, String(satioData.user_degrees_latitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_lat.panel, default_on_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // User Degrees Longitude
@@ -13525,6 +13824,7 @@ void update_display()
                 lv_obj_set_style_outline_color(satio_c.ta_user_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_deg_lon, String(satioData.user_degrees_longitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_lon.panel, default_on_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Degrees Latitude
@@ -13720,6 +14020,7 @@ void update_display()
                 lv_obj_set_style_outline_color(satio_c.ta_user_altitude, main_contrast_value_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_altitude, String(satioData.user_altitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_altitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_altitude.panel, default_on_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Altitude
@@ -13765,6 +14066,7 @@ void update_display()
                 lv_obj_set_style_outline_color(satio_c.ta_user_speed, main_contrast_value_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_speed, String(satioData.user_speed, 2).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_speed, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_speed.panel, default_on_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Speed
@@ -13818,6 +14120,7 @@ void update_display()
                 lv_obj_set_style_outline_color(satio_c.ta_user_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_ground_heading, String(satioData.user_ground_heading, 2).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_ground_heading.panel, default_on_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Ground Heading

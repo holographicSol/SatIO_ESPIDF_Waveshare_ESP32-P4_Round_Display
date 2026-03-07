@@ -428,8 +428,10 @@ typedef struct {
 
     lv_obj_t * lbl_deg_lon;      // GPS Longitude
     lv_obj_t * val_deg_lon;      // GPS Longitude
+    button_t btn_auto_set_user_lat;
     lv_obj_t * lbl_user_deg_lon; // User Longitude
     lv_obj_t * ta_user_deg_lon;  // User Longitude
+    button_t btn_auto_set_user_lon;
     lv_obj_t * lbl_sys_deg_lon;  // System Longitude
     lv_obj_t * val_sys_deg_lon;  // System Longitude
 
@@ -445,6 +447,7 @@ typedef struct {
     lv_obj_t * lbl_altitude;      // GPS Altitude
     lv_obj_t * val_altitude;      // GPS Altitude    
     lv_obj_t * lbl_user_altitude; // User Altitude
+    button_t btn_auto_set_user_altitude;
     lv_obj_t * ta_user_altitude;  // User Altitude
     lv_obj_t * lbl_sys_altitude;  // System Altitude
     lv_obj_t * val_sys_altitude;  // System Altitude
@@ -461,6 +464,7 @@ typedef struct {
     lv_obj_t * lbl_speed;      // GPS Speed
     lv_obj_t * val_speed;      // GPS Speed
     lv_obj_t * lbl_user_speed; // User Speed
+    button_t btn_auto_set_user_speed;
     lv_obj_t * ta_user_speed;  // User Speed
     lv_obj_t * lbl_sys_speed;  // System Speed
     lv_obj_t * val_sys_speed;  // System Speed
@@ -480,6 +484,7 @@ typedef struct {
     lv_obj_t * val_ground_heading;      // GPS Ground Heading
     lv_obj_t * lbl_user_ground_heading; // User Ground Heading
     lv_obj_t * ta_user_ground_heading;  // User Ground Heading
+    button_t btn_auto_set_user_ground_heading;
     lv_obj_t * lbl_sys_ground_heading;  // System Ground Heading
     lv_obj_t * val_sys_ground_heading;  // System Ground Heading
 
