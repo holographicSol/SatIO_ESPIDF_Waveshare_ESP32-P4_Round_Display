@@ -401,8 +401,12 @@ extern "C" void app_main(void)
                 "t_dsp=%ld  "
 
                 "sat=%s "
-                "lat=%.7f "
-                "lon=%.7f "
+                "deg_lat=%.7f "
+                "deg_lon=%.7f "
+                "usr_lat=%.7f "
+                "usr_lon=%.7f "
+                "sys_lat=%.7f "
+                "sys_lon=%.7f "
                 "alt=%.2f "
                 "ghd=%.2f "
                 "spd=%.2f "
@@ -439,6 +443,10 @@ extern "C" void app_main(void)
                 gnggaData.satellite_count,
                 satioData.degrees_latitude,
                 satioData.degrees_longitude,
+                satioData.user_degrees_latitude,
+                satioData.user_degrees_longitude,
+                satioData.system_degrees_latitude,
+                satioData.system_degrees_longitude,
                 satioData.altitude,
                 satioData.ground_heading,
                 satioData.speed,

@@ -420,14 +420,22 @@ typedef struct {
     lv_obj_t * lbl_title_location;
 
     lv_obj_t * lbl_deg_lat;      // GPS Latitude
-    lv_obj_t * val_deg_lat;      // GPS Longitude
+    lv_obj_t * val_deg_lat;      // GPS Latitude
     lv_obj_t * lbl_user_deg_lat; // User Latitude
     lv_obj_t * ta_user_deg_lat;  // User Latitude
+    lv_obj_t * lbl_sys_deg_lat;  // System Latitude
+    lv_obj_t * val_sys_deg_lat;  // System Latitude
 
     lv_obj_t * lbl_deg_lon;      // GPS Longitude
     lv_obj_t * val_deg_lon;      // GPS Longitude
     lv_obj_t * lbl_user_deg_lon; // User Longitude
     lv_obj_t * ta_user_deg_lon;  // User Longitude
+    lv_obj_t * lbl_sys_deg_lon;  // System Longitude
+    lv_obj_t * val_sys_deg_lon;  // System Longitude
+
+    lv_obj_t * lbl_location_mode; 
+    button_t btn_location_mode_gps;
+    button_t btn_location_mode_user;
 
     /* ---------------------------------------------------------- */
     /* Title Altitude                                             */
@@ -438,6 +446,12 @@ typedef struct {
     lv_obj_t * val_altitude;      // GPS Altitude    
     lv_obj_t * lbl_user_altitude; // User Altitude
     lv_obj_t * ta_user_altitude;  // User Altitude
+    lv_obj_t * lbl_sys_altitude;  // System Altitude
+    lv_obj_t * val_sys_altitude;  // System Altitude
+
+    lv_obj_t * lbl_altitude_mode; 
+    button_t btn_altitude_mode_gps;
+    button_t btn_altitude_mode_user;
 
     /* ---------------------------------------------------------- */
     /* Title Speed                                                */
@@ -448,6 +462,12 @@ typedef struct {
     lv_obj_t * val_speed;      // GPS Speed
     lv_obj_t * lbl_user_speed; // User Speed
     lv_obj_t * ta_user_speed;  // User Speed
+    lv_obj_t * lbl_sys_speed;  // System Speed
+    lv_obj_t * val_sys_speed;  // System Speed
+
+    lv_obj_t * lbl_speed_mode; 
+    button_t btn_speed_mode_gps;
+    button_t btn_speed_mode_user;
 
     /* ---------------------------------------------------------- */
     /* Title Heading                                              */
@@ -460,6 +480,12 @@ typedef struct {
     lv_obj_t * val_ground_heading;      // GPS Ground Heading
     lv_obj_t * lbl_user_ground_heading; // User Ground Heading
     lv_obj_t * ta_user_ground_heading;  // User Ground Heading
+    lv_obj_t * lbl_sys_ground_heading;  // System Ground Heading
+    lv_obj_t * val_sys_ground_heading;  // System Ground Heading
+
+    lv_obj_t * lbl_ground_heading_mode; 
+    button_t btn_ground_heading_mode_gps;
+    button_t btn_ground_heading_mode_user;
 
     /* ---------------------------------------------------------- */
     /* Title Mileage                                              */

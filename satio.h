@@ -68,25 +68,34 @@ struct SATIOStruct {
     // ------------------------------------------------------------------------------------
     // LOCATION
     // ------------------------------------------------------------------------------------
-    double degrees_latitude;                            // Converted latitude in degrees
-    double degrees_longitude;                           // Converted longitude in degrees
-    double user_degrees_latitude;
-    double user_degrees_longitude;
+    double degrees_latitude;         // GPS latitude converted to degrees
+    double degrees_longitude;        // GPS longitude converted to degrees
+    double user_degrees_latitude;    // User specified latitude
+    double user_degrees_longitude;   // User specified longitude
+    double system_degrees_latitude;  // System latitude (GPS / User)
+    double system_degrees_longitude; // Sytem longitude (GPS / User)
+    int location_value_mode;         // GPS / User
     // ------------------------------------------------------------------------------------
     // ALTITUDE SETTINGS
     // ------------------------------------------------------------------------------------
-    double altitude;      // must always be meters altitude.
-    double user_altitude;
+    double altitude;         // GPS altitude (must always be meters altitude)
+    double user_altitude;    // User specified altitude
+    double system_altitude;  // System altitude (GPS / User)
+    int altitude_value_mode; // GPS / User
     // ------------------------------------------------------------------------------------
     // SPEED SETTINGS
     // ------------------------------------------------------------------------------------
-    double speed; // should always be meters a second.
-    double user_speed;
+    double speed;         // GPS speed (must always be meters a second)
+    double user_speed;    // User specified altitude
+    double system_speed;  // System speed (GPS / User)
+    int speed_value_mode; // GPS / User
     // ------------------------------------------------------------------------------------
     // HEADING SETTINGS
     // ------------------------------------------------------------------------------------
-    double ground_heading;
-    double user_ground_heading;
+    double ground_heading;         // GPS ground heading
+    double user_ground_heading;    // User specified ground heading
+    double system_ground_heading;  // System ground heading (GPS / User)
+    int ground_heading_value_mode; // GPS / User
     char   ground_heading_name[MAX_GLOBAL_ELEMENT_SIZE]; // Ground heading (e.g., N, NNE)
     // ------------------------------------------------------------------------------------
     // MILEAGE

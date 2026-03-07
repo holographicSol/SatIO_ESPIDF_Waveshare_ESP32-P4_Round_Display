@@ -549,18 +549,40 @@ void taskUniverse(void * pvParameters) {
     // ------------------------------------------------
     // Track Home Sun, Moon & Planets.
     // ------------------------------------------------
-    trackPlanets(satioData.degrees_latitude,
-                 satioData.degrees_longitude,
-                 satioData.rtc_year,
-                 satioData.rtc_month,
-                 satioData.rtc_mday,
-                 satioData.rtc_hour,
-                 satioData.rtc_minute,
-                 satioData.rtc_second,
-                 satioData.local_hour,
-                 satioData.local_minute,
-                 satioData.local_second,
-                 atol(gnggaData.altitude));
+
+    // change following to use a special switch rather than checking location_mode_value
+    if (satioData.location_value_mode==SATIO_MODE_GPS) {
+      trackPlanets(satioData.degrees_latitude,
+                  satioData.degrees_longitude,
+                  satioData.rtc_year,
+                  satioData.rtc_month,
+                  satioData.rtc_mday,
+                  satioData.rtc_hour,
+                  satioData.rtc_minute,
+                  satioData.rtc_second,
+                  satioData.local_hour,
+                  satioData.local_minute,
+                  satioData.local_second,
+                  satioData.altitude
+                );
+    }
+    // change following to use a special switch rather than checking location_mode_value
+    else if (satioData.location_value_mode==SATIO_MODE_USER) {
+      trackPlanets(satioData.user_degrees_latitude,
+                  satioData.user_degrees_longitude,
+                  satioData.rtc_year,
+                  satioData.rtc_month,
+                  satioData.rtc_mday,
+                  satioData.rtc_hour,
+                  satioData.rtc_minute,
+                  satioData.rtc_second,
+                  satioData.local_hour,
+                  satioData.local_minute,
+                  satioData.local_second,
+                  satioData.user_altitude
+                );
+    }
+
     systemData.i_count_track_planets++;
     esp_task_wdt_reset();
     // ------------------------------------------------

@@ -434,31 +434,6 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define MAX_DAYS_OF_THE_WEEK 7
 #define MAX_MONTHS_OF_THE_YEAR 12
 
-// #define MAX_COORDINATE_CONVERSION_UPDATE_MODES 2
-// #define COORDINATE_UPDATE_MODE_USER            0
-// #define COORDINATE_UPDATE_MODE_GPS             1
-
-
-// #define MAX_ALTITUDE_UNIT_MODES       3
-// #define ALTITUDE_UNIT_MODE_METERS     0
-// #define ALTITUDE_UNIT_MODE_MILES      1
-// #define ALTITUDE_UNIT_MODE_KILOMETERS 2
-
-// #define MAX_ALTITUDE_UPDATE_MODES   2
-// #define ALTITUDE_UPDATE_MODE_USER   0
-// #define ALTITUDE_UPDATE_MODE_GPS    1
-
-
-// #define MAX_SPEED_UNIT_MODES            4 // Number of speed conversion modes
-// #define SPEED_UNIT_MODE_METERS_A_SECOND 0
-// #define SPEED_UNIT_MODE_MPH             1
-// #define SPEED_UNIT_MODE_KPH             2
-// #define SPEED_UNIT_MODE_KTS             3
-
-// #define MAX_SPEED_CONVERSIO_MODES    2
-// #define SPEED_UPDATE_MODE_USER       0
-// #define SPEED_UPDATE_MODE_GPS        1
-
 #define METERS_TO_MILES_RATIO      0.000621371
 #define METERS_TO_KILOMETERS_RATIO 0.001
 
@@ -470,12 +445,11 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define KNOTS_TO_MPH 1.15078
 #define KNOTS_TO_KPH 1.852
 
-// #define MAX_GROUND_HEADING_UPDATE_MODES   2
-// #define GROUND_HEADING_UPDATE_MODE_USER   0
-// #define GROUND_HEADING_UPDATE_MODE_GPS    1
-
-
 #define LAST_EPOCH 1900
+
+#define SATIO_MODE_GPS  0
+#define SATIO_MODE_USER 1
+
 // ----------------------------------------------------------------------------------------
 // SIDEREAL HELPER.
 // ----------------------------------------------------------------------------------------
