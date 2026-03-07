@@ -302,13 +302,13 @@ void taskGPS(void * pvParameters) {
         esp_task_wdt_reset();
         // xSemaphoreGive(i2c_bus0_mutex);
         // --------------------------------------------
-        // Set INS data.
+        // Set INS data. (Can be used without GPS)
         // --------------------------------------------
-        set_ins(satioData.degrees_latitude,
-                satioData.degrees_longitude,
-                satioData.altitude,
-                satioData.ground_heading,
-                satioData.speed,
+        set_ins(satioData.system_degrees_latitude,
+                satioData.system_degrees_latitude,
+                satioData.system_altitude,
+                satioData.system_ground_heading,
+                satioData.system_speed,
                 atof(gnggaData.gps_precision_factor),
                 gyroData.gyro_0_ang_z);
         esp_task_wdt_reset();
@@ -359,14 +359,14 @@ void taskGyro(void * pvParameters) {
         {systemData.i_count_read_gyro_0=0;}
       esp_task_wdt_reset();
       // ----------------------------------------------
-      // Estimate INS data.
+      // Estimate INS data. (Can be used without GPS)
       // INS data is fed bsck into INS.
       // ----------------------------------------------
       if (systemData.interval_breach_gyro_0==true) {
       if (ins_estimate_position(gyroData.gyro_0_ang_y,
                           gyroData.gyro_0_ang_z,
-                          satioData.ground_heading,
-                          satioData.speed,
+                          satioData.system_ground_heading,
+                          satioData.system_speed,
                           satioData.local_unixtime_uS)==true) {
                           systemData.i_count_read_ins++;
                           systemData.interval_breach_ins=1;
@@ -546,14 +546,11 @@ void taskUniverse(void * pvParameters) {
   while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
   for (;;) {
     esp_task_wdt_reset();
-    // ------------------------------------------------
-    // Track Home Sun, Moon & Planets.
-    // ------------------------------------------------
-
-    // change following to use a special switch rather than checking location_mode_value
-    if (satioData.location_value_mode==SATIO_MODE_GPS) {
-      trackPlanets(satioData.degrees_latitude,
-                  satioData.degrees_longitude,
+    // ---------------------------------------------------------
+    // Track Home Sun, Moon & Planets. (Can be used without GPS)
+    // ---------------------------------------------------------
+      trackPlanets(satioData.system_degrees_latitude,
+                  satioData.system_degrees_longitude,
                   satioData.rtc_year,
                   satioData.rtc_month,
                   satioData.rtc_mday,
@@ -563,26 +560,8 @@ void taskUniverse(void * pvParameters) {
                   satioData.local_hour,
                   satioData.local_minute,
                   satioData.local_second,
-                  satioData.altitude
+                  satioData.system_altitude
                 );
-    }
-    // change following to use a special switch rather than checking location_mode_value
-    else if (satioData.location_value_mode==SATIO_MODE_USER) {
-      trackPlanets(satioData.user_degrees_latitude,
-                  satioData.user_degrees_longitude,
-                  satioData.rtc_year,
-                  satioData.rtc_month,
-                  satioData.rtc_mday,
-                  satioData.rtc_hour,
-                  satioData.rtc_minute,
-                  satioData.rtc_second,
-                  satioData.local_hour,
-                  satioData.local_minute,
-                  satioData.local_second,
-                  satioData.user_altitude
-                );
-    }
-
     systemData.i_count_track_planets++;
     esp_task_wdt_reset();
     // ------------------------------------------------
