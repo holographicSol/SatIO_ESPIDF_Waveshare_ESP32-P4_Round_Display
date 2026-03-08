@@ -358,13 +358,12 @@ extern "C" void app_main(void)
 
     printf("waiting a moment...\n");
     delay(5000); // current
-    // delay(1000); // temp
 
     // --------------------------------------------------------------
     // Display Home screen
     // --------------------------------------------------------------
     printf("starting SatIO UI\n");
-    // initSatIOUI();
+    // initSatIOUI(); // already initialized for loading screen
     flag_display_home_screen=true;
     satio_ui_begin();
 

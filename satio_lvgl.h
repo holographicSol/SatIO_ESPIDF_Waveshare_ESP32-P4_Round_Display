@@ -304,6 +304,17 @@ typedef struct {
 } mapping_config_container_t;
 
 /** ---------------------------------------------------------------------------------------
+ * @brief GPS Switch Panel Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel; // Main container panel
+    button_t switch_satio_panel;
+    button_t switch_gngga_panel;
+    button_t switch_gnrmc_panel;
+    button_t switch_gpatt_panel;
+} gps_switch_container_t;
+
+/** ---------------------------------------------------------------------------------------
  * @brief GNGGA Container Struct
  */
 typedef struct {

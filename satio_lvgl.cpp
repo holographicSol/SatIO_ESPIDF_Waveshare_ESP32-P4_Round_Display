@@ -165,7 +165,7 @@ gngga_container_t gngga_c;
 gnrmc_container_t gnrmc_c;
 gpatt_container_t gpatt_c;
 satio_container_t satio_c;
-button_t switch_gps_panel;
+gps_switch_container_t gps_switch_panel;
 int current_gps_panel=0;
 #define MAX_GPS_PANEL_VIEWS 4
 
@@ -236,6 +236,15 @@ lv_color_t main_contrast_border_hue;
 lv_color_t main_contrast_shadow_hue;
 lv_color_t main_contrast_title_hue;
 lv_color_t main_contrast_value_hue;
+
+// Rainbow Color Major
+lv_color_t rainbow_outline_hue;
+lv_color_t rainbow_title_hue;
+lv_color_t rainbow_value_hue;
+// Rainbow Color Major
+lv_color_t rainbow_contrast_outline_hue;
+lv_color_t rainbow_contrast_title_hue;
+lv_color_t rainbow_contrast_value_hue;
 
 // ---------------------------
 // Size
@@ -1333,7 +1342,7 @@ static void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void switch_gps_panel_event_cb(lv_event_t * e)
+static void switch_satio_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1341,12 +1350,74 @@ static void switch_gps_panel_event_cb(lv_event_t * e)
         code == LV_EVENT_CLICKED ||
         code == LV_EVENT_PRESSED ||
         code == LV_EVENT_RELEASED
-    ) {printf("[switch_gps_panel_event_cb] event code: %d\n", code);}
+    ) {printf("[switch_satio_panel_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
-        current_gps_panel+=1;
-        if (current_gps_panel>=MAX_GPS_PANEL_VIEWS) {current_gps_panel=0;}
-        printf("[switch_gps_panel_event_cb] Switching GPS panel view: %d\n", current_gps_panel);
+        current_gps_panel=0;
+        printf("[switch_satio_panel_event_cb] Switching to SatIO panel.\n");
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void switch_gngga_panel_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[switch_gngga_panel_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        current_gps_panel=1;
+        printf("[switch_gngga_panel_event_cb] Switching to GNGGA panel.\n");
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void switch_gnrmc_panel_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[switch_gnrmc_panel_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        current_gps_panel=2;
+        printf("[switch_gnrmc_panel_event_cb] Switching to GNRMC panel.\n");
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+static void switch_gpatt_panel_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if
+    (
+        code == LV_EVENT_CLICKED ||
+        code == LV_EVENT_PRESSED ||
+        code == LV_EVENT_RELEASED
+    ) {printf("[switch_gpatt_panel_event_cb] event code: %d\n", code);}
+
+    if(code == LV_EVENT_CLICKED) {
+        current_gps_panel=3;
+        printf("[switch_gpatt_panel_event_cb] Switching to GPATT panel.\n");
     }
 }
 
@@ -3308,6 +3379,361 @@ button_t create_button(
 
     return result;
 }
+
+gps_switch_container_t create_gps_switch_panel(
+    lv_obj_t * scr,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+
+    int32_t outline_padding,
+
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+
+    int32_t row_height,
+
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+)
+{
+    gps_switch_container_t result = {0};
+    
+    /* --- MAIN PANEL ------------------------------------------------------------------ */
+    result.panel = lv_obj_create(scr);
+
+    // Show scrollbar
+    if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
+    } else {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_OFF);}
+
+    // Enable scrolling
+    if (enable_scrolling) {lv_obj_set_scroll_dir(result.panel, LV_DIR_ALL);
+    } else {lv_obj_set_scroll_dir(result.panel, LV_DIR_NONE);}
+
+    // Size & Position
+    lv_obj_set_size(result.panel, width_px, height_px);
+    lv_obj_align(result.panel, alignment, pos_x, pos_y);
+    lv_obj_set_style_radius(result.panel, radius, LV_PART_MAIN);
+
+    // Main Padding
+    lv_obj_set_style_pad_all(result.panel, outer_pad_all, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(result.panel, main_column_padding, LV_PART_MAIN);
+    lv_obj_set_style_pad_row(result.panel, main_row_padding, LV_PART_MAIN);
+
+    // Outline
+    lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
+    lv_obj_set_style_outline_pad(result.panel, outline_padding, LV_PART_MAIN);
+    
+    // Border
+    lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+
+    // Background
+    lv_obj_set_style_bg_color(result.panel, default_bg_hue, LV_PART_MAIN);
+
+    // Flex
+    lv_obj_set_flex_flow(result.panel, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(result.panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+
+    /* --- Row Buttons ------------------------------------------------------------------ */
+    lv_obj_t * row_0 = lv_obj_create(result.panel);
+
+    // Show scrollbar
+    if (show_scrollbar) {lv_obj_set_scrollbar_mode(row_0, LV_SCROLLBAR_MODE_AUTO);
+    } else {lv_obj_set_scrollbar_mode(row_0, LV_SCROLLBAR_MODE_OFF);}
+
+    // Enable scrolling
+    if (enable_scrolling) {lv_obj_set_scroll_dir(row_0, LV_DIR_ALL);
+    } else {lv_obj_set_scroll_dir(row_0, LV_DIR_NONE);}
+
+    // Size & Position
+    int32_t sub_row_width = width_px - (outer_pad_all*2);
+    int32_t sub_row_height = row_height-(outline_padding*2);
+    lv_obj_set_size(row_0, sub_row_width, sub_row_height);
+    lv_obj_align(row_0, LV_ALIGN_CENTER, pos_x, pos_y);
+
+    // Row Padding
+    lv_obj_set_style_pad_all(row_0, inner_pad_all, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_0, sub_column_padding, LV_PART_MAIN);
+    lv_obj_set_style_pad_row(row_0, sub_row_padding, LV_PART_MAIN);
+
+    // Outline
+    lv_obj_set_style_outline_width(row_0, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(row_0, lv_color_make(0,0,0), LV_PART_MAIN);
+    lv_obj_set_style_outline_pad(row_0, 0, LV_PART_MAIN);
+
+    // Border
+    lv_obj_set_style_border_width(row_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(row_0, lv_color_make(0,0,0), LV_PART_MAIN);
+
+    // Background
+    lv_obj_set_style_bg_opa(row_0, LV_OPA_TRANSP, LV_PART_MAIN);
+
+    // Flex
+    lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_0,
+        LV_FLEX_ALIGN_START,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Try to ensure no clipping when setting value width
+    int32_t value_width_0 = (sub_row_width/4) - (sub_column_padding*1);
+    int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
+
+    // SatIO Panel View
+    result.switch_satio_panel = create_button(
+        row_0,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0, 0,
+        "SatIO",
+        LV_TEXT_ALIGN_CENTER,
+        false,
+        false,
+        &cobalt_alien_17,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.switch_satio_panel.button, switch_satio_panel_event_cb, LV_EVENT_ALL, NULL);
+
+    // GNGGA Panel View
+    result.switch_gngga_panel = create_button(
+        row_0,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0, 0,
+        "GNGGA",
+        LV_TEXT_ALIGN_CENTER,
+        false,
+        false,
+        &cobalt_alien_17,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.switch_gngga_panel.button, switch_gngga_panel_event_cb, LV_EVENT_ALL, NULL);
+
+    // GNRMC Panel View
+    result.switch_gnrmc_panel = create_button(
+        row_0,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0, 0,
+        "GNRMC",
+        LV_TEXT_ALIGN_CENTER,
+        false,
+        false,
+        &cobalt_alien_17,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.switch_gnrmc_panel.button, switch_gnrmc_panel_event_cb, LV_EVENT_ALL, NULL);
+
+    // GPATT Panel View
+    result.switch_gpatt_panel = create_button(
+        row_0,
+        value_width_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0, 0,
+        "GPATT",
+        LV_TEXT_ALIGN_CENTER,
+        false,
+        false,
+        &cobalt_alien_17,
+        radius_rounded
+    );
+    lv_obj_add_event_cb(result.switch_gpatt_panel.button, switch_gpatt_panel_event_cb, LV_EVENT_ALL, NULL);
+
+    lv_obj_set_size(result.switch_satio_panel.panel, value_width_0, obj_height);
+    lv_obj_set_size(result.switch_gngga_panel.panel, value_width_0, obj_height);
+    lv_obj_set_size(result.switch_gnrmc_panel.panel, value_width_0, obj_height);
+    lv_obj_set_size(result.switch_gpatt_panel.panel, value_width_0, obj_height);
+
+    return result;
+}
+
+// gps_switch_container_t create_gps_switch_panel(
+//     lv_obj_t * scr,
+//     int32_t width_px,
+//     int32_t height_px,
+//     lv_align_t alignment,
+//     int32_t pos_x,
+//     int32_t pos_y,
+//     int32_t radius,
+//     int32_t padding,
+//     int32_t row_height,
+//     int32_t row_spacing,
+//     bool show_scrollbar,
+//     bool enable_scrolling,
+//     const lv_font_t * font_title,
+//     const lv_font_t * font_sub
+// )
+// {
+//     gps_switch_container_t result = {0};
+
+//     /* --- MAIN PANEL ------------------------------------------------------------------ */
+//     result.panel = lv_obj_create(scr);
+//     lv_obj_set_size(result.panel, width_px+(padding*2), height_px+(padding*2));
+//     lv_obj_align(result.panel, alignment, pos_x, pos_y);
+
+//     // Show scrollbar
+//     if (show_scrollbar) {
+//         lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
+//     } else {
+//         lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_OFF);
+//     }
+
+//     // Enable scrolling
+//     if (enable_scrolling) {
+//         lv_obj_set_scroll_dir(result.panel, LV_DIR_ALL);
+//     } else {
+//         lv_obj_set_scroll_dir(result.panel, LV_DIR_NONE);
+//     }
+
+//     // Panel style - CLEANED UP (single padding source)
+//     lv_obj_set_style_radius(result.panel, radius, LV_PART_MAIN);
+//     lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
+//     lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
+//     lv_obj_set_style_outline_pad(result.panel, 0, LV_PART_MAIN);
+//     lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
+//     lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+//     lv_obj_set_style_bg_color(result.panel, default_bg_hue, LV_PART_MAIN);
+    
+//     // SINGLE padding source - panel only
+//     lv_obj_set_style_pad_all(result.panel, 0, LV_PART_MAIN);
+//     lv_obj_set_style_pad_column(result.panel, 0, LV_PART_MAIN);
+//     lv_obj_set_style_pad_row(result.panel, 0, LV_PART_MAIN);
+
+//     lv_obj_set_flex_flow(result.panel, LV_FLEX_FLOW_COLUMN);
+//     lv_obj_set_flex_align(result.panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+
+//     /* ---------------------------------------------------------- */
+
+//     lv_obj_t * row_0 = lv_obj_create(result.panel);
+//     lv_obj_set_size(row_0, width_px-(padding*2), row_height-(padding*2));
+
+//     // ZERO ROW PADDING - flex handles spacing
+//     lv_obj_set_style_pad_all(row_0, padding, LV_PART_MAIN);
+//     lv_obj_set_style_pad_column(row_0, 0, LV_PART_MAIN);
+//     lv_obj_set_style_pad_row(row_0, 0, LV_PART_MAIN);
+//     lv_obj_set_style_border_width(row_0, 0, LV_PART_MAIN);
+//     lv_obj_set_style_bg_opa(row_0, LV_OPA_TRANSP, LV_PART_MAIN);
+
+//     lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
+//     lv_obj_set_flex_align(
+//         row_0,
+//         LV_FLEX_ALIGN_SPACE_EVENLY,  // distribute buttons evenly horizontally
+//         LV_FLEX_ALIGN_CENTER,        // vertically center within row
+//         LV_FLEX_ALIGN_CENTER
+//     );
+
+//     // Show scrollbar
+//     if (show_scrollbar) {
+//         lv_obj_set_scrollbar_mode(row_0, LV_SCROLLBAR_MODE_AUTO);
+//     } else {
+//         lv_obj_set_scrollbar_mode(row_0, LV_SCROLLBAR_MODE_OFF);
+//     }
+
+//     // Enable scrolling
+//     if (enable_scrolling) {
+//         lv_obj_set_scroll_dir(row_0, LV_DIR_ALL);
+//     } else {
+//         lv_obj_set_scroll_dir(row_0, LV_DIR_NONE);
+//     }
+
+//     /* --- BUTTON DIMENSIONS (NO CLIPPING) --------------------------------------------- */
+//     int32_t available_width = width_px - (2 * padding);
+//     int32_t value_width_0 = available_width / 4;
+//     int32_t obj_height = row_height - (outline_width*2);  // small vertical margin
+
+//     /* --- CREATE BUTTONS ------------------------------------------------------------- */
+//     // SatIO Panel View
+//     result.switch_satio_panel = create_button(
+//         row_0,
+//         value_width_0,
+//         obj_height,
+//         LV_ALIGN_CENTER,
+//         0, 0,
+//         "SatIO",
+//         LV_TEXT_ALIGN_CENTER,
+//         false,
+//         false,
+//         &cobalt_alien_17,
+//         radius_rounded
+//     );
+//     lv_obj_add_event_cb(result.switch_satio_panel.button, switch_satio_panel_event_cb, LV_EVENT_ALL, NULL);
+
+//     // GNGGA Panel View
+//     result.switch_gngga_panel = create_button(
+//         row_0,
+//         value_width_0,
+//         obj_height,
+//         LV_ALIGN_CENTER,
+//         0, 0,
+//         "GNGGA",
+//         LV_TEXT_ALIGN_CENTER,
+//         false,
+//         false,
+//         &cobalt_alien_17,
+//         radius_rounded
+//     );
+//     lv_obj_add_event_cb(result.switch_gngga_panel.button, switch_gngga_panel_event_cb, LV_EVENT_ALL, NULL);
+
+//     // GNRMC Panel View
+//     result.switch_gnrmc_panel = create_button(
+//         row_0,
+//         value_width_0,
+//         obj_height,
+//         LV_ALIGN_CENTER,
+//         0, 0,
+//         "GNRMC",
+//         LV_TEXT_ALIGN_CENTER,
+//         false,
+//         false,
+//         &cobalt_alien_17,
+//         radius_rounded
+//     );
+//     lv_obj_add_event_cb(result.switch_gnrmc_panel.button, switch_gnrmc_panel_event_cb, LV_EVENT_ALL, NULL);
+
+//     // GPATT Panel View
+//     result.switch_gpatt_panel = create_button(
+//         row_0,
+//         value_width_0,
+//         obj_height,
+//         LV_ALIGN_CENTER,
+//         0, 0,
+//         "GPATT",
+//         LV_TEXT_ALIGN_CENTER,
+//         false,
+//         false,
+//         &cobalt_alien_17,
+//         radius_rounded
+//     );
+//     lv_obj_add_event_cb(result.switch_gpatt_panel.button, switch_gpatt_panel_event_cb, LV_EVENT_ALL, NULL);
+
+//     // ENSURE FINAL SIZES (in case create_button ignores params)
+//     lv_obj_set_size(result.switch_satio_panel.panel, value_width_0, obj_height);
+//     lv_obj_set_size(result.switch_gngga_panel.panel, value_width_0, obj_height);
+//     lv_obj_set_size(result.switch_gnrmc_panel.panel, value_width_0, obj_height);
+//     lv_obj_set_size(result.switch_gpatt_panel.panel, value_width_0, obj_height);
+
+//     return result;
+// }
+
 
 gngga_container_t create_gngga_panel(
     lv_obj_t * scr,
@@ -12721,6 +13147,35 @@ void display_gps_screen()
     int32_t menu_h_px = 400;
     int32_t menu_row_h_px = 34;
 
+    // GPS Switch Panel
+    gps_switch_panel = create_gps_switch_panel(
+        gps_screen,       // parent
+        400,              // width px
+        40+(4*3),         // height px
+        LV_ALIGN_TOP_MID, // alignment
+        0,                // pos x
+        90,               // pos y
+        radius_rounded,   // radius
+
+        4,                // outer_pad_all
+        4,                // inner_pad_all
+
+        2,                // outline_padding
+
+        8,                // main_row_padding
+        8,                // main_column_padding
+
+        2,                // sub_row_padding
+        8,                // sub_column_padding
+
+        48,               // row height
+
+        false,            // show scrollbar
+        false,            // enable scrolling
+        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_17  // font for text,
+    );
+
     // SATIO
     satio_c = create_satio_panel(
         gps_screen,       // parent
@@ -12820,23 +13275,6 @@ void display_gps_screen()
     lv_obj_invalidate(gps_screen);  // Force redraw
     printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
-
-    // Switch Panel View
-    switch_gps_panel = create_button(
-        gps_screen,           // parent
-        200,                  // width
-        48,                   // height
-        LV_ALIGN_TOP_MID,     // alignment
-        0,                    // pos x
-        85,                   // pos y
-        "GPS",                // label text
-        LV_TEXT_ALIGN_CENTER, // text align
-        false,                // show scrollbar
-        false,                // enable scrolling
-        &cobalt_alien_17,     // font for labels,
-        radius_rounded
-    );
-    lv_obj_add_event_cb(switch_gps_panel.button, switch_gps_panel_event_cb, LV_EVENT_ALL, NULL);
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
 
@@ -13039,21 +13477,23 @@ void update_display()
     // ---------------------
     // Rainbow Effect
     // ---------------------
+    current_hue = (current_hue + 1) % 360;
+    // Rainbow Major
+    rainbow_outline_hue = lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100);
+    rainbow_title_hue   = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
+    rainbow_value_hue   = lv_color_hsv_to_rgb((current_hue + 200) % 360, 100, 100);
+    // Rainbow Minor
+    rainbow_contrast_outline_hue = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
+    rainbow_contrast_title_hue   = lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100);
+    rainbow_contrast_value_hue   = lv_color_hsv_to_rgb((current_hue + 50) % 360, 100, 100);
+
     if (enable_rainbow_effect==true) {
-        // Increment Hue
-        current_hue = (current_hue + 1) % 360;
         // Major
-        // main_bg_hue      = lv_color_make(0,0,0); // unused here
         main_outline_hue = lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100);
-        // main_border_hue  = lv_color_make(0,0,0); // unused here
-        // main_shadow_hue  = lv_color_make(0,0,0); // unused here
         main_title_hue   = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
         main_value_hue   = lv_color_hsv_to_rgb((current_hue + 200) % 360, 100, 100);
         // Minor
-        // main_contrast_bg_hue      = lv_color_make(10,10,10); // unused here
         main_contrast_outline_hue = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
-        // main_contrast_border_hue  = lv_color_make(0,0,0); // unused here
-        // main_contrast_shadow_hue  = lv_color_make(0,0,0); // unused here
         main_contrast_title_hue   = lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100);
         main_contrast_value_hue   = lv_color_hsv_to_rgb((current_hue + 50) % 360, 100, 100);
     }
@@ -13078,15 +13518,15 @@ void update_display()
     if (kb_alnumsym.kb != NULL && lv_obj_is_valid(kb_alnumsym.kb)) {
         if (!lv_obj_has_flag(kb_alnumsym.kb, LV_OBJ_FLAG_HIDDEN)) {
             // Rainbow keyboard full outline
-            lv_obj_set_style_outline_color(kb_alnumsym.kb, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(kb_alnumsym.kb, rainbow_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard full keys
-            lv_obj_set_style_text_color(kb_alnumsym.kb, main_title_hue, LV_PART_ITEMS);
+            lv_obj_set_style_text_color(kb_alnumsym.kb, rainbow_title_hue, LV_PART_ITEMS);
             // Rainbow keyboard full checked keys
             lv_obj_set_style_text_color(kb_alnumsym.kb, main_contrast_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
             // Rainbow keyboard full text area outline
-            lv_obj_set_style_outline_color(kb_alnumsym.ta, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(kb_alnumsym.ta, rainbow_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard full text area text
-            lv_obj_set_style_text_color(kb_alnumsym.ta, main_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(kb_alnumsym.ta, rainbow_value_hue, LV_PART_MAIN);
         }
     }
     // ---------------------
@@ -13095,15 +13535,15 @@ void update_display()
     if (kb_numdec.kb != NULL && lv_obj_is_valid(kb_numdec.kb)) {
         if (!lv_obj_has_flag(kb_numdec.kb, LV_OBJ_FLAG_HIDDEN)) {
             // Rainbow keyboard numdec full outline
-            lv_obj_set_style_outline_color(kb_numdec.kb, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(kb_numdec.kb, rainbow_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard numdec full keys
-            lv_obj_set_style_text_color(kb_numdec.kb, main_title_hue, LV_PART_ITEMS);
+            lv_obj_set_style_text_color(kb_numdec.kb, rainbow_title_hue, LV_PART_ITEMS);
             // Rainbow keyboard numdec full checked keys
             lv_obj_set_style_text_color(kb_numdec.kb, main_contrast_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
             // Rainbow keyboard numdec full text area outline
-            lv_obj_set_style_outline_color(kb_numdec.ta, main_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(kb_numdec.ta, rainbow_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard numdec full text area text
-            lv_obj_set_style_text_color(kb_numdec.ta, main_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(kb_numdec.ta, rainbow_value_hue, LV_PART_MAIN);
         }
     }
     
@@ -13114,15 +13554,15 @@ void update_display()
         vTaskDelay(5 / portTICK_PERIOD_MS);
 
         // Title Bar Outline
-        lv_obj_set_style_outline_color(main_title_bar.panel, main_outline_hue, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(main_title_bar.panel, rainbow_outline_hue, LV_PART_MAIN);
 
         // Title Bar Local Time
         lv_label_set_text(main_title_bar.time_label, satioData.formatted_local_time_HHMMSS);
-        lv_obj_set_style_text_color(main_title_bar.time_label, main_title_hue, LV_PART_MAIN);
+        lv_obj_set_style_text_color(main_title_bar.time_label, rainbow_title_hue, LV_PART_MAIN);
 
         // Title Bar Local Date
         lv_label_set_text(main_title_bar.date_label, satioData.formatted_local_short_date_DDMMYY);
-        lv_obj_set_style_text_color(main_title_bar.date_label, main_title_hue, LV_PART_MAIN);
+        lv_obj_set_style_text_color(main_title_bar.date_label, rainbow_title_hue, LV_PART_MAIN);
 
         // GPS Sync
         if (satioData.gps_sync) {
@@ -13136,8 +13576,8 @@ void update_display()
             lv_obj_add_flag(main_title_bar.datetime_sync, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_flag(main_title_bar.gps_signal_strength, LV_OBJ_FLAG_HIDDEN);
             String gps_signal_text = "" + String(gnggaData.satellite_count) + ":" + String(gnggaData.gps_precision_factor) + "";
-            lv_obj_set_style_outline_color(main_title_bar.gps_signal_strength, main_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(main_title_bar.gps_signal_strength, main_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(main_title_bar.gps_signal_strength, rainbow_contrast_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(main_title_bar.gps_signal_strength, rainbow_contrast_title_hue, LV_PART_MAIN);
             lv_label_set_text(main_title_bar.gps_signal_strength, gps_signal_text.c_str());
         }
 
@@ -13155,12 +13595,12 @@ void update_display()
         else {
             if (sdcardData.sdcard_mounted) {
                 lv_obj_set_style_outline_color(main_title_bar.sdcard_mounted, main_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(main_title_bar.sdcard_mounted, main_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(main_title_bar.sdcard_mounted, rainbow_contrast_title_hue, LV_PART_MAIN);
                 lv_label_set_text(main_title_bar.sdcard_mounted, "SD");
             }
             else {
                 lv_obj_set_style_outline_color(main_title_bar.sdcard_mounted, main_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(main_title_bar.sdcard_mounted, main_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(main_title_bar.sdcard_mounted, rainbow_contrast_title_hue, LV_PART_MAIN);
                 lv_label_set_text(main_title_bar.sdcard_mounted, "SD!");
             }
         }
@@ -13173,30 +13613,30 @@ void update_display()
         vTaskDelay(5 / portTICK_PERIOD_MS);
 
         // Rainbow System Tray Outline
-        lv_obj_set_style_outline_color(system_tray.panel, main_outline_hue, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(system_tray.panel, rainbow_outline_hue, LV_PART_MAIN);
 
         // Rainbow System Tray Brightness Slider Outline
-        lv_obj_set_style_outline_color(system_tray.slider_brightness, main_contrast_outline_hue, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(system_tray.slider_brightness, rainbow_contrast_outline_hue, LV_PART_MAIN);
 
         // Rainbow System Tray Brightness Slider Knob
         lv_obj_set_style_bg_color(system_tray.slider_brightness, main_contrast_value_hue, LV_PART_KNOB);
 
         // Rainbow System Tray Brightness Slider Indicator
-        lv_obj_set_style_outline_color(system_tray.slider_brightness, main_outline_hue, LV_PART_INDICATOR);
+        lv_obj_set_style_outline_color(system_tray.slider_brightness, rainbow_contrast_outline_hue, LV_PART_INDICATOR);
 
         // System Tray Local Time
         lv_label_set_text(system_tray.local_time, satioData.formatted_local_time_HHMMSS);
-        lv_obj_set_style_text_color(system_tray.local_time, main_title_hue, LV_PART_MAIN);
+        lv_obj_set_style_text_color(system_tray.local_time, rainbow_title_hue, LV_PART_MAIN);
 
         // System Tray Local Date
         lv_label_set_text(system_tray.local_date, satioData.formatted_local_short_date_DDMMYY);
-        lv_obj_set_style_text_color(system_tray.local_date, main_title_hue, LV_PART_MAIN);
+        lv_obj_set_style_text_color(system_tray.local_date, rainbow_title_hue, LV_PART_MAIN);
 
         // System Tray Human Date
         String human_date = String(satioData.local_wday_name) + " " + String(satioData.local_mday) + " " + String(satioData.local_month_name);
         // printf("human date: %s\n", human_date.c_str());
         lv_label_set_text(system_tray.human_date, human_date.c_str());
-        lv_obj_set_style_text_color(system_tray.human_date, main_title_hue, LV_PART_MAIN);
+        lv_obj_set_style_text_color(system_tray.human_date, rainbow_title_hue, LV_PART_MAIN);
 
         // GPS Sync
         if (satioData.gps_sync) {
@@ -13211,7 +13651,7 @@ void update_display()
             lv_obj_remove_flag(system_tray.gps_signal_strength, LV_OBJ_FLAG_HIDDEN);
             String gps_signal_text = "" + String(gnggaData.satellite_count) + ":" + String(gnggaData.gps_precision_factor) + "";
             lv_obj_set_style_outline_color(system_tray.gps_signal_strength, main_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(system_tray.gps_signal_strength, main_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(system_tray.gps_signal_strength, rainbow_contrast_title_hue, LV_PART_MAIN);
             lv_label_set_text(system_tray.gps_signal_strength, gps_signal_text.c_str());
         }
 
@@ -13229,12 +13669,12 @@ void update_display()
         else {
             if (sdcardData.sdcard_mounted) {
                 lv_obj_set_style_outline_color(system_tray.sdcard_mounted, main_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(system_tray.sdcard_mounted, main_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(system_tray.sdcard_mounted, rainbow_contrast_title_hue, LV_PART_MAIN);
                 lv_label_set_text(system_tray.sdcard_mounted, "SD");
             }
             else {
                 lv_obj_set_style_outline_color(system_tray.sdcard_mounted, main_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(system_tray.sdcard_mounted, main_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(system_tray.sdcard_mounted, rainbow_contrast_title_hue, LV_PART_MAIN);
                 lv_label_set_text(system_tray.sdcard_mounted, "SD!");
             }
         }
@@ -13246,13 +13686,12 @@ void update_display()
             uint32_t grid_child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
             for(uint32_t i = 0; i < grid_child_cnt; i++) {
                 lv_obj_t * btn = lv_obj_get_child(system_tray.grid_menu_1, i);
-                lv_obj_set_style_outline_color(btn, main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(btn, rainbow_contrast_outline_hue, LV_PART_MAIN);
                 // Get label
                 lv_obj_t * label = lv_obj_get_child(btn, 0);
                 if(label && lv_obj_has_class(label, &lv_label_class)) {
                     // Color label
-                    lv_obj_set_style_text_color(label, 
-                        lv_color_hsv_to_rgb((current_hue + (i * 60)) % 360, 100, 100), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(label,  lv_color_hsv_to_rgb((current_hue + (i * 60)) % 360, 100, 100), LV_PART_MAIN);
                 }
             }
         }
@@ -13371,13 +13810,13 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Panel
-                lv_obj_set_style_outline_color(mfc.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.panel, main_outline_hue, LV_PART_MAIN);
 
                 // Label Current Switch
                 lv_obj_set_style_text_color(mfc.label_switch_index_select, main_contrast_title_hue, LV_PART_MAIN);
                 // Value Current Switch
                 lv_dropdown_set_selected(mfc.dd_switch_index_select, current_matrix_i);
-                lv_obj_set_style_outline_color(mfc.dd_switch_index_select, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_switch_index_select, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.dd_switch_index_select, main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_MAIN);
@@ -13388,7 +13827,7 @@ void update_display()
                 lv_obj_set_style_text_color(mfc.label_function_index_select, main_contrast_title_hue, LV_PART_MAIN);
                 // Value Current Function
                 lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
-                lv_obj_set_style_outline_color(mfc.dd_function_index_select, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_function_index_select, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.dd_function_index_select, main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_MAIN);
@@ -13399,7 +13838,7 @@ void update_display()
                 lv_obj_set_style_text_color(mfc.label_function_name, main_contrast_title_hue, LV_PART_MAIN);
                 // Value Primary Function Comparotor
                 lv_dropdown_set_selected(mfc.dd_function_name, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
-                lv_obj_set_style_outline_color(mfc.dd_function_name, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_function_name, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.dd_function_name, main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_value_hue, LV_PART_MAIN);
@@ -13411,7 +13850,7 @@ void update_display()
 
                 // X Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
-                lv_obj_set_style_outline_color(mfc.dd_mode_x, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_mode_x, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.dd_mode_x, main_contrast_title_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_title_hue, LV_PART_MAIN);
@@ -13420,7 +13859,6 @@ void update_display()
                 // X Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]==0) {
                     // Mode 0: User Defined
-                    lv_obj_set_style_outline_color(mfc.ta_x, main_contrast_value_hue, LV_PART_MAIN);
                     if (!strcmp(
                         String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]).c_str(),
                         lv_textarea_get_text(mfc.ta_x))==0)
@@ -13429,6 +13867,7 @@ void update_display()
                         }
                     lv_obj_add_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_set_style_outline_color(mfc.ta_x, main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.ta_x, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
@@ -13436,7 +13875,7 @@ void update_display()
                     lv_dropdown_set_selected(mfc.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
                     lv_obj_add_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_outline_color(mfc.dd_x, main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.dd_x, main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.dd_x, main_contrast_value_hue, LV_PART_MAIN);
                     lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_value_hue, LV_PART_MAIN);
@@ -13449,7 +13888,7 @@ void update_display()
 
                 // Y Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
-                lv_obj_set_style_outline_color(mfc.dd_mode_y, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_mode_y, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.dd_mode_y, main_contrast_title_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_title_hue, LV_PART_MAIN);
@@ -13466,7 +13905,7 @@ void update_display()
                         }
                     lv_obj_add_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_outline_color(mfc.ta_y, main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.ta_y, main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.ta_y, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
@@ -13475,7 +13914,7 @@ void update_display()
                     lv_obj_add_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_set_style_text_color(mfc.dd_y, main_contrast_value_hue, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(mfc.dd_y, main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.dd_y, main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_value_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
@@ -13486,7 +13925,7 @@ void update_display()
                 lv_obj_set_style_text_color(mfc.label_z, main_contrast_title_hue, LV_PART_MAIN);
                 // Z Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
-                lv_obj_set_style_outline_color(mfc.dd_mode_z, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_mode_z, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.dd_mode_z, main_contrast_title_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_title_hue, LV_PART_MAIN);
@@ -13503,7 +13942,7 @@ void update_display()
                         }
                     lv_obj_add_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_outline_color(mfc.ta_z, main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.ta_z, main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.ta_z, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
@@ -13512,7 +13951,7 @@ void update_display()
                     lv_obj_add_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_set_style_text_color(mfc.dd_z, main_contrast_value_hue, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(mfc.dd_z, main_contrast_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.dd_z, main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_outline_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_value_hue, LV_PART_MAIN);
                     lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
@@ -13522,7 +13961,7 @@ void update_display()
                 // Operator
                 lv_obj_set_style_text_color(mfc.label_operator, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_operator, matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i]);
-                lv_obj_set_style_outline_color(mfc.dd_operator, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_operator, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.dd_operator, main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_MAIN);
@@ -13532,7 +13971,7 @@ void update_display()
                 // Inverted
                 lv_obj_set_style_text_color(mfc.label_inverted_logic, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_inverted_logic, matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i]);
-                lv_obj_set_style_outline_color(mfc.dd_inverted_logic, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_inverted_logic, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.dd_inverted_logic, main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_value_hue, LV_PART_MAIN);
@@ -13542,7 +13981,7 @@ void update_display()
                 // PWM Off
                 lv_obj_set_style_text_color(mfc.label_output_pwm_0, main_contrast_title_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.ta_pwm_0, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.ta_pwm_0, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.ta_pwm_0, main_contrast_outline_hue, LV_PART_MAIN);
                 if (!strcmp(
                     String(matrixData.output_pwm[0][current_matrix_i][0]).c_str(),
                     lv_textarea_get_text(mfc.ta_pwm_0))==0)
@@ -13553,7 +13992,7 @@ void update_display()
                 // PWM On
                 lv_obj_set_style_text_color(mfc.label_output_pwm_1, main_contrast_title_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.ta_pwm_1, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.ta_pwm_1, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.ta_pwm_1, main_contrast_outline_hue, LV_PART_MAIN);
                 if (!strcmp(
                     String(matrixData.output_pwm[0][current_matrix_i][1]).c_str(),
                     lv_textarea_get_text(mfc.ta_pwm_1))==0)
@@ -13563,7 +14002,7 @@ void update_display()
 
                 // Connected Map Slot
                 lv_obj_set_style_text_color(mfc.label_map_slot, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.dd_map_slot, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_map_slot, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
                 lv_obj_set_style_text_color(mfc.dd_map_slot, main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_outline_hue, LV_PART_MAIN);
@@ -13573,7 +14012,7 @@ void update_display()
 
                 // Output Mode
                 lv_obj_set_style_text_color(mfc.label_output_mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.dd_output_mode, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.dd_output_mode, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
                 lv_obj_set_style_text_color(mfc.dd_output_mode, main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_outline_hue, LV_PART_MAIN);
@@ -13583,7 +14022,7 @@ void update_display()
 
                 // Output Port
                 lv_obj_set_style_text_color(mfc.label_port_map, lv_color_make(255, 0, 0), LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.ta_port_map, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mfc.ta_port_map, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.ta_port_map, lv_color_make(255, 0, 0), LV_PART_MAIN);
                 if (!strcmp(
                     String(matrixData.matrix_port_map[0][current_matrix_i]).c_str(),
@@ -13612,7 +14051,7 @@ void update_display()
 
                 // Output Value
                 if (mfc.matrix_switch_output_value) {
-                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, main_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, main_contrast_outline_hue, LV_PART_MAIN);
                     lv_label_set_text(mfc.matrix_switch_output_value, String(String("") + String(matrixData.output_value[0][current_matrix_i])).c_str());
                     /* Text Color: Switch Intention (blue) */
                     if (matrixData.switch_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);}
@@ -13649,7 +14088,7 @@ void update_display()
 
                 // Map Slot (Remeains Static Color For Emphasis)
                 lv_obj_set_style_text_color(mcc.slot, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mcc.dd_slot, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.dd_slot, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mcc.dd_slot, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
                 lv_obj_set_style_text_color(mcc.dd_slot, main_contrast_value_hue, LV_PART_MAIN);
@@ -13705,7 +14144,7 @@ void update_display()
                     lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C5]).c_str());
                 }
 
-                lv_obj_set_style_outline_color(mcc.dd_c0, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.dd_c0, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mcc.c0, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_c0, (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
                 lv_obj_set_style_text_color(mcc.dd_c0, main_contrast_value_hue, LV_PART_MAIN);
@@ -13714,33 +14153,33 @@ void update_display()
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                lv_obj_set_style_outline_color(mcc.ta_c1, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.ta_c1, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mcc.c1, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c1, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C1]).c_str());
                 lv_obj_set_style_text_color(mcc.ta_c1, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_outline_color(mcc.ta_c2, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.ta_c2, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mcc.c2, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c2, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C2]).c_str());
                 lv_obj_set_style_text_color(mcc.ta_c2, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_outline_color(mcc.ta_c3, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.ta_c3, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mcc.c3, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c3, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C3]).c_str());
                 lv_obj_set_style_text_color(mcc.ta_c3, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_outline_color(mcc.ta_c4, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.ta_c4, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mcc.c4, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c4, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C4]).c_str());
                 lv_obj_set_style_text_color(mcc.ta_c4, main_contrast_value_hue, LV_PART_MAIN);
                 
-                lv_obj_set_style_outline_color(mcc.ta_c5, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.ta_c5, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(mcc.c5, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c5, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C5]).c_str());
                 lv_obj_set_style_text_color(mcc.ta_c5, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(mcc.mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mcc.dd_mode, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.dd_mode, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_mode, mappingData.map_mode[0][current_mapping_i]);
                 lv_obj_set_style_text_color(mcc.dd_mode, main_contrast_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_outline_hue, LV_PART_MAIN);
@@ -13749,12 +14188,12 @@ void update_display()
                 lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 lv_obj_set_style_text_color(mcc.input_value, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mcc.value_input, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.value_input, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_mapping_i)).c_str());
                 lv_obj_set_style_text_color(mcc.value_input, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(mcc.map_result, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mcc.value_map_result, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.value_map_result, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][current_mapping_i]).c_str());
                 lv_obj_set_style_text_color(mcc.value_map_result, main_contrast_value_hue, LV_PART_MAIN);
             }
@@ -13765,17 +14204,6 @@ void update_display()
     // ---------------------
     else if (lv_scr_act() == gps_screen) {
         vTaskDelay(5 / portTICK_PERIOD_MS); // these will be wdt reset
-
-        // Switch GPS Panel
-        if (switch_gps_panel.label) {
-            if      (current_gps_panel==0) {lv_label_set_text(switch_gps_panel.label, "SATIO");}
-            else if (current_gps_panel==1) {lv_label_set_text(switch_gps_panel.label, "GNGGA");}
-            else if (current_gps_panel==2) {lv_label_set_text(switch_gps_panel.label, "GNRMC");}
-            else if (current_gps_panel==3) {lv_label_set_text(switch_gps_panel.label, "GPATT");}
-            else {lv_label_set_text(switch_gps_panel.label, "");}
-            lv_obj_set_style_outline_color(switch_gps_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(switch_gps_panel.label, main_contrast_title_hue, LV_PART_MAIN);
-        }
 
         if (current_gps_panel == 0) {
             if (satio_c.panel) {
@@ -13789,6 +14217,10 @@ void update_display()
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
+                // Switch Panel
+                // lv_obj_set_style_outline_color(gps_switch_panel.switch_satio_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+
                 // Panel
                 lv_obj_set_style_outline_color(satio_c.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
@@ -13796,7 +14228,7 @@ void update_display()
                 // GPS Degrees Latitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_deg_lat, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_deg_lat, String(satioData.degrees_latitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.val_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13804,7 +14236,7 @@ void update_display()
                 // GPS Degrees Longitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_deg_lon, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_deg_lon, String(satioData.degrees_longitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.val_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13812,25 +14244,25 @@ void update_display()
                 // User Degrees Latitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_user_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_deg_lat, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_deg_lat, String(satioData.user_degrees_latitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_lat.panel, default_on_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_lat.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // User Degrees Longitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_user_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_deg_lon, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_deg_lon, String(satioData.user_degrees_longitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_lon.panel, default_on_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_lon.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Degrees Latitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_sys_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_sys_deg_lat, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_deg_lat, String(satioData.system_degrees_latitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.val_sys_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13838,7 +14270,7 @@ void update_display()
                 // System Degrees Longitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_sys_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_sys_deg_lon, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_deg_lon, String(satioData.system_degrees_longitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.val_sys_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13852,7 +14284,7 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_location_mode_user.label, default_off_value_hue, LV_PART_MAIN);
                     // GPS emphasis
                     lv_obj_set_style_outline_color(satio_c.btn_location_mode_gps.panel, default_on_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_location_mode_gps.label, default_on_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_location_mode_gps.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
                 else if (satioData.location_value_mode==SATIO_MODE_USER) {
                     // GPS lowlight
@@ -13860,7 +14292,7 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_location_mode_gps.label, default_off_value_hue, LV_PART_MAIN);
                     // User emphasis
                     lv_obj_set_style_outline_color(satio_c.btn_location_mode_user.panel, default_on_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_location_mode_user.label, default_on_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_location_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -13869,7 +14301,7 @@ void update_display()
                 // Local Year Day
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_local_yday, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_local_yday, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_local_yday, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_local_yday, String(satioData.local_yday).c_str());
                 lv_obj_set_style_text_color(satio_c.val_local_yday, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13877,7 +14309,7 @@ void update_display()
                 // Local Weekday Name
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_local_wday_name, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_local_wday_name, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_local_wday_name, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_local_wday_name, String(satioData.local_wday_name).c_str());
                 lv_obj_set_style_text_color(satio_c.val_local_wday_name, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13885,7 +14317,7 @@ void update_display()
                 // Local Month Name
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_local_month_name, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_local_month_name, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_local_month_name, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_local_month_name, String(satioData.local_month_name).c_str());
                 lv_obj_set_style_text_color(satio_c.val_local_month_name, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13895,7 +14327,7 @@ void update_display()
                 // Formatted Local Time
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_formatted_local_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_local_time, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_formatted_local_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_local_time, String(satioData.formatted_local_time_HHMMSS).c_str());
                 lv_obj_set_style_text_color(satio_c.val_formatted_local_time, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13903,7 +14335,7 @@ void update_display()
                 // Formatted Local Date
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_formatted_local_date, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_local_date, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_formatted_local_date, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_local_date, String(satioData.formatted_local_date_DDMMYYYY).c_str());
                 lv_obj_set_style_text_color(satio_c.val_formatted_local_date, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13911,7 +14343,7 @@ void update_display()
                 // Local Unix Time (μs)
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_local_unixtime_us, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_local_unixtime_us, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_local_unixtime_us, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_local_unixtime_us, String(satioData.local_unixtime_uS).c_str());
                 lv_obj_set_style_text_color(satio_c.val_local_unixtime_us, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13919,7 +14351,7 @@ void update_display()
                 // Formatted RTC Sync Time
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_formatted_rtc_sync_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_sync_time, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_sync_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_rtc_sync_time, String(satioData.formatted_rtc_sync_time).c_str());
                 lv_obj_set_style_text_color(satio_c.val_formatted_rtc_sync_time, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13927,7 +14359,7 @@ void update_display()
                 // Formatted RTC Sync Date
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_formatted_rtc_sync_date, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_sync_date, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_sync_date, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_rtc_sync_date, String(satioData.formatted_rtc_sync_date_DDMMYYYY).c_str());
                 lv_obj_set_style_text_color(satio_c.val_formatted_rtc_sync_date, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13935,7 +14367,7 @@ void update_display()
                 // RTC Sync Latitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_rtcsync_latitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_rtcsync_latitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_rtcsync_latitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_rtcsync_latitude, String(satioData.rtcsync_latitude).c_str());
                 lv_obj_set_style_text_color(satio_c.val_rtcsync_latitude, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13943,7 +14375,7 @@ void update_display()
                 // RTC Sync Longitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_rtcsync_longitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_rtcsync_longitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_rtcsync_longitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_rtcsync_longitude, String(satioData.rtcsync_longitude).c_str());
                 lv_obj_set_style_text_color(satio_c.val_rtcsync_longitude, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13951,7 +14383,7 @@ void update_display()
                 // RTC Sync Altitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_rtcsync_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_rtcsync_altitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_rtcsync_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_rtcsync_altitude, String(satioData.rtcsync_altitude).c_str());
                 lv_obj_set_style_text_color(satio_c.val_rtcsync_altitude, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13959,7 +14391,7 @@ void update_display()
                 // Formatted RTC Time
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_formatted_rtc_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_time, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_rtc_time, String(satioData.formatted_rtc_time).c_str());
                 lv_obj_set_style_text_color(satio_c.val_formatted_rtc_time, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13967,7 +14399,7 @@ void update_display()
                 // Formatted RTC Date
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_formatted_rtc_date, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_date, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_date, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_rtc_date, String(satioData.formatted_rtc_date).c_str());
                 lv_obj_set_style_text_color(satio_c.val_formatted_rtc_date, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13975,7 +14407,7 @@ void update_display()
                 // RTC Unix Time
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_rtc_unixtime, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_rtc_unixtime, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_rtc_unixtime, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_rtc_unixtime, String(satioData.rtc_unixtime).c_str());
                 lv_obj_set_style_text_color(satio_c.val_rtc_unixtime, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13985,7 +14417,7 @@ void update_display()
                 // UTC Second Offset
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_utc_second_offset, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_utc_second_offset, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_utc_second_offset, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_utc_second_offset, String(satioData.utc_second_offset).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_utc_second_offset, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -13993,7 +14425,7 @@ void update_display()
                 // UTC Auto Offset Flag
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_utc_auto_offset_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_utc_auto_offset_flag, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_utc_auto_offset_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_utc_auto_offset_flag, satioData.utc_auto_offset_flag ? "Yes" : "No");
                 lv_obj_set_style_text_color(satio_c.val_utc_auto_offset_flag, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14001,7 +14433,7 @@ void update_display()
                 // Set Time Automatically
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_set_time_automatically, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_set_time_automatically, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_set_time_automatically, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_set_time_automatically, satioData.set_time_automatically ? "Yes" : "No");
                 lv_obj_set_style_text_color(satio_c.val_set_time_automatically, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14009,7 +14441,7 @@ void update_display()
                 // GPS Altitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_altitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_altitude, String(satioData.altitude).c_str());
                 lv_obj_set_style_text_color(satio_c.val_altitude, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14017,16 +14449,16 @@ void update_display()
                 // User Altitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_user_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_altitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_altitude, String(satioData.user_altitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_altitude, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_altitude.panel, default_on_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_altitude.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Altitude
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_sys_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_altitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_sys_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_altitude, String(satioData.system_altitude, 7).c_str());
                 lv_obj_set_style_text_color(satio_c.val_sys_altitude, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14040,7 +14472,7 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_altitude_mode_user.label, default_off_value_hue, LV_PART_MAIN);
                     // GPS emphasis
                     lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_gps.panel, default_on_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_altitude_mode_gps.label, default_on_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_altitude_mode_gps.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
                 else if (satioData.altitude_value_mode==SATIO_MODE_USER) {
                     // GPS lowlight
@@ -14048,14 +14480,14 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_altitude_mode_gps.label, default_off_value_hue, LV_PART_MAIN);
                     // User emphasis
                     lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_user.panel, default_on_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_altitude_mode_user.label, default_on_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_altitude_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
                 // ────────────────────────────────────────────────
                 // GPS Speed
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_speed, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_speed, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_speed, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_speed, String(satioData.speed, 2).c_str());
                 lv_obj_set_style_text_color(satio_c.val_speed, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14063,16 +14495,16 @@ void update_display()
                 // User Speed
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_user_speed, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_speed, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_speed, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_speed, String(satioData.user_speed, 2).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_speed, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_speed.panel, default_on_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_speed.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Speed
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_sys_speed, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_speed, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_sys_speed, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_speed, String(satioData.system_speed, 2).c_str());
                 lv_obj_set_style_text_color(satio_c.val_sys_speed, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14086,7 +14518,7 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_speed_mode_user.label, default_off_value_hue, LV_PART_MAIN);
                     // GPS emphasis
                     lv_obj_set_style_outline_color(satio_c.btn_speed_mode_gps.panel, default_on_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_speed_mode_gps.label, default_on_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_speed_mode_gps.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
                 else if (satioData.speed_value_mode==SATIO_MODE_USER) {
                     // GPS lowlight
@@ -14094,14 +14526,14 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_speed_mode_gps.label, default_off_value_hue, LV_PART_MAIN);
                     // User emphasis
                     lv_obj_set_style_outline_color(satio_c.btn_speed_mode_user.panel, default_on_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_speed_mode_user.label, default_on_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_speed_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
                 // ────────────────────────────────────────────────
                 // Ground Heading Name
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_ground_heading_name, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_ground_heading_name, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_ground_heading_name, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_ground_heading_name, String(satioData.ground_heading_name).c_str());
                 lv_obj_set_style_text_color(satio_c.val_ground_heading_name, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14109,7 +14541,7 @@ void update_display()
                 // GPS Ground Heading
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_ground_heading, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_ground_heading, String(satioData.ground_heading, 2).c_str());
                 lv_obj_set_style_text_color(satio_c.val_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14117,16 +14549,16 @@ void update_display()
                 // User Ground Heading
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_user_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.ta_user_ground_heading, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_ground_heading, String(satioData.user_ground_heading, 2).c_str());
                 lv_obj_set_style_text_color(satio_c.ta_user_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_ground_heading.panel, default_on_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_ground_heading.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Ground Heading
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_sys_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_sys_ground_heading, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_ground_heading, String(satioData.system_ground_heading, 2).c_str());
                 lv_obj_set_style_text_color(satio_c.val_sys_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14140,7 +14572,7 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_user.label, default_off_value_hue, LV_PART_MAIN);
                     // GPS emphasis
                     lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_gps.panel, default_on_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_gps.label, default_on_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_gps.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
                 else if (satioData.ground_heading_value_mode==SATIO_MODE_USER) {
                     // GPS lowlight
@@ -14148,7 +14580,7 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_gps.label, default_off_value_hue, LV_PART_MAIN);
                     // User emphasis
                     lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_user.panel, default_on_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_user.label, default_on_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
                 // vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -14157,7 +14589,7 @@ void update_display()
                 // Mileage
                 // ────────────────────────────────────────────────
                 lv_obj_set_style_text_color(satio_c.lbl_mileage, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_mileage, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.val_mileage, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_mileage, String(satioData.mileage).c_str());
                 lv_obj_set_style_text_color(satio_c.val_mileage, main_contrast_value_hue, LV_PART_MAIN);
             }
@@ -14166,67 +14598,70 @@ void update_display()
         else if (current_gps_panel==1) {
             if (gngga_c.panel) {
                 // Hide
-                // lv_obj_add_flag(gngga_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(gnrmc_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(gpatt_c.panel, LV_OBJ_FLAG_HIDDEN);
-                // lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
 
                 // Show
                 lv_obj_remove_flag(gngga_c.panel, LV_OBJ_FLAG_HIDDEN);
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
+                // Switch Panel
+                // lv_obj_set_style_outline_color(gps_switch_panel.switch_gngga_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+
                 // Panel
-                lv_obj_set_style_outline_color(gngga_c.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.panel, main_outline_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gngga_c.lbl_utc_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_utc_time, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_utc_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_utc_time, String(gnggaData.utc_time).c_str());
                 // lv_label_set_text(gngga_c.val_utc_time, "foobar");
                 lv_obj_set_style_text_color(gngga_c.val_utc_time, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gngga_c.lbl_latitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_latitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_latitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_latitude, String(String(gnggaData.latitude_hemisphere) + " " + String(gnggaData.latitude)).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_latitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gngga_c.lbl_longitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_longitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_longitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_longitude, String(String(gnggaData.longitude_hemisphere) + " " + String(gnggaData.longitude)).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_longitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gngga_c.lbl_solution_status, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_solution_status, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_solution_status, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_solution_status, String(gnggaData.solution_status).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_solution_status, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gngga_c.lbl_sat_count, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_sat_count, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_sat_count, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_sat_count, String(gnggaData.satellite_count).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_sat_count, main_contrast_value_hue, LV_PART_MAIN);     
                 
                 lv_obj_set_style_text_color(gngga_c.lbl_gps_precision_factor, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_gps_precision_factor, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_gps_precision_factor, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_gps_precision_factor, String(gnggaData.gps_precision_factor).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_gps_precision_factor, main_contrast_value_hue, LV_PART_MAIN);    
                 
                 lv_obj_set_style_text_color(gngga_c.lbl_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_altitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_altitude, String(String(gnggaData.altitude) + " " + String(gnggaData.altitude_units)).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_altitude, main_contrast_value_hue, LV_PART_MAIN);    
 
                 lv_obj_set_style_text_color(gngga_c.lbl_geoidal, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_geoidal, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_geoidal, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_geoidal, String(String(gnggaData.geoidal) + " " + String(gnggaData.geoidal_units)).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_geoidal, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gngga_c.lbl_differential_delay, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_differential_delay, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_differential_delay, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_differential_delay, String(gnggaData.differential_delay).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_differential_delay, main_contrast_value_hue, LV_PART_MAIN); 
 
                 lv_obj_set_style_text_color(gngga_c.lbl_bad_element_count, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gngga_c.val_bad_element_count, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_bad_element_count, String(gnggaData.total_bad_elements).c_str());
                 lv_obj_set_style_text_color(gngga_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN); 
             }
@@ -14236,74 +14671,78 @@ void update_display()
             if (gnrmc_c.panel) {
                 // Hide
                 lv_obj_add_flag(gngga_c.panel, LV_OBJ_FLAG_HIDDEN);
-                // lv_obj_add_flag(gnrmc_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(gpatt_c.panel, LV_OBJ_FLAG_HIDDEN);
-                // lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
 
                 // Show
                 lv_obj_remove_flag(gnrmc_c.panel, LV_OBJ_FLAG_HIDDEN);
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
-                lv_obj_set_style_outline_color(gnrmc_c.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                // Switch Panel
+                // lv_obj_set_style_outline_color(gps_switch_panel.switch_gnrmc_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+
+                // Panel
+                lv_obj_set_style_outline_color(gnrmc_c.panel, main_outline_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_utc_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_utc_time, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_utc_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_utc_time, String(gnrmcData.utc_time).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_utc_time, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_positioning_status, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_positioning_status, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_positioning_status, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_positioning_status, String(gnrmcData.positioning_status).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_positioning_status, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_latitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_latitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_latitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_latitude,
                                 String(String(gnrmcData.latitude_hemisphere) + " " +
                                         String(gnrmcData.latitude)).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_latitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_longitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_longitude, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_longitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_longitude,
                                 String(String(gnrmcData.longitude_hemisphere) + " " +
                                         String(gnrmcData.longitude)).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_longitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_ground_speed, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_ground_speed, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_ground_speed, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_ground_speed, String(gnrmcData.ground_speed).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_ground_speed, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_ground_heading, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_ground_heading, String(gnrmcData.ground_heading).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_utc_date, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_utc_date, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_utc_date, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_utc_date, String(gnrmcData.utc_date).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_utc_date, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_installation_angle, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_installation_angle, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_installation_angle, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_installation_angle, String(gnrmcData.installation_angle).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_installation_angle, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_installation_angle_direction, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_installation_angle_direction, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_installation_angle_direction, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_installation_angle_direction,
                                 String(gnrmcData.installation_angle_direction).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_installation_angle_direction, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_mode_indication, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_mode_indication, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_mode_indication, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_mode_indication, String(gnrmcData.mode_indication).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_mode_indication, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gnrmc_c.lbl_bad_element_count, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gnrmc_c.val_bad_element_count, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_bad_element_count, String(gnrmcData.total_bad_elements).c_str());
                 lv_obj_set_style_text_color(gnrmc_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN);
             }
@@ -14314,118 +14753,122 @@ void update_display()
                 // Hide
                 lv_obj_add_flag(gngga_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(gnrmc_c.panel, LV_OBJ_FLAG_HIDDEN);
-                // lv_obj_add_flag(gpatt_c.panel, LV_OBJ_FLAG_HIDDEN);
-                // lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
 
                 // Show
                 lv_obj_remove_flag(gpatt_c.panel, LV_OBJ_FLAG_HIDDEN);
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
-                lv_obj_set_style_outline_color(gpatt_c.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                // Switch Panel
+                // lv_obj_set_style_outline_color(gps_switch_panel.switch_gpatt_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                // lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+
+                // Panel
+                lv_obj_set_style_outline_color(gpatt_c.panel, main_outline_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_pith, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_pitch, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_pitch, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_pitch, String(gpattData.pitch).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_pitch, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_roll, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_roll, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_roll, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_roll, String(gpattData.roll).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_roll, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_yaw, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_yaw, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_yaw, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_yaw, String(gpattData.yaw).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_yaw, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_software_version, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_software_version, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_software_version, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_software_version, String(gpattData.software_version).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_software_version, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_product_id, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_product_id, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_product_id, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_product_id, String(gpattData.product_id).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_product_id, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_ins, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_ins, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_ins, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_ins, String(gpattData.ins).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_ins, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_hardware_version, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_hardware_version, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_hardware_version, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_hardware_version, String(gpattData.hardware_version).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_hardware_version, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_run_state_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_run_state_flag, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_run_state_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_run_state_flag, String(gpattData.run_state_flag).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_run_state_flag, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_mis_angle_num, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_mis_angle_num, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_mis_angle_num, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_mis_angle_num, String(gpattData.mis_angle_num).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_mis_angle_num, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_static_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_static_flag, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_static_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_static_flag, String(gpattData.static_flag).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_static_flag, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_user_code, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_user_code, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_user_code, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_user_code, String(gpattData.user_code).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_user_code, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_gst_data, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_gst_data, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_gst_data, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_gst_data, String(gpattData.gst_data).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_gst_data, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_line_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_line_flag, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_line_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_line_flag, String(gpattData.line_flag).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_line_flag, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_mis_att_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_mis_att_flag, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_mis_att_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_mis_att_flag, String(gpattData.mis_att_flag).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_mis_att_flag, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_imu_kind, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_imu_kind, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_imu_kind, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_imu_kind, String(gpattData.imu_kind).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_imu_kind, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_ubi_car_kind, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_ubi_car_kind, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_ubi_car_kind, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_ubi_car_kind, String(gpattData.ubi_car_kind).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_ubi_car_kind, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_mileage, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_mileage, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_mileage, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_mileage, String(gpattData.mileage).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_mileage, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_run_inetial_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_run_inetial_flag, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_run_inetial_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_run_inetial_flag, String(gpattData.run_inetial_flag).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_run_inetial_flag, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_speed_num, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_speed_num, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_speed_num, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_speed_num, String(gpattData.speed_num).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_speed_num, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_scalable, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_scalable, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_scalable, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_scalable, String(gpattData.scalable).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_scalable, main_contrast_value_hue, LV_PART_MAIN);
 
                 lv_obj_set_style_text_color(gpatt_c.lbl_bad_element_count, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(gpatt_c.val_bad_element_count, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_bad_element_count, String(gpattData.total_bad_elements).c_str());
                 lv_obj_set_style_text_color(gpatt_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN);
             }
@@ -14447,7 +14890,7 @@ void update_display()
             // Angular X
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_x, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_x, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_x, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_ang_x, String(gyroData.gyro_0_ang_x).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_ang_x, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14455,7 +14898,7 @@ void update_display()
             // Angular Y
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_y, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_y, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_ang_y, String(gyroData.gyro_0_ang_y).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_ang_y, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14463,7 +14906,7 @@ void update_display()
             // Angular Z
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_z, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_z, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_ang_z, String(gyroData.gyro_0_ang_z).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_ang_z, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14471,7 +14914,7 @@ void update_display()
             // Acceleration X
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_x, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_x, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_x, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_acc_x, String(gyroData.gyro_0_acc_x).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_acc_x, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14479,7 +14922,7 @@ void update_display()
             // Acceleration Y
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_y, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_y, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_acc_y, String(gyroData.gyro_0_acc_y).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_acc_y, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14487,7 +14930,7 @@ void update_display()
             // Acceleration Z
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_z, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_z, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_acc_z, String(gyroData.gyro_0_acc_z).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_acc_z, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14495,7 +14938,7 @@ void update_display()
             // Gyroscope X
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_x, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_x, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_x, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_gyr_x, String(gyroData.gyro_0_gyr_x).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_gyr_x, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14503,7 +14946,7 @@ void update_display()
             // Gyroscope Y
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_y, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_y, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_gyr_y, String(gyroData.gyro_0_gyr_y).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_gyr_y, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14511,7 +14954,7 @@ void update_display()
             // Gyroscope Z
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_z, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_z, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_gyr_z, String(gyroData.gyro_0_gyr_z).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_gyr_z, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14519,7 +14962,7 @@ void update_display()
             // Magnetometer X
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_x, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_x, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_x, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_mag_x, String(gyroData.gyro_0_mag_x).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_mag_x, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14527,7 +14970,7 @@ void update_display()
             // Magnetometer Y
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_y, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_y, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_mag_y, String(gyroData.gyro_0_mag_y).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_mag_y, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14535,7 +14978,7 @@ void update_display()
             // Magnetometer Z
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_z, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_z, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_mag_z, String(gyroData.gyro_0_mag_z).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_mag_z, main_contrast_value_hue, LV_PART_MAIN);
 
@@ -14543,7 +14986,7 @@ void update_display()
             // Current UI Baud Rate
             // ────────────────────────────────────────────────
             lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_current_uiBaud, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_current_uiBaud, main_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_current_uiBaud, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_current_uiBaud, String(gyroData.gyro_0_current_uiBaud).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_current_uiBaud, main_contrast_value_hue, LV_PART_MAIN);
         }
@@ -14629,24 +15072,25 @@ void initSatIOUI() {
 
     // Default Major
     default_bg_hue      = lv_color_make(0,0,0);
-    default_outline_hue = lv_color_make(14,14,14); // used instead of border
+    default_outline_hue = lv_color_make(28,28,28); // used instead of border
     default_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
     default_shadow_hue  = lv_color_make(0,0,0);
     default_title_hue   = lv_color_make(0,0, 255);
     default_value_hue   = lv_color_make(0,255,0);
     // Default Minor
     default_contrast_bg_hue      = lv_color_make(14,14,14);
-    default_contrast_outline_hue = lv_color_make(14,14,14); // used instead of border
+    default_contrast_outline_hue = lv_color_make(28,28,28); // used instead of border
     default_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
     default_contrast_shadow_hue  = lv_color_make(0,0,0);
     default_contrast_title_hue   = lv_color_make(0,0, 255);
     default_contrast_value_hue   = lv_color_make(0,255,0);
+
     // Default Off
-    default_off_outline_hue = lv_color_make(128,128,128); // used instead of border
-    default_off_title_hue   = lv_color_make(128,128,128);
-    default_off_value_hue   = lv_color_make(128,128,128);
+    default_off_outline_hue = lv_color_make(28,28,28); // used instead of border
+    default_off_title_hue   = lv_color_make(28,28,28);
+    default_off_value_hue   = lv_color_make(28,28,28);
     // Default On
-    default_on_outline_hue = lv_color_make(0,255,0); // used instead of border
+    default_on_outline_hue = lv_color_make(28,28,28); // used instead of border
     default_on_title_hue   = lv_color_make(0,255,0);
     default_on_value_hue   = lv_color_make(0,255,0);
 
@@ -14665,8 +15109,18 @@ void initSatIOUI() {
     custom_contrast_title_hue   = lv_color_make(0,0, 255);
     custom_contrast_value_hue   = lv_color_make(0,255,0);
 
+    // Rainbow Hue Major
+    rainbow_outline_hue = lv_color_make(0,0,0); // used instead of border
+    rainbow_title_hue   = lv_color_make(0,0,255);
+    rainbow_value_hue   = lv_color_make(0,255,0);
+    // Rainbow Hue Minor
+    rainbow_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
+    rainbow_contrast_title_hue   = lv_color_make(0,0,255);
+    rainbow_contrast_value_hue   = lv_color_make(0,255,0);
+
+
     // Set Current Pallette
-    enable_rainbow_effect=true;
+    enable_rainbow_effect=false;
     setColorsDefault();
 
     // --------------------------------------------------------------
