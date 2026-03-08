@@ -375,7 +375,7 @@ typedef struct {
  */
 typedef struct {
     lv_obj_t * panel; // Main container panel
-    lv_obj_t * lbl_pith;
+    lv_obj_t * lbl_pitch;
     lv_obj_t * val_pitch;
     lv_obj_t * lbl_roll;
     lv_obj_t * val_roll;
@@ -795,6 +795,17 @@ button_t create_button(
     int32_t radius
     );
 
+lv_obj_t * create_row(
+    lv_obj_t * parent,
+    int32_t sub_row_width,
+    int32_t sub_row_height,
+    int32_t inner_pad_all,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    bool show_scrollbar,
+    bool enable_scrolling
+    );
+
 matrix_function_container_t create_matrix_function_container(
     lv_obj_t * scr,
     int32_t width_px,
@@ -803,6 +814,14 @@ matrix_function_container_t create_matrix_function_container(
     int32_t pos_x,
     int32_t pos_y,
     int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,
@@ -813,13 +832,128 @@ mapping_config_container_t create_mapping_config_container(
     lv_obj_t * scr,
     int32_t width_px,
     int32_t height_px,
-    int32_t alignment,
+    lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     int32_t radius,
-    int32_t padding,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
     int32_t row_height,
-    int32_t row_spacing,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    );
+
+gyro_0_container_t create_gyro_panel(
+    lv_obj_t * scr,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    );
+
+satio_container_t create_satio_panel(
+    lv_obj_t * scr,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    );
+
+gngga_container_t create_gngga_panel(
+    lv_obj_t * scr,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    );
+
+gnrmc_container_t create_gnrmc_panel(
+    lv_obj_t * scr,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    );
+
+gpatt_container_t create_gpatt_panel(
+    lv_obj_t * scr,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,
