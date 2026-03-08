@@ -11153,7 +11153,7 @@ mapping_config_container_t create_mapping_config_container(
         false,           // show scrollbars
         false,           // enable scrolling
         font_sub,
-        LV_TEXT_ALIGN_RIGHT
+        LV_TEXT_ALIGN_CENTER
     );
     lv_textarea_set_text(result.ta_c1, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C1]).c_str());
     lv_obj_add_event_cb(result.ta_c1, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -11214,7 +11214,7 @@ mapping_config_container_t create_mapping_config_container(
         false,           // show scrollbars
         false,           // enable scrolling
         font_sub,
-        LV_TEXT_ALIGN_RIGHT
+        LV_TEXT_ALIGN_CENTER
     );
     lv_textarea_set_text(result.ta_c2, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C2]).c_str());
     lv_obj_add_event_cb(result.ta_c2, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -11275,7 +11275,7 @@ mapping_config_container_t create_mapping_config_container(
         false,           // show scrollbars
         false,           // enable scrolling
         font_sub,
-        LV_TEXT_ALIGN_RIGHT
+        LV_TEXT_ALIGN_CENTER
     );
     lv_textarea_set_text(result.ta_c3, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C3]).c_str());
     lv_obj_add_event_cb(result.ta_c3, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -11336,7 +11336,7 @@ mapping_config_container_t create_mapping_config_container(
         false,           // show scrollbars
         false,           // enable scrolling
         font_sub,
-        LV_TEXT_ALIGN_RIGHT
+        LV_TEXT_ALIGN_CENTER
     );
     lv_textarea_set_text(result.ta_c4, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C4]).c_str());
     lv_obj_add_event_cb(result.ta_c4, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
@@ -11397,7 +11397,7 @@ mapping_config_container_t create_mapping_config_container(
         false,           // show scrollbars
         false,           // enable scrolling
         font_sub,
-        LV_TEXT_ALIGN_RIGHT
+        LV_TEXT_ALIGN_CENTER
     );
     lv_textarea_set_text(result.ta_c5, String(mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C5]).c_str());
     lv_obj_add_event_cb(result.ta_c5, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
