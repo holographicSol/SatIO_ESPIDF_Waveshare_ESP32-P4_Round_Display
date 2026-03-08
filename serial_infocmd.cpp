@@ -928,7 +928,7 @@ void setSpeed(double speed) {
 }
 
 void setGroundHeading(double heading) {
-  if (heading>=0 && heading<DBL_MAX && heading!=NAN) {
+  if (heading>=-360 && heading<=360 && heading!=NAN) {
     satioData.user_ground_heading=heading;
   }
 }
