@@ -384,32 +384,31 @@ static void PrintHelp(void) {
 
   [ Satio ]
 
-      satio --coord-update-mode-gps           Use GPS latitude, longitude values.
-      satio --coord-update-mode-user        Do not update latiude, longitude unless --set-coord or otherwise.
-      satio --set-coord -lat n -lon n  Set degrees latitude and longitude (ensure --coord-update-mode-user before --set-coord).
+      [ Time ]
       satio --utc-offset n             Set +-seconds offset time.
       satio --auto-datetime-on         Enable set datetime automatically  (--auto-datetime-on overrides any datetime -set).
       satio --auto-datetime-off        Disable set datetime automatically (ensure --auto-datetime-off before using -set time).
       satio --set-datetime --year n --month n --mday n --hour n --minute n --second n  (must be UTC except if utc offset 0).
 
-      satio --speed-mode-gps     Use GPS speed values.
-      satio --speed-mode-user  Do not update speed unless --set-speed or otherwise.
-      satio --set-speed n        Set speed in meters per second (ensure --speed-mode-user before --set-speed).satio --set-speed 0.1
-      satio --speed-unit-KTS     Use default knots.
-      satio --speed-unit-KPH     Convert knots per second to K/PH.
-      satio --speed-unit-MPH     Convert knots per second to M/PH.
-      satio --speed-unit-mPS     Convert knots per second to meters per second.
+      [ Location ]
+      satio --coord-value-mode-gps             Use GPS coordinates.
+      satio --coord-value-mode-user            User user defined coordinates.
+      satio --set-coord -lat n -lon n          Set degrees latitude and longitude.
 
-      satio --altitude-mode-gps         Use GPS altitude values.
-      satio --altitude-mode-user      Do not update speed unless --set-altitude or otherwise.
-      satio --set-altitude n            Set altitude in meters (ensure --altitude-mode-user before --set-altitude).
-      satio --altitude-unit-meters      Use default meters altitude.
-      satio --altitude-unit-kilometers  Convert meters to kilometers.
-      satio --altitude-unit-miles       Convert meters to miles.
+      [ Speed ]
+      satio --speed-value-mode-gps             Use GPS speed.
+      satio --speed-value-mode-user            User user defined speed.
+      satio --set-speed n                      Set speed in meters per second.
+
+      [ Altitude ]
+      satio --altitude-value-mode-gps          Use GPS altitude values.
+      satio --altitude-value-mode-user         User user defined altitude.
+      satio --set-altitude n                   Set altitude in meters.
       
-      satio --ground-heading-update-mode-gps     Use GPS ground heading values.
-      satio --ground-heading-update-mode-user  Do not update heading unless --set-ground-heading or otherwise.
-      satio --set-ground-heading          Set ground heading in degrees (0-360. Ensure --ground-heading-update-mode-user before --ground-heading).
+      [ Ground Heading ]
+      satio --ground-heading-value-mode-gps    Use GPS ground heading values.
+      satio --ground-heading-value-mode-user   User user defined ground heading.
+      satio --set-ground-heading               Set ground heading in degrees.
 
   [ Gyro ]
 
@@ -910,11 +909,6 @@ void datetimeSetDTAuto(bool set_dt_auto) {
 }
 
 void setCoordinatesDegrees(double latitude, double longitude) {
-  /*
-     satio --coord-update-mode-gps
-     satio --coord-update-mode-user
-     satio --set-coord -lat 0.123 -lon 4.567
-  */
   if (latitude>=-90 && latitude<=90 && longitude>=-180 && longitude<=180) {
     satioData.user_degrees_latitude=latitude;
     satioData.user_degrees_longitude=longitude;
@@ -922,40 +916,18 @@ void setCoordinatesDegrees(double latitude, double longitude) {
 }
 
 void setAltitude(double altitude) {
-  /*
-     satio --altitude-mode-gps
-     satio --altitude-mode-user
-     satio --set-altitude 1000
-     satio --altitude-unit-kilometers
-     satio --altitude-unit-miles
-     satio --altitude-unit-meters
-  */
   if (altitude>=0 && altitude<DBL_MAX && altitude!=NAN) {
     satioData.user_altitude=altitude;
   }
 }
 
 void setSpeed(double speed) {
-  /*
-     satio --speed-mode-gps
-     satio --speed-mode-user
-     satio --set-speed 1000
-     satio --speed-unit-KTS
-     satio --speed-unit-KPH
-     satio --speed-unit-MPH
-     satio --speed-unit-mPS
-  */
   if (speed>=0 && speed<DBL_MAX && speed!=NAN) {
     satioData.user_speed=speed;
   }
 }
 
 void setGroundHeading(double heading) {
-  /*
-     satio --ground-heading-update-mode-user
-     satio --ground-heading-update-mode-gps
-     satio --set-ground-heading 180
-  */
   if (heading>=0 && heading<DBL_MAX && heading!=NAN) {
     satioData.user_ground_heading=heading;
   }
@@ -1291,7 +1263,7 @@ void CmdProcess() {
       }
 
       else if (strcmp(pos[0], "satio")==0) {
-
+        // time
         if (argparser_has_flag(&parser, "utc-offset")) {setUTCSecondOffset(argparser_get_int64(&parser, "utc-offset", 0));}
         if (argparser_has_flag(&parser, "auto-datetime-on")) {datetimeSetDTAuto(true);}
         if (argparser_has_flag(&parser, "auto-datetime-off")) {datetimeSetDTAuto(false);}
@@ -1302,6 +1274,33 @@ void CmdProcess() {
                                  argparser_get_uint8(&parser,  "hour", -1),
                                  argparser_get_uint8(&parser,  "minute", -1),
                                  argparser_get_uint8(&parser,  "second", -1));}
+        // location
+        if (argparser_has_flag(&parser, "set-coord") && argparser_has_flag(&parser, "lat") && argparser_has_flag(&parser, "lon")) {
+          setCoordinatesDegrees(argparser_get_double(&parser, "lat", NAN), argparser_get_double(&parser, "lon", NAN));
+        }
+        if (argparser_has_flag(&parser, "coord-value-mode-gps")) {satioData.location_value_mode=SATIO_MODE_GPS;}
+        if (argparser_has_flag(&parser, "coord-value-mode-user")) {satioData.location_value_mode=SATIO_MODE_USER;}
+
+        // speed
+        if (argparser_has_flag(&parser, "set-speed")) {
+          setSpeed(argparser_get_double(&parser, "set-speed", NAN));
+        }
+        if (argparser_has_flag(&parser, "speed-value-mode-gps")) {satioData.speed_value_mode=SATIO_MODE_GPS;}
+        if (argparser_has_flag(&parser, "speed-value-mode-user")) {satioData.speed_value_mode=SATIO_MODE_USER;}
+
+        // altitude
+        if (argparser_has_flag(&parser, "set-altitude")) {
+          setAltitude(argparser_get_double(&parser, "set-altitude", NAN));
+        }
+        if (argparser_has_flag(&parser, "altitude-value-mode-gps")) {satioData.altitude_value_mode=SATIO_MODE_GPS;}
+        if (argparser_has_flag(&parser, "altitude-value-mode-user")) {satioData.altitude_value_mode=SATIO_MODE_USER;}
+
+        // ground heading
+        if (argparser_has_flag(&parser, "set-ground-heading")) {
+          setGroundHeading(argparser_get_double(&parser, "set-ground-heading", NAN));
+        }
+        if (argparser_has_flag(&parser, "ground-heading-value-mode-gps")) {satioData.ground_heading_value_mode=SATIO_MODE_GPS;}
+        if (argparser_has_flag(&parser, "ground-heading-value-mode-user")) {satioData.ground_heading_value_mode=SATIO_MODE_USER;}
       }
 
       else if (strcmp(pos[0], "gyro")==0) {
