@@ -6825,7 +6825,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width;
+    obj_w_0 = sub_row_width - (sub_column_padding*2);
 
     result.lbl_title_altitude= create_label(
         row_title_altitude,
@@ -6864,7 +6864,7 @@ satio_container_t create_satio_panel(
 
     // Set row object widths
     obj_w_0 = 250;
-    obj_w_1 = (((sub_row_width/4) *1) - obj_w_0) - (sub_column_padding*2);
+    obj_w_1 = (((sub_row_width) *1) - obj_w_0) - (sub_column_padding*2);
 
     result.lbl_altitude = create_label(
         gps_altitude,
@@ -6999,7 +6999,7 @@ satio_container_t create_satio_panel(
 
     // Set row object widths
     obj_w_0 = 250;
-    obj_w_1 = (((sub_row_width/4) *1) - obj_w_0) - (sub_column_padding*2);  
+    obj_w_1 = (((sub_row_width) *1) - obj_w_0) - (sub_column_padding*2);
 
     result.lbl_sys_altitude = create_label(
         row_sys_alt,
@@ -7121,7 +7121,7 @@ satio_container_t create_satio_panel(
     /* ---------------------------------------------------------- */
     /* Title Speed                                                */
     /* ---------------------------------------------------------- */
-lv_obj_t * row_title_speed = create_row(
+    lv_obj_t * row_title_speed = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -7132,7 +7132,7 @@ lv_obj_t * row_title_speed = create_row(
         false
     );
 
-    obj_w_0 = sub_row_width;
+    obj_w_0 = sub_row_width - (sub_column_padding*2);
 
     result.lbl_title_speed = create_label(
         row_title_speed,
@@ -7170,7 +7170,7 @@ lv_obj_t * row_title_speed = create_row(
     );
 
     obj_w_0 = 250;
-    obj_w_1 = (((sub_row_width / 4) * 1) - obj_w_0) - (sub_column_padding * 2);
+    obj_w_1 = (((sub_row_width) *1) - obj_w_0) - (sub_column_padding*2);
 
     result.lbl_speed = create_label(
         row_gps_speed,
@@ -7433,7 +7433,7 @@ lv_obj_t * row_title_speed = create_row(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width;
+    obj_w_0 = sub_row_width - (sub_column_padding*2);
 
     result.lbl_title_heading = create_label(
         row_title_heading,
@@ -7796,7 +7796,7 @@ lv_obj_t * row_title_speed = create_row(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width;
+    obj_w_0 = sub_row_width - (sub_column_padding*2);
 
     result.lbl_title_mileage = create_label(
         row_title_mileage,
@@ -7892,7 +7892,7 @@ lv_obj_t * row_title_speed = create_row(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width;
+    obj_w_0 = sub_row_width - (sub_column_padding*2);
 
     result.lbl_title_local_time = create_label(
         row_title_local_time,
@@ -8453,7 +8453,7 @@ lv_obj_t * row_title_speed = create_row(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width;
+    obj_w_0 = sub_row_width - (sub_column_padding*2);
 
     result.lbl_title_rtc_time = create_label(
         row_title_rtc_time,
@@ -8665,7 +8665,7 @@ lv_obj_t * row_title_speed = create_row(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width;
+    obj_w_0 = sub_row_width - (sub_column_padding*2);
 
     result.lbl_title_rtc_sync = create_label(
         row_title_rtc_sync,
