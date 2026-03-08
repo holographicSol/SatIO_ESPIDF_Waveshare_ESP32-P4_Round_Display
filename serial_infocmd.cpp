@@ -916,7 +916,7 @@ void setCoordinatesDegrees(double latitude, double longitude) {
 }
 
 void setAltitude(double altitude) {
-  if (altitude>=0 && altitude<DBL_MAX && altitude!=NAN) {
+  if (altitude>=DBL_MIN && altitude<DBL_MAX && altitude!=NAN) {
     satioData.user_altitude=altitude;
   }
 }
