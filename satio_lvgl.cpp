@@ -6327,7 +6327,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding*2);
+    obj_w_0 = sub_row_width - (sub_column_padding);
 
     result.lbl_title_location= create_label(
         row_title_positioning,
@@ -6825,7 +6825,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding*2);
+    obj_w_0 = sub_row_width - (sub_column_padding);
 
     result.lbl_title_altitude= create_label(
         row_title_altitude,
@@ -7132,7 +7132,7 @@ satio_container_t create_satio_panel(
         false
     );
 
-    obj_w_0 = sub_row_width - (sub_column_padding*2);
+    obj_w_0 = sub_row_width - (sub_column_padding);
 
     result.lbl_title_speed = create_label(
         row_title_speed,
@@ -7433,7 +7433,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding*2);
+    obj_w_0 = sub_row_width - (sub_column_padding);
 
     result.lbl_title_heading = create_label(
         row_title_heading,
@@ -7796,7 +7796,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding*2);
+    obj_w_0 = sub_row_width - (sub_column_padding);
 
     result.lbl_title_mileage = create_label(
         row_title_mileage,
@@ -7892,7 +7892,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding*2);
+    obj_w_0 = sub_row_width - (sub_column_padding);
 
     result.lbl_title_local_time = create_label(
         row_title_local_time,
@@ -8453,7 +8453,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding*2);
+    obj_w_0 = sub_row_width - (sub_column_padding);
 
     result.lbl_title_rtc_time = create_label(
         row_title_rtc_time,
@@ -8665,7 +8665,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding*2);
+    obj_w_0 = sub_row_width - (sub_column_padding);
 
     result.lbl_title_rtc_sync = create_label(
         row_title_rtc_sync,
