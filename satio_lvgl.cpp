@@ -9061,7 +9061,7 @@ gyro_0_container_t create_gyro_panel(
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* ---------------------------------------------------------- */
-    /* Row 0: Angular X (gyro_0_ang_x)                           */
+    /* Row 0: Angle                                               */
     /* ---------------------------------------------------------- */
 
     lv_obj_t * row_0 = create_row(
@@ -9076,8 +9076,8 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_0 = (width_px/4); // label
+    obj_w_1 = (((width_px/4) *1)) - (sub_column_padding*2);
 
     result.lbl_gyro_0_ang_x = create_label(
         row_0,
@@ -9086,7 +9086,7 @@ gyro_0_container_t create_gyro_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "Ang X",
+        "ANGLE",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
@@ -9115,94 +9115,14 @@ gyro_0_container_t create_gyro_panel(
         1
     );
 
-    lv_obj_set_size(result.lbl_gyro_0_ang_x, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_ang_x, obj_w_1, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 1: Angular Y                                           */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_1 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
-
-    result.lbl_gyro_0_ang_y = create_label(
-        row_1,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Ang Y",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
     result.val_gyro_0_ang_y = create_label(
-        row_1,
+        row_0,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
         "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_gyro_0_ang_y, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_ang_y, obj_w_1, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 2: Angular Z                                           */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_2 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
-
-    result.lbl_gyro_0_ang_z = create_label(
-        row_2,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Ang Z",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
@@ -9214,7 +9134,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     result.val_gyro_0_ang_z = create_label(
-        row_2,
+        row_0,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
@@ -9231,11 +9151,14 @@ gyro_0_container_t create_gyro_panel(
         1
     );
 
-    lv_obj_set_size(result.lbl_gyro_0_ang_z, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_gyro_0_ang_x, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_ang_x, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_ang_y, obj_w_1, obj_height);
     lv_obj_set_size(result.val_gyro_0_ang_z, obj_w_1, obj_height);
+  
 
     /* ---------------------------------------------------------- */
-    /* Row 3: Acc X                                               */
+    /* Row 3: Acc                                                 */
     /* ---------------------------------------------------------- */
 
     lv_obj_t * row_3 = create_row(
@@ -9250,8 +9173,8 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_0 = (width_px/4); // label
+    obj_w_1 = (((width_px/4) *1)) - (sub_column_padding*2);
 
     result.lbl_gyro_0_acc_x = create_label(
         row_3,
@@ -9260,7 +9183,7 @@ gyro_0_container_t create_gyro_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "G-Force X",
+        "G-FORCE",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
@@ -9289,94 +9212,14 @@ gyro_0_container_t create_gyro_panel(
         1
     );
 
-    lv_obj_set_size(result.lbl_gyro_0_acc_x, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_acc_x, obj_w_1, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 4: Acc Y                                               */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_4 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
-
-    result.lbl_gyro_0_acc_y = create_label(
-        row_4,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "G-Force Y",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
     result.val_gyro_0_acc_y = create_label(
-        row_4,
+        row_3,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
         "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_gyro_0_acc_y, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_acc_y, obj_w_1, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 5: Acc Z                                               */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_5 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
-
-    result.lbl_gyro_0_acc_z = create_label(
-        row_5,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "G-Force Z",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
@@ -9388,7 +9231,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     result.val_gyro_0_acc_z = create_label(
-        row_5,
+        row_3,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
@@ -9405,11 +9248,14 @@ gyro_0_container_t create_gyro_panel(
         1
     );
 
-    lv_obj_set_size(result.lbl_gyro_0_acc_z, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_gyro_0_acc_x, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_acc_x, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_acc_y, obj_w_1, obj_height);
     lv_obj_set_size(result.val_gyro_0_acc_z, obj_w_1, obj_height);
 
+
     /* ---------------------------------------------------------- */
-    /* Row 6: Gyro X (processed)                                  */
+    /* Row 6: Gyro                                                */
     /* ---------------------------------------------------------- */
 
     lv_obj_t * row_6 = create_row(
@@ -9424,8 +9270,8 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_0 = (width_px/4); // label
+    obj_w_1 = (((width_px/4) *1)) - (sub_column_padding*2);
 
     result.lbl_gyro_0_gyr_x = create_label(
         row_6,
@@ -9434,7 +9280,7 @@ gyro_0_container_t create_gyro_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "Gyro X",
+        "GYRO",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
@@ -9463,94 +9309,14 @@ gyro_0_container_t create_gyro_panel(
         1
     );
 
-    lv_obj_set_size(result.lbl_gyro_0_gyr_x, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_gyr_x, obj_w_1, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 7: Gyro Y                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_7 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
-
-    result.lbl_gyro_0_gyr_y = create_label(
-        row_7,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Gyro Y",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
     result.val_gyro_0_gyr_y = create_label(
-        row_7,
+        row_6,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
         "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_gyro_0_gyr_y, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_gyr_y, obj_w_1, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 8: Gyro Z                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_8 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
-
-    result.lbl_gyro_0_gyr_z = create_label(
-        row_8,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Gyro Z",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
@@ -9562,7 +9328,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     result.val_gyro_0_gyr_z = create_label(
-        row_8,
+        row_6,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
@@ -9579,11 +9345,13 @@ gyro_0_container_t create_gyro_panel(
         1
     );
 
-    lv_obj_set_size(result.lbl_gyro_0_gyr_z, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_gyro_0_gyr_x, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_gyr_x, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_gyr_y, obj_w_1, obj_height);
     lv_obj_set_size(result.val_gyro_0_gyr_z, obj_w_1, obj_height);
 
     /* ---------------------------------------------------------- */
-    /* Row 9: Mag X                                               */
+    /* Row 9: Mag                                                 */
     /* ---------------------------------------------------------- */
 
     lv_obj_t * row_9 = create_row(
@@ -9598,8 +9366,8 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_0 = (width_px/4); // label
+    obj_w_1 = (((width_px/4) *1)) - (sub_column_padding*2);
 
     result.lbl_gyro_0_mag_x = create_label(
         row_9,
@@ -9608,7 +9376,7 @@ gyro_0_container_t create_gyro_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "Magnetic Field X",
+        "MAG",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
@@ -9637,94 +9405,14 @@ gyro_0_container_t create_gyro_panel(
         1
     );
 
-    lv_obj_set_size(result.lbl_gyro_0_mag_x, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_mag_x, obj_w_1, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 10: Mag Y                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_10 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
-
-    result.lbl_gyro_0_mag_y = create_label(
-        row_10,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Magnetic Field Y",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
     result.val_gyro_0_mag_y = create_label(
-        row_10,
+        row_9,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
         "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1
-    );
-
-    lv_obj_set_size(result.lbl_gyro_0_mag_y, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_mag_y, obj_w_1, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row 11: Mag Z                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_11 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
-
-    result.lbl_gyro_0_mag_z = create_label(
-        row_11,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Magnetic Field Z",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
@@ -9736,7 +9424,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     result.val_gyro_0_mag_z = create_label(
-        row_11,
+        row_9,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
@@ -9753,7 +9441,9 @@ gyro_0_container_t create_gyro_panel(
         1
     );
 
-    lv_obj_set_size(result.lbl_gyro_0_mag_z, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_gyro_0_mag_x, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_mag_x, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_mag_y, obj_w_1, obj_height);
     lv_obj_set_size(result.val_gyro_0_mag_z, obj_w_1, obj_height);
 
     /* ---------------------------------------------------------- */
@@ -10810,8 +10500,6 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_set_size(result.ta_port_map, obj_w_5, obj_height);
 
     /* ------------- Switches  ------------------------------- */
-
-    // these switches are temporarily out of view unless scroll down (while available space is being considered)
 
     lv_obj_t * row_switches_0 = create_row(
         result.panel,
@@ -11931,11 +11619,11 @@ void display_matrix_screen()
     // Create Function Panel
     mfc = create_matrix_function_container(
         matrix_screen,    // parent
-        400,              // width px
-        370,              // height px
+        440,              // width px
+        345,              // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        110,              // pos y
+        95,               // pos y
         radius_rounded,   // radius
         2,                // outer_pad_all
         4,                // inner_pad_all
@@ -11944,9 +11632,9 @@ void display_matrix_screen()
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        48,               // row height
-        true,             // show scrollbar
-        true,             // enable scrolling
+        40,               // row height
+        false,            // show scrollbar
+        false,            // enable scrolling
         &cobalt_alien_17, // font for titles,
         &cobalt_alien_17  // font for text,
     );
@@ -11960,11 +11648,11 @@ void display_matrix_screen()
     // Create Mapping Panel
     mcc = create_mapping_config_container(
         matrix_screen,    // parent
-        400,              // width px
-        370,              // height px
+        440,              // width px
+        350,              // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        110,              // pos y
+        95,               // pos y
         radius_rounded,   // radius
         2,                // outer_pad_all
         4,                // inner_pad_all
@@ -11973,9 +11661,9 @@ void display_matrix_screen()
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        48,               // row height
+        37,               // row height
         true,             // show scrollbar
-        true,             // enable scrolling
+        false,            // enable scrolling
         &cobalt_alien_17, // font for titles,
         &cobalt_alien_17  // font for text,
     );
@@ -12145,6 +11833,8 @@ void display_gps_screen()
     printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
+    current_gps_panel=0;
+
     int32_t menu_w_px = 550;
     int32_t menu_h_px = 400;
     int32_t menu_row_h_px = 34;
@@ -12152,19 +11842,19 @@ void display_gps_screen()
     // GPS Switch Panel
     gps_switch_panel = create_gps_switch_panel(
         gps_screen,       // parent
-        400,              // width px
-        40+(4*3),         // height px
+        450,              // width px
+        40+(4*2),         // height px
         LV_ALIGN_TOP_MID, // alignment
         0,                // pos x
-        90,               // pos y
+        95,               // pos y
         radius_rounded,   // radius
-        4,                // outer_pad_all
+        2,                // outer_pad_all
         4,                // inner_pad_all
         2,                // outline_padding
         8,                // main_row_padding
         8,                // main_column_padding
         2,                // sub_row_padding
-        8,                // sub_column_padding
+        10,               // sub_column_padding
         48,               // row height
         false,            // show scrollbar
         false,            // enable scrolling
@@ -12188,7 +11878,7 @@ void display_gps_screen()
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        48,               // row height
+        42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
         &cobalt_alien_17, // font for titles,
@@ -12218,7 +11908,7 @@ void display_gps_screen()
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        48,               // row height
+        42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
         &cobalt_alien_17, // font for titles,
@@ -12248,7 +11938,7 @@ void display_gps_screen()
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        48,               // row height
+        42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
         &cobalt_alien_17, // font for titles,
@@ -12278,7 +11968,7 @@ void display_gps_screen()
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        48,               // row height
+        42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
         &cobalt_alien_17, // font for titles,
@@ -12339,26 +12029,20 @@ void display_gyro_screen()
     // Gyro
     gyro_0_c = create_gyro_panel(
         gyro_screen,      // parent
-        480,              // width px
-        400,              // height px
+        650,              // width px
+        (42*5),           // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
         0,                // pos y
         radius_rounded,   // radius
-
         2,                // outer_pad_all
         4,                // inner_pad_all
-
         2,                // outline_padding
-
         2,                // main_row_padding
         4,                // main_column_padding
-
         2,                // sub_row_padding
         8,                // sub_column_padding
-
-        48,               // row height
-
+        42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
         &cobalt_alien_17, // font for titles,
@@ -13232,8 +12916,10 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                // lv_obj_set_style_outline_color(gps_switch_panel.switch_satio_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
-                // lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, main_contrast_title_hue, LV_PART_MAIN);
 
                 // Panel
                 lv_obj_set_style_outline_color(satio_c.panel, main_contrast_outline_hue, LV_PART_MAIN);
@@ -13622,8 +13308,10 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                // lv_obj_set_style_outline_color(gps_switch_panel.switch_gngga_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
-                // lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, main_contrast_title_hue, LV_PART_MAIN);
 
                 // Panel
                 lv_obj_set_style_outline_color(gngga_c.panel, main_outline_hue, LV_PART_MAIN);
@@ -13694,8 +13382,10 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                // lv_obj_set_style_outline_color(gps_switch_panel.switch_gnrmc_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
-                // lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, main_contrast_title_hue, LV_PART_MAIN);
 
                 // Panel
                 lv_obj_set_style_outline_color(gnrmc_c.panel, main_outline_hue, LV_PART_MAIN);
@@ -13775,8 +13465,10 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                // lv_obj_set_style_outline_color(gps_switch_panel.switch_gpatt_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
-                // lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
 
                 // Panel
                 lv_obj_set_style_outline_color(gpatt_c.panel, main_outline_hue, LV_PART_MAIN);
@@ -13911,7 +13603,7 @@ void update_display()
             // ────────────────────────────────────────────────
             // Angular Y
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_y, main_contrast_title_hue, LV_PART_MAIN);
+            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_y, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_ang_y, String(gyroData.gyro_0_ang_y).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_ang_y, main_contrast_value_hue, LV_PART_MAIN);
@@ -13919,7 +13611,7 @@ void update_display()
             // ────────────────────────────────────────────────
             // Angular Z
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_z, main_contrast_title_hue, LV_PART_MAIN);
+            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_z, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_ang_z, String(gyroData.gyro_0_ang_z).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_ang_z, main_contrast_value_hue, LV_PART_MAIN);
@@ -13935,7 +13627,7 @@ void update_display()
             // ────────────────────────────────────────────────
             // Acceleration Y
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_y, main_contrast_title_hue, LV_PART_MAIN);
+            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_y, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_acc_y, String(gyroData.gyro_0_acc_y).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_acc_y, main_contrast_value_hue, LV_PART_MAIN);
@@ -13943,7 +13635,7 @@ void update_display()
             // ────────────────────────────────────────────────
             // Acceleration Z
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_z, main_contrast_title_hue, LV_PART_MAIN);
+            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_z, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_acc_z, String(gyroData.gyro_0_acc_z).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_acc_z, main_contrast_value_hue, LV_PART_MAIN);
@@ -13959,7 +13651,7 @@ void update_display()
             // ────────────────────────────────────────────────
             // Gyroscope Y
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_y, main_contrast_title_hue, LV_PART_MAIN);
+            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_y, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_gyr_y, String(gyroData.gyro_0_gyr_y).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_gyr_y, main_contrast_value_hue, LV_PART_MAIN);
@@ -13967,7 +13659,7 @@ void update_display()
             // ────────────────────────────────────────────────
             // Gyroscope Z
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_z, main_contrast_title_hue, LV_PART_MAIN);
+            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_z, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_gyr_z, String(gyroData.gyro_0_gyr_z).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_gyr_z, main_contrast_value_hue, LV_PART_MAIN);
@@ -13983,7 +13675,7 @@ void update_display()
             // ────────────────────────────────────────────────
             // Magnetometer Y
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_y, main_contrast_title_hue, LV_PART_MAIN);
+            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_y, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_mag_y, String(gyroData.gyro_0_mag_y).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_mag_y, main_contrast_value_hue, LV_PART_MAIN);
@@ -13991,7 +13683,7 @@ void update_display()
             // ────────────────────────────────────────────────
             // Magnetometer Z
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_z, main_contrast_title_hue, LV_PART_MAIN);
+            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_z, main_contrast_title_hue, LV_PART_MAIN);
             lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_mag_z, String(gyroData.gyro_0_mag_z).c_str());
             lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_mag_z, main_contrast_value_hue, LV_PART_MAIN);

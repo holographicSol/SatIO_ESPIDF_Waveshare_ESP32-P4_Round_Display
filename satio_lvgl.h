@@ -574,30 +574,30 @@ typedef struct {
     
     lv_obj_t * lbl_gyro_0_ang_x;
     lv_obj_t * val_gyro_0_ang_x;
-    lv_obj_t * lbl_gyro_0_ang_y;
+    // lv_obj_t * lbl_gyro_0_ang_y;
     lv_obj_t * val_gyro_0_ang_y;
-    lv_obj_t * lbl_gyro_0_ang_z;
+    // lv_obj_t * lbl_gyro_0_ang_z;
     lv_obj_t * val_gyro_0_ang_z;
     
     lv_obj_t * lbl_gyro_0_acc_x;
     lv_obj_t * val_gyro_0_acc_x;
-    lv_obj_t * lbl_gyro_0_acc_y;
+    // lv_obj_t * lbl_gyro_0_acc_y;
     lv_obj_t * val_gyro_0_acc_y;
-    lv_obj_t * lbl_gyro_0_acc_z;
+    // lv_obj_t * lbl_gyro_0_acc_z;
     lv_obj_t * val_gyro_0_acc_z;
     
     lv_obj_t * lbl_gyro_0_gyr_x;
     lv_obj_t * val_gyro_0_gyr_x;
-    lv_obj_t * lbl_gyro_0_gyr_y;
+    // lv_obj_t * lbl_gyro_0_gyr_y;
     lv_obj_t * val_gyro_0_gyr_y;
-    lv_obj_t * lbl_gyro_0_gyr_z;
+    // lv_obj_t * lbl_gyro_0_gyr_z;
     lv_obj_t * val_gyro_0_gyr_z;
     
     lv_obj_t * lbl_gyro_0_mag_x;
     lv_obj_t * val_gyro_0_mag_x;
-    lv_obj_t * lbl_gyro_0_mag_y;
+    // lv_obj_t * lbl_gyro_0_mag_y;
     lv_obj_t * val_gyro_0_mag_y;
-    lv_obj_t * lbl_gyro_0_mag_z;
+    // lv_obj_t * lbl_gyro_0_mag_z;
     lv_obj_t * val_gyro_0_mag_z;
     
     lv_obj_t * lbl_gyro_0_current_uiBaud;
