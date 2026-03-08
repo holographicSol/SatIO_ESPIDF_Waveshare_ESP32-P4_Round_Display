@@ -3671,7 +3671,7 @@ gngga_container_t create_gngga_panel(
         0,
         0,
         "UTC Time",
-        LV_TEXT_ALIGN_LEFT,
+        LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
         false,
@@ -6365,7 +6365,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     result.lbl_deg_lat= create_label(
@@ -6376,7 +6376,7 @@ satio_container_t create_satio_panel(
         0,
         0,
         "[GPS] Degrees Latitude",
-        LV_TEXT_ALIGN_LEFT,
+        LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
         false,
@@ -6423,7 +6423,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     result.lbl_deg_lon = create_label(
@@ -6524,7 +6524,7 @@ satio_container_t create_satio_panel(
 
     result.btn_auto_set_user_lat = create_button(
         row_user_lat,         // parent
-        obj_w_2,        // width px
+        obj_w_2,              // width px
         obj_height,           // height px
         LV_ALIGN_CENTER,      // alignment
         0,                    // pos x
@@ -6558,9 +6558,9 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200;
+    obj_w_0 = 250;
     obj_w_2 = 30;
-    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0 - obj_w_2) - (sub_column_padding*2);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0 - obj_w_2) - (sub_column_padding*3);
 
     result.lbl_user_deg_lon = create_label(
         row_user_lon,
@@ -6635,7 +6635,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200;
+    obj_w_0 = 250;
     obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     result.lbl_sys_deg_lat= create_label(
@@ -6693,7 +6693,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200;
+    obj_w_0 = 250;
     obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     result.lbl_sys_deg_lon = create_label(
@@ -6751,7 +6751,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200;
+    obj_w_0 = 250;
     obj_w_1 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
     obj_w_2 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
 
@@ -6921,9 +6921,9 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200;
-    obj_w_1 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
-    obj_w_2 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
+    obj_w_0 = 250;
+    obj_w_2 = 30;
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0 - obj_w_2) - (sub_column_padding*3);
 
     result.lbl_user_altitude = create_label(
         row_user_alt,
@@ -7058,7 +7058,7 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200;
+    obj_w_0 = 250;
     obj_w_1 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
     obj_w_2 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
 
@@ -7227,8 +7227,8 @@ lv_obj_t * row_title_speed = create_row(
     );
 
     obj_w_0 = 250;
-    obj_w_2 = 32;
-    obj_w_1 = sub_row_width - obj_w_0 - obj_w_2 - (sub_column_padding * 4);
+    obj_w_2 = 30;
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0 - obj_w_2) - (sub_column_padding*3);
 
     result.lbl_user_speed = create_label(
         row_user_speed,
@@ -7588,8 +7588,8 @@ lv_obj_t * row_title_speed = create_row(
 
     // Set row object widths
     obj_w_0 = 250;
-    obj_w_2 = 32;
-    obj_w_1 = sub_row_width - obj_w_0 - obj_w_2 - (sub_column_padding * 4);
+    obj_w_2 = 30;
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0 - obj_w_2) - (sub_column_padding*3);
 
     result.lbl_user_ground_heading = create_label(
         row_user_ground_heading,
@@ -9076,7 +9076,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_ang_x = create_label(
@@ -9134,7 +9134,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_ang_y = create_label(
@@ -9192,7 +9192,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_ang_z = create_label(
@@ -9250,7 +9250,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_acc_x = create_label(
@@ -9308,7 +9308,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_acc_y = create_label(
@@ -9366,7 +9366,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_acc_z = create_label(
@@ -9424,7 +9424,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_gyr_x = create_label(
@@ -9482,7 +9482,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_gyr_y = create_label(
@@ -9540,7 +9540,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_gyr_z = create_label(
@@ -9598,7 +9598,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_mag_x = create_label(
@@ -9656,7 +9656,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_mag_y = create_label(
@@ -9714,7 +9714,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_mag_z = create_label(
@@ -9772,7 +9772,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 200; // label
+    obj_w_0 = 250; // label
     obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
 
     result.lbl_gyro_0_current_uiBaud = create_label(
