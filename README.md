@@ -24,7 +24,9 @@
 
 Logic may require or not require values X,Y,Z.
 
-All of the following values can be used in the matrix:
+All of the following values can be used in the matrix.
+
+Primary Comparitors:
 
     [0] NONE
     [1] ON
@@ -88,9 +90,9 @@ All of the following values can be used in the matrix:
     [59] Sun Altitude
     [60] Sun Helio Ecl Lat
     [61] Sun Helio Ecl Lon
-    [62] Moon Azimuth
-    [63] Moon Altitude
-    [64] Moon Phase
+    [62] Luna Azimuth
+    [63] Luna Altitude
+    [64] Luna Phase
     [65] Mercury Azimuth
     [66] Mercury Altitude
     [67] Mercury H.Ecliptic Lat
@@ -151,6 +153,13 @@ Many matrix functions accept operators, where required:
     [2] Over
     [3] Under
     [4] Range
+
+-----
+
+[ Function XYZ Modes ]
+
+    [0] User Value. A value that is set by the user.
+    [1] System Value. A value that is set by the system. Allows primary comparitors to be compared to other primary comparitors. 
 
 -----
 
@@ -253,9 +262,9 @@ Customizable Inertial navigation system.
 
 Satio
 
-      satio --coord-mode-gps           Use GPS latitude, longitude values.
-      satio --coord-mode-static        Do not update latiude, longitude unless --set-coord or otherwise.
-      satio --set-coord -lat n -lon n  Set degrees latitude and longitude (ensure --coord-mode-static before --set-coord).
+      satio --coord-update-mode-gps           Use GPS latitude, longitude values.
+      satio --coord-update-mode-static        Do not update latiude, longitude unless --set-coord or otherwise.
+      satio --set-coord -lat n -lon n  Set degrees latitude and longitude (ensure --coord-update-mode-static before --set-coord).
       satio --utc-offset n             Set +-seconds offset time.
       satio --auto-datetime-on         Enable set datetime automatically  (--auto-datetime-on overrides any datetime -set).
       satio --auto-datetime-off        Disable set datetime automatically (ensure --auto-datetime-off before using -set time).
@@ -276,9 +285,9 @@ Satio
       satio --altitude-unit-kilometers  Convert meters to kilometers.
       satio --altitude-unit-miles       Convert meters to miles.
 
-      satio --ground-heading-mode-gps     Use GPS ground heading values.
-      satio --ground-heading-mode-static  Do not update heading unless --set-ground-heading or otherwise.
-      satio --set-ground-heading          Set ground heading in degrees (0-360. Ensure --ground-heading-mode-static before --ground-heading).
+      satio --ground-heading-update-mode-gps     Use GPS ground heading values.
+      satio --ground-heading-update-mode-static  Do not update heading unless --set-ground-heading or otherwise.
+      satio --set-ground-heading          Set ground heading in degrees (0-360. Ensure --ground-heading-update-mode-static before --ground-heading).
 
 -----
 
@@ -349,9 +358,10 @@ Stat
     stat --sentence --admplex0  Takes arguments -e, -d.
     stat --sentence --gyro0     Takes arguments -e, -d.
     stat --sentence --sun       Takes arguments -e, -d.
-    stat --sentence --moon      Takes arguments -e, -d.
     stat --sentence --mercury   Takes arguments -e, -d.
     stat --sentence --venus     Takes arguments -e, -d.
+    stat --sentence --earth     Takes arguments -e, -d.
+    stat --sentence --luna      Takes arguments -e, -d.
     stat --sentence --mars      Takes arguments -e, -d.
     stat --sentence --jupiter   Takes arguments -e, -d.
     stat --sentence --saturn    Takes arguments -e, -d.
