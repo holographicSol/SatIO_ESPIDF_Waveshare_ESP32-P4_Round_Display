@@ -10582,9 +10582,9 @@ matrix_function_container_t create_matrix_function_container(
 
     // Set row object widths
     obj_w_0 = 80; // label
-    obj_w_1 = (((width_px/2) *1) - obj_w_0) - (sub_column_padding*2);
+    obj_w_1 = (((sub_row_width/2) *1) - obj_w_0) - (sub_column_padding*2);
     obj_w_2 = 60;
-    obj_w_3 = (((width_px/2) *1) - obj_w_2) - (sub_column_padding*3);
+    obj_w_3 = (((sub_row_width/2) *1) - obj_w_2) - (sub_column_padding*2);
 
     // Label Operator
     result.label_operator = create_label(
@@ -10694,9 +10694,9 @@ matrix_function_container_t create_matrix_function_container(
 
     // Set row object widths
     obj_w_0 = 55; // label
-    obj_w_1 = (((width_px/2) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/2) *1) - obj_w_0) - (sub_column_padding*2);
     obj_w_2 = 55;
-    obj_w_3 = (((width_px/2) *1) - obj_w_2) - (sub_column_padding*3);
+    obj_w_3 = (((sub_row_width/2) *1) - obj_w_2) - (sub_column_padding*2);
 
     // Label PWM0
     result.label_output_pwm_0 = create_label(
@@ -10803,11 +10803,11 @@ matrix_function_container_t create_matrix_function_container(
 
     // Set row object widths
     obj_w_0 = 35; // label
-    obj_w_1 = (((width_px/3) *1) - obj_w_0) - (sub_column_padding*2);
+    obj_w_1 = (((sub_row_width/3) *1) - obj_w_0) - (sub_column_padding*2);
     obj_w_2 = 30;
-    obj_w_3 = (((width_px/3) *1) - obj_w_2) - (sub_column_padding*2);
+    obj_w_3 = (((sub_row_width/3) *1) - obj_w_2) - (sub_column_padding*2);
     obj_w_4 = 30;
-    obj_w_5 = (((width_px/3) *1) - obj_w_2) - (sub_column_padding*3);
+    obj_w_5 = (((sub_row_width/3) *1) - obj_w_2) - (sub_column_padding*2);
 
     // Label Map Slot
     result.label_map_slot = create_label(
@@ -10964,13 +10964,15 @@ matrix_function_container_t create_matrix_function_container(
         LV_FLEX_ALIGN_CENTER
     );
 
+    obj_w_0 = ((sub_row_width/3) *1) - (sub_column_padding*1);
+
     // Computer Assist Toggle
     result.matrix_switch_computer_assist = create_button(
         row_switches_0,       // parent
-        100,                  // width px
+        obj_w_0,              // width px
         obj_height,           // height px
         LV_ALIGN_BOTTOM_MID,  // alignment
-        20,                   // pos x
+        0,                    // pos x
         0,                    // pos y
         "ASSIST",             // label text
         LV_TEXT_ALIGN_CENTER, // text align
@@ -10986,7 +10988,7 @@ matrix_function_container_t create_matrix_function_container(
     // Output Value
     result.matrix_switch_output_value = create_label(
         row_switches_0,       // parent
-        170,                  // width
+        obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_BOTTOM_MID,  // parent alignment
         0,                    // pos x
@@ -11007,10 +11009,10 @@ matrix_function_container_t create_matrix_function_container(
     // Matrix Switch Override
     result.matrix_switch_override = create_button(
         row_switches_0,       // parent
-        100,                  // width px
+        obj_w_0,              // width px
         obj_height,           // height px
         LV_ALIGN_BOTTOM_MID,  // alignment
-        -20,                  // pos x
+        0,                    // pos x
         0,                    // pos y
         "OVERRIDE",           // label text
         LV_TEXT_ALIGN_CENTER, // text align
