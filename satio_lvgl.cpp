@@ -7658,8 +7658,8 @@ satio_container_t create_satio_panel(
         2,
         general_radius,
         1,
-        default_btn_off_bg,
-        default_btn_off_value_hue
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.btn_speed_mode_gps = create_button(
