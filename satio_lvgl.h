@@ -643,10 +643,30 @@ static void switch_matrix_mapping_panel_event_cb(lv_event_t * e);
 static void current_matrix_override_off_event_cb(lv_event_t * e);
 static void switch_gps_panel_event_cb(lv_event_t * e);
 
-system_tray_t create_system_tray(lv_obj_t * scr);
+/** -------------------------------------------------------------------------------------
+ * @brief Create System Tray.
+ * 
+ * @param parent Specify parent object.
+ */
+system_tray_t create_system_tray(
+    lv_obj_t * parent
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Title Bar.
+ * 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @return title_bar_t.
+ */
 title_bar_t create_title_bar (
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -656,8 +676,22 @@ title_bar_t create_title_bar (
     bool enable_scrolling
     );
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Slider.
+ * 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param range_min Specify minimum value.
+ * @param range_max Specify maximum value.
+ * @param value Specify initial value.
+ * @return lv_obj_t.
+ */
 lv_obj_t * create_slider(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -668,8 +702,30 @@ lv_obj_t * create_slider(
     int32_t range_value
     );
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Label.
+ * 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param text Specify initial text.
+ * @param font Specify text font.
+ * @param text_align Text alignment on label.
+ * @param transparent_bg Tranparent background.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param outline_width Specify panel outline width.
+ * @param radius Specify panel outline radius.
+ * @param expected_number_of_lines Specify expected number of lines (used for alignment).
+ * @param color_bg Background color.
+ * @param color_text Text color.
+ * @return lv_obj_t.
+ */
 lv_obj_t * create_label(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -688,8 +744,27 @@ lv_obj_t * create_label(
     lv_color_t color_text
     );
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Text Area.
+ * 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param one_line Enable/disables multiline.
+ * @param accepted_chars Specify accepted chars.
+ * @param placeholder_text Specify placeholder text.
+ * @param transparent_bg Tranparent background.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font Specify text font.
+ * @param text_align Text alignment on label.
+ * @return lv_obj_t.
+ */
 lv_obj_t * create_textarea(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -705,8 +780,30 @@ lv_obj_t * create_textarea(
     lv_text_align_t text_align
     );
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Text Area.
+ * 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param kb_ta_padding_px Distance between bottom of textarea and top of keyboard.
+ * @param ta_height_px Height of text area.
+ * @param keyboard_mode Set keyboard mode:
+ *                      LV_KEYBOARD_MODE_TEXT_LOWER
+ *                      LV_KEYBOARD_MODE_TEXT_UPPER
+ *                      LV_KEYBOARD_MODE_SPECIAL
+ *                      LV_KEYBOARD_MODE_NUMBER
+ *                      LV_KEYBOARD_MODE_USER_1
+ *                      LV_KEYBOARD_MODE_USER_2
+ *                      LV_KEYBOARD_MODE_USER_3
+ *                      LV_KEYBOARD_MODE_USER_4
+ * @return keyboard_t.
+ */
 keyboard_t create_keyboard(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -717,19 +814,48 @@ keyboard_t create_keyboard(
     lv_keyboard_mode_t keyboard_mode
     );
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Menu Item
+ * 
+ * @param menu Specify menu_struct object.
+ * @param num_pages Specify number of pages.
+ * @param title Specify menu title.
+ * @return Void. A menu must be specified as the first parameter.
+ */
 void create_menu_item(
     menu_struct * menu,
-    int page_index,
+    int num_pages,
     const char * title
     );
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Menu Page
+ * 
+ * @param menu Specify menu_struct object.
+ * @param title Specify menu title.
+ * @return lv_obj_t.
+ */
 lv_obj_t * create_menu_page(
-    lv_obj_t * menu_x,
+    lv_obj_t * menu,
     const char * title
     );
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Menu.
+ * 
+ * @param parent Specify parent object.
+ * @param max_pages Specify max pages.
+ * @param page_titles Specify page titles array.
+ * @param main_menu_items
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @return menu_struct.
+ */
 menu_struct create_menu(
-    lv_obj_t *scr,
+    lv_obj_t *parent,
     int max_pages,
     const char ** page_titles,
     const char ** main_menu_items,
@@ -740,8 +866,31 @@ menu_struct create_menu(
     int32_t pos_y
     );
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Menu Grid Layout.
+ *
+ * @param parent Specify parent object.
+ * @param cols Number of columns.
+ * @param rows Number of rows.
+ * @param cell_size_px Size of each cell (square).
+ * @param outer_padding Outer padding around the grid.
+ * @param inner_padding Inner padding between cells.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param lv_alignment Grid alignment on parent.
+ * @param item_radius Radius of individual item panels.
+ * @param max_cols_visible Maximum visible columns (for scrolling).
+ * @param max_rows_visible Maximum visible rows (for scrolling).
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param text_align Text alignment inside cells.
+ * @param font Font used in cells.
+ * @param transparent_bg Transparent background for cells.
+ * @param transparent_outline Transparent outline for cells.
+ * @return lv_obj_t* Pointer to the created grid container.
+ */
 lv_obj_t * create_menu_grid(
-    lv_obj_t *scr,
+    lv_obj_t *parent,
     const int32_t cols,
     const int32_t rows,
     const int32_t cell_size_px,
@@ -759,10 +908,24 @@ lv_obj_t * create_menu_grid(
     const lv_font_t * font,
     bool transparent_bg,
     bool transparent_outline
-    ) ;
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Dropdown Menu.
+ *
+ * @param parent Specify parent object.
+ * @param options Array of option strings.
+ * @param option_count Number of options in the array.
+ * @param width_px Dropdown width.
+ * @param height_px Dropdown height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param font Font used in dropdown.
+ * @return lv_obj_t* Pointer to the created dropdown object.
+ */
 lv_obj_t * create_dropdown_menu(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     char options[][MAX_GLOBAL_ELEMENT_SIZE],
     int option_count,
     int32_t width_px,
@@ -771,19 +934,49 @@ lv_obj_t * create_dropdown_menu(
     int32_t pos_x,
     int32_t pos_y,
     const lv_font_t * font
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Switch.
+ *
+ * @param parent Specify parent object.
+ * @param size_w_px Switch width.
+ * @param size_h_px Switch height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @return lv_obj_t* Pointer to the created switch object.
+ */
 lv_obj_t * create_switch(
-    lv_obj_t *scr,
+    lv_obj_t *parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Custom Button (with panel + transparent button + label).
+ *
+ * @param parent Specify parent object.
+ * @param size_w_px Button width.
+ * @param size_h_px Button height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param text Button display text.
+ * @param text_align Text alignment.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font Font used for button text.
+ * @param radius Corner radius.
+ * @param color_bg Background color.
+ * @param color_text Text color.
+ * @return button_t structure containing panel, button and label objects.
+ */
 button_t create_button(
-    lv_obj_t *scr,
+    lv_obj_t *parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -797,8 +990,21 @@ button_t create_button(
     int32_t radius,
     lv_color_t color_bg,
     lv_color_t color_text
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Horizontal Row Container.
+ *
+ * @param parent Specify parent object.
+ * @param sub_row_width Width of each sub-row.
+ * @param sub_row_height Height of each sub-row.
+ * @param inner_pad_all Uniform inner padding.
+ * @param sub_row_padding Padding between sub-rows.
+ * @param sub_column_padding Padding between sub-columns.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @return lv_obj_t* Pointer to the created row container.
+ */
 lv_obj_t * create_row(
     lv_obj_t * parent,
     int32_t sub_row_width,
@@ -808,10 +1014,36 @@ lv_obj_t * create_row(
     int32_t sub_column_padding,
     bool show_scrollbar,
     bool enable_scrolling
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Matrix Function Container.
+ *
+ * Creates a structured container typically used for matrix-style function key layouts.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return matrix_function_container_t structure.
+ */
 matrix_function_container_t create_matrix_function_container(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -830,10 +1062,34 @@ matrix_function_container_t create_matrix_function_container(
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Mapping Configuration Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return mapping_config_container_t structure.
+ */
 mapping_config_container_t create_mapping_config_container(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -852,10 +1108,34 @@ mapping_config_container_t create_mapping_config_container(
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Gyro Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gyro_0_container_t structure.
+ */
 gyro_0_container_t create_gyro_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -874,10 +1154,34 @@ gyro_0_container_t create_gyro_panel(
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Satio Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return satio_container_t structure.
+ */
 satio_container_t create_satio_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -896,10 +1200,34 @@ satio_container_t create_satio_panel(
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create GNGGA NMEA Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gngga_container_t structure.
+ */
 gngga_container_t create_gngga_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -918,10 +1246,34 @@ gngga_container_t create_gngga_panel(
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create GNRMC NMEA Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gnrmc_container_t structure.
+ */
 gnrmc_container_t create_gnrmc_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -940,10 +1292,34 @@ gnrmc_container_t create_gnrmc_panel(
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create GPATT Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gpatt_container_t structure.
+ */
 gpatt_container_t create_gpatt_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -962,10 +1338,70 @@ gpatt_container_t create_gpatt_panel(
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create GPS Switch Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gps_switch_container_t structure.
+ */
+gps_switch_container_t create_gps_switch_panel(
+    lv_obj_t * parent,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+);
+
+/** -------------------------------------------------------------------------------------
+ * @brief Create Image Loaded from SD Card.
+ *
+ * @param parent Specify parent object.
+ * @param filename Path/filename on SD card.
+ * @param width_px Display width.
+ * @param height_px Display height.
+ * @param color_depth_bits Color depth (16, 32, etc.).
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param alignment Image alignment on parent.
+ * @param discard_after_display Free image data after first display (memory optimization).
+ * @return sdcard_image_t* Pointer to image info structure (or NULL on failure).
+ */
 sdcard_image_t * create_image_from_sdcard(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     const char * filename,
     uint32_t width_px,
     uint32_t height_px,
@@ -974,17 +1410,30 @@ sdcard_image_t * create_image_from_sdcard(
     uint32_t pos_y,
     lv_align_t alignment,
     bool discard_after_display
-    );
+);
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Default Screen Objects.
+ *
+ * Initializes and places all default UI elements on the given parent screen.
+ *
+ * @param parent Specify parent object (usually the active screen).
+ * @return Void.
+ */
 void create_default_screen_objects(
-    lv_obj_t * scr
-    );
+    lv_obj_t * parent
+);
 
+/* Free's loading image from memory */
 void cleanup_loading_image();
 
+/* Sets global color scheme to default color scheme */
 void setColorsDefault();
+
+/* Sets global color scheme to custom color scheme */
 void setColorsCustom();
 
+/* Display screen's */
 void display_loading_screen();
 void display_home_screen();
 void display_matrix_screen();
@@ -994,6 +1443,7 @@ void display_disp_screen();
 void display_system_screen();
 void display_uap_screen();
 
+/* Flags to trigger scrren loading */
 extern bool flag_display_loading_screen;
 extern bool flag_display_home_screen;
 extern bool flag_display_matrix_screen;
@@ -1003,12 +1453,16 @@ extern bool flag_display_disp_screen;
 extern bool flag_display_system_screen;
 extern bool flag_display_uap_screen;
 
+/* Main function to update screen objects and load screens */
 void update_display();
-void update_display_on_timer(
-    lv_timer_t * timer
-    );
 
+/* Timer runs update_display function */
+void update_display_on_timer(lv_timer_t * timer);
+
+/* Initialize LVGL for this device */
 void initSatIOUI();
+
+/* Start's update_display_on_timer */
 void satio_ui_begin();
 
 #endif // SATIO_LVGL_H

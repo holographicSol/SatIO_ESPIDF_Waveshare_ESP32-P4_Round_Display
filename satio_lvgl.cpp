@@ -195,25 +195,25 @@ lv_color_t default_title_hue;
 lv_color_t default_subtitle_hue;
 lv_color_t default_value_hue;
 
-// BTN 
+// Button Default
 lv_color_t default_btn_bg;
 lv_color_t default_btn_outline_hue;
 lv_color_t default_btn_border_hue;
 lv_color_t default_btn_shadow_hue;
 lv_color_t default_btn_value_hue;
-// BTN Default Off
+// Button Default Off
 lv_color_t default_btn_off_bg;
 lv_color_t default_btn_off_outline_hue;
 lv_color_t default_btn_off_border_hue;
 lv_color_t default_btn_off_shadow_hue;
 lv_color_t default_btn_off_value_hue;
-// BTN Default On
+// Button Default On
 lv_color_t default_btn_on_bg;
 lv_color_t default_btn_on_outline_hue;
 lv_color_t default_btn_on_border_hue;
 lv_color_t default_btn_on_shadow_hue;
 lv_color_t default_btn_on_value_hue;
-// BTN ult Toggle
+// Button Default Toggle
 lv_color_t default_btn_toggle_outline_hue;
 lv_color_t default_btn_toggle_value_hue;
 
@@ -1713,9 +1713,11 @@ static void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
 
 /** ---------------------------------------------------------------------------------------
  * Title Bar
+ * 
+ * @param parent 
  */
 title_bar_t create_title_bar (
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -1729,7 +1731,7 @@ title_bar_t create_title_bar (
     title_bar_t title_bar = {0};
     
     // Create title bar
-    title_bar.panel = lv_obj_create(scr);
+    title_bar.panel = lv_obj_create(parent);
 
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(title_bar.panel, LV_SCROLLBAR_MODE_AUTO);}
@@ -1878,16 +1880,12 @@ title_bar_t create_title_bar (
     return title_bar;
 }
 
-/** ---------------------------------------------------------------------------------------
- * @brief Create System Tray
+/** -------------------------------------------------------------------------------------
+ * @brief Create System Tray.
  * 
- * Creates a system tray panel that slides down from the top of the screen when swiped down and hides when swiped up.
- * Contains a brightness slider as an example item.
- * 
- * @param scr Pointer to the parent screen object.
- * @return A struct containing references to the system tray objects and state.
+ * @param parent Specify parent object.
  */
-system_tray_t create_system_tray(lv_obj_t * scr)
+system_tray_t create_system_tray(lv_obj_t * parent)
 {
     
     /* ------------------------------------ TRAY --------------------------------------- */
@@ -1896,7 +1894,7 @@ system_tray_t create_system_tray(lv_obj_t * scr)
     system_tray_t tray = {0};
     
     // Create system tray
-    tray.panel = lv_obj_create(scr);
+    tray.panel = lv_obj_create(parent);
 
     // Size and position
     lv_obj_set_size(tray.panel, 720, 300);
@@ -2131,7 +2129,7 @@ system_tray_t create_system_tray(lv_obj_t * scr)
  * @brief Create Slider
  */
 lv_obj_t * create_slider(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -2139,17 +2137,17 @@ lv_obj_t * create_slider(
     int32_t pos_y,
     int32_t range_min,
     int32_t range_max,
-    int32_t range_value
+    int32_t value
     )
 {
     /*----------------------------------------------- SLIDER -----------------------------------------------*/
 
     // Create slider
-    lv_obj_t * slider = lv_slider_create(scr);
+    lv_obj_t * slider = lv_slider_create(parent);
 
     // Set range and initial value
     lv_slider_set_range(slider, range_min, range_max);
-    lv_slider_set_value(slider, range_value, LV_ANIM_OFF);
+    lv_slider_set_value(slider, value, LV_ANIM_OFF);
 
     // Size and position
     lv_obj_set_size(slider, size_w_px, size_h_px);
@@ -2219,27 +2217,29 @@ lv_obj_t * create_slider(
     return slider;   
 }
 
-/** ---------------------------------------------------------------------------------------
- * @brief Create Label
+/** -------------------------------------------------------------------------------------
+ * @brief Create Label.
  * 
- * Intention is to be resusable, flexible & while providing a consistent style.
- * 
- * @param scr Pointer to the parent screen object.
- * @param size_w_px Width of the label in pixels.
- * @param size_h_px Height of the label in pixels.
- * @param alignment Alignment of the label within its parent/screen.
- * @param pos_x X position of the label within its parent/screen.
- * @param pos_y Y position of the label within its parent/screen.
- * @param text Text to display in the label.
- * @param text_align Alignment of the text within the label (e.g., LV_TEXT_ALIGN_CENTER).
- * @param font Font to use for the label text.
- * @param transparent_bg If true, the label background will be transparent.
- * @param show_scrollbar If true, a scrollbar will be shown.
- * @param enable_scrolling If true, scrolling will be enabled.
- * @return Pointer to the created label object.
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param text Specify initial text.
+ * @param font Specify text font.
+ * @param text_align Text alignment on label.
+ * @param transparent_bg Tranparent background.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param outline_width Specify panel outline width.
+ * @param radius Specify panel outline radius.
+ * @param expected_number_of_lines Specify expected number of lines (used for alignment).
+ * @param color_bg Background color.
+ * @param color_text Text color.
  */
 lv_obj_t * create_label(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -2261,7 +2261,7 @@ lv_obj_t * create_label(
     /*----------------------------------------------- LABEL -----------------------------------------------*/
 
     // Create label
-    lv_obj_t * result = lv_label_create(scr);
+    lv_obj_t * result = lv_label_create(parent);
 
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result, LV_SCROLLBAR_MODE_AUTO);}
@@ -2336,7 +2336,7 @@ lv_obj_t * create_label(
  * 
  * Intention is to be resusable, flexible & while providing a consistent style.
  * 
- * @param scr Pointer to the parent screen object.
+ * @param parent Pointer to the parent screen object.
  * @param size_w_px Width of the textarea in pixels.
  * @param size_h_px Height of the textarea in pixels.
  * @param alignment Alignment of the textarea within its parent/screen.
@@ -2350,7 +2350,7 @@ lv_obj_t * create_label(
  * @return Pointer to the created textarea object.
  */
 lv_obj_t * create_textarea(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -2369,7 +2369,7 @@ lv_obj_t * create_textarea(
     /* ----------------------------------- TEXTAREA ------------------------------------ */
 
     // Create textarea
-    lv_obj_t * ta = lv_textarea_create(scr);
+    lv_obj_t * ta = lv_textarea_create(parent);
 
     // Set single line mode if specified
     lv_textarea_set_one_line(ta, one_line);
@@ -2453,7 +2453,7 @@ lv_obj_t * create_textarea(
  * 
  * Intention is to be resusable, flexible & while providing a consistent style.
  * 
- * @param scr Pointer to the parent screen object.
+ * @param parent Pointer to the parent screen object.
  * @param size_w_px Width of the keyboard in pixels.
  * @param size_h_px Height of the keyboard in pixels.
  * @param alignment Alignment of the keyboard within its parent/screen.
@@ -2474,7 +2474,7 @@ lv_obj_t * create_textarea(
  * 
  */
 keyboard_t create_keyboard(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -2493,7 +2493,7 @@ keyboard_t create_keyboard(
     result.ta = (lv_obj_t *)malloc(sizeof(lv_obj_t *));
 
     // Create keyboard
-    result.kb = lv_keyboard_create(scr);
+    result.kb = lv_keyboard_create(parent);
 
     // Keyboard mode
     lv_keyboard_set_mode(result.kb, keyboard_mode);
@@ -2563,7 +2563,7 @@ keyboard_t create_keyboard(
     /*---------------------------------------------- TEXTAREA -----------------------------------------------*/
 
     // Create text area
-    result.ta = lv_textarea_create(scr);
+    result.ta = lv_textarea_create(parent);
 
     // Connect keyboard to textarea
     lv_keyboard_set_textarea(result.kb, result.ta);
@@ -2615,12 +2615,17 @@ keyboard_t create_keyboard(
  * @param title Title of the menu_x page.
  * @return Pointer to the created menu_x page object.
  */
-void create_menu_item(menu_struct * menu, int page_index, const char * title) {
+void create_menu_item(
+    menu_struct * menu,
+    int num_pages,
+    const char * title
+    )
+{
 
     /*--------------------------------------------- CONTAINER -----------------------------------------------*/
 
     // Create container
-    lv_obj_t * container = lv_menu_cont_create(menu->pages[page_index]);
+    lv_obj_t * container = lv_menu_cont_create(menu->pages[num_pages]);
 
     /*-------------------------------------- CONTAINER LV_PART_MAIN -----------------------------------------*/
     
@@ -2691,9 +2696,9 @@ void create_menu_item(menu_struct * menu, int page_index, const char * title) {
     /* --- ADD TO MENU ----------------------------------------------------------------- */
     
     // Add to menu struct
-    if(menu->page_item_counts[page_index] < menu->max_items_per_page) {
-        menu->page_items[page_index][menu->page_item_counts[page_index]] = container;
-        menu->page_item_counts[page_index]++;
+    if(menu->page_item_counts[num_pages] < menu->max_items_per_page) {
+        menu->page_items[num_pages][menu->page_item_counts[num_pages]] = container;
+        menu->page_item_counts[num_pages]++;
     }
 }
 
@@ -2706,12 +2711,16 @@ void create_menu_item(menu_struct * menu, int page_index, const char * title) {
  * @param title Title of the menu_x page.
  * @return Pointer to the created menu_x page object.
  */
-lv_obj_t * create_menu_page(lv_obj_t * menu_x, const char * title) {
+lv_obj_t * create_menu_page(
+    lv_obj_t * menu,
+    const char * title
+    )
+{
 
     /* --- MENU ------------------------------------------------------------------------ */
 
     // Create menu
-    lv_obj_t * menu_page = lv_menu_page_create(menu_x, title);
+    lv_obj_t * menu_page = lv_menu_page_create(menu, title);
 
     /* --- MENU LV_PART_MAIN ----------------------------------------------------------- */
 
@@ -2750,7 +2759,7 @@ lv_obj_t * create_menu_page(lv_obj_t * menu_x, const char * title) {
  * 
  * Intention is to be resusable, flexible & while providing a consistent style.
  * 
- * @param scr Pointer to the parent screen object.
+ * @param parent Pointer to the parent screen object.
  * @param max_pages Maximum number of pages in the menu.
  * @param page_titles Array of page titles (NULL-terminated).
  * @param main_menu_items Array of main menu item titles (NULL-terminated).
@@ -2762,7 +2771,7 @@ lv_obj_t * create_menu_page(lv_obj_t * menu_x, const char * title) {
  * 
  */
 menu_struct create_menu(
-    lv_obj_t *scr,
+    lv_obj_t * parent,
     int max_pages,
     const char ** page_titles,
     const char ** main_menu_items,
@@ -2791,7 +2800,7 @@ menu_struct create_menu(
     }
 
     // Create menu
-    result.menu = lv_menu_create(scr);
+    result.menu = lv_menu_create(parent);
 
     // Size and position
     lv_obj_set_size(result.menu, size_w_px, size_h_px);
@@ -2954,7 +2963,7 @@ menu_struct create_menu(
  * 
  * Intention is to be resusable, flexible & while providing a consistent style.
  * 
- * @param scr Pointer to the parent screen object.
+ * @param parent Pointer to the parent screen object.
  * @param menu_grid Pointer to the parent menu_grid object.
  * @param cols Number of columns in the grid.
  * @param rows Number of rows in the grid.
@@ -2972,7 +2981,7 @@ menu_struct create_menu(
  * @return Pointer to the created grid_menu object.
  */
 lv_obj_t * create_menu_grid(
-    lv_obj_t *scr,
+    lv_obj_t *parent,
     // lv_obj_t * grid_menu,
     const int32_t cols,
     const int32_t rows,
@@ -3008,7 +3017,7 @@ lv_obj_t * create_menu_grid(
     lv_coord_t * grid_menu_x_row_dsc = (lv_coord_t *)malloc((GRID_MENU_X_MAX_ROWS + 1) * sizeof(lv_coord_t));
 
     // Create grid object
-    lv_obj_t * grid_menu = lv_obj_create(scr);
+    lv_obj_t * grid_menu = lv_obj_create(parent);
 
     // Automatically set size according to configuration
     if (show_scrollbar == false) {
@@ -3146,7 +3155,7 @@ lv_obj_t * create_menu_grid(
  * 
  * Intention is to be resusable, flexible & while providing a consistent style.
  * 
- * @param scr Pointer to the parent screen object.
+ * @param parent Pointer to the parent screen object.
  * @param options Array of option strings.
  * @param option_count Number of options in the array.
  * @param width_px Width of the dropdown menu in pixels.
@@ -3156,7 +3165,7 @@ lv_obj_t * create_menu_grid(
  * 
  */
 lv_obj_t * create_dropdown_menu(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     char options[][MAX_GLOBAL_ELEMENT_SIZE],
     int option_count,
     int32_t width_px,
@@ -3170,7 +3179,7 @@ lv_obj_t * create_dropdown_menu(
     /* --- DROPDOWN -------------------------------------------------------------------- */
 
     // Create dropdown
-    lv_obj_t * ddlist = lv_dropdown_create(scr);
+    lv_obj_t * ddlist = lv_dropdown_create(parent);
 
 
     // Add options if provided
@@ -3255,7 +3264,7 @@ lv_obj_t * create_dropdown_menu(
 }
 
 lv_obj_t * create_switch(
-    lv_obj_t *scr,
+    lv_obj_t *parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -3263,7 +3272,7 @@ lv_obj_t * create_switch(
     int32_t pos_y
     )
 {
-    lv_obj_t * sw = lv_switch_create(scr);
+    lv_obj_t * sw = lv_switch_create(parent);
     lv_obj_set_size(sw, size_w_px, size_h_px);
     lv_obj_align(sw, alignment, pos_x, pos_y);
 
@@ -3276,7 +3285,7 @@ lv_obj_t * create_switch(
 }
 
 button_t create_button(
-    lv_obj_t *scr,
+    lv_obj_t *parent,
     int32_t size_w_px,
     int32_t size_h_px,
     lv_align_t alignment,
@@ -3296,7 +3305,7 @@ button_t create_button(
 
     // ---- Panel Style ----
 
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
 
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);}
@@ -3410,37 +3419,31 @@ button_t create_button(
 }
 
 gps_switch_container_t create_gps_switch_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
     int32_t radius,
-
     int32_t outer_pad_all,
     int32_t inner_pad_all,
-
     int32_t outline_padding,
-
     int32_t main_row_padding,
     int32_t main_column_padding,
-
     int32_t sub_row_padding,
     int32_t sub_column_padding,
-
     int32_t row_height,
-
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,
     const lv_font_t * font_sub
-)
+    )
 {
     gps_switch_container_t result = {0};
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
 
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
@@ -3614,7 +3617,7 @@ gps_switch_container_t create_gps_switch_panel(
 }
 
 gngga_container_t create_gngga_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -3638,7 +3641,7 @@ gngga_container_t create_gngga_panel(
     gngga_container_t result = {0};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
     
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
@@ -4313,7 +4316,7 @@ gngga_container_t create_gngga_panel(
 }
 
 gnrmc_container_t create_gnrmc_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -4337,7 +4340,7 @@ gnrmc_container_t create_gnrmc_panel(
     gnrmc_container_t result = {0};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
     
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
@@ -5072,7 +5075,7 @@ gnrmc_container_t create_gnrmc_panel(
 }
 
 gpatt_container_t create_gpatt_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -5096,7 +5099,7 @@ gpatt_container_t create_gpatt_panel(
     gpatt_container_t result = {0};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
     
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
@@ -6451,7 +6454,7 @@ gpatt_container_t create_gpatt_panel(
 }
 
 satio_container_t create_satio_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -6475,7 +6478,7 @@ satio_container_t create_satio_panel(
     satio_container_t result = {0};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
     
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
@@ -9368,7 +9371,7 @@ satio_container_t create_satio_panel(
 }
 
 gyro_0_container_t create_gyro_panel(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -9398,7 +9401,7 @@ gyro_0_container_t create_gyro_panel(
     gyro_0_container_t result = {0};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
     
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
@@ -9990,7 +9993,7 @@ lv_obj_t * create_row(
  * - Output PWM (2 values)
  * - Port Map
  * 
- * @param scr Pointer to the parent screen object.
+ * @param parent Pointer to the parent screen object.
  * @param width_px Width of the container in pixels.
  * @param height_px Height of the container in pixels.
  * @param alignment Alignment of the container within its parent/screen.
@@ -9999,7 +10002,7 @@ lv_obj_t * create_row(
  * @return matrix_function_container_t struct with all UI element pointers.
  */
 matrix_function_container_t create_matrix_function_container(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -10028,7 +10031,7 @@ matrix_function_container_t create_matrix_function_container(
     matrix_function_container_t result = {0};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
 
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
@@ -11041,7 +11044,7 @@ matrix_function_container_t create_matrix_function_container(
  * - Configuration 5
  * - Map Mode
  * 
- * @param scr Pointer to the parent screen object.
+ * @param parent Pointer to the parent screen object.
  * @param width_px Width of the container in pixels.
  * @param height_px Height of the container in pixels.
  * @param alignment Alignment of the container within its parent/screen.
@@ -11050,7 +11053,7 @@ matrix_function_container_t create_matrix_function_container(
  * @return mapping_config_container_t struct with all UI element pointers.
  */
 mapping_config_container_t create_mapping_config_container(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     int32_t width_px,
     int32_t height_px,
     lv_align_t alignment,
@@ -11074,7 +11077,7 @@ mapping_config_container_t create_mapping_config_container(
     mapping_config_container_t result = {0};
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
-    result.panel = lv_obj_create(scr);
+    result.panel = lv_obj_create(parent);
     
     // Show scrollbar
     if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
@@ -11125,7 +11128,7 @@ mapping_config_container_t create_mapping_config_container(
 
     /* --- Slot ------------------------------------------------------- */
 
-    lv_obj_t * row1 = create_row(
+    lv_obj_t * row_map_slot = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11138,10 +11141,10 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
     
     result.slot = create_label(
-        row1,                 // parent
+        row_map_slot,         // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11162,7 +11165,7 @@ mapping_config_container_t create_mapping_config_container(
 
     // Select Map Mode
     result.dd_slot = create_dropdown_menu(
-        row1,
+        row_map_slot,
         NULL,
         0,
         obj_w_1,
@@ -11186,7 +11189,7 @@ mapping_config_container_t create_mapping_config_container(
     
     /* --- Function Name ------------------------------------------------------- */
     
-    lv_obj_t * row2 = create_row(
+    lv_obj_t * row_c0 = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11199,11 +11202,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
     
     // C0
     result.c0 = create_label(
-        row2,                 // parent
+        row_c0,               // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11224,7 +11227,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Select C0
     result.dd_c0 = create_dropdown_menu(
-        row2,
+        row_c0,
         NULL,
         0,
         obj_w_1,
@@ -11248,7 +11251,7 @@ mapping_config_container_t create_mapping_config_container(
     
     /* --- C1 Value ------------------------------------------------------------- */
     
-    lv_obj_t * row3 = create_row(
+    lv_obj_t * row_c1 = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11261,11 +11264,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
     
     // Label C1
     result.c1 = create_label(
-        row3,                 // parent
+        row_c1,               // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11286,7 +11289,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Value C1
     result.ta_c1 = create_textarea(
-        row3,            // lv_obj_t
+        row_c1,          // lv_obj_t
         obj_w_1,         // width px
         obj_height,      // height px
         LV_ALIGN_CENTER, // alignment
@@ -11311,7 +11314,7 @@ mapping_config_container_t create_mapping_config_container(
     
     /* --- C2 Value ------------------------------------------------------------- */
     
-    lv_obj_t * row4 = create_row(
+    lv_obj_t * row_c2 = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11324,11 +11327,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     // Label C2
     result.c2 = create_label(
-        row4,                 // parent
+        row_c2,               // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11349,7 +11352,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Value C2
     result.ta_c2 = create_textarea(
-        row4,            // lv_obj_t
+        row_c2,          // lv_obj_t
         obj_w_1,         // width px
         obj_height,      // height px
         LV_ALIGN_CENTER, // alignment
@@ -11374,7 +11377,7 @@ mapping_config_container_t create_mapping_config_container(
 
     /* --- C3 Value ------------------------------------------------------------- */
     
-    lv_obj_t * row5 = create_row(
+    lv_obj_t * row_c3 = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11387,11 +11390,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     // Label C3
     result.c3 = create_label(
-        row5,                 // parent
+        row_c3,               // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11412,7 +11415,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Value C3
     result.ta_c3 = create_textarea(
-        row5,            // lv_obj_t
+        row_c3,          // lv_obj_t
         obj_w_1,         // width px
         obj_height,      // height px
         LV_ALIGN_CENTER, // alignment
@@ -11437,7 +11440,7 @@ mapping_config_container_t create_mapping_config_container(
     
     /* --- C4 Value ------------------------------------------------------------ */
     
-    lv_obj_t * row6 = create_row(
+    lv_obj_t * row_c4 = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11450,11 +11453,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     // Label C4
     result.c4 = create_label(
-        row6,                 // parent
+        row_c4,               // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11475,7 +11478,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Value C4
     result.ta_c4 = create_textarea(
-        row6,            // lv_obj_t
+        row_c4,          // lv_obj_t
         obj_w_1,         // width px
         obj_height,      // height px
         LV_ALIGN_CENTER, // alignment
@@ -11500,7 +11503,7 @@ mapping_config_container_t create_mapping_config_container(
     
     /* --- C5 Value ---------------------------------------------------------- */
     
-    lv_obj_t * row7 = create_row(
+    lv_obj_t * row_c5 = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11513,11 +11516,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     // Label C5
     result.c5 = create_label(
-        row7,                 // parent
+        row_c5,               // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11538,7 +11541,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Value C5
     result.ta_c5 = create_textarea(
-        row7,            // lv_obj_t
+        row_c5,          // lv_obj_t
         obj_w_1,         // width px
         obj_height,      // height px
         LV_ALIGN_CENTER, // alignment
@@ -11563,7 +11566,7 @@ mapping_config_container_t create_mapping_config_container(
     
     /* --- Map Mode --------------------------------------------------------- */
     
-    lv_obj_t * row8 = create_row(
+    lv_obj_t * row_map_mode = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11576,11 +11579,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
     
     // Map Mode
     result.mode = create_label(
-        row8,                 // parent
+        row_map_mode,         // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11601,7 +11604,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Select Map Mode
     result.dd_mode = create_dropdown_menu(
-        row8,
+        row_map_mode,
         NULL,
         0,
         obj_w_1,
@@ -11625,7 +11628,7 @@ mapping_config_container_t create_mapping_config_container(
 
     /* --- Map Input Value --------------------------------------------------- */
     
-    lv_obj_t * row9 = create_row(
+    lv_obj_t * row_input_valu = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11638,11 +11641,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     // Label Input
     result.input_value = create_label(
-        row9,                 // parent
+        row_input_valu,       // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11663,7 +11666,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Value Input
     result.value_input = create_label(
-        row9,                 // parent
+        row_input_valu,       // parent
         obj_w_1,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11688,7 +11691,7 @@ mapping_config_container_t create_mapping_config_container(
 
     /* --- Map Result ---------------------------------------------------------- */
     
-    lv_obj_t * row10 = create_row(
+    lv_obj_t * row_map_result = create_row(
         result.panel,
         sub_row_width,
         sub_row_height,
@@ -11701,11 +11704,11 @@ mapping_config_container_t create_mapping_config_container(
 
     // Set row object widths
     obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_1 = (((sub_row_width/1) *1) - obj_w_0) - (sub_column_padding*2);
 
     // Label Output
     result.map_result = create_label(
-        row10,                // parent
+        row_map_result,       // parent
         obj_w_0,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11726,7 +11729,7 @@ mapping_config_container_t create_mapping_config_container(
     
     // Value Output
     result.value_map_result = create_label(
-        row10,                // parent
+        row_map_result,       // parent
         obj_w_1,              // width
         obj_height,           // height
         LV_ALIGN_CENTER,      // parent alignment
@@ -11755,7 +11758,7 @@ mapping_config_container_t create_mapping_config_container(
 /** ----------------------------------------------------------------------------------------
  * @brief Display image from SD card.
  * 
- * @param scr Pointer to the parent screen object.
+ * @param parent Pointer to the parent screen object.
  * @param filename Path to the image file on the SD card.
  * @param width_px Width of the image in pixels.
  * @param height_px Height of the image in pixels.
@@ -11768,7 +11771,7 @@ mapping_config_container_t create_mapping_config_container(
  * 
  */
 sdcard_image_t * create_image_from_sdcard(
-    lv_obj_t * scr,
+    lv_obj_t * parent,
     const char * filename,
     uint32_t width_px,
     uint32_t height_px,
@@ -11813,7 +11816,7 @@ sdcard_image_t * create_image_from_sdcard(
            sdcard_image->dsc.header.cf, width_px, height_px, sdcard_image->f_size);
 
     // Create LVGL image object
-    sdcard_image->lv_image_obj = lv_img_create(scr);
+    sdcard_image->lv_image_obj = lv_img_create(parent);
     if (!sdcard_image->lv_image_obj) {
         printf("ERROR: Failed to create LVGL image\n");
         heap_caps_free(sdcard_image->bytes_in_psram);
@@ -11863,22 +11866,25 @@ void lvgl_cleanup_all() {
     // Ensure no pending events
     lv_timer_handler();
     
+    cleanup_loading_image();
     astro_clock_end();
 }
 
-void create_default_screen_objects(lv_obj_t * scr)
+void create_default_screen_objects(
+    lv_obj_t * parent
+    )
 {
 
     lvgl_cleanup_all();
 
     // Set background color for main part of the screen
-    lv_obj_set_style_bg_color(scr, lv_color_make(0, 0, 0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(parent, lv_color_make(0, 0, 0), LV_PART_MAIN);
 
     // -------------------------------- Keypad Num ------------------------------------ //
 
     // Create keyboard (bootstrapped)
     kb_numdec = create_keyboard(
-        scr,            // lv_obj_t
+        parent,            // lv_obj_t
         600,                    // width px
         250,                    // height px
         LV_ALIGN_CENTER,        // alignment
@@ -11898,7 +11904,7 @@ void create_default_screen_objects(lv_obj_t * scr)
 
     // Create keyboard (bootstrapped)
     kb_alnumsym = create_keyboard(
-        scr,            // lv_obj_t
+        parent,            // lv_obj_t
         600,                    // width px
         250,                    // height px
         LV_ALIGN_CENTER,        // alignment
@@ -11917,7 +11923,7 @@ void create_default_screen_objects(lv_obj_t * scr)
     // -------------------------------- Title Bar --------------------------------- //
 
     main_title_bar = create_title_bar(
-        scr, // parent
+        parent, // parent
         720, // width px
         64,  // height px
         LV_ALIGN_TOP_MID,
@@ -11930,13 +11936,13 @@ void create_default_screen_objects(lv_obj_t * scr)
     // ------------------------------ System Tray --------------------------------- //
 
     // Create system tray
-    system_tray = create_system_tray(scr);
+    system_tray = create_system_tray(parent);
 
     // Plug in event callback for screen click events
-    lv_obj_add_event_cb(scr, screen_tap_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(parent, screen_tap_cb, LV_EVENT_CLICKED, NULL);
 
     // Plug in event callback for screen swipe events
-    lv_obj_add_event_cb(scr, screen_swipe_cb, LV_EVENT_GESTURE, NULL);
+    lv_obj_add_event_cb(parent, screen_swipe_cb, LV_EVENT_GESTURE, NULL);
 }
 
 void display_loading_screen() {
