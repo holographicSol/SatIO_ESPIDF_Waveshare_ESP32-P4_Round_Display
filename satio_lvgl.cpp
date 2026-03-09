@@ -3515,7 +3515,7 @@ gps_switch_container_t create_gps_switch_panel(
     );
 
     // Set row object widths
-    obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
+    obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*1);
 
     // SatIO Panel View
     result.switch_satio_panel = create_button(
@@ -13619,10 +13619,7 @@ void update_display()
     // Gyro screen
     // ---------------------
     else if (lv_scr_act() == gyro_screen) {
-        vTaskDelay(5 / portTICK_PERIOD_MS);
         if (gyro_0_c.panel) {
-
-            vTaskDelay(5 / portTICK_PERIOD_MS);
 
             // ────────────────────────────────────────────────
             // Angular
