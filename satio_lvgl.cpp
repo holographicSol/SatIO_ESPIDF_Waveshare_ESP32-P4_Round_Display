@@ -7638,9 +7638,9 @@ satio_container_t create_satio_panel(
         false
     );
 
-    obj_w_0 = sub_row_width / 2;
-    obj_w_1 = (sub_row_width / 4) - (sub_column_padding * 2);
-    obj_w_2 = (sub_row_width / 4) - (sub_column_padding * 2);
+    obj_w_0 = 250;
+    obj_w_1 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
+    obj_w_2 = (((sub_row_width/4) *1)) - (sub_column_padding*2);    
 
     result.lbl_speed_mode = create_label(
         row_speed_mode,
@@ -8025,9 +8025,9 @@ satio_container_t create_satio_panel(
     );
 
     // Set row object widths
-    obj_w_0 = sub_row_width / 2;
-    obj_w_1 = (sub_row_width / 4) - (sub_column_padding * 2);
-    obj_w_2 = (sub_row_width / 4) - (sub_column_padding * 2);
+    obj_w_0 = 250;
+    obj_w_1 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
+    obj_w_2 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
 
     result.lbl_ground_heading_mode = create_label(
         row_ground_heading_mode,
