@@ -593,13 +593,13 @@ void switch_gps_panel_event_cb(lv_event_t * e);
  * @brief Create System Tray.
  * 
  * @param parent Specify parent object.
- * @param title_font Specify title font.
- * @param subtitle_font Specify subtitle font.
+ * @param font_title Specify title font.
+ * @param font_subtitle Specify subtitle font.
  */
 system_tray_t create_system_tray(
     lv_obj_t * parent,
     const lv_font_t * font_title,
-    const lv_font_t * font_sub
+    const lv_font_t * font_subtitle
 );
 
 /** -------------------------------------------------------------------------------------
@@ -613,8 +613,8 @@ system_tray_t create_system_tray(
  * @param pos_y Offset from alignment.
  * @param show_scrollbar Show/hide scrollbar.
  * @param enable_scrolling Enable/disable scrolling.
- * @param title_font Specify title font.
- * @param subtitle_font Specify subtitle font.
+ * @param font_title Specify title font.
+ * @param font_subtitle Specify subtitle font.
  * @return title_bar_t.
  */
 title_bar_t create_title_bar (
@@ -626,8 +626,8 @@ title_bar_t create_title_bar (
     int32_t pos_y,
     bool show_scrollbar,
     bool enable_scrolling,
-    const lv_font_t * title_font,
-    const lv_font_t * subtitle_font
+    const lv_font_t * font_title,
+    const lv_font_t * font_subtitle
     );
 
 /** -------------------------------------------------------------------------------------
@@ -754,8 +754,8 @@ lv_obj_t * create_textarea(
  *                      LV_KEYBOARD_MODE_USER_2
  *                      LV_KEYBOARD_MODE_USER_3
  *                      LV_KEYBOARD_MODE_USER_4
- * @param title_font Specify title font.
- * @param subtitle_font Specify subtitle font.
+ * @param font_title Specify title font.
+ * @param font_subtitle Specify subtitle font.
  * @return keyboard_t.
  */
 keyboard_t create_keyboard(
@@ -768,64 +768,8 @@ keyboard_t create_keyboard(
     int32_t kb_ta_padding_px,
     int32_t ta_height_px,
     lv_keyboard_mode_t keyboard_mode,
-    const lv_font_t * title_font,
-    const lv_font_t * subtitle_font
-    );
-
-/** -------------------------------------------------------------------------------------
- * @brief Create Menu Item
- * 
- * @param menu Specify menu_struct object.
- * @param num_pages Specify number of pages.
- * @param title Specify menu title.
- * @return Void. A menu must be specified as the first parameter.
- */
-void create_menu_item(
-    menu_struct * menu,
-    int num_pages,
-    const char * title
-    );
-
-/** -------------------------------------------------------------------------------------
- * @brief Create Menu Page
- * 
- * @param menu Specify menu_struct object.
- * @param title Specify menu title.
- * @return lv_obj_t.
- */
-lv_obj_t * create_menu_page(
-    lv_obj_t * menu,
-    const char * title
-    );
-
-/** -------------------------------------------------------------------------------------
- * @brief Create Menu.
- * 
- * @param parent Specify parent object.
- * @param max_pages Specify max pages.
- * @param page_titles Specify page titles array.
- * @param main_menu_items
- * @param size_w_px Panel width.
- * @param size_h_px Panel height
- * @param alignment Panel alignment on parent object.
- * @param pos_x Offset from alignment.
- * @param pos_y Offset from alignment.
- * @param title_font Specify title font.
- * @param subtitle_font Specify subtitle font.
- * @return menu_struct.
- */
-menu_struct create_menu(
-    lv_obj_t * parent,
-    int max_pages,
-    const char ** page_titles,
-    const char ** main_menu_items,
-    int32_t size_w_px,
-    int32_t size_h_px,
-    lv_align_t alignment,
-    int32_t pos_x,
-    int32_t pos_y,
-    lv_font_t * title_font,
-    lv_font_t * subtitle_font
+    const lv_font_t * font_title,
+    const lv_font_t * font_subtitle
     );
 
 /** -------------------------------------------------------------------------------------

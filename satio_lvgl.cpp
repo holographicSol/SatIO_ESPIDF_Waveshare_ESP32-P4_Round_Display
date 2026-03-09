@@ -102,55 +102,50 @@ bool flag_display_display_screen = false;
 bool flag_display_system_screen = false;
 bool flag_display_uap_screen = false;
 
-bool update_matrix_screen=false;
-
 /** ---------------------------------------------------------------------------------------
  * @brief Global Objects
  */
-lv_obj_t * label_enter_str;
-lv_obj_t * text_area_1_obj;
 
-lv_obj_t * label_enter_digits;
-lv_obj_t * text_area_2_obj;
-
-lv_obj_t * grid_menu_x;
-lv_obj_t * drop_down_menu_x;
-
-menu_struct menu_x;
-
+// ---------------------------
+// Loading screen image
+// ---------------------------
+static sdcard_image_t * loading_image = NULL;
+// ---------------------------
+// Keyboards
+// ---------------------------
 keyboard_t kb_numdec;
 keyboard_t kb_alnumsym;
-
+// ---------------------------
+// System Tray
+// ---------------------------
+system_tray_t system_tray;
 lv_obj_t * slider_brightness;
 int32_t slider_brightness_value = 0;
 int32_t slider_outline_width = 2;
-
+// ---------------------------
+// Title Bar
+// ---------------------------
 title_bar_t main_title_bar;
-system_tray_t system_tray;
-
-// Loading screen image (freed when switching to home screen)
-static sdcard_image_t * loading_image = NULL;
-
-lv_obj_t * title_bar_local_time_label;
-lv_obj_t * title_bar_local_date_label;
-
-lv_obj_t * matrix_overview_grid_1;
-lv_obj_t * dropdown_menu_matrix_switch_select;
+// ---------------------------
+// Matrix
+// ---------------------------
+#define MAX_MATRIX_PANEL_VIEWS 2
+int current_matrix_panel_view=0;
 int current_matrix_i = 0;
 int current_mapping_i = 0;
 int current_matrix_function_i = 0;
+lv_obj_t * matrix_overview_grid_1;
 matrix_function_container_t mfc;
 mapping_config_container_t mcc;
-
 button_t matrix_new;
 button_t matrix_save;
 button_t matrix_load;
 button_t matrix_delete;
 lv_obj_t * dd_matrix_file_slot_select;
 button_t switch_matrix_mapping_panel;
-int current_matrix_panel_view=0;
-#define MAX_MATRIX_PANEL_VIEWS 2
-
+// ---------------------------
+// GPS
+// ---------------------------
 gngga_container_t gngga_c;
 gnrmc_container_t gnrmc_c;
 gpatt_container_t gpatt_c;
@@ -158,83 +153,14 @@ satio_container_t satio_c;
 gps_switch_container_t gps_switch_panel;
 int current_gps_panel=0;
 #define MAX_GPS_PANEL_VIEWS 4
-
+// ---------------------------
+// Gyro
+// ---------------------------
 gyro_0_container_t gyro_0_c;
 
 /** ---------------------------------------------------------------------------------------
  * @brief Global Style
  */
-
-// ---------------------------
-// Color
-// ---------------------------
-
-// Rainbow Effect
-bool enable_rainbow_effect=true;
-
-// Current Hue
-uint32_t current_hue=0;
-
-// Default Color
-lv_color_t default_bg_hue;
-lv_color_t default_bg_title_hue;
-lv_color_t default_outline_hue;
-lv_color_t default_border_hue;
-lv_color_t default_shadow_hue;
-lv_color_t default_title_hue;
-lv_color_t default_subtitle_hue;
-lv_color_t default_value_hue;
-
-// Button Default
-lv_color_t default_btn_bg;
-lv_color_t default_btn_outline_hue;
-lv_color_t default_btn_border_hue;
-lv_color_t default_btn_shadow_hue;
-lv_color_t default_btn_value_hue;
-// Button Default Off
-lv_color_t default_btn_off_bg;
-lv_color_t default_btn_off_outline_hue;
-lv_color_t default_btn_off_border_hue;
-lv_color_t default_btn_off_shadow_hue;
-lv_color_t default_btn_off_value_hue;
-// Button Default On
-lv_color_t default_btn_on_bg;
-lv_color_t default_btn_on_outline_hue;
-lv_color_t default_btn_on_border_hue;
-lv_color_t default_btn_on_shadow_hue;
-lv_color_t default_btn_on_value_hue;
-// Button Default Toggle
-lv_color_t default_btn_toggle_outline_hue;
-lv_color_t default_btn_toggle_value_hue;
-
-// Custom Color
-lv_color_t custom_bg_hue;
-lv_color_t custom_title_bg_hue;
-lv_color_t custom_outline_hue;
-lv_color_t custom_border_hue;
-lv_color_t custom_shadow_hue;
-lv_color_t custom_title_hue;
-lv_color_t custom_subtitle_hue;
-lv_color_t custom_value_hue;
-
-// Current Color (Is set as default/custom)
-lv_color_t main_bg_hue;
-lv_color_t main_title_bg_hue;
-lv_color_t main_outline_hue;
-lv_color_t main_border_hue;
-lv_color_t main_shadow_hue;
-lv_color_t main_title_hue;
-lv_color_t main_subtitle_hue;
-lv_color_t main_value_hue;
-
-// Rainbow Color Major
-lv_color_t rainbow_outline_hue;
-lv_color_t rainbow_title_hue;
-lv_color_t rainbow_value_hue;
-// Rainbow Color Major
-lv_color_t rainbow_contrast_outline_hue;
-lv_color_t rainbow_contrast_title_hue;
-lv_color_t rainbow_contrast_value_hue;
 
 // ---------------------------
 // Size
@@ -249,8 +175,84 @@ int32_t radius_square  = 0;
 int32_t radius_rounded = 5;
 int32_t radius_circle  = 360;
 int32_t general_radius = 0;
-
-static const lv_font_t * font_menu_item;
+// ---------------------------
+// Current Hue
+// ---------------------------
+uint32_t current_hue=0;
+// ---------------------------
+// Rainbow Color
+// ---------------------------
+lv_color_t rainbow_outline_hue;
+lv_color_t rainbow_title_hue;
+lv_color_t rainbow_value_hue;
+// ---------------------------
+// Rainbow Contrast Color
+// ---------------------------
+lv_color_t rainbow_contrast_outline_hue;
+lv_color_t rainbow_contrast_title_hue;
+lv_color_t rainbow_contrast_value_hue;
+// ---------------------------
+// Default Color
+// ---------------------------
+lv_color_t default_bg_hue;
+lv_color_t default_bg_title_hue;
+lv_color_t default_outline_hue;
+lv_color_t default_border_hue;
+lv_color_t default_shadow_hue;
+lv_color_t default_title_hue;
+lv_color_t default_subtitle_hue;
+lv_color_t default_value_hue;
+// ---------------------------
+// Default Button
+// ---------------------------
+lv_color_t default_btn_bg;
+lv_color_t default_btn_outline_hue;
+lv_color_t default_btn_border_hue;
+lv_color_t default_btn_shadow_hue;
+lv_color_t default_btn_value_hue;
+// ---------------------------
+// Default Button Off
+// ---------------------------
+lv_color_t default_btn_off_bg;
+lv_color_t default_btn_off_outline_hue;
+lv_color_t default_btn_off_border_hue;
+lv_color_t default_btn_off_shadow_hue;
+lv_color_t default_btn_off_value_hue;
+// ---------------------------
+// Default Button On
+// ---------------------------
+lv_color_t default_btn_on_bg;
+lv_color_t default_btn_on_outline_hue;
+lv_color_t default_btn_on_border_hue;
+lv_color_t default_btn_on_shadow_hue;
+lv_color_t default_btn_on_value_hue;
+// ---------------------------
+// Default Button Toggle
+// ---------------------------
+lv_color_t default_btn_toggle_outline_hue;
+lv_color_t default_btn_toggle_value_hue;
+// ---------------------------
+// Custom Color
+// ---------------------------
+lv_color_t custom_bg_hue;
+lv_color_t custom_title_bg_hue;
+lv_color_t custom_outline_hue;
+lv_color_t custom_border_hue;
+lv_color_t custom_shadow_hue;
+lv_color_t custom_title_hue;
+lv_color_t custom_subtitle_hue;
+lv_color_t custom_value_hue;
+// -------------------------------------
+// Current Color (set as default/custom)
+// -------------------------------------
+lv_color_t main_bg_hue;
+lv_color_t main_title_bg_hue;
+lv_color_t main_outline_hue;
+lv_color_t main_border_hue;
+lv_color_t main_shadow_hue;
+lv_color_t main_title_hue;
+lv_color_t main_subtitle_hue;
+lv_color_t main_value_hue;
 
 /* ----------------------------------------------------------------------------------------
  * @brief Custom LVGL log callback to redirect logs to ESP-IDF logging system.
@@ -1709,8 +1711,8 @@ void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
  * @param pos_y Offset from alignment.
  * @param show_scrollbar Show/hide scrollbar.
  * @param enable_scrolling Enable/disable scrolling.
- * @param title_font Specify title font.
- * @param subtitle_font Specify subtitle font.
+ * @param font_title Specify title font.
+ * @param font_subtitle Specify subtitle font.
  * @return title_bar_t.
  */
 title_bar_t create_title_bar (
@@ -1883,8 +1885,8 @@ title_bar_t create_title_bar (
  * @brief Create System Tray.
  * 
  * @param parent Specify parent object.
- * @param title_font Specify title font.
- * @param subtitle_font Specify subtitle font.
+ * @param font_title Specify title font.
+ * @param font_subtitle Specify subtitle font.
  */
 system_tray_t create_system_tray(
     lv_obj_t * parent,
@@ -2486,8 +2488,8 @@ lv_obj_t * create_textarea(
  *                      LV_KEYBOARD_MODE_USER_2
  *                      LV_KEYBOARD_MODE_USER_3
  *                      LV_KEYBOARD_MODE_USER_4
- * @param title_font Specify title font.
- * @param subtitle_font Specify subtitle font.
+ * @param font_title Specify title font.
+ * @param font_subtitle Specify subtitle font.
  * @return keyboard_t.
  */
 keyboard_t create_keyboard(
@@ -2621,357 +2623,6 @@ keyboard_t create_keyboard(
     lv_obj_set_style_text_align(result.ta, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.ta, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.ta, default_title_hue, LV_PART_MAIN);
-
-    return result;
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Create Menu Item
- * 
- * @param menu Specify menu_struct object.
- * @param num_pages Specify number of pages.
- * @param title Specify menu title.
- * @return Void. A menu must be specified as the first parameter.
- */
-void create_menu_item(
-    menu_struct * menu,
-    int num_pages,
-    const char * title
-    )
-{
-
-    /*--------------------------------------------- CONTAINER -----------------------------------------------*/
-
-    // Create container
-    lv_obj_t * container = lv_menu_cont_create(menu->pages[num_pages]);
-
-    /*-------------------------------------- CONTAINER LV_PART_MAIN -----------------------------------------*/
-    
-    // Size and position
-    lv_obj_set_style_pad_hor(container, 2, LV_PART_MAIN);
-    lv_obj_set_style_pad_ver(container, 4, LV_PART_MAIN);
-    lv_obj_set_width(container, lv_pct(80));
-
-    // Main style: radius
-    lv_obj_set_style_radius(container, general_radius, LV_PART_MAIN);
-
-    // Main style: outline
-    lv_obj_set_style_outline_width(container, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(container, lv_color_make(0,0,0), LV_PART_MAIN);
-
-    // Main style: border
-    lv_obj_set_style_border_width(container, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(container, default_border_hue, LV_PART_MAIN);
-
-    // Main style: background
-    lv_obj_set_style_bg_color(container, default_bg_hue, LV_PART_MAIN);
-
-    // Main style: shadow
-    lv_obj_set_style_shadow_width(container, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(container, default_shadow_hue, LV_PART_MAIN);
-
-    // Main style: text
-    lv_obj_set_style_text_align(container, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(container, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(container, default_title_hue, LV_PART_MAIN);
-
-    /*----------------------------------------------- LABEL -----------------------------------------------*/
-    
-    // Create label
-    lv_obj_t * label = lv_label_create(container);
-
-    /* --- LABEL LV_PART_MAIN ---------------------------------------------------------- */
-
-    // Size and position
-    lv_obj_set_style_pad_hor(label, 8, LV_PART_MAIN);
-    lv_obj_set_style_pad_ver(label, 8, LV_PART_MAIN);
-    lv_obj_set_width(label, lv_pct(100));
-
-    // Main style: radius
-    lv_obj_set_style_radius(label, general_radius, LV_PART_MAIN);
-
-    // Main style: outline
-    lv_obj_set_style_outline_width(label, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(label, lv_color_make(0,0,0), LV_PART_MAIN);
-
-    // Main style: border
-    lv_obj_set_style_border_width(label, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(label, default_border_hue, LV_PART_MAIN);
-    
-    // Main style: background
-    lv_obj_set_style_bg_color(label, default_bg_hue, LV_PART_MAIN);
-
-    // Main style: shadow
-    lv_obj_set_style_shadow_width(label, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(label, default_shadow_hue, LV_PART_MAIN);
-
-    // Main style: text
-    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(label, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(label, font_menu_item, LV_PART_MAIN);
-    lv_label_set_text(label, title);
-
-    /* --- ADD TO MENU ----------------------------------------------------------------- */
-    
-    // Add to menu struct
-    if(menu->page_item_counts[num_pages] < menu->max_items_per_page) {
-        menu->page_items[num_pages][menu->page_item_counts[num_pages]] = container;
-        menu->page_item_counts[num_pages]++;
-    }
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Create Menu Page
- * 
- * @param menu Specify menu_struct object.
- * @param title Specify menu title.
- * @return lv_obj_t.
- */
-lv_obj_t * create_menu_page(
-    lv_obj_t * menu,
-    const char * title
-    )
-{
-
-    /* --- MENU ------------------------------------------------------------------------ */
-
-    // Create menu
-    lv_obj_t * menu_page = lv_menu_page_create(menu, title);
-
-    /* --- MENU LV_PART_MAIN ----------------------------------------------------------- */
-
-    // Size and position
-    lv_obj_set_style_pad_row(menu_page, 2, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(menu_page, 2, LV_PART_MAIN);
-
-    // Main style: radius
-    lv_obj_set_style_radius(menu_page, general_radius, LV_PART_MAIN);
-
-    // Main style: outline
-    lv_obj_set_style_outline_width(menu_page, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(menu_page, default_outline_hue, LV_PART_MAIN);
-
-    // Main style: border
-    lv_obj_set_style_border_width(menu_page, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(menu_page, default_border_hue, LV_PART_MAIN);
-
-    // Main style: background
-    lv_obj_set_style_bg_color(menu_page, default_bg_hue, LV_PART_MAIN);
-
-    // Main style: shadow
-    lv_obj_set_style_shadow_width(menu_page, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(menu_page, default_shadow_hue, LV_PART_MAIN);
-
-    // Main style: text
-    lv_obj_set_style_text_align(menu_page, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(menu_page, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(menu_page, font_menu_item, LV_PART_MAIN);
-
-    return menu_page;
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Create Menu.
- * 
- * @param parent Specify parent object.
- * @param max_pages Specify max pages.
- * @param page_titles Specify page titles array.
- * @param main_menu_items
- * @param size_w_px Panel width.
- * @param size_h_px Panel height
- * @param alignment Panel alignment on parent object.
- * @param pos_x Offset from alignment.
- * @param pos_y Offset from alignment.
- * @param title_font Specify title font.
- * @param subtitle_font Specify subtitle font.
- * @return menu_struct.
- */
-menu_struct create_menu(
-    lv_obj_t * parent,
-    int max_pages,
-    const char ** page_titles,
-    const char ** main_menu_items,
-    int32_t size_w_px,
-    int32_t size_h_px,
-    lv_align_t alignment,
-    int32_t pos_x,
-    int32_t pos_y,
-    lv_font_t * title_font,
-    lv_font_t * subtitle_font
-    )
-{
-    /* --- MENU ------------------------------------------------------------------------ */
-
-    // Create a new menu_struct
-    menu_struct result = {0};
-    
-    // Allocate pages arrays
-    result.max_pages = max_pages;
-    result.pages = (lv_obj_t **)malloc(max_pages * sizeof(lv_obj_t *));
-    result.page_items = (lv_obj_t ***)malloc(max_pages * sizeof(lv_obj_t **));
-    result.page_item_counts = (uint32_t *)calloc(max_pages, sizeof(uint32_t));
-    
-    // Allocate items arrays for each page
-    result.max_items_per_page = 10;  // Max items per page
-    for(int p = 0; p < max_pages; p++) {
-        result.page_items[p] = (lv_obj_t **)malloc(result.max_items_per_page * sizeof(lv_obj_t *));
-    }
-
-    // Create menu
-    result.menu = lv_menu_create(parent);
-
-    // Size and position
-    lv_obj_set_size(result.menu, size_w_px, size_h_px);
-    lv_obj_align(result.menu, alignment, pos_x, pos_y);
-
-    /* --- MENU LV_PART_MAIN ----------------------------------------------------------- */
-
-    // Size and position
-    lv_obj_set_style_transform_width(result.menu, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_row(result.menu, 4, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(result.menu, 2, LV_PART_MAIN);
-
-    // Main style: radius
-    lv_obj_set_style_radius(result.menu, general_radius, LV_PART_MAIN);
-
-    // Main style: outline
-    lv_obj_set_style_outline_width(result.menu, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.menu, default_outline_hue, LV_PART_MAIN);
-
-    // Main style: border
-    lv_obj_set_style_border_width(result.menu, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.menu, default_border_hue, LV_PART_MAIN);
-
-    // Main style: background
-    lv_obj_set_style_bg_color(result.menu, default_bg_hue, LV_PART_MAIN);
-
-    // Main style: shadow
-    lv_obj_set_style_shadow_width(result.menu, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.menu, default_shadow_hue, LV_PART_MAIN);
-
-    // Main style: text
-    lv_obj_set_style_text_align(result.menu, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.menu, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.menu, title_font, LV_PART_MAIN);
-
-    /* --- MENU LV_PART_ITEMS ---------------------------------------------------------- */
-
-    lv_obj_set_style_border_width(result.menu, border_width, LV_PART_ITEMS);
-
-    /* --- MAIN HEADER ----------------------------------------------------------------- */
-
-    // Create main header
-    result.main_header = lv_menu_get_main_header(result.menu);
-
-    /* --- MAIN HEADER LV_PART_MAIN ---------------------------------------------------- */
-
-    // Size and position
-    lv_obj_set_style_pad_all(result.main_header, 12, LV_PART_MAIN);
-
-    // Main style: radius
-    lv_obj_set_style_radius(result.main_header, general_radius, LV_PART_MAIN);
-
-    // Main style: outline
-    lv_obj_set_style_outline_width(result.main_header, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.main_header, default_outline_hue, LV_PART_MAIN);
-
-    // Main style: border
-    lv_obj_set_style_border_width(result.main_header, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.main_header, default_border_hue, LV_PART_MAIN);
-
-    // Main style: background
-    lv_obj_set_style_bg_color(result.main_header, default_bg_hue, LV_PART_MAIN);
-
-    // Main style: shadow
-    lv_obj_set_style_shadow_width(result.main_header, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.main_header, default_shadow_hue, LV_PART_MAIN);
-
-    // Main style: text
-    lv_obj_set_style_text_align(result.main_header, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.main_header, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.main_header, title_font, LV_PART_MAIN);
-
-    /* --- ROOT BACK BUTTON ------------------------------------------------------------ */
-    
-    // Enable root back button
-    lv_menu_set_mode_root_back_button(result.menu, LV_MENU_ROOT_BACK_BUTTON_ENABLED);
-
-    // Create back button
-    result.back_button = lv_menu_get_main_header_back_button(result.menu);
-
-    // Create back button label
-    result.back_label = lv_obj_get_child(result.back_button, 0);
-
-    /* --- ROOT BACK BUTTON LV_PART_MAIN ------------------------------------------------- */
-
-    // Size and position
-    lv_obj_set_style_pad_all(result.back_button, 8, LV_PART_MAIN);
-
-    // Main style: radius
-    lv_obj_set_style_radius(result.back_button, general_radius, LV_PART_MAIN);
-
-    // Main style: outline
-    lv_obj_set_style_outline_width(result.back_button, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.back_button, default_outline_hue, LV_PART_MAIN);
-
-    // Main style: border
-    lv_obj_set_style_border_width(result.back_button, border_width, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.back_button, default_border_hue, LV_PART_MAIN);
-
-    // Main style: background
-    lv_obj_set_style_bg_color(result.back_button, default_bg_hue, LV_PART_MAIN);
-
-    // Main style: shadow
-    lv_obj_set_style_shadow_width(result.back_button, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.back_button, default_shadow_hue, LV_PART_MAIN);
-
-    // Main style: text
-    lv_obj_set_style_text_align(result.back_button, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.back_button, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.back_button, title_font, LV_PART_MAIN);
-
-    /* --- ROOT BACK BUTTON LABEL LV_PART_MAIN ----------------------------------------- */
-
-    // Main style: radius
-    lv_obj_set_style_radius(result.back_label, general_radius, LV_PART_MAIN);
-
-    // Main style: outline
-    lv_obj_set_style_outline_width(result.back_label, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.back_label, default_outline_hue, LV_PART_MAIN);
-
-    // Main style: border
-    lv_obj_set_style_border_width(result.back_label, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.back_label, default_border_hue, LV_PART_MAIN);
-
-    // Main style: background
-    lv_obj_set_style_bg_color(result.back_label, default_bg_hue, LV_PART_MAIN);
-
-    // Main style: shadow
-    lv_obj_set_style_shadow_width(result.back_label, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.back_label, default_shadow_hue, LV_PART_MAIN);
-
-    // Main style: text
-    lv_obj_set_style_text_align(result.back_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.back_label, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.back_label, title_font, LV_PART_MAIN);
-
-    /* --- CREATE PAGES ----------------------------------------------------------------- */
-
-    // Create Pages
-    for(int i = 0; i < max_pages && page_titles[i] != NULL; i++) {
-        result.pages[i] = create_menu_page(result.menu, page_titles[i]);
-        result.page_count++;
-    }
-
-    // Add main menu items to first page if provided
-    if(main_menu_items && result.pages[0]) {
-        for(int i = 0; main_menu_items[i] != NULL; i++) {
-            create_menu_item(&result, 0, main_menu_items[i]);
-        }
-    }
-    
-    // Set current page
-    lv_menu_set_page(result.menu, result.pages[0]);
 
     return result;
 }
@@ -3388,7 +3039,7 @@ button_t create_button(
 
     // Main style: text
     lv_obj_set_style_text_align(result.panel, text_align, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.panel, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.panel, font, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.panel, color_text, LV_PART_MAIN);
 
     // ---- Button Style ----
@@ -3420,7 +3071,7 @@ button_t create_button(
 
     // Main style: text
     lv_obj_set_style_text_align(result.button, text_align, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.button, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.button, font, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.button, color_text, LV_PART_MAIN);
 
     // ---- Label Style ----
@@ -3451,7 +3102,7 @@ button_t create_button(
 
     // Main style: text
     lv_obj_set_style_text_align(result.label, text_align, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.label, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.label, font, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.label, color_text, LV_PART_MAIN);
 
     // Size and position (Center the (now auto-sized) label inside panel)
@@ -14084,8 +13735,6 @@ void initSatIOUI() {
     system_screen  = lv_obj_create(NULL);
     uap_screen     = lv_obj_create(NULL);
 
-    font_menu_item = &cobalt_alien_17;
-
     // Default
     default_bg_hue                  = lv_color_make(0,0,0);
     default_bg_title_hue            = lv_color_make(12,12,12);
@@ -14139,7 +13788,6 @@ void initSatIOUI() {
 
 
     // Set Current Pallette
-    // enable_rainbow_effect=false;
     setColorsDefault();
 
     // --------------------------------------------------------------
