@@ -44,9 +44,10 @@ struct systemStruct {
   bool output_admplex0_enabled;
   bool output_gyro_0_enabled;
   bool output_sun_enabled;
-  bool output_moon_enabled;
   bool output_mercury_enabled;
   bool output_venus_enabled;
+  bool output_earth_enabled;
+  bool output_luna_enabled;
   bool output_mars_enabled;
   bool output_jupiter_enabled;
   bool output_saturn_enabled;

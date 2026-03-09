@@ -52,4 +52,6 @@ void setOverrideOutputValue(int switch_idx, uint32_t override_value);
  */
 void outputStat(void);
 
+void setAllSentenceOutput(bool enable);
+
 #endif

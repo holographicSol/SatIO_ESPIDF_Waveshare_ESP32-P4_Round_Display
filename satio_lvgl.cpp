@@ -79,7 +79,7 @@ lv_obj_t * home_screen;
 lv_obj_t * matrix_screen;
 lv_obj_t * gps_screen;
 lv_obj_t * gyro_screen;
-lv_obj_t * display_screen;
+lv_obj_t * serial_screen;
 lv_obj_t * system_screen;
 lv_obj_t * uap_screen;
 
@@ -89,7 +89,7 @@ int32_t current_screen_number = 0;
 #define MATRIX_SCREEN  2
 #define GPS_SCREEN     3
 #define GYRO_SCREEN    4
-#define DISPLAY_SCREEN 5
+#define SERIAL_SCREEN 5
 #define SYSTEM_SCREEN  6
 #define UAP_SCREEN     7
 
@@ -98,7 +98,7 @@ bool flag_display_home_screen = false;
 bool flag_display_matrix_screen = false;
 bool flag_display_gps_screen = false;
 bool flag_display_gyro_screen = false;
-bool flag_display_display_screen = false;
+bool flag_display_serial_screen = false;
 bool flag_display_system_screen = false;
 bool flag_display_uap_screen = false;
 
@@ -157,6 +157,10 @@ int current_gps_panel=0;
 // Gyro
 // ---------------------------
 gyro_0_container_t gyro_0_c;
+// ---------------------------
+// Serial
+// ---------------------------
+serial_container_t serial_c;
 
 /** ---------------------------------------------------------------------------------------
  * @brief Global Style
@@ -856,7 +860,7 @@ void system_tray_grid_menu_1_event_cb(lv_event_t * e)
             case 1:  flag_display_matrix_screen=true; break;
             case 2:  flag_display_gps_screen=true; break;
             case 3:  flag_display_gyro_screen=true; break;
-            case 4:  flag_display_display_screen=true; break;
+            case 4:  flag_display_serial_screen=true; break;
             case 5:  flag_display_system_screen=true; break;
             case 6:  flag_display_uap_screen=true; break;
             default: break;
@@ -1701,6 +1705,107 @@ void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
 }
 
 /** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+void sw_output_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if (code == LV_EVENT_VALUE_CHANGED)
+    {
+        lv_obj_t * sw = (lv_obj_t *)lv_event_get_target(e);
+
+        bool is_enabled = lv_obj_has_state(sw, LV_STATE_CHECKED);
+
+        if (sw == serial_c.sw_output_all) {
+            setAllSentenceOutput(is_enabled);
+            printf("[OUTPUT ALL] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_satio) {
+            systemData.output_satio_enabled = is_enabled;
+            printf("[OUTPUT SATIO] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_gngga) {
+            systemData.output_gngga_enabled = is_enabled;
+            printf("[OUTPUT GNGGA] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_gnrmc) {
+            systemData.output_gnrmc_enabled = is_enabled;
+            printf("[OUTPUT GNRMC] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_gpatt) {
+            systemData.output_gpatt_enabled = is_enabled;
+            printf("[OUTPUT GPATT] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_ins) {
+            systemData.output_ins_enabled = is_enabled;
+            printf("[OUTPUT INS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_matrix) {
+            systemData.output_matrix_enabled = is_enabled;
+            printf("[OUTPUT MATRIX] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_input_controller) {
+            systemData.output_input_portcontroller = is_enabled;
+            printf("[OUTPUT INPUT CONTROLLER] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_admplex_0) {
+            systemData.output_admplex0_enabled = is_enabled;
+            printf("[OUTPUT ADMplex 0] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_gyro_0) {
+            systemData.output_gyro_0_enabled = is_enabled;
+            printf("[OUTPUT GYRO 0] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_sun) {
+            systemData.output_sun_enabled = is_enabled;
+            printf("[OUTPUT SUN] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_mercury) {
+            systemData.output_mercury_enabled = is_enabled;
+            printf("[OUTPUT MERCURY] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_venus) {
+            systemData.output_venus_enabled = is_enabled;
+            printf("[OUTPUT VENUS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_earth) {
+            systemData.output_earth_enabled = is_enabled;
+            printf("[OUTPUT EARTH] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_luna) {
+            systemData.output_luna_enabled = is_enabled;
+            printf("[OUTPUT LUNA] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_mars) {
+            systemData.output_mars_enabled = is_enabled;
+            printf("[OUTPUT MARS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_jupiter) {
+            systemData.output_jupiter_enabled = is_enabled;
+            printf("[OUTPUT JUPITER] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_saturn) {
+            systemData.output_saturn_enabled = is_enabled;
+            printf("[OUTPUT SATURN] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_uranus) {
+            systemData.output_uranus_enabled = is_enabled;
+            printf("[OUTPUT URANUS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_neptune) {
+            systemData.output_neptune_enabled = is_enabled;
+            printf("[OUTPUT NEPTUNE] %s\n", is_enabled ? "Enabled" : "Disabled");}
+
+        else if (sw == serial_c.sw_output_meteors) {
+            systemData.output_meteors_enabled = is_enabled;
+            printf("[OUTPUT METEORS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+    }
+}
+
+/** -------------------------------------------------------------------------------------
  * @brief Create Title Bar.
  * 
  * @param parent Specify parent object.
@@ -2118,7 +2223,7 @@ system_tray_t create_system_tray(
                 case 1: lv_label_set_text(label, "Mtx"); break;
                 case 2: lv_label_set_text(label, "GPS"); break;
                 case 3: lv_label_set_text(label, "Gyro"); break;
-                case 4: lv_label_set_text(label, "Dis"); break; 
+                case 4: lv_label_set_text(label, "Srl"); break; 
                 case 5: lv_label_set_text(label, "Sys"); break;
                 case 6: lv_label_set_text(label, "?"); break;
                 default: break;
@@ -9222,20 +9327,14 @@ gyro_0_container_t create_gyro_panel(
     int32_t pos_x,
     int32_t pos_y,
     int32_t radius,
-
     int32_t outer_pad_all,
     int32_t inner_pad_all,
-
     int32_t outline_padding,
-
     int32_t main_row_padding,
     int32_t main_column_padding,
-
     int32_t sub_row_padding,
     int32_t sub_column_padding,
-
     int32_t row_height,
-
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font_title,
@@ -9307,6 +9406,15 @@ gyro_0_container_t create_gyro_panel(
         sub_column_padding,
         false,
         false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_0,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
     );
 
     // Set row object widths
@@ -9413,6 +9521,15 @@ gyro_0_container_t create_gyro_panel(
         false
     );
 
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_0,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
     // Set row object widths
     obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*1);
 
@@ -9515,6 +9632,15 @@ gyro_0_container_t create_gyro_panel(
         sub_column_padding,
         false,
         false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_0,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
     );
 
     // Set row object widths
@@ -9620,6 +9746,15 @@ gyro_0_container_t create_gyro_panel(
         false
     );
 
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_0,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
     // Set row object widths
     obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*1);
 
@@ -9723,6 +9858,15 @@ gyro_0_container_t create_gyro_panel(
         false
     );
 
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_0,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
     // Set row object widths
     obj_w_0 = (((sub_row_width/2) *1)) - (sub_column_padding*1);
 
@@ -9768,6 +9912,1338 @@ gyro_0_container_t create_gyro_panel(
 
     lv_obj_set_size(result.lbl_gyro_0_current_uiBaud, obj_w_0, obj_height);
     lv_obj_set_size(result.val_gyro_0_current_uiBaud, obj_w_0, obj_height);
+
+    return result;
+}
+
+serial_container_t create_serial_panel(
+    lv_obj_t * parent,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    )
+{
+    serial_container_t result = {0};
+
+    /* --- MAIN PANEL ------------------------------------------------------------------ */
+    result.panel = lv_obj_create(parent);
+    
+    // Show scrollbar
+    if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
+    } else {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_OFF);}
+
+    // Enable scrolling
+    if (enable_scrolling) {lv_obj_set_scroll_dir(result.panel, LV_DIR_ALL);
+    } else {lv_obj_set_scroll_dir(result.panel, LV_DIR_NONE);}
+
+    // Size & Position
+    lv_obj_set_size(result.panel, width_px, height_px);
+    lv_obj_align(result.panel, alignment, pos_x, pos_y);
+    lv_obj_set_style_radius(result.panel, radius, LV_PART_MAIN);
+
+    // Main Padding
+    lv_obj_set_style_pad_all(result.panel, outer_pad_all, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(result.panel, main_column_padding, LV_PART_MAIN);
+    lv_obj_set_style_pad_row(result.panel, main_row_padding, LV_PART_MAIN);
+
+    // Outline
+    lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
+    lv_obj_set_style_outline_pad(result.panel, outline_padding, LV_PART_MAIN);
+    
+    // Border
+    lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+
+    // Background
+    lv_obj_set_style_bg_color(result.panel, default_bg_hue, LV_PART_MAIN);
+
+    // Flex
+    lv_obj_set_flex_flow(result.panel, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(result.panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+
+    // Row sizes
+    int32_t sub_row_width = width_px - (outer_pad_all*2);
+    int32_t sub_row_height = row_height-(outline_padding*2);
+
+    // Row Object sizes
+    int32_t obj_w_0 = 0;
+    int32_t obj_w_1 = 0;
+    int32_t obj_w_2 = 0;
+    int32_t obj_w_3 = 0;
+    int32_t obj_w_4 = 0;
+    int32_t obj_w_5 = 0;
+    int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
+
+    /* ---------------------------------------------------------- */
+    /* Output All                                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_all = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_all,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Set row object widths
+    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
+    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
+
+    // Label Output all
+    result.lbl_output_all = create_label(
+        row_output_all,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT ALL",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+    // Switch Output All
+    result.sw_output_all = create_switch(
+        row_output_all,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_all, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_all, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_all, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Output SatIO                                               */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_satio = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_satio, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_satio,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output all
+    result.lbl_output_satio = create_label(
+        row_output_satio,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT SATIO",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+    // Switch Output All
+    result.sw_output_satio = create_switch(
+        row_output_satio,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_satio, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_satio, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_satio, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Output GNGGA                                               */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_gngga = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_gngga, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_gngga,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output GNGGA
+    result.lbl_output_gngga = create_label(
+        row_output_gngga,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT GNGGA",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output GNGGA
+    result.sw_output_gngga = create_switch(
+        row_output_gngga,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_gngga, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_gngga, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_gngga, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Output GNRMC                                               */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_gnrmc = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_gnrmc, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_gnrmc,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output GNRMC
+    result.lbl_output_gnrmc = create_label(
+        row_output_gnrmc,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT GNRMC",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output GNRMC
+    result.sw_output_gnrmc = create_switch(
+        row_output_gnrmc,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_gnrmc, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_gnrmc, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_gnrmc, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output GPATT                                               */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_gpatt = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_gpatt, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_gpatt,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output GPATT
+    result.lbl_output_gpatt = create_label(
+        row_output_gpatt,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT GPATT",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output GPATT
+    result.sw_output_gpatt = create_switch(
+        row_output_gpatt,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_gpatt, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_gpatt, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_gpatt, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output INS                                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_ins = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_ins, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_ins,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output INS
+    result.lbl_output_ins = create_label(
+        row_output_ins,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT INS",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output INS
+    result.sw_output_ins = create_switch(
+        row_output_ins,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_ins, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_ins, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_ins, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output MATRIX                                              */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_matrix = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_matrix, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_matrix,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output MATRIX
+    result.lbl_output_matrix = create_label(
+        row_output_matrix,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT MATRIX",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output MATRIX
+    result.sw_output_matrix = create_switch(
+        row_output_matrix,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_matrix, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_matrix, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_matrix, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Output INPUT CONTROLLER                                    */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_input_controller = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_input_controller, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_input_controller,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output INPUT CONTROLLER
+    result.lbl_output_input_controller = create_label(
+        row_output_input_controller,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT INPUT CONTROLLER",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output INPUT CONTROLLER
+    result.sw_output_input_controller = create_switch(
+        row_output_input_controller,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_input_controller, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_input_controller, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_input_controller, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output ADMplex 0                                           */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_admplex_0 = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_admplex_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_admplex_0,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output ADMplex 0
+    result.lbl_output_admplex_0 = create_label(
+        row_output_admplex_0,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT ADMplex 0",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output ADMplex 0
+    result.sw_output_admplex_0 = create_switch(
+        row_output_admplex_0,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_admplex_0, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_admplex_0, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_admplex_0, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output GYRO 0                                              */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_gyro_0 = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_gyro_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_gyro_0,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output GYRO 0
+    result.lbl_output_gyro_0 = create_label(
+        row_output_gyro_0,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT GYRO 0",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output GYRO 0
+    result.sw_output_gyro_0 = create_switch(
+        row_output_gyro_0,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_gyro_0, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_gyro_0, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_gyro_0, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output SUN                                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_sun = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_sun, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_sun,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output SUN
+    result.lbl_output_sun = create_label(
+        row_output_sun,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT SUN",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output SUN
+    result.sw_output_sun = create_switch(
+        row_output_sun,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_sun, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_sun, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_sun, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Output MERCURY                                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_mercury = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_mercury, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_mercury,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output MERCURY
+    result.lbl_output_mercury = create_label(
+        row_output_mercury,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT MERCURY",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output MERCURY
+    result.sw_output_mercury = create_switch(
+        row_output_mercury,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_mercury, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_mercury, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_mercury, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output VENUS                                               */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_venus = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_venus, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_venus,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output VENUS
+    result.lbl_output_venus = create_label(
+        row_output_venus,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT VENUS",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output VENUS
+    result.sw_output_venus = create_switch(
+        row_output_venus,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_venus, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_venus, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_venus, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output EARTH                                               */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_earth = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_earth, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_earth,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output EARTH
+    result.lbl_output_earth = create_label(
+        row_output_earth,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT EARTH",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output EARTH
+    result.sw_output_earth = create_switch(
+        row_output_earth,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_earth, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_earth, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_earth, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output LUNA                                                */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_luna = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_luna, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_luna,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output LUNA
+    result.lbl_output_luna = create_label(
+        row_output_luna,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT LUNA",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output LUNA
+    result.sw_output_luna = create_switch(
+        row_output_luna,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_luna, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_luna, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_luna, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output MARS                                                */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_mars = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_mars, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_mars,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output MARS
+    result.lbl_output_mars = create_label(
+        row_output_mars,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT MARS",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output MARS
+    result.sw_output_mars = create_switch(
+        row_output_mars,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_mars, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_mars, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_mars, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Output JUPITER                                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_jupiter = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_jupiter, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_jupiter,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output JUPITER
+    result.lbl_output_jupiter = create_label(
+        row_output_jupiter,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT JUPITER",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output JUPITER
+    result.sw_output_jupiter = create_switch(
+        row_output_jupiter,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_jupiter, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_jupiter, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_jupiter, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output SATURN                                              */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_saturn = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_saturn, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_saturn,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output SATURN
+    result.lbl_output_saturn = create_label(
+        row_output_saturn,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT SATURN",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output SATURN
+    result.sw_output_saturn = create_switch(
+        row_output_saturn,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_saturn, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_saturn, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_saturn, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output URANUS                                              */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_uranus = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_uranus, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_uranus,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output URANUS
+    result.lbl_output_uranus = create_label(
+        row_output_uranus,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT URANUS",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output URANUS
+    result.sw_output_uranus = create_switch(
+        row_output_uranus,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_uranus, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_uranus, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_uranus, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output NEPTUNE                                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_neptune = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_neptune, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_neptune,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output NEPTUNE
+    result.lbl_output_neptune = create_label(
+        row_output_neptune,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT NEPTUNE",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output NEPTUNE
+    result.sw_output_neptune = create_switch(
+        row_output_neptune,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_neptune, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_neptune, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_neptune, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Output METEORS                                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_output_meteors = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Adjust Flex
+    lv_obj_set_flex_flow(row_output_meteors, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_output_meteors,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Label Output METEORS
+    result.lbl_output_meteors = create_label(
+        row_output_meteors,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "OUTPUT METEORS",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    // Switch Output METEORS
+    result.sw_output_meteors = create_switch(
+        row_output_meteors,
+        obj_w_1,
+        row_height,
+        LV_ALIGN_CENTER,
+        0,
+        0
+    );
+    lv_obj_add_event_cb(result.sw_output_meteors, sw_output_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_size(result.lbl_output_meteors, obj_w_0, obj_height);
+    lv_obj_set_size(result.sw_output_meteors, obj_w_1, obj_height);
 
     return result;
 }
@@ -12013,7 +13489,7 @@ void display_matrix_screen()
         40,               // row height
         false,            // show scrollbar
         false,            // enable scrolling
-        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_25, // font for titles,
         &cobalt_alien_17  // font for text,
     );
     lv_obj_add_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
@@ -12042,7 +13518,7 @@ void display_matrix_screen()
         37,               // row height
         true,             // show scrollbar
         false,            // enable scrolling
-        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_25, // font for titles,
         &cobalt_alien_17  // font for text,
     );
     lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
@@ -12247,7 +13723,7 @@ void display_gps_screen()
         48,               // row height
         false,            // show scrollbar
         false,            // enable scrolling
-        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_25, // font for titles,
         &cobalt_alien_17  // font for text,
     );
 
@@ -12270,7 +13746,7 @@ void display_gps_screen()
         42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
-        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_25, // font for titles,
         &cobalt_alien_17  // font for text,
     );
 
@@ -12300,7 +13776,7 @@ void display_gps_screen()
         42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
-        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_25, // font for titles,
         &cobalt_alien_17  // font for text,
     );
 
@@ -12330,7 +13806,7 @@ void display_gps_screen()
         42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
-        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_25, // font for titles,
         &cobalt_alien_17  // font for text,
     );
 
@@ -12360,7 +13836,7 @@ void display_gps_screen()
         42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
-        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_25, // font for titles,
         &cobalt_alien_17  // font for text,
     );
 
@@ -12435,9 +13911,13 @@ void display_gyro_screen()
         42,               // row height
         true,             // show scrollbar
         true,             // enable scrolling
-        &cobalt_alien_17, // font for titles,
+        &cobalt_alien_25, // font for titles,
         &cobalt_alien_17  // font for text,
     );
+
+    // Calibrate Gyro -> Button starts timer -> calibration ends on timeout.
+
+    // Calibrate Magnetic Field -> Button starts timer -> calibration ends on timeout.
 
     printf("[display_gps_screen] invalidating display\n");
     lv_obj_invalidate(gyro_screen);  // Force redraw
@@ -12446,41 +13926,69 @@ void display_gyro_screen()
 }
 
 /** -------------------------------------------------------------------------------------
- * @brief Show Display Settings Screen.
+ * @brief Show Serial Screen.
  */
-void display_display_screen()
+void display_serial_screen()
 {
     // Set Display Flag
-    printf("[display_display_screen] setting display flag\n");
-    flag_display_display_screen = false;
+    printf("[display_serial_screen] setting serial flag\n");
+    flag_display_serial_screen = false;
 
     // Check Current Screen
-    printf("[display_display_screen] checking sctive screen\n");
+    printf("[display_serial_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
-    if (current_screen == display_screen) {
-        printf("[display_display_screen] screen already active, returning\n");
+    if (current_screen == serial_screen) {
+        printf("[display_serial_screen] screen already active, returning\n");
         return;
     }
-    printf("[display_display_screen] selected new screen, attempting to load new screen\n");
+    printf("[display_serial_screen] selected new screen, attempting to load new screen\n");
 
-    current_screen_number = DISPLAY_SCREEN;
+    current_screen_number = SERIAL_SCREEN;
 
     // Always create a fresh screen
-    printf("[display_display_screen] creating screen object\n");
-    display_screen = lv_obj_create(NULL);
+    printf("[display_serial_screen] creating screen object\n");
+    serial_screen = lv_obj_create(NULL);
     
     // Load screen before creating more objects (smoother, faster load)
-    printf("[display_display_screen] loading screen\n");
-    lv_scr_load_anim(display_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    printf("[display_serial_screen] loading screen\n");
+    lv_scr_load_anim(serial_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
-    printf("[display_display_screen] creating default screen objects\n");
-    create_default_screen_objects(display_screen);
+    printf("[display_serial_screen] creating default screen objects\n");
+    create_default_screen_objects(serial_screen);
 
-    printf("[display_display_screen] invalidating display\n");
-    lv_obj_invalidate(display_screen);  // Force redraw
-    printf("[display_display_screen] calling timer handler\n");
-    lv_timer_handler();  // Process events/render    
+    printf("[display_serial_screen] invalidating display\n");
+    lv_obj_invalidate(serial_screen);  // Force redraw
+    printf("[display_serial_screen] calling timer handler\n");
+    lv_timer_handler();  // Process events/render
+
+    // Serial
+    serial_c = create_serial_panel(
+        serial_screen,    // parent
+        450,              // width px
+        450,              // height px
+        LV_ALIGN_CENTER,  // alignment
+        0,                // pos x
+        0,                // pos y
+        radius_rounded,   // radius
+        2,                // outer_pad_all
+        4,                // inner_pad_all
+        2,                // outline_padding
+        2,                // main_row_padding
+        4,                // main_column_padding
+        2,                // sub_row_padding
+        8,                // sub_column_padding
+        42,               // row height
+        true,             // show scrollbar
+        true,             // enable scrolling
+        &cobalt_alien_25, // font for titles,
+        &cobalt_alien_17  // font for text,
+    );
+
+    printf("[display_serial_screen] invalidating display\n");
+    lv_obj_invalidate(serial_screen);  // Force redraw
+    printf("[display_serial_screen] calling timer handler\n");
+    lv_timer_handler();  // Process events/render
 }
 
 /** -------------------------------------------------------------------------------------
@@ -12596,7 +14104,7 @@ void update_display()
     else if (flag_display_matrix_screen==true) {display_matrix_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
     else if (flag_display_gps_screen==true) {display_gps_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
     else if (flag_display_gyro_screen==true) {display_gyro_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
-    else if (flag_display_display_screen==true) {display_display_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
+    else if (flag_display_serial_screen==true) {display_serial_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
     else if (flag_display_system_screen==true) {display_system_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
     else if (flag_display_uap_screen==true) {display_uap_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
     
@@ -13731,7 +15239,7 @@ void initSatIOUI() {
     matrix_screen  = lv_obj_create(NULL);
     gps_screen     = lv_obj_create(NULL);
     gyro_screen    = lv_obj_create(NULL);
-    display_screen = lv_obj_create(NULL);
+    serial_screen  = lv_obj_create(NULL);
     system_screen  = lv_obj_create(NULL);
     uap_screen     = lv_obj_create(NULL);
 

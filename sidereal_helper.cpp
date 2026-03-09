@@ -20,7 +20,7 @@ struct SiderealPlantetsStruct siderealPlanetData = {
     .track_mercury = true,
     .track_venus = true,
     .track_earth = true,
-    .track_moon = true,
+    .track_luna = true,
     .track_mars = true,
     .track_jupiter = true,
     .track_saturn = true,
@@ -41,14 +41,14 @@ struct SiderealPlantetsStruct siderealPlanetData = {
     .sun_radius_vector = NAN,
     .sun_distance = NAN,
     .sun_ecliptic_lat = NAN,
-    .moon_ra = NAN,
-    .moon_dec = NAN,
-    .moon_az = NAN,
-    .moon_alt = NAN,
-    .moon_r = NAN,
-    .moon_s = NAN,
-    .moon_p = NAN,
-    .moon_p_name = {
+    .luna_ra = NAN,
+    .luna_dec = NAN,
+    .luna_az = NAN,
+    .luna_alt = NAN,
+    .luna_r = NAN,
+    .luna_s = NAN,
+    .luna_p = NAN,
+    .luna_p_name = {
         "New Moon",
         "Waxing Crescent",
         "First Quarter",
@@ -58,7 +58,7 @@ struct SiderealPlantetsStruct siderealPlanetData = {
         "Third Quarter",
         "Waning Crescent"
     },
-    .moon_lum = NAN,
+    .luna_lum = NAN,
     .mercury_ra = NAN,
     .mercury_dec = NAN,
     .mercury_az = NAN,
@@ -524,16 +524,16 @@ void trackSun(void) {
 
 void trackMoon(void) {
     myAstro.doMoon();
-    siderealPlanetData.moon_ra = myAstro.getRAdec();
-    siderealPlanetData.moon_dec = myAstro.getDeclinationDec();
+    siderealPlanetData.luna_ra = myAstro.getRAdec();
+    siderealPlanetData.luna_dec = myAstro.getDeclinationDec();
     myAstro.doRAdec2AltAz();
-    siderealPlanetData.moon_az = myAstro.getAzimuth();
-    siderealPlanetData.moon_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
+    siderealPlanetData.luna_az = myAstro.getAzimuth();
+    siderealPlanetData.luna_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
     myAstro.doMoonRiseSetTimes();
-    siderealPlanetData.moon_r = myAstro.getMoonriseTime();
-    siderealPlanetData.moon_s = myAstro.getMoonsetTime();
-    siderealPlanetData.moon_p = myAstro.getMoonPhase();
-    siderealPlanetData.moon_lum = myAstro.getLunarLuminance();
+    siderealPlanetData.luna_r = myAstro.getMoonriseTime();
+    siderealPlanetData.luna_s = myAstro.getMoonsetTime();
+    siderealPlanetData.luna_p = myAstro.getMoonPhase();
+    siderealPlanetData.luna_lum = myAstro.getLunarLuminance();
 }
 
 void trackMercury(void) {
@@ -675,14 +675,14 @@ void clearSun(void) {
 }
 
 void clearMoon(void) {
-    siderealPlanetData.moon_ra = NAN;
-    siderealPlanetData.moon_dec = NAN;
-    siderealPlanetData.moon_az = NAN;
-    siderealPlanetData.moon_alt = NAN;
-    siderealPlanetData.moon_r = NAN;
-    siderealPlanetData.moon_s = NAN;
-    siderealPlanetData.moon_p = NAN;
-    siderealPlanetData.moon_lum = NAN;
+    siderealPlanetData.luna_ra = NAN;
+    siderealPlanetData.luna_dec = NAN;
+    siderealPlanetData.luna_az = NAN;
+    siderealPlanetData.luna_alt = NAN;
+    siderealPlanetData.luna_r = NAN;
+    siderealPlanetData.luna_s = NAN;
+    siderealPlanetData.luna_p = NAN;
+    siderealPlanetData.luna_lum = NAN;
 }
 
 void clearMercury(void) {

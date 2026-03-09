@@ -236,9 +236,9 @@ static void PrintHelp(void) {
                                   [59] Sun Altitude
                                   [60] Sun Helio Ecl Lat
                                   [61] Sun Helio Ecl Lon
-                                  [62] Moon Azimuth
-                                  [63] Moon Altitude
-                                  [64] Moon Phase
+                                  [62] Luna Azimuth
+                                  [63] Luna Altitude
+                                  [64] Luna Phase
                                   [65] Mercury Azimuth
                                   [66] Mercury Altitude
                                   [67] Mercury H.Ecliptic Lat
@@ -388,7 +388,7 @@ static void PrintHelp(void) {
       satio --utc-offset n             Set +-seconds offset time.
       satio --auto-datetime-on         Enable set datetime automatically  (--auto-datetime-on overrides any datetime -set).
       satio --auto-datetime-off        Disable set datetime automatically (ensure --auto-datetime-off before using -set time).
-      satio --set-datetime --year n --month n --mday n --hour n --minute n --second n  (must be UTC except if utc offset 0).
+      satio --set-datetime --year n --month n --mday n --hour n --minute n --second n  (expects UTC +- 0).
 
       [ Location ]
       satio --coord-value-mode-gps             Use GPS coordinates.
@@ -477,7 +477,7 @@ static void PrintHelp(void) {
       stat --sentence --admplex0  Takes arguments -e, -d.
       stat --sentence --gyro0     Takes arguments -e, -d.
       stat --sentence --sun       Takes arguments -e, -d.
-      stat --sentence --moon      Takes arguments -e, -d.
+      stat --sentence --luna      Takes arguments -e, -d.
       stat --sentence --mercury   Takes arguments -e, -d.
       stat --sentence --venus     Takes arguments -e, -d.
       stat --sentence --mars      Takes arguments -e, -d.
@@ -511,7 +511,7 @@ void PrintSystemData(void) {
     printf("[output_admplex0_enabled] %d\n", systemData.output_admplex0_enabled);
     printf("[output_gyro_0_enabled] %d\n", systemData.output_gyro_0_enabled);
     printf("[output_sun_enabled] %d\n", systemData.output_sun_enabled);
-    printf("[output_moon_enabled] %d\n", systemData.output_moon_enabled);
+    printf("[output_luna_enabled] %d\n", systemData.output_luna_enabled);
     printf("[output_mercury_enabled] %d\n", systemData.output_mercury_enabled);
     printf("[output_venus_enabled] %d\n", systemData.output_venus_enabled);
     printf("[output_mars_enabled] %d\n", systemData.output_mars_enabled);
@@ -602,6 +602,7 @@ void PrintMatrixData(void) {
 // }
 
 void setAllSentenceOutput(bool enable) {
+  systemData.output_satio_all = enable;
   systemData.output_satio_enabled=enable;
   systemData.output_gngga_enabled=enable;
   systemData.output_gnrmc_enabled=enable;
@@ -612,9 +613,11 @@ void setAllSentenceOutput(bool enable) {
   systemData.output_admplex0_enabled=enable;
   systemData.output_gyro_0_enabled=enable;
   systemData.output_sun_enabled=enable;
-  systemData.output_moon_enabled=enable;
+  systemData.output_earth_enabled=enable;
+  systemData.output_luna_enabled=enable;
   systemData.output_mercury_enabled=enable;
   systemData.output_venus_enabled=enable;
+  systemData.output_earth_enabled=enable;
   systemData.output_mars_enabled=enable;
   systemData.output_jupiter_enabled=enable;
   systemData.output_saturn_enabled=enable;
@@ -1139,7 +1142,8 @@ void CmdProcess() {
         if (argparser_has_flag(&parser, "admplex0")) {systemData.output_admplex0_enabled=enable; printf("setting admplex0 output enabled: %d\n", systemData.output_admplex0_enabled);}
         if (argparser_has_flag(&parser, "gyro0")) {systemData.output_gyro_0_enabled=enable; printf("setting gyro_0 output enabled: %d\n", systemData.output_gyro_0_enabled);}
         if (argparser_has_flag(&parser, "sun")) {systemData.output_sun_enabled=enable; printf("setting sun output enabled: %d\n", systemData.output_sun_enabled);}
-        if (argparser_has_flag(&parser, "moon")) {systemData.output_moon_enabled=enable; printf("setting moon output enabled: %d\n", systemData.output_moon_enabled);}
+        if (argparser_has_flag(&parser, "earth")) {systemData.output_sun_enabled=enable; printf("setting earth output enabled: %d\n", systemData.output_earth_enabled);}
+        if (argparser_has_flag(&parser, "luna")) {systemData.output_luna_enabled=enable; printf("setting luna output enabled: %d\n", systemData.output_luna_enabled);}
         if (argparser_has_flag(&parser, "mercury")) {systemData.output_mercury_enabled=enable; printf("setting mercury output enabled: %d\n", systemData.output_mercury_enabled);}
         if (argparser_has_flag(&parser, "venus")) {systemData.output_venus_enabled=enable; printf("setting venus output enabled: %d\n", systemData.output_venus_enabled);}
         if (argparser_has_flag(&parser, "mars")) {systemData.output_mars_enabled=enable; printf("setting mars output enabled: %d\n", systemData.output_mars_enabled);}
@@ -1508,17 +1512,28 @@ void outputSentences(void) {
       strcat(serial0Data.BUFFER, serial0Data.checksum);
       printf("%s\n", serial0Data.BUFFER);
     }
-    if (systemData.output_moon_enabled) {
+    if (systemData.output_luna_enabled) {
       memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
-      strcat(serial0Data.BUFFER, "$MOON,");
-      strcat(serial0Data.BUFFER, String(siderealPlanetData.moon_ra + String(",")).c_str());
-      strcat(serial0Data.BUFFER, String(siderealPlanetData.moon_dec + String(",")).c_str());
-      strcat(serial0Data.BUFFER, String(siderealPlanetData.moon_az + String(",")).c_str());
-      strcat(serial0Data.BUFFER, String(siderealPlanetData.moon_alt + String(",")).c_str());
-      strcat(serial0Data.BUFFER, String(siderealPlanetData.moon_r + String(",")).c_str());
-      strcat(serial0Data.BUFFER, String(siderealPlanetData.moon_s + String(",")).c_str());
-      strcat(serial0Data.BUFFER, String(siderealPlanetData.moon_p + String(",")).c_str());
-      strcat(serial0Data.BUFFER, String(siderealPlanetData.moon_lum + String(",")).c_str());
+      strcat(serial0Data.BUFFER, "$EARTH,");
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.earth_ecliptic_lat + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.earth_ecliptic_long + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(satioData.altitude + String(",")).c_str()); // distance to earth sea level
+      createChecksumSerial0(serial0Data.BUFFER);
+      strcat(serial0Data.BUFFER, "*");
+      strcat(serial0Data.BUFFER, serial0Data.checksum);
+      printf("%s\n", serial0Data.BUFFER);
+    }
+    if (systemData.output_luna_enabled) {
+      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      strcat(serial0Data.BUFFER, "$LUNA,");
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.luna_ra + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.luna_dec + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.luna_az + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.luna_alt + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.luna_r + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.luna_s + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.luna_p + String(",")).c_str());
+      strcat(serial0Data.BUFFER, String(siderealPlanetData.luna_lum + String(",")).c_str());
       createChecksumSerial0(serial0Data.BUFFER);
       strcat(serial0Data.BUFFER, "*");
       strcat(serial0Data.BUFFER, serial0Data.checksum);

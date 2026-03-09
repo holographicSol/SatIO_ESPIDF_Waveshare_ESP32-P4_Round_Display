@@ -526,7 +526,7 @@ typedef struct {
 } satio_container_t;
 
 /** ---------------------------------------------------------------------------------------
- * @brief GYRO Container Struct
+ * @brief Gyro Container Struct
  */
 typedef struct {
     lv_obj_t * panel;
@@ -549,6 +549,75 @@ typedef struct {
     lv_obj_t * lbl_gyro_0_current_uiBaud;
     lv_obj_t * val_gyro_0_current_uiBaud;
 } gyro_0_container_t;
+
+/** ---------------------------------------------------------------------------------------
+ * @brief Serial Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel;
+    lv_obj_t * lbl_output_all;
+    lv_obj_t * sw_output_all;
+
+    lv_obj_t * lbl_output_satio;
+    lv_obj_t * sw_output_satio;
+
+    lv_obj_t * lbl_output_gngga;
+    lv_obj_t * sw_output_gngga;
+
+    lv_obj_t * lbl_output_gnrmc;
+    lv_obj_t * sw_output_gnrmc;
+
+    lv_obj_t * lbl_output_gpatt;
+    lv_obj_t * sw_output_gpatt;
+
+    lv_obj_t * lbl_output_ins;
+    lv_obj_t * sw_output_ins;
+
+    lv_obj_t * lbl_output_matrix;
+    lv_obj_t * sw_output_matrix;
+
+    lv_obj_t * lbl_output_input_controller;
+    lv_obj_t * sw_output_input_controller;
+
+    lv_obj_t * lbl_output_admplex_0;
+    lv_obj_t * sw_output_admplex_0;
+
+    lv_obj_t * lbl_output_gyro_0;
+    lv_obj_t * sw_output_gyro_0;
+
+    lv_obj_t * lbl_output_sun;
+    lv_obj_t * sw_output_sun;
+
+    lv_obj_t * lbl_output_mercury;
+    lv_obj_t * sw_output_mercury;
+
+    lv_obj_t * lbl_output_venus;
+    lv_obj_t * sw_output_venus;
+
+    lv_obj_t * lbl_output_earth;
+    lv_obj_t * sw_output_earth;
+
+    lv_obj_t * lbl_output_luna;
+    lv_obj_t * sw_output_luna;
+
+    lv_obj_t * lbl_output_mars;
+    lv_obj_t * sw_output_mars;
+
+    lv_obj_t * lbl_output_jupiter;
+    lv_obj_t * sw_output_jupiter;
+
+    lv_obj_t * lbl_output_saturn;
+    lv_obj_t * sw_output_saturn;
+
+    lv_obj_t * lbl_output_uranus;
+    lv_obj_t * sw_output_uranus;
+
+    lv_obj_t * lbl_output_neptune;
+    lv_obj_t * sw_output_neptune;
+
+    lv_obj_t * lbl_output_meteors;
+    lv_obj_t * sw_output_meteors;
+} serial_container_t;
 
 /** --------------------------------------------------------------------------------------- 
  * Callbacks.
@@ -1376,9 +1445,9 @@ void display_gps_screen();
 void display_gyro_screen();
 
 /** -------------------------------------------------------------------------------------
- * @brief Show Display Settings Screen.
+ * @brief Show Serial Screen.
  */
-void display_disp_screen();
+void display_serial_screen();
 
 /** -------------------------------------------------------------------------------------
  * @brief Show System Settings Screen.

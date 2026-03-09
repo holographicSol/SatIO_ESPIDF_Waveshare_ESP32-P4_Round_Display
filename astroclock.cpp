@@ -94,7 +94,7 @@ static Planet sun     = {0,              SIZE_UNIT * 8 / 2,  0, 0, {0}, NULL, NU
 static Planet mercury = {ORBIT_STEP * 1, SIZE_UNIT * 3 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Smallest planet
 static Planet venus   = {ORBIT_STEP * 2, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
 static Planet earth   = {ORBIT_STEP * 3, SIZE_UNIT * 5 / 2,  0, 0, {0}, NULL, NULL, NULL};
-static Planet moon    = {ORBIT_STEP / 2, SIZE_UNIT * 3 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Relative to Earth
+static Planet luna    = {ORBIT_STEP / 2, SIZE_UNIT * 3 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Relative to Earth
 static Planet mars    = {ORBIT_STEP * 4, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
 static Planet jupiter = {ORBIT_STEP * 5, SIZE_UNIT * 6 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Largest planet
 static Planet saturn  = {ORBIT_STEP * 6, SIZE_UNIT * 5 / 2,  0, 0, {0}, NULL, NULL, NULL};
@@ -120,8 +120,8 @@ lv_point_precise_t venus_altitude_points[2];
 static lv_obj_t * earth_altitude_line = NULL;
 lv_point_precise_t earth_altitude_points[2];
 
-static lv_obj_t * moon_altitude_line = NULL;
-lv_point_precise_t moon_altitude_points[2];
+static lv_obj_t * luna_altitude_line = NULL;
+lv_point_precise_t luna_altitude_points[2];
 
 static lv_obj_t * mars_altitude_line = NULL;
 lv_point_precise_t mars_altitude_points[2];
@@ -138,7 +138,7 @@ lv_point_precise_t uranus_altitude_points[2];
 static lv_obj_t * neptune_altitude_line = NULL;
 lv_point_precise_t neptune_altitude_points[2];
 
-static lv_obj_t * moon_shadow = NULL;  // Shadow overlay for moon phase
+static lv_obj_t * luna_shadow = NULL;  // Shadow overlay for luna phase
 static lv_obj_t * saturn_ring = NULL;  // Saturn's rings
 static lv_point_precise_t saturn_ring_points[2];
 
@@ -470,9 +470,9 @@ void astro_clock_update(void) {
         // altitde_angle = ecliptic_long - (siderealPlanetData.venus_az + 180.0f);
         // update_altitude_line(venus_altitude_line, altitde_angle, venus_altitude_points, venus.orbit_radius);
 
-        // ecliptic_long = -siderealPlanetData.moon_ecliptic_long;
-        // altitde_angle = ecliptic_long - (siderealPlanetData.moon_az + 180.0f);
-        // update_altitude_line(moon_altitude_line, altitde_angle, moon_altitude_points, moon.orbit_radius);
+        // ecliptic_long = -siderealPlanetData.luna_ecliptic_long;
+        // altitde_angle = ecliptic_long - (siderealPlanetData.luna_az + 180.0f);
+        // update_altitude_line(luna_altitude_line, altitde_angle, luna_altitude_points, luna.orbit_radius);
 
         // ecliptic_long = -siderealPlanetData.mars_ecliptic_long;
         // altitde_angle = ecliptic_long - (siderealPlanetData.mars_az + 180.0f);
@@ -508,83 +508,83 @@ void astro_clock_update(void) {
     //                                                              MOON
     // -----------------------------------------------------------------
 
-    if (siderealPlanetData.track_moon) {
+    if (siderealPlanetData.track_luna) {
         
         // Moon uses RA mapped from 0-24 hours to 0-360 degrees
-        float moon_angle = (siderealPlanetData.moon_ra / 24.0f) * 360.0f;
-        float moon_rad = deg2rad(moon_angle + ANGLE_OFFSET);
+        float luna_angle = (siderealPlanetData.luna_ra / 24.0f) * 360.0f;
+        float luna_rad = deg2rad(luna_angle + ANGLE_OFFSET);
         
-        // Position moon relative to Earth's center
-        moon.x = (earth.x + earth.radius) + (int)(moon.orbit_radius * sinf(moon_rad)) - moon.radius;
-        moon.y = (earth.y + earth.radius) + (int)(moon.orbit_radius * cosf(moon_rad)) - moon.radius;
+        // Position luna relative to Earth's center
+        luna.x = (earth.x + earth.radius) + (int)(luna.orbit_radius * sinf(luna_rad)) - luna.radius;
+        luna.y = (earth.y + earth.radius) + (int)(luna.orbit_radius * cosf(luna_rad)) - luna.radius;
         
-        lv_obj_set_pos(moon.obj, moon.x, moon.y);
-        if (moon.target_box) {
-            lv_obj_set_pos(moon.target_box, moon.x - 4, moon.y - 4);
+        lv_obj_set_pos(luna.obj, luna.x, luna.y);
+        if (luna.target_box) {
+            lv_obj_set_pos(luna.target_box, luna.x - 4, luna.y - 4);
         }
         
-        // Update moon phase visualization
-        // moon_p: 0=New, 1=WaxCres, 2=FirstQ, 3=WaxGib, 4=Full, 5=WanGib, 6=ThirdQ, 7=WanCres
-        if (moon_shadow) {
-            lv_obj_set_pos(moon_shadow, moon.x, moon.y);
-            int phase = (int)siderealPlanetData.moon_p;
-            if (phase < 0 || phase > 7) phase = 0;  // Default to new moon if invalid
+        // Update luna phase visualization
+        // luna_p: 0=New, 1=WaxCres, 2=FirstQ, 3=WaxGib, 4=Full, 5=WanGib, 6=ThirdQ, 7=WanCres
+        if (luna_shadow) {
+            lv_obj_set_pos(luna_shadow, luna.x, luna.y);
+            int phase = (int)siderealPlanetData.luna_p;
+            if (phase < 0 || phase > 7) phase = 0;  // Default to new luna if invalid
             
             // Phase determines shadow coverage and side
             // Waxing (1-3): shadow on left, shrinking
             // Waning (5-7): shadow on right, growing
             switch (phase) {
                 case 0:  // New Moon - full shadow
-                    lv_arc_set_bg_angles(moon_shadow, 0, 360);
-                    lv_obj_clear_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+                    lv_arc_set_bg_angles(luna_shadow, 0, 360);
+                    lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
                 case 1:  // Waxing Crescent - 75% shadow left
-                    lv_arc_set_bg_angles(moon_shadow, 45, 315);
-                    lv_obj_clear_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+                    lv_arc_set_bg_angles(luna_shadow, 45, 315);
+                    lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
                 case 2:  // First Quarter - 50% shadow left
-                    lv_arc_set_bg_angles(moon_shadow, 90, 270);
-                    lv_obj_clear_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+                    lv_arc_set_bg_angles(luna_shadow, 90, 270);
+                    lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
                 case 3:  // Waxing Gibbous - 25% shadow left
-                    lv_arc_set_bg_angles(moon_shadow, 135, 225);
-                    lv_obj_clear_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+                    lv_arc_set_bg_angles(luna_shadow, 135, 225);
+                    lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
                 case 4:  // Full Moon - no shadow
-                    lv_obj_add_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_add_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
                 case 5:  // Waning Gibbous - 25% shadow right
-                    lv_arc_set_bg_angles(moon_shadow, 315, 405);  // 315 to 45 (wraps)
-                    lv_obj_clear_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+                    lv_arc_set_bg_angles(luna_shadow, 315, 405);  // 315 to 45 (wraps)
+                    lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
                 case 6:  // Third Quarter - 50% shadow right
-                    lv_arc_set_bg_angles(moon_shadow, 270, 450);  // 270 to 90 (wraps)
-                    lv_obj_clear_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+                    lv_arc_set_bg_angles(luna_shadow, 270, 450);  // 270 to 90 (wraps)
+                    lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
                 case 7:  // Waning Crescent - 75% shadow right
-                    lv_arc_set_bg_angles(moon_shadow, 225, 495);  // 225 to 135 (wraps)
-                    lv_obj_clear_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+                    lv_arc_set_bg_angles(luna_shadow, 225, 495);  // 225 to 135 (wraps)
+                    lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
             }
         }
         
-        // Position moon orbit arc centered on Earth
-        if (moon.orbit) {
-            lv_obj_align_to(moon.orbit, earth.obj, LV_ALIGN_CENTER, 0, 0);
-            lv_color_t color = (siderealPlanetData.moon_alt <= 0) ? COLOR_ORBIT_MOON_BELOW : COLOR_ORBIT_MOON_ABOVE;
-            lv_obj_set_style_arc_color(moon.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.moon_alt <= 0) ? MOON_ORBIT_ARC_WIDTH_BELOW : MOON_ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(moon.orbit, width, LV_PART_MAIN);
+        // Position luna orbit arc centered on Earth
+        if (luna.orbit) {
+            lv_obj_align_to(luna.orbit, earth.obj, LV_ALIGN_CENTER, 0, 0);
+            lv_color_t color = (siderealPlanetData.luna_alt <= 0) ? COLOR_ORBIT_MOON_BELOW : COLOR_ORBIT_MOON_ABOVE;
+            lv_obj_set_style_arc_color(luna.orbit, color, LV_PART_MAIN);
+            int32_t width = (siderealPlanetData.luna_alt <= 0) ? MOON_ORBIT_ARC_WIDTH_BELOW : MOON_ORBIT_ARC_WIDTH_ABOVE;
+            lv_obj_set_style_arc_width(luna.orbit, width, LV_PART_MAIN);
         }
-        lv_obj_clear_flag(moon.orbit, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(moon.obj, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(luna.orbit, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(luna.obj, LV_OBJ_FLAG_HIDDEN);
 
     }
     
     else {
-        lv_obj_add_flag(moon.orbit, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(moon.obj, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(moon_shadow, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(luna.orbit, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(luna.obj, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
     }
     
     // -----------------------------------------------------------------
@@ -862,14 +862,14 @@ static void update_target_data_content(int target) {
                 "Declination: %.2f\n"
                 "Azimuth: %.2f\n"
                 "Altitude: %.2f",
-                siderealPlanetData.moon_r,
-                siderealPlanetData.moon_s,
-                siderealPlanetData.moon_p_name[(int)siderealPlanetData.moon_p],
-                siderealPlanetData.moon_lum,
-                siderealPlanetData.moon_ra,
-                siderealPlanetData.moon_dec,
-                siderealPlanetData.moon_az,
-                siderealPlanetData.moon_alt
+                siderealPlanetData.luna_r,
+                siderealPlanetData.luna_s,
+                siderealPlanetData.luna_p_name[(int)siderealPlanetData.luna_p],
+                siderealPlanetData.luna_lum,
+                siderealPlanetData.luna_ra,
+                siderealPlanetData.luna_dec,
+                siderealPlanetData.luna_az,
+                siderealPlanetData.luna_alt
             );
             lv_label_set_text(label, buf);
             break;
@@ -1025,7 +1025,7 @@ void astro_clock_set_target(int target) {
     if (mercury.target_box) lv_obj_add_flag(mercury.target_box, LV_OBJ_FLAG_HIDDEN);
     if (venus.target_box) lv_obj_add_flag(venus.target_box, LV_OBJ_FLAG_HIDDEN);
     if (earth.target_box) lv_obj_add_flag(earth.target_box, LV_OBJ_FLAG_HIDDEN);
-    if (moon.target_box) lv_obj_add_flag(moon.target_box, LV_OBJ_FLAG_HIDDEN);
+    if (luna.target_box) lv_obj_add_flag(luna.target_box, LV_OBJ_FLAG_HIDDEN);
     if (mars.target_box) lv_obj_add_flag(mars.target_box, LV_OBJ_FLAG_HIDDEN);
     if (jupiter.target_box) lv_obj_add_flag(jupiter.target_box, LV_OBJ_FLAG_HIDDEN);
     if (saturn.target_box) lv_obj_add_flag(saturn.target_box, LV_OBJ_FLAG_HIDDEN);
@@ -1068,9 +1068,9 @@ void astro_clock_set_target(int target) {
             obj_center_y = earth.y + earth.radius;
             break;
         case ASTRO_TARGET_MOON:
-            box = moon.target_box;
-            obj_center_x = moon.x + moon.radius;
-            obj_center_y = moon.y + moon.radius;
+            box = luna.target_box;
+            obj_center_x = luna.x + luna.radius;
+            obj_center_y = luna.y + luna.radius;
             break;
         case ASTRO_TARGET_MARS:
             box = mars.target_box;
@@ -1241,8 +1241,8 @@ void astro_clock_begin(
     venus.radius = SIZE_UNIT * 4 / 2;
     earth.orbit_radius = ORBIT_STEP * 3;
     earth.radius = SIZE_UNIT * 5 / 2;
-    moon.orbit_radius = ORBIT_STEP / 2;
-    moon.radius = SIZE_UNIT * 3 / 2;
+    luna.orbit_radius = ORBIT_STEP / 2;
+    luna.radius = SIZE_UNIT * 3 / 2;
     mars.orbit_radius = ORBIT_STEP * 4;
     mars.radius = SIZE_UNIT * 4 / 2;
     jupiter.orbit_radius = ORBIT_STEP * 5;
@@ -1259,7 +1259,7 @@ void astro_clock_begin(
     mercury.color = lv_color_make(255, 0, 255);
     venus.color = lv_color_make(180, 180, 0);
     earth.color = lv_color_make(0, 0, 255);
-    moon.color = lv_color_make(128, 128, 128);
+    luna.color = lv_color_make(128, 128, 128);
     mars.color = lv_color_make(255, 0, 0);
     jupiter.color = lv_color_make(128, 128, 128);
     saturn.color = lv_color_make(210, 210, 0);
@@ -1347,7 +1347,7 @@ void astro_clock_begin(
     // mercury.color = lv_color_make(255, 0, 255);
     // venus.color = lv_color_make(180, 180, 0);
     // earth.color = lv_color_make(0, 0, 255);
-    // moon.color = lv_color_make(128, 128, 128);
+    // luna.color = lv_color_make(128, 128, 128);
     // mars.color = lv_color_make(255, 0, 0);
     // jupiter.color = lv_color_make(128, 128, 128);
     // saturn.color = lv_color_make(210, 210, 0);
@@ -1382,13 +1382,13 @@ void astro_clock_begin(
     // lv_obj_set_style_line_rounded(venus_altitude_line, true, 0);
 
     // Moon altitde line
-    // printf("DEBUG: Creating moon_altitude_line\n");
-    // moon_altitude_line = lv_line_create(astro_container);
-    // if (!moon_altitude_line) { printf("ERROR: Failed to create moon_altitude_line\n"); return;}
-    // printf("DEBUG: moon_altitude_line done\n");
-    // lv_obj_set_style_line_color(moon_altitude_line, lv_color_make(128, 128, 128), 0);
-    // lv_obj_set_style_line_width(moon_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
-    // lv_obj_set_style_line_rounded(moon_altitude_line, true, 0);
+    // printf("DEBUG: Creating luna_altitude_line\n");
+    // luna_altitude_line = lv_line_create(astro_container);
+    // if (!luna_altitude_line) { printf("ERROR: Failed to create luna_altitude_line\n"); return;}
+    // printf("DEBUG: luna_altitude_line done\n");
+    // lv_obj_set_style_line_color(luna_altitude_line, lv_color_make(128, 128, 128), 0);
+    // lv_obj_set_style_line_width(luna_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
+    // lv_obj_set_style_line_rounded(luna_altitude_line, true, 0);
 
     // // Mars altitde line (line from Earth to edge showing local altitde relative to mars)
     // printf("DEBUG: Creating mars_altitude_line\n");
@@ -1455,10 +1455,10 @@ void astro_clock_begin(
     // earth_altitude_points[1].x = 0;
     // earth_altitude_points[1].y = 0;
 
-    // moon_altitude_points[0].x = 0;
-    // moon_altitude_points[0].y = 0;
-    // moon_altitude_points[1].x = 0;
-    // moon_altitude_points[1].y = 0;
+    // luna_altitude_points[0].x = 0;
+    // luna_altitude_points[0].y = 0;
+    // luna_altitude_points[1].x = 0;
+    // luna_altitude_points[1].y = 0;
 
     // mars_altitude_points[0].x = 0;
     // mars_altitude_points[0].y = 0;
@@ -1487,10 +1487,10 @@ void astro_clock_begin(
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
     
-    int moon_spacing = SIZE_UNIT;  // Gap between Earth surface and Moon orbit
-    moon.orbit_radius = earth.radius + moon_spacing + moon.radius;
-    moon.orbit = create_orbit(astro_container, moon.orbit_radius, COLOR_ORBIT_MOON_BELOW);
-    lv_obj_add_flag(moon.orbit, LV_OBJ_FLAG_HIDDEN);  // Hide until first update positions it
+    int luna_spacing = SIZE_UNIT;  // Gap between Earth surface and Moon orbit
+    luna.orbit_radius = earth.radius + luna_spacing + luna.radius;
+    luna.orbit = create_orbit(astro_container, luna.orbit_radius, COLOR_ORBIT_MOON_BELOW);
+    lv_obj_add_flag(luna.orbit, LV_OBJ_FLAG_HIDDEN);  // Hide until first update positions it
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
     
@@ -1511,22 +1511,22 @@ void astro_clock_begin(
     earth.obj = create_planet(astro_container, earth.radius, earth.color);
     venus.obj = create_planet(astro_container, venus.radius, venus.color);
     mercury.obj = create_planet(astro_container, mercury.radius, mercury.color);
-    moon.obj = create_planet(astro_container, moon.radius, moon.color);
+    luna.obj = create_planet(astro_container, luna.radius, luna.color);
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Moon shadow arc for phase visualization
-    moon_shadow = lv_arc_create(astro_container);
-    lv_obj_remove_style_all(moon_shadow);
-    lv_obj_set_size(moon_shadow, moon.radius * 2, moon.radius * 2);
-    lv_obj_set_style_arc_color(moon_shadow, lv_color_black(), LV_PART_MAIN);
-    lv_obj_set_style_arc_width(moon_shadow, moon.radius, LV_PART_MAIN);
-    lv_obj_set_style_arc_rounded(moon_shadow, false, LV_PART_MAIN);
-    lv_arc_set_bg_angles(moon_shadow, 0, 180);
-    lv_arc_set_value(moon_shadow, 0);
-    lv_obj_set_style_arc_opa(moon_shadow, LV_OPA_TRANSP, LV_PART_INDICATOR);
-    lv_obj_set_style_bg_opa(moon_shadow, LV_OPA_TRANSP, LV_PART_KNOB);
-    lv_obj_remove_flag(moon_shadow, LV_OBJ_FLAG_CLICKABLE);
+    luna_shadow = lv_arc_create(astro_container);
+    lv_obj_remove_style_all(luna_shadow);
+    lv_obj_set_size(luna_shadow, luna.radius * 2, luna.radius * 2);
+    lv_obj_set_style_arc_color(luna_shadow, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_arc_width(luna_shadow, luna.radius, LV_PART_MAIN);
+    lv_obj_set_style_arc_rounded(luna_shadow, false, LV_PART_MAIN);
+    lv_arc_set_bg_angles(luna_shadow, 0, 180);
+    lv_arc_set_value(luna_shadow, 0);
+    lv_obj_set_style_arc_opa(luna_shadow, LV_OPA_TRANSP, LV_PART_INDICATOR);
+    lv_obj_set_style_bg_opa(luna_shadow, LV_OPA_TRANSP, LV_PART_KNOB);
+    lv_obj_remove_flag(luna_shadow, LV_OBJ_FLAG_CLICKABLE);
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
     
@@ -1550,10 +1550,10 @@ void astro_clock_begin(
     if (!earth.target_box) { printf("ERROR: Failed to create earth.target_box\n"); return;}
     printf("DEBUG: earth.target_box done\n");
     
-    printf("DEBUG: Creating moon.target_box\n");
-    moon.target_box = create_target_box(astro_container, moon.radius * 2);
-    if (!moon.target_box) { printf("ERROR: Failed to create moon.target_box\n"); return;}
-    printf("DEBUG: moon.target_box done\n");
+    printf("DEBUG: Creating luna.target_box\n");
+    luna.target_box = create_target_box(astro_container, luna.radius * 2);
+    if (!luna.target_box) { printf("ERROR: Failed to create luna.target_box\n"); return;}
+    printf("DEBUG: luna.target_box done\n");
     
     printf("DEBUG: Creating mars.target_box\n");
     mars.target_box = create_target_box(astro_container, mars.radius * 2);
@@ -1616,7 +1616,7 @@ void astro_clock_begin(
     lv_obj_add_event_cb(mercury.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_MERCURY);
     lv_obj_add_event_cb(venus.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_VENUS);
     lv_obj_add_event_cb(earth.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_EARTH);
-    lv_obj_add_event_cb(moon.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_MOON);
+    lv_obj_add_event_cb(luna.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_MOON);
     lv_obj_add_event_cb(mars.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_MARS);
     lv_obj_add_event_cb(jupiter.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_JUPITER);
     lv_obj_add_event_cb(saturn.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_SATURN);
@@ -1658,7 +1658,7 @@ void astro_clock_end() {
     // mercury.obj = NULL; mercury.orbit = NULL; mercury.target_box = NULL;
     // venus.obj = NULL; venus.orbit = NULL; venus.target_box = NULL;
     // earth.obj = NULL; earth.orbit = NULL; earth.target_box = NULL;
-    // moon.obj = NULL; moon.orbit = NULL; moon.target_box = NULL;
+    // luna.obj = NULL; luna.orbit = NULL; luna.target_box = NULL;
     // mars.obj = NULL; mars.orbit = NULL; mars.target_box = NULL;
     // jupiter.obj = NULL; jupiter.orbit = NULL; jupiter.target_box = NULL;
     // saturn.obj = NULL; saturn.orbit = NULL; saturn.target_box = NULL;
@@ -1667,7 +1667,7 @@ void astro_clock_end() {
     
     // // Other global objects
     // altitde_line = NULL;
-    // moon_shadow = NULL;
+    // luna_shadow = NULL;
     // saturn_ring = NULL;
     // target_data_box = NULL;
     // target_connector_line = NULL;

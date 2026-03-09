@@ -1621,20 +1621,20 @@ bool matrixSwitch(void) {
       }
 
       // Moon
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOON_AZIMUTH)) {
-        tmp_x = siderealPlanetData.moon_az;
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_LUNA_AZIMUTH)) {
+        tmp_x = siderealPlanetData.luna_az;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOON_ALTITUDE)) {
-        tmp_x = siderealPlanetData.moon_alt;
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_LUNA_ALTITUDE)) {
+        tmp_x = siderealPlanetData.luna_alt;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
       }
-      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_MOON_PHASE)) {
-        tmp_x = siderealPlanetData.moon_p;
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_LUNA_PHASE)) {
+        tmp_x = siderealPlanetData.luna_p;
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;
@@ -2359,16 +2359,16 @@ String get_matrix_function_comparitor(int index_matrix_value_comparitor) {
 
     // Moon
 
-    case INDEX_MATRIX_SWITCH_FUNCTION_MOON_AZIMUTH:
-      result = String(siderealPlanetData.moon_az);
+    case INDEX_MATRIX_SWITCH_FUNCTION_LUNA_AZIMUTH:
+      result = String(siderealPlanetData.luna_az);
       break;
 
-    case INDEX_MATRIX_SWITCH_FUNCTION_MOON_ALTITUDE:
-      result = String(siderealPlanetData.moon_alt);
+    case INDEX_MATRIX_SWITCH_FUNCTION_LUNA_ALTITUDE:
+      result = String(siderealPlanetData.luna_alt);
       break;
 
-    case INDEX_MATRIX_SWITCH_FUNCTION_MOON_PHASE:
-      result = String(siderealPlanetData.moon_p);
+    case INDEX_MATRIX_SWITCH_FUNCTION_LUNA_PHASE:
+      result = String(siderealPlanetData.luna_p);
       break;
 
     // Mercury
