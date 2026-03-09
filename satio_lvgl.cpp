@@ -195,14 +195,27 @@ lv_color_t default_title_hue;
 lv_color_t default_subtitle_hue;
 lv_color_t default_value_hue;
 
-// Default Off
-lv_color_t default_off_outline_hue;
-lv_color_t default_off_title_hue;
-lv_color_t default_off_value_hue;
-// Default On
-lv_color_t default_on_outline_hue;
-lv_color_t default_on_title_hue;
-lv_color_t default_on_value_hue;
+// BTN 
+lv_color_t default_btn_bg;
+lv_color_t default_btn_outline_hue;
+lv_color_t default_btn_border_hue;
+lv_color_t default_btn_shadow_hue;
+lv_color_t default_btn_value_hue;
+// BTN Default Off
+lv_color_t default_btn_off_bg;
+lv_color_t default_btn_off_outline_hue;
+lv_color_t default_btn_off_border_hue;
+lv_color_t default_btn_off_shadow_hue;
+lv_color_t default_btn_off_value_hue;
+// BTN Default On
+lv_color_t default_btn_on_bg;
+lv_color_t default_btn_on_outline_hue;
+lv_color_t default_btn_on_border_hue;
+lv_color_t default_btn_on_shadow_hue;
+lv_color_t default_btn_on_value_hue;
+// BTN ult Toggle
+lv_color_t default_btn_toggle_outline_hue;
+lv_color_t default_btn_toggle_value_hue;
 
 // Custom Color
 lv_color_t custom_bg_hue;
@@ -3274,7 +3287,9 @@ button_t create_button(
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font,
-    int32_t radius
+    int32_t radius,
+    lv_color_t color_bg,
+    lv_color_t color_text
     )
 {
     button_t result = {0};
@@ -3300,23 +3315,23 @@ button_t create_button(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.panel, default_btn_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.panel, default_btn_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.panel, default_bg_hue, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.panel, color_bg, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.panel, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.panel, default_shadow_hue, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.panel, default_btn_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.panel, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.panel, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.panel, default_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.panel, color_text, LV_PART_MAIN);
 
     // ---- Button Style ----
 
@@ -3331,24 +3346,24 @@ button_t create_button(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.button, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.button, default_outline_hue, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.button, default_btn_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.button, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.button, default_border_hue, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.button, default_btn_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.button, default_bg_hue, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.button, color_bg, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(result.button, LV_OPA_0, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.button, 0, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.button, default_shadow_hue, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.button, default_btn_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.button, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.button, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.button, default_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.button, color_text, LV_PART_MAIN);
 
     // ---- Label Style ----
     
@@ -3362,23 +3377,24 @@ button_t create_button(
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.label, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.label, default_outline_hue, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.label, default_btn_outline_hue, LV_PART_MAIN);
 
     // Main style: border
     lv_obj_set_style_border_width(result.label, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.label, default_border_hue, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.label, default_btn_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(result.label, default_bg_hue, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.label, color_bg, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(result.button, LV_OPA_0, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(result.label, shadow_width, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.label, default_shadow_hue, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.label, default_btn_shadow_hue, LV_PART_MAIN);
 
     // Main style: text
     lv_obj_set_style_text_align(result.label, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(result.label, font_menu_item, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result.label, default_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label, color_text, LV_PART_MAIN);
 
     // Size and position (Center the (now auto-sized) label inside panel)
     lv_obj_center(result.label);
@@ -3509,7 +3525,7 @@ gps_switch_container_t create_gps_switch_panel(
     lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
         row_0,
-        LV_FLEX_ALIGN_START,
+        LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
@@ -3529,7 +3545,9 @@ gps_switch_container_t create_gps_switch_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.switch_satio_panel.button, switch_satio_panel_event_cb, LV_EVENT_ALL, NULL);
 
@@ -3545,7 +3563,9 @@ gps_switch_container_t create_gps_switch_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.switch_gngga_panel.button, switch_gngga_panel_event_cb, LV_EVENT_ALL, NULL);
 
@@ -3561,7 +3581,9 @@ gps_switch_container_t create_gps_switch_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.switch_gnrmc_panel.button, switch_gnrmc_panel_event_cb, LV_EVENT_ALL, NULL);
 
@@ -3577,7 +3599,9 @@ gps_switch_container_t create_gps_switch_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.switch_gpatt_panel.button, switch_gpatt_panel_event_cb, LV_EVENT_ALL, NULL);
 
@@ -6734,8 +6758,10 @@ satio_container_t create_satio_panel(
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
         false,                // enable scrolling
-        &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        &cobalt_alien_17,     // font for labels
+        radius_rounded,
+        default_btn_bg,
+        default_btn_toggle_value_hue
     );
     lv_obj_add_event_cb(result.btn_auto_set_user_lat.button, btn_auto_set_user_lat_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -6804,7 +6830,7 @@ satio_container_t create_satio_panel(
 
     result.btn_auto_set_user_lon = create_button(
         row_user_lon,         // parent
-        obj_w_2,        // width px
+        obj_w_2,              // width px
         obj_height,           // height px
         LV_ALIGN_CENTER,      // alignment
         0,                    // pos x
@@ -6814,7 +6840,9 @@ satio_container_t create_satio_panel(
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_toggle_value_hue
     );
     lv_obj_add_event_cb(result.btn_auto_set_user_lon.button, btn_auto_set_user_lon_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -6988,7 +7016,7 @@ satio_container_t create_satio_panel(
 
     result.btn_location_mode_gps = create_button(
         row_loc_mode,         // parent
-        obj_w_1,        // width px
+        obj_w_1,              // width px
         obj_height,           // height px
         LV_ALIGN_CENTER,      // alignment
         0,                    // pos x
@@ -6998,13 +7026,15 @@ satio_container_t create_satio_panel(
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.btn_location_mode_gps.button, btn_location_mode_gps_event_cb, LV_EVENT_CLICKED, NULL);
 
     result.btn_location_mode_user = create_button(
         row_loc_mode,         // parent
-        obj_w_2,        // width px
+        obj_w_2,              // width px
         obj_height,           // height px
         LV_ALIGN_CENTER,      // alignment
         0,                    // pos x
@@ -7014,7 +7044,9 @@ satio_container_t create_satio_panel(
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.btn_location_mode_user.button, btn_location_mode_user_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -7185,7 +7217,7 @@ satio_container_t create_satio_panel(
 
     result.btn_auto_set_user_altitude = create_button(
         row_user_alt,         // parent
-        obj_w_2,        // width px
+        obj_w_2,              // width px
         obj_height,           // height px
         LV_ALIGN_CENTER,      // alignment
         0,                    // pos x
@@ -7195,7 +7227,9 @@ satio_container_t create_satio_panel(
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_toggle_value_hue
     );
     lv_obj_add_event_cb(result.btn_auto_set_user_altitude.button, btn_auto_set_user_altitude_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -7309,7 +7343,7 @@ satio_container_t create_satio_panel(
 
     result.btn_altitude_mode_gps = create_button(
         row_alt_mode,         // parent
-        obj_w_1,        // width px
+        obj_w_1,              // width px
         obj_height,           // height px
         LV_ALIGN_CENTER,      // alignment
         0,                    // pos x
@@ -7319,13 +7353,15 @@ satio_container_t create_satio_panel(
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.btn_altitude_mode_gps.button, btn_altitude_mode_gps_event_cb, LV_EVENT_CLICKED, NULL);
 
     result.btn_altitude_mode_user = create_button(
         row_alt_mode,         // parent
-        obj_w_2,        // width px
+        obj_w_2,              // width px
         obj_height,           // height px
         LV_ALIGN_CENTER,      // alignment
         0,                    // pos x
@@ -7335,7 +7371,9 @@ satio_container_t create_satio_panel(
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.btn_altitude_mode_user.button, btn_altitude_mode_user_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -7514,7 +7552,9 @@ satio_container_t create_satio_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_toggle_value_hue
     );
     lv_obj_add_event_cb(result.btn_auto_set_user_speed.button, btn_auto_set_user_speed_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -7618,8 +7658,8 @@ satio_container_t create_satio_panel(
         2,
         general_radius,
         1,
-        default_bg_hue,
-        default_subtitle_hue
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
 
     result.btn_speed_mode_gps = create_button(
@@ -7634,7 +7674,9 @@ satio_container_t create_satio_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.btn_speed_mode_gps.button, btn_speed_mode_gps_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -7650,7 +7692,9 @@ satio_container_t create_satio_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.btn_speed_mode_user.button, btn_speed_mode_user_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -7893,7 +7937,9 @@ satio_container_t create_satio_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_toggle_value_hue
     );
     lv_obj_add_event_cb(result.btn_auto_set_user_ground_heading.button, btn_auto_set_user_ground_heading_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -8015,7 +8061,9 @@ satio_container_t create_satio_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.btn_ground_heading_mode_gps.button, btn_ground_heading_mode_gps_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -8031,7 +8079,9 @@ satio_container_t create_satio_panel(
         false,
         false,
         &cobalt_alien_17,
-        radius_rounded
+        radius_rounded,
+        default_btn_off_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.btn_ground_heading_mode_user.button, btn_ground_heading_mode_user_event_cb, LV_EVENT_CLICKED, NULL);
 
@@ -10927,7 +10977,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.matrix_switch_computer_assist.button, current_matrix_computer_assist_event_cb, LV_EVENT_ALL, NULL);
 
@@ -10948,7 +11000,7 @@ matrix_function_container_t create_matrix_function_container(
         2,                    // outline width
         radius_rounded,       // outline radius
         1,
-        default_bg_hue,
+        default_btn_bg,
         default_value_hue
     );
 
@@ -10965,7 +11017,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
     );
     lv_obj_add_event_cb(result.matrix_switch_override.button, current_matrix_override_off_event_cb, LV_EVENT_ALL, NULL);
     
@@ -12107,7 +12161,9 @@ void display_matrix_screen()
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_on_value_hue
     );
     lv_obj_add_event_cb(switch_matrix_mapping_panel.button, switch_matrix_mapping_panel_event_cb, LV_EVENT_ALL, NULL);
 
@@ -12154,7 +12210,9 @@ void display_matrix_screen()
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_on_value_hue
     );
     lv_obj_add_event_cb(matrix_new.button, matrix_new_event_cb, LV_EVENT_ALL, NULL);
 
@@ -12171,7 +12229,9 @@ void display_matrix_screen()
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_on_value_hue
     );
     lv_obj_add_event_cb(matrix_save.button, matrix_save_event_cb, LV_EVENT_ALL, NULL);
 
@@ -12188,7 +12248,9 @@ void display_matrix_screen()
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_on_value_hue
     );
     lv_obj_add_event_cb(matrix_load.button, matrix_load_event_cb, LV_EVENT_ALL, NULL);
 
@@ -12205,7 +12267,9 @@ void display_matrix_screen()
         false,                // show scrollbar
         false,                // enable scrolling
         &cobalt_alien_17,     // font for labels,
-        radius_rounded
+        radius_rounded,
+        default_btn_bg,
+        default_btn_on_value_hue
     );
     lv_obj_add_event_cb(matrix_delete.button, matrix_delete_event_cb, LV_EVENT_ALL, NULL);
 
@@ -13203,10 +13267,17 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_satio_panel.panel, default_btn_on_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gngga_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gnrmc_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gpatt_panel.panel, default_btn_off_bg, LV_PART_MAIN);
 
                 // Panel
                 lv_obj_set_style_outline_color(satio_c.panel, default_outline_hue, LV_PART_MAIN);
@@ -13246,18 +13317,22 @@ void update_display()
                 // ────────────────────────────────────────────────
                 if (satioData.location_value_mode==SATIO_MODE_GPS) {
                     // User lowlight
-                    lv_obj_set_style_outline_color(satio_c.btn_location_mode_user.panel, default_off_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_location_mode_user.label, default_off_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_location_mode_user.panel, default_btn_off_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_location_mode_user.panel, default_btn_off_bg, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_location_mode_user.label, default_btn_off_value_hue, LV_PART_MAIN);
                     // GPS emphasis
-                    lv_obj_set_style_outline_color(satio_c.btn_location_mode_gps.panel, default_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_location_mode_gps.panel, default_btn_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_location_mode_gps.panel, default_btn_on_bg, LV_PART_MAIN);
                     lv_obj_set_style_text_color(satio_c.btn_location_mode_gps.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
                 else if (satioData.location_value_mode==SATIO_MODE_USER) {
                     // GPS lowlight
-                    lv_obj_set_style_outline_color(satio_c.btn_location_mode_gps.panel, default_off_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_location_mode_gps.label, default_off_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_location_mode_gps.panel, default_btn_off_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_location_mode_gps.panel, default_btn_off_bg, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_location_mode_gps.label, default_btn_off_value_hue, LV_PART_MAIN);
                     // User emphasis
-                    lv_obj_set_style_outline_color(satio_c.btn_location_mode_user.panel, default_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_location_mode_user.panel, default_btn_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_location_mode_user.panel, default_btn_on_bg, LV_PART_MAIN);
                     lv_obj_set_style_text_color(satio_c.btn_location_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
@@ -13372,18 +13447,22 @@ void update_display()
                 // ────────────────────────────────────────────────
                 if (satioData.altitude_value_mode==SATIO_MODE_GPS) {
                     // User lowlight
-                    lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_user.panel, default_off_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_altitude_mode_user.label, default_off_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_user.panel, default_btn_off_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_altitude_mode_user.panel, default_btn_off_bg, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_altitude_mode_user.label, default_btn_off_value_hue, LV_PART_MAIN);
                     // GPS emphasis
-                    lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_gps.panel, default_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_gps.panel, default_btn_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_altitude_mode_gps.panel, default_btn_on_bg, LV_PART_MAIN);
                     lv_obj_set_style_text_color(satio_c.btn_altitude_mode_gps.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
                 else if (satioData.altitude_value_mode==SATIO_MODE_USER) {
                     // GPS lowlight
-                    lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_gps.panel, default_off_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_altitude_mode_gps.label, default_off_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_gps.panel, default_btn_off_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_altitude_mode_gps.panel, default_btn_off_bg, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_altitude_mode_gps.label, default_btn_off_value_hue, LV_PART_MAIN);
                     // User emphasis
-                    lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_user.panel, default_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_user.panel, default_btn_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_altitude_mode_user.panel, default_btn_on_bg, LV_PART_MAIN);
                     lv_obj_set_style_text_color(satio_c.btn_altitude_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
@@ -13407,18 +13486,22 @@ void update_display()
                 // ────────────────────────────────────────────────
                 if (satioData.speed_value_mode==SATIO_MODE_GPS) {
                     // User lowlight
-                    lv_obj_set_style_outline_color(satio_c.btn_speed_mode_user.panel, default_off_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_speed_mode_user.label, default_off_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_speed_mode_user.panel, default_btn_off_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_speed_mode_user.panel, default_btn_off_bg, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_speed_mode_user.label, default_btn_off_value_hue, LV_PART_MAIN);
                     // GPS emphasis
-                    lv_obj_set_style_outline_color(satio_c.btn_speed_mode_gps.panel, default_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_speed_mode_gps.panel, default_btn_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_speed_mode_gps.panel, default_btn_on_bg, LV_PART_MAIN);
                     lv_obj_set_style_text_color(satio_c.btn_speed_mode_gps.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
                 else if (satioData.speed_value_mode==SATIO_MODE_USER) {
                     // GPS lowlight
-                    lv_obj_set_style_outline_color(satio_c.btn_speed_mode_gps.panel, default_off_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_speed_mode_gps.label, default_off_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_speed_mode_gps.panel, default_btn_off_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_speed_mode_gps.panel, default_btn_off_bg, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_speed_mode_gps.label, default_btn_off_value_hue, LV_PART_MAIN);
                     // User emphasis
-                    lv_obj_set_style_outline_color(satio_c.btn_speed_mode_user.panel, default_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_speed_mode_user.panel, default_btn_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_speed_mode_user.panel, default_btn_on_bg, LV_PART_MAIN);
                     lv_obj_set_style_text_color(satio_c.btn_speed_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
@@ -13447,18 +13530,22 @@ void update_display()
                 // ────────────────────────────────────────────────
                 if (satioData.ground_heading_value_mode==SATIO_MODE_GPS) {
                     // User lowlight
-                    lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_user.panel, default_off_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_user.label, default_off_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_user.panel, default_btn_off_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_ground_heading_mode_user.panel, default_btn_off_bg, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_user.label, default_btn_off_value_hue, LV_PART_MAIN);
                     // GPS emphasis
-                    lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_gps.panel, default_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_gps.panel, default_btn_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_ground_heading_mode_gps.panel, default_btn_on_bg, LV_PART_MAIN);
                     lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_gps.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
                 else if (satioData.ground_heading_value_mode==SATIO_MODE_USER) {
                     // GPS lowlight
-                    lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_gps.panel, default_off_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_gps.label, default_off_value_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_gps.panel, default_btn_off_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_ground_heading_mode_gps.panel, default_btn_off_bg, LV_PART_MAIN);
+                    lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_gps.label, default_btn_off_value_hue, LV_PART_MAIN);
                     // User emphasis
-                    lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_user.panel, default_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_user.panel, default_btn_on_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_bg_color(satio_c.btn_ground_heading_mode_user.panel, default_btn_on_bg, LV_PART_MAIN);
                     lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
@@ -13482,10 +13569,17 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_satio_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gngga_panel.panel, default_btn_on_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gnrmc_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gpatt_panel.panel, default_btn_off_bg, LV_PART_MAIN);
 
                 lv_label_set_text(gngga_c.val_utc_time, String(gnggaData.utc_time).c_str());
 
@@ -13520,10 +13614,17 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_satio_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gngga_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gnrmc_panel.panel, default_btn_on_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gpatt_panel.panel, default_btn_off_bg, LV_PART_MAIN);
 
                 lv_label_set_text(gnrmc_c.val_utc_time, String(gnrmcData.utc_time).c_str());
 
@@ -13565,10 +13666,17 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_satio_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gngga_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gnrmc_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_bg_color(gps_switch_panel.switch_gpatt_panel.panel, default_btn_on_bg, LV_PART_MAIN);
 
                 lv_label_set_text(gpatt_c.val_pitch, String(gpattData.pitch).c_str());
 
@@ -13727,23 +13835,36 @@ void initSatIOUI() {
     font_menu_item = &cobalt_alien_17;
 
     // Default
-    default_bg_hue                = lv_color_make(0,0,0);
-    default_bg_title_hue          = lv_color_make(12,12,12);
-    default_outline_hue           = lv_color_make(28,28,28);
-    default_border_hue            = lv_color_make(0,0,0);
-    default_shadow_hue            = lv_color_make(0,0,0);
-    default_title_hue             = lv_color_make(255,0, 0);
-    default_subtitle_hue          = lv_color_make(0,0, 255);
-    default_value_hue             = lv_color_make(0,255,0);
+    default_bg_hue                  = lv_color_make(0,0,0);
+    default_bg_title_hue            = lv_color_make(12,12,12);
+    default_outline_hue             = lv_color_make(28,28,28);
+    default_border_hue              = lv_color_make(0,0,0);
+    default_shadow_hue              = lv_color_make(0,0,0);
+    default_title_hue               = lv_color_make(255,0, 0);
+    default_subtitle_hue            = lv_color_make(0,0, 255);
+    default_value_hue               = lv_color_make(0,255,0);
 
-    // Default Off
-    default_off_outline_hue      = lv_color_make(28,28,28);
-    default_off_title_hue        = lv_color_make(28,28,28);
-    default_off_value_hue        = lv_color_make(28,28,28);
-    // Default On
-    default_on_outline_hue       = lv_color_make(28,28,28);
-    default_on_title_hue         = lv_color_make(0,255,0);
-    default_on_value_hue         = lv_color_make(0,255,0);
+    // BTN
+    default_btn_bg                  = lv_color_make(12,12,12);
+    default_btn_outline_hue         = lv_color_make(28,28,28);
+    default_btn_border_hue          = lv_color_make(0,0,0);
+    default_btn_shadow_hue          = lv_color_make(0,0,0);
+    default_btn_value_hue           = lv_color_make(42,42,42);
+    // BTN Default Off
+    default_btn_off_bg              = lv_color_make(0,0,0);
+    default_btn_off_outline_hue     = lv_color_make(28,28,28);
+    default_btn_off_border_hue      = lv_color_make(0,0,0);
+    default_btn_off_shadow_hue      = lv_color_make(0,0,0);
+    default_btn_off_value_hue       = lv_color_make(42,42,42);
+    // BTN Default On
+    default_btn_on_bg               = lv_color_make(12,12,12);
+    default_btn_on_outline_hue      = lv_color_make(28,28,28);
+    default_btn_on_border_hue       = lv_color_make(0,0,0);
+    default_btn_on_shadow_hue       = lv_color_make(0,0,0);
+    default_btn_on_value_hue        = lv_color_make(0,255,0);
+    // BTN Default Toggle
+    default_btn_toggle_outline_hue  = lv_color_make(28,28,28);
+    default_btn_toggle_value_hue    = lv_color_make(0,0,255);
 
     // Custom (intended to be changed by user -> sets main_hue)
     // custom_bg_hue                = lv_color_make(0,0,0);

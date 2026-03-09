@@ -794,7 +794,9 @@ button_t create_button(
     bool show_scrollbar,
     bool enable_scrolling,
     const lv_font_t * font,
-    int32_t radius
+    int32_t radius,
+    lv_color_t color_bg,
+    lv_color_t color_text
     );
 
 lv_obj_t * create_row(
