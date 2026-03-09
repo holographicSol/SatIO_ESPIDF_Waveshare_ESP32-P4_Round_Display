@@ -683,7 +683,9 @@ lv_obj_t * create_label(
     bool enable_scrolling,
     int32_t outline_width,
     int32_t radius,
-    int32_t expected_number_of_lines=1
+    int32_t expected_number_of_lines,
+    lv_color_t color_bg,
+    lv_color_t color_text
     );
 
 lv_obj_t * create_textarea(

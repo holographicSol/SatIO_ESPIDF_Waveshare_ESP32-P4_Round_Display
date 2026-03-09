@@ -174,6 +174,7 @@ gyro_0_container_t gyro_0_c;
 /** ---------------------------------------------------------------------------------------
  * @brief Global Style
  */
+
 // ---------------------------
 // Color
 // ---------------------------
@@ -184,20 +185,16 @@ bool enable_rainbow_effect=true;
 // Current Hue
 uint32_t current_hue=0;
 
-// Default Color Major
+// Default Color
 lv_color_t default_bg_hue;
+lv_color_t default_bg_title_hue;
 lv_color_t default_outline_hue;
 lv_color_t default_border_hue;
 lv_color_t default_shadow_hue;
 lv_color_t default_title_hue;
+lv_color_t default_subtitle_hue;
 lv_color_t default_value_hue;
-// Default Color Minor
-lv_color_t default_contrast_bg_hue;
-lv_color_t default_contrast_outline_hue;
-lv_color_t default_contrast_border_hue;
-lv_color_t default_contrast_shadow_hue;
-lv_color_t default_contrast_title_hue;
-lv_color_t default_contrast_value_hue;
+
 // Default Off
 lv_color_t default_off_outline_hue;
 lv_color_t default_off_title_hue;
@@ -207,35 +204,25 @@ lv_color_t default_on_outline_hue;
 lv_color_t default_on_title_hue;
 lv_color_t default_on_value_hue;
 
-// Custom Color Major
+// Custom Color
 lv_color_t custom_bg_hue;
+lv_color_t custom_title_bg_hue;
 lv_color_t custom_outline_hue;
 lv_color_t custom_border_hue;
 lv_color_t custom_shadow_hue;
 lv_color_t custom_title_hue;
+lv_color_t custom_subtitle_hue;
 lv_color_t custom_value_hue;
-// Custom Color Minor
-lv_color_t custom_contrast_bg_hue;
-lv_color_t custom_contrast_outline_hue;
-lv_color_t custom_contrast_border_hue;
-lv_color_t custom_contrast_shadow_hue;
-lv_color_t custom_contrast_title_hue;
-lv_color_t custom_contrast_value_hue;
 
-// Current Color Major (Is set as default/custom)
+// Current Color (Is set as default/custom)
 lv_color_t main_bg_hue;
+lv_color_t main_title_bg_hue;
 lv_color_t main_outline_hue;
 lv_color_t main_border_hue;
 lv_color_t main_shadow_hue;
 lv_color_t main_title_hue;
+lv_color_t main_subtitle_hue;
 lv_color_t main_value_hue;
-// Current Color Minor (Is set as default/custom)
-lv_color_t main_contrast_bg_hue;
-lv_color_t main_contrast_outline_hue;
-lv_color_t main_contrast_border_hue;
-lv_color_t main_contrast_shadow_hue;
-lv_color_t main_contrast_title_hue;
-lv_color_t main_contrast_value_hue;
 
 // Rainbow Color Major
 lv_color_t rainbow_outline_hue;
@@ -1757,7 +1744,7 @@ title_bar_t create_title_bar (
     lv_obj_set_style_border_color(title_bar.panel, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(title_bar.panel, default_contrast_bg_hue, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(title_bar.panel, default_bg_title_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(title_bar.panel, shadow_width, LV_PART_MAIN);
@@ -1786,7 +1773,9 @@ title_bar_t create_title_bar (
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Date
@@ -1805,7 +1794,9 @@ title_bar_t create_title_bar (
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Datetime Sync
@@ -1819,12 +1810,14 @@ title_bar_t create_title_bar (
         "GPS SYNC",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
-        false,                // transparent background
+        true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // GPS Signal
@@ -1838,12 +1831,14 @@ title_bar_t create_title_bar (
         "0:0",                // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
-        false,                // transparent background
+        true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // SDCard Status
@@ -1857,12 +1852,14 @@ title_bar_t create_title_bar (
         "SD",                 // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
-        false,                // transparent background
+        true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     return title_bar;
@@ -1908,7 +1905,7 @@ system_tray_t create_system_tray(lv_obj_t * scr)
     lv_obj_set_style_border_color(tray.panel, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_color(tray.panel, default_contrast_bg_hue, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tray.panel, default_bg_title_hue, LV_PART_MAIN);
 
     // Main style: shadow
     lv_obj_set_style_shadow_width(tray.panel, shadow_width, LV_PART_MAIN);
@@ -1956,7 +1953,9 @@ system_tray_t create_system_tray(lv_obj_t * scr)
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Date
@@ -1975,7 +1974,9 @@ system_tray_t create_system_tray(lv_obj_t * scr)
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Human Date
@@ -1994,7 +1995,9 @@ system_tray_t create_system_tray(lv_obj_t * scr)
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Datetime Sync
@@ -2008,12 +2011,14 @@ system_tray_t create_system_tray(lv_obj_t * scr)
         "GPS SYNC",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
-        false,                // transparent background
+        true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // GPS Signal
@@ -2027,12 +2032,14 @@ system_tray_t create_system_tray(lv_obj_t * scr)
         "0:0",                // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
-        false,                // transparent background
+        true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // SDCard Status
@@ -2046,12 +2053,14 @@ system_tray_t create_system_tray(lv_obj_t * scr)
         "SD",                 // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
-        false,                // transparent background
+        true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
         0,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Grid Menu 1
@@ -2231,7 +2240,9 @@ lv_obj_t * create_label(
     bool enable_scrolling,
     int32_t outline_width,
     int32_t radius,
-    int32_t expected_number_of_lines
+    int32_t expected_number_of_lines,
+    lv_color_t color_bg,
+    lv_color_t color_text
     )
 {
     /*----------------------------------------------- LABEL -----------------------------------------------*/
@@ -2273,7 +2284,8 @@ lv_obj_t * create_label(
         lv_obj_set_style_border_color(result, default_border_hue, LV_PART_MAIN);
 
         // Main style: background
-        lv_obj_set_style_bg_opa(result, LV_OPA_TRANSP, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(result, color_bg, LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(result, LV_OPA_0, LV_PART_MAIN);
 
         // Main style: shadow
         lv_obj_set_style_shadow_width(result, 0, LV_PART_MAIN);
@@ -2289,7 +2301,8 @@ lv_obj_t * create_label(
         lv_obj_set_style_border_color(result, default_border_hue, LV_PART_MAIN);
 
         // Main style: background
-        lv_obj_set_style_bg_color(result, default_bg_hue, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(result, color_bg, LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(result, LV_OPA_100, LV_PART_MAIN);
 
         // Main style: shadow
         lv_obj_set_style_shadow_width(result, shadow_width, LV_PART_MAIN);
@@ -2299,7 +2312,7 @@ lv_obj_t * create_label(
     // Main style: text
     lv_obj_set_style_text_align(result, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(result, font, LV_PART_MAIN);
-    lv_obj_set_style_text_color(result, main_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result, color_text, LV_PART_MAIN);
     lv_label_set_text(result, text);
 
     return result;
@@ -2414,7 +2427,7 @@ lv_obj_t * create_textarea(
     // Main style: text
     lv_obj_set_style_text_align(ta, text_align, LV_PART_MAIN);
     lv_obj_set_style_text_font(ta, font, LV_PART_MAIN);
-    lv_obj_set_style_text_color(ta, default_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_color(ta, default_value_hue, LV_PART_MAIN);
 
     lv_obj_set_style_pad_top(ta, (size_h_px - lv_font_get_line_height(font)) / 2, LV_PART_MAIN);
     lv_obj_set_style_pad_bottom(ta, (size_h_px - lv_font_get_line_height(font)) / 2, LV_PART_MAIN);
@@ -3189,7 +3202,7 @@ lv_obj_t * create_dropdown_menu(
     // Main style: text
     lv_obj_set_style_text_align(ddlist, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     lv_obj_set_style_text_font(ddlist, font, LV_PART_MAIN);
-    lv_obj_set_style_text_color(ddlist, default_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_color(ddlist, default_value_hue, LV_PART_MAIN);
 
     /* --- DROPDOWN LIST --------------------------------------------------------------- */
 
@@ -3219,7 +3232,7 @@ lv_obj_t * create_dropdown_menu(
     // List style: text
     lv_obj_set_style_text_align(list, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     lv_obj_set_style_text_font(list, font, LV_PART_MAIN);
-    lv_obj_set_style_text_color(list, default_title_hue, LV_PART_MAIN);
+    lv_obj_set_style_text_color(list, default_value_hue, LV_PART_MAIN);
 
     // List style: background checked
     lv_obj_set_style_bg_color(list, default_border_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
@@ -3451,6 +3464,15 @@ gps_switch_container_t create_gps_switch_panel(
     int32_t sub_row_width = width_px - (outer_pad_all*2);
     int32_t sub_row_height = row_height-(outline_padding*2);
 
+    // Row Object sizes
+    int32_t obj_w_0 = 0;
+    int32_t obj_w_1 = 0;
+    int32_t obj_w_2 = 0;
+    int32_t obj_w_3 = 0;
+    int32_t obj_w_4 = 0;
+    int32_t obj_w_5 = 0;
+    int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
+
     /* --- Row Buttons ------------------------------------------------------------------ */
     lv_obj_t * row_0 = lv_obj_create(result.panel);
 
@@ -3493,17 +3515,16 @@ gps_switch_container_t create_gps_switch_panel(
     );
 
     // Set row object widths
-    int32_t value_width_0 = (sub_row_width/4) - (sub_column_padding*1);
-    int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
+    obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*2);
 
     // SatIO Panel View
     result.switch_satio_panel = create_button(
         row_0,
-        value_width_0,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0, 0,
-        "SatIO",
+        "SATIO",
         LV_TEXT_ALIGN_CENTER,
         false,
         false,
@@ -3515,7 +3536,7 @@ gps_switch_container_t create_gps_switch_panel(
     // GNGGA Panel View
     result.switch_gngga_panel = create_button(
         row_0,
-        value_width_0,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0, 0,
@@ -3531,7 +3552,7 @@ gps_switch_container_t create_gps_switch_panel(
     // GNRMC Panel View
     result.switch_gnrmc_panel = create_button(
         row_0,
-        value_width_0,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0, 0,
@@ -3547,7 +3568,7 @@ gps_switch_container_t create_gps_switch_panel(
     // GPATT Panel View
     result.switch_gpatt_panel = create_button(
         row_0,
-        value_width_0,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0, 0,
@@ -3560,10 +3581,10 @@ gps_switch_container_t create_gps_switch_panel(
     );
     lv_obj_add_event_cb(result.switch_gpatt_panel.button, switch_gpatt_panel_event_cb, LV_EVENT_ALL, NULL);
 
-    lv_obj_set_size(result.switch_satio_panel.panel, value_width_0, obj_height);
-    lv_obj_set_size(result.switch_gngga_panel.panel, value_width_0, obj_height);
-    lv_obj_set_size(result.switch_gnrmc_panel.panel, value_width_0, obj_height);
-    lv_obj_set_size(result.switch_gpatt_panel.panel, value_width_0, obj_height);
+    lv_obj_set_size(result.switch_satio_panel.panel, obj_w_0, obj_height);
+    lv_obj_set_size(result.switch_gngga_panel.panel, obj_w_0, obj_height);
+    lv_obj_set_size(result.switch_gnrmc_panel.panel, obj_w_0, obj_height);
+    lv_obj_set_size(result.switch_gpatt_panel.panel, obj_w_0, obj_height);
 
     return result;
 }
@@ -3678,7 +3699,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_utc_time = create_label(
@@ -3696,7 +3719,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_utc_time, obj_w_0, obj_height);
@@ -3736,7 +3761,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_latitude = create_label(
@@ -3754,7 +3781,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_latitude, obj_w_0, obj_height);
@@ -3794,7 +3823,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_longitude = create_label(
@@ -3812,7 +3843,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_longitude, obj_w_0, obj_height);
@@ -3852,7 +3885,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_solution_status = create_label(
@@ -3870,7 +3905,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_solution_status, obj_w_0, obj_height);
@@ -3910,7 +3947,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_sat_count = create_label(
@@ -3928,7 +3967,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_sat_count, obj_w_0, obj_height);
@@ -3968,7 +4009,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_gps_precision_factor = create_label(
@@ -3986,7 +4029,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_gps_precision_factor, obj_w_0, obj_height);
@@ -4026,7 +4071,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_altitude = create_label(
@@ -4044,7 +4091,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_altitude, obj_w_0, obj_height);
@@ -4084,7 +4133,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_geoidal = create_label(
@@ -4102,7 +4153,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_geoidal, obj_w_0, obj_height);
@@ -4142,7 +4195,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_differential_delay = create_label(
@@ -4160,7 +4215,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_differential_delay, obj_w_0, obj_height);
@@ -4200,7 +4257,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_bad_element_count = create_label(
@@ -4218,7 +4277,9 @@ gngga_container_t create_gngga_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_bad_element_count, obj_w_0, obj_height);
@@ -4335,7 +4396,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_utc_time = create_label(
@@ -4353,7 +4416,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_utc_time, obj_w_0, obj_height);
@@ -4393,7 +4458,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_positioning_status = create_label(
@@ -4411,7 +4478,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_positioning_status, obj_w_0, obj_height);
@@ -4451,7 +4520,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_latitude = create_label(
@@ -4469,7 +4540,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_latitude, obj_w_0, obj_height);
@@ -4509,7 +4582,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_longitude = create_label(
@@ -4527,7 +4602,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_longitude, obj_w_0, obj_height);
@@ -4567,7 +4644,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_ground_speed = create_label(
@@ -4585,7 +4664,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_ground_speed, obj_w_0, obj_height);
@@ -4625,7 +4706,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_ground_heading = create_label(
@@ -4643,7 +4726,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_ground_heading, obj_w_0, obj_height);
@@ -4683,7 +4768,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_utc_date = create_label(
@@ -4701,7 +4788,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_utc_date, obj_w_0, obj_height);
@@ -4741,7 +4830,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_installation_angle = create_label(
@@ -4759,7 +4850,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_installation_angle, obj_w_0, obj_height);
@@ -4799,7 +4892,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_installation_angle_direction = create_label(
@@ -4817,7 +4912,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_installation_angle_direction, obj_w_0, obj_height);
@@ -4857,7 +4954,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_mode_indication = create_label(
@@ -4875,7 +4974,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_mode_indication, obj_w_0, obj_height);
@@ -4915,7 +5016,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_bad_element_count = create_label(
@@ -4933,7 +5036,9 @@ gnrmc_container_t create_gnrmc_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_bad_element_count, obj_w_0, obj_height);
@@ -5050,7 +5155,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_pitch = create_label(
@@ -5068,7 +5175,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_pitch, obj_w_0, obj_height);
@@ -5108,7 +5217,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_roll = create_label(
@@ -5126,7 +5237,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_roll, obj_w_0, obj_height);
@@ -5166,7 +5279,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_yaw = create_label(
@@ -5184,7 +5299,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_yaw, obj_w_0, obj_height);
@@ -5224,7 +5341,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_software_version = create_label(
@@ -5242,7 +5361,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_software_version, obj_w_0, obj_height);
@@ -5282,7 +5403,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_product_id = create_label(
@@ -5300,7 +5423,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_product_id, obj_w_0, obj_height);
@@ -5340,7 +5465,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_ins = create_label(
@@ -5358,7 +5485,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_ins, obj_w_0, obj_height);
@@ -5398,7 +5527,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_hardware_version = create_label(
@@ -5416,7 +5547,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_hardware_version, obj_w_0, obj_height);
@@ -5456,7 +5589,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_run_state_flag = create_label(
@@ -5474,7 +5609,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_run_state_flag, obj_w_0, obj_height);
@@ -5514,7 +5651,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_mis_angle_num = create_label(
@@ -5532,7 +5671,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_mis_angle_num, obj_w_0, obj_height);
@@ -5572,7 +5713,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_static_flag = create_label(
@@ -5590,7 +5733,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_static_flag, obj_w_0, obj_height);
@@ -5630,7 +5775,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_user_code = create_label(
@@ -5648,7 +5795,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_user_code, obj_w_0, obj_height);
@@ -5688,7 +5837,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_gst_data = create_label(
@@ -5706,7 +5857,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_gst_data, obj_w_0, obj_height);
@@ -5746,7 +5899,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_line_flag = create_label(
@@ -5764,7 +5919,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_line_flag, obj_w_0, obj_height);
@@ -5804,7 +5961,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_mis_att_flag = create_label(
@@ -5822,7 +5981,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_mis_att_flag, obj_w_0, obj_height);
@@ -5862,7 +6023,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_imu_kind = create_label(
@@ -5880,7 +6043,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_imu_kind, obj_w_0, obj_height);
@@ -5920,7 +6085,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_ubi_car_kind = create_label(
@@ -5938,7 +6105,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_ubi_car_kind, obj_w_0, obj_height);
@@ -5978,7 +6147,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_mileage = create_label(
@@ -5996,7 +6167,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_mileage, obj_w_0, obj_height);
@@ -6036,7 +6209,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_run_inetial_flag = create_label(
@@ -6054,7 +6229,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_run_inetial_flag, obj_w_0, obj_height);
@@ -6094,7 +6271,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_speed_num = create_label(
@@ -6112,7 +6291,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_speed_num, obj_w_0, obj_height);
@@ -6152,7 +6333,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_scalable = create_label(
@@ -6170,7 +6353,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_scalable, obj_w_0, obj_height);
@@ -6210,7 +6395,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_bad_element_count = create_label(
@@ -6228,7 +6415,9 @@ gpatt_container_t create_gpatt_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_bad_element_count, obj_w_0, obj_height);
@@ -6344,7 +6533,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_title_hue,
+        default_title_hue
     );
 
     lv_obj_set_size(result.lbl_title_location, obj_w_0, obj_height);
@@ -6383,7 +6574,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_deg_lat = create_label(
@@ -6401,7 +6594,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_deg_lat, obj_w_0, obj_height);
@@ -6441,7 +6636,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_deg_lon = create_label(
@@ -6459,7 +6656,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_deg_lon, obj_w_0, obj_height);
@@ -6500,7 +6699,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.ta_user_deg_lat = create_textarea(
@@ -6577,7 +6778,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.ta_user_deg_lon = create_textarea(
@@ -6653,7 +6856,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_sys_deg_lat = create_label(
@@ -6671,7 +6876,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_sys_deg_lat, obj_w_0, obj_height);
@@ -6711,7 +6918,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_sys_deg_lon = create_label(
@@ -6729,7 +6938,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_sys_deg_lon, obj_w_0, obj_height);
@@ -6770,7 +6981,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.btn_location_mode_gps = create_button(
@@ -6842,7 +7055,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_title_hue,
+        default_title_hue
     );
 
     lv_obj_set_size(result.lbl_title_altitude, obj_w_0, obj_height);
@@ -6881,7 +7096,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_altitude = create_label(
@@ -6899,7 +7116,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_altitude, obj_w_0, obj_height);
@@ -6940,7 +7159,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.ta_user_altitude = create_textarea(
@@ -7016,7 +7237,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_sys_altitude = create_label(
@@ -7034,7 +7257,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_sys_altitude, obj_w_0, obj_height);
@@ -7077,7 +7302,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.btn_altitude_mode_gps = create_button(
@@ -7149,7 +7376,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_title_hue,
+        default_title_hue
     );
 
     lv_obj_set_size(result.lbl_title_speed, obj_w_0, obj_height);
@@ -7187,7 +7416,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_speed = create_label(
@@ -7205,7 +7436,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_speed, obj_w_0, obj_height);
@@ -7245,7 +7478,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.ta_user_speed = create_textarea(
@@ -7320,7 +7555,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_sys_speed = create_label(
@@ -7338,7 +7575,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_sys_speed, obj_w_0, obj_height);
@@ -7378,7 +7617,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.btn_speed_mode_gps = create_button(
@@ -7450,7 +7691,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_title_hue,
+        default_title_hue
     );
 
     lv_obj_set_size(result.lbl_title_heading, obj_w_0, obj_height);
@@ -7489,7 +7732,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_ground_heading_name = create_label(
@@ -7507,7 +7752,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_ground_heading_name, obj_w_0, obj_height);
@@ -7547,7 +7794,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_ground_heading = create_label(
@@ -7565,7 +7814,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_ground_heading, obj_w_0, obj_height);
@@ -7606,7 +7857,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.ta_user_ground_heading = create_textarea(
@@ -7682,7 +7935,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_sys_ground_heading = create_label(
@@ -7700,7 +7955,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_sys_ground_heading, obj_w_0, obj_height);
@@ -7741,7 +7998,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.btn_ground_heading_mode_gps = create_button(
@@ -7813,7 +8072,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_title_hue,
+        default_title_hue
     );
 
     lv_obj_set_size(result.lbl_title_mileage, obj_w_0, obj_height);
@@ -7852,7 +8113,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_mileage = create_label(
@@ -7870,7 +8133,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_mileage, obj_w_0, obj_height);
@@ -7909,7 +8174,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_title_hue,
+        default_title_hue
     );
 
     lv_obj_set_size(result.lbl_title_local_time, obj_w_0, obj_height);
@@ -7948,7 +8215,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.ta_utc_second_offset = create_textarea(
@@ -8007,7 +8276,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_utc_auto_offset_flag = create_label(
@@ -8025,7 +8296,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_utc_auto_offset_flag, obj_w_0, obj_height);
@@ -8065,7 +8338,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_set_time_automatically = create_label(
@@ -8083,7 +8358,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_set_time_automatically, obj_w_0, obj_height);
@@ -8123,7 +8400,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_local_yday = create_label(
@@ -8141,7 +8420,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_local_yday, obj_w_0, obj_height);
@@ -8181,7 +8462,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_local_wday_name = create_label(
@@ -8199,7 +8482,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_local_wday_name, obj_w_0, obj_height);
@@ -8239,7 +8524,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_local_month_name = create_label(
@@ -8257,7 +8544,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_local_month_name, obj_w_0, obj_height);
@@ -8297,7 +8586,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_formatted_local_time = create_label(
@@ -8315,7 +8606,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_formatted_local_time, obj_w_0, obj_height);
@@ -8355,7 +8648,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_formatted_local_date = create_label(
@@ -8373,7 +8668,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_formatted_local_date, obj_w_0, obj_height);
@@ -8413,7 +8710,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_local_unixtime_us = create_label(
@@ -8431,7 +8730,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_local_unixtime_us, obj_w_0, obj_height);
@@ -8470,7 +8771,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_title_hue,
+        default_title_hue
     );
 
     lv_obj_set_size(result.lbl_title_rtc_time, obj_w_0, obj_height);
@@ -8509,7 +8812,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_formatted_rtc_time = create_label(
@@ -8527,7 +8832,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_formatted_rtc_time, obj_w_0, obj_height);
@@ -8567,7 +8874,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_formatted_rtc_date = create_label(
@@ -8585,7 +8894,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_formatted_rtc_date, obj_w_0, obj_height);
@@ -8625,7 +8936,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_rtc_unixtime = create_label(
@@ -8643,7 +8956,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_rtc_unixtime, obj_w_0, obj_height);
@@ -8682,7 +8997,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_title_hue,
+        default_title_hue
     );
 
     lv_obj_set_size(result.lbl_title_rtc_sync, obj_w_0, obj_height);
@@ -8721,7 +9038,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_formatted_rtc_sync_time = create_label(
@@ -8739,7 +9058,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_formatted_rtc_sync_time, obj_w_0, obj_height);
@@ -8779,7 +9100,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_formatted_rtc_sync_date = create_label(
@@ -8797,7 +9120,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_formatted_rtc_sync_date, obj_w_0, obj_height);
@@ -8837,7 +9162,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_rtcsync_latitude = create_label(
@@ -8855,7 +9182,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_rtcsync_latitude, obj_w_0, obj_height);
@@ -8895,7 +9224,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_rtcsync_longitude = create_label(
@@ -8913,7 +9244,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_rtcsync_longitude, obj_w_0, obj_height);
@@ -8953,7 +9286,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_rtcsync_altitude = create_label(
@@ -8971,7 +9306,9 @@ satio_container_t create_satio_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_rtcsync_altitude, obj_w_0, obj_height);
@@ -9076,8 +9413,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = (width_px/4); // label
-    obj_w_1 = (((width_px/4) *1)) - (sub_column_padding*2);
+    obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*1);
 
     result.lbl_gyro_0_ang_x = create_label(
         row_0,
@@ -9094,12 +9430,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_gyro_0_ang_x = create_label(
         row_0,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9112,12 +9450,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     result.val_gyro_0_ang_y = create_label(
         row_0,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9130,12 +9470,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     result.val_gyro_0_ang_z = create_label(
         row_0,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9148,13 +9490,15 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_gyro_0_ang_x, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_ang_x, obj_w_1, obj_height);
-    lv_obj_set_size(result.val_gyro_0_ang_y, obj_w_1, obj_height);
-    lv_obj_set_size(result.val_gyro_0_ang_z, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_ang_x, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_ang_y, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_ang_z, obj_w_0, obj_height);
   
 
     /* ---------------------------------------------------------- */
@@ -9173,8 +9517,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = (width_px/4); // label
-    obj_w_1 = (((width_px/4) *1)) - (sub_column_padding*2);
+    obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*1);
 
     result.lbl_gyro_0_acc_x = create_label(
         row_3,
@@ -9191,12 +9534,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_gyro_0_acc_x = create_label(
         row_3,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9209,12 +9554,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     result.val_gyro_0_acc_y = create_label(
         row_3,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9227,12 +9574,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     result.val_gyro_0_acc_z = create_label(
         row_3,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9245,13 +9594,15 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_gyro_0_acc_x, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_acc_x, obj_w_1, obj_height);
-    lv_obj_set_size(result.val_gyro_0_acc_y, obj_w_1, obj_height);
-    lv_obj_set_size(result.val_gyro_0_acc_z, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_acc_x, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_acc_y, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_acc_z, obj_w_0, obj_height);
 
 
     /* ---------------------------------------------------------- */
@@ -9270,8 +9621,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = (width_px/4); // label
-    obj_w_1 = (((width_px/4) *1)) - (sub_column_padding*2);
+    obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*1);
 
     result.lbl_gyro_0_gyr_x = create_label(
         row_6,
@@ -9288,12 +9638,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_gyro_0_gyr_x = create_label(
         row_6,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9306,12 +9658,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     result.val_gyro_0_gyr_y = create_label(
         row_6,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9324,12 +9678,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     result.val_gyro_0_gyr_z = create_label(
         row_6,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9342,13 +9698,15 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_gyro_0_gyr_x, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_gyr_x, obj_w_1, obj_height);
-    lv_obj_set_size(result.val_gyro_0_gyr_y, obj_w_1, obj_height);
-    lv_obj_set_size(result.val_gyro_0_gyr_z, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_gyr_x, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_gyr_y, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_gyr_z, obj_w_0, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row 9: Mag                                                 */
@@ -9366,8 +9724,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = (width_px/4); // label
-    obj_w_1 = (((width_px/4) *1)) - (sub_column_padding*2);
+    obj_w_0 = (((sub_row_width/4) *1)) - (sub_column_padding*1);
 
     result.lbl_gyro_0_mag_x = create_label(
         row_9,
@@ -9384,12 +9741,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_gyro_0_mag_x = create_label(
         row_9,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9402,12 +9761,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     result.val_gyro_0_mag_y = create_label(
         row_9,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9420,12 +9781,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     result.val_gyro_0_mag_z = create_label(
         row_9,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9438,13 +9801,15 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_gyro_0_mag_x, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_mag_x, obj_w_1, obj_height);
-    lv_obj_set_size(result.val_gyro_0_mag_y, obj_w_1, obj_height);
-    lv_obj_set_size(result.val_gyro_0_mag_z, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_mag_x, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_mag_y, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_gyro_0_mag_z, obj_w_0, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row 12: Current UI Baud Rate                               */
@@ -9462,8 +9827,7 @@ gyro_0_container_t create_gyro_panel(
     );
 
     // Set row object widths
-    obj_w_0 = 250; // label
-    obj_w_1 = (((width_px/1) *1) - obj_w_0) - (sub_column_padding*3);
+    obj_w_0 = (((sub_row_width/2) *1)) - (sub_column_padding*1);
 
     result.lbl_gyro_0_current_uiBaud = create_label(
         row_12,
@@ -9480,12 +9844,14 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     result.val_gyro_0_current_uiBaud = create_label(
         row_12,
-        obj_w_1,
+        obj_w_0,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -9498,11 +9864,13 @@ gyro_0_container_t create_gyro_panel(
         false,
         2,
         general_radius,
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     lv_obj_set_size(result.lbl_gyro_0_current_uiBaud, obj_w_0, obj_height);
-    lv_obj_set_size(result.val_gyro_0_current_uiBaud, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_gyro_0_current_uiBaud, obj_w_0, obj_height);
 
     return result;
 }
@@ -9692,7 +10060,9 @@ matrix_function_container_t create_matrix_function_container(
         false,              // enable scrolling
         2,                  // outline width
         general_radius,     // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     // Switch Value
@@ -9731,7 +10101,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Function Value
@@ -9793,7 +10165,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value Function Name
@@ -9854,7 +10228,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // User X
@@ -9961,7 +10337,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // User Y
@@ -10066,7 +10444,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // User Z
@@ -10172,7 +10552,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value Operator
@@ -10211,7 +10593,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Inverted Logic Value
@@ -10280,7 +10664,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     // Label PWM1
@@ -10320,7 +10706,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     // Value PWM1
@@ -10387,7 +10775,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Map Slot Value
@@ -10426,7 +10816,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     // Output Value
@@ -10465,7 +10857,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Port Value
@@ -10553,7 +10947,9 @@ matrix_function_container_t create_matrix_function_container(
         false,                // enable scrolling
         2,                    // outline width
         radius_rounded,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Matrix Switch Override
@@ -10703,7 +11099,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
 
     // Select Map Mode
@@ -10763,7 +11161,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Select C0
@@ -10823,7 +11223,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value C1
@@ -10884,7 +11286,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value C2
@@ -10945,7 +11349,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value C3
@@ -11006,7 +11412,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value C4
@@ -11067,7 +11475,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value C5
@@ -11128,7 +11538,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Select Map Mode
@@ -11188,7 +11600,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value Input
@@ -11207,7 +11621,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Critical for alignment
@@ -11247,7 +11663,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
     
     // Value Output
@@ -11266,7 +11684,9 @@ mapping_config_container_t create_mapping_config_container(
         false,                // enable scrolling
         2,                    // outline width
         general_radius,       // outline radius
-        1
+        1,
+        default_bg_hue,
+        default_value_hue
     );
 
     // Critical for alignment
@@ -11848,12 +12268,12 @@ void display_gps_screen()
         0,                // pos x
         95,               // pos y
         radius_rounded,   // radius
-        2,                // outer_pad_all
-        4,                // inner_pad_all
-        2,                // outline_padding
-        8,                // main_row_padding
-        8,                // main_column_padding
-        2,                // sub_row_padding
+        1,                // outer_pad_all
+        1,                // inner_pad_all
+        1,                // outline_padding
+        1,                // main_row_padding
+        1,                // main_column_padding
+        1,                // sub_row_padding
         10,               // sub_column_padding
         48,               // row height
         false,            // show scrollbar
@@ -12030,7 +12450,7 @@ void display_gyro_screen()
     gyro_0_c = create_gyro_panel(
         gyro_screen,      // parent
         650,              // width px
-        (42*5),           // height px
+        (42*5)-(outline_width*2)-(2*2), // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
         0,                // pos y
@@ -12198,20 +12618,6 @@ void update_display()
     rainbow_contrast_title_hue   = lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100);
     rainbow_contrast_value_hue   = lv_color_hsv_to_rgb((current_hue + 50) % 360, 100, 100);
 
-    if (enable_rainbow_effect==true) {
-        // Major
-        main_outline_hue = lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100);
-        main_title_hue   = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
-        main_value_hue   = lv_color_hsv_to_rgb((current_hue + 200) % 360, 100, 100);
-        // Minor
-        main_contrast_outline_hue = lv_color_hsv_to_rgb((current_hue + 150) % 360, 100, 100);
-        main_contrast_title_hue   = lv_color_hsv_to_rgb((current_hue + 100) % 360, 100, 100);
-        main_contrast_value_hue   = lv_color_hsv_to_rgb((current_hue + 50) % 360, 100, 100);
-    }
-    else {
-        setColorsDefault();
-    }
-
     // ---------------------
     // Check Load Screen Flags
     // ---------------------
@@ -12233,7 +12639,7 @@ void update_display()
             // Rainbow keyboard full keys
             lv_obj_set_style_text_color(kb_alnumsym.kb, rainbow_title_hue, LV_PART_ITEMS);
             // Rainbow keyboard full checked keys
-            lv_obj_set_style_text_color(kb_alnumsym.kb, main_contrast_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(kb_alnumsym.kb, rainbow_value_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
             // Rainbow keyboard full text area outline
             lv_obj_set_style_outline_color(kb_alnumsym.ta, rainbow_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard full text area text
@@ -12250,7 +12656,7 @@ void update_display()
             // Rainbow keyboard numdec full keys
             lv_obj_set_style_text_color(kb_numdec.kb, rainbow_title_hue, LV_PART_ITEMS);
             // Rainbow keyboard numdec full checked keys
-            lv_obj_set_style_text_color(kb_numdec.kb, main_contrast_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(kb_numdec.kb, rainbow_value_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
             // Rainbow keyboard numdec full text area outline
             lv_obj_set_style_outline_color(kb_numdec.ta, rainbow_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard numdec full text area text
@@ -12330,7 +12736,7 @@ void update_display()
         lv_obj_set_style_outline_color(system_tray.slider_brightness, rainbow_contrast_outline_hue, LV_PART_MAIN);
 
         // Rainbow System Tray Brightness Slider Knob
-        lv_obj_set_style_bg_color(system_tray.slider_brightness, main_contrast_value_hue, LV_PART_KNOB);
+        lv_obj_set_style_bg_color(system_tray.slider_brightness, rainbow_contrast_value_hue, LV_PART_KNOB);
 
         // Rainbow System Tray Brightness Slider Indicator
         lv_obj_set_style_outline_color(system_tray.slider_brightness, rainbow_contrast_outline_hue, LV_PART_INDICATOR);
@@ -12460,36 +12866,33 @@ void update_display()
                 }
             }
             lv_dropdown_set_selected(dd_matrix_file_slot_select, current_matrix_function_i);
-            lv_obj_set_style_outline_color(dd_matrix_file_slot_select, main_contrast_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(dd_matrix_file_slot_select, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
         }
 
         // Matrix New
         if (matrix_new.panel) {
-            lv_obj_set_style_outline_color(matrix_new.panel, main_contrast_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_new.label, main_contrast_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_new.panel, default_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_new.label, default_value_hue, LV_PART_MAIN);
         }
 
         // Matrix Save
         if (matrix_save.panel) {
-            lv_obj_set_style_outline_color(matrix_save.panel, main_contrast_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_save.label, main_contrast_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_save.panel, default_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_save.label, default_value_hue, LV_PART_MAIN);
         }
 
         // Matrix Load
         if (matrix_load.panel) {
-            lv_obj_set_style_outline_color(matrix_load.panel, main_contrast_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_load.label, main_contrast_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_load.panel, default_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_load.label, default_value_hue, LV_PART_MAIN);
         }
 
         // Matrix Delete
         if (matrix_delete.panel) {
-            lv_obj_set_style_outline_color(matrix_delete.panel, main_contrast_outline_hue, LV_PART_MAIN);
-            lv_obj_set_style_text_color(matrix_delete.label, main_contrast_title_hue, LV_PART_MAIN);
+            lv_obj_set_style_outline_color(matrix_delete.panel, default_outline_hue, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_delete.label, default_value_hue, LV_PART_MAIN);
         }
         
         // Matrix Configuration Panel
@@ -12505,57 +12908,36 @@ void update_display()
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch
-                lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, default_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(switch_matrix_mapping_panel.label, "MATRIX");
-                lv_obj_set_style_text_color(switch_matrix_mapping_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(switch_matrix_mapping_panel.label, default_value_hue, LV_PART_MAIN);
 
                 // Panel
                 lv_obj_set_style_outline_color(mfc.panel, main_outline_hue, LV_PART_MAIN);
 
                 // Label Current Switch
-                lv_obj_set_style_text_color(mfc.label_switch_index_select, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.label_switch_index_select, default_value_hue, LV_PART_MAIN);
+
                 // Value Current Switch
                 lv_dropdown_set_selected(mfc.dd_switch_index_select, current_matrix_i);
-                lv_obj_set_style_outline_color(mfc.dd_switch_index_select, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.dd_switch_index_select, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_switch_index_select), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                // Label Current Function
-                lv_obj_set_style_text_color(mfc.label_function_index_select, main_contrast_title_hue, LV_PART_MAIN);
                 // Value Current Function
                 lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
-                lv_obj_set_style_outline_color(mfc.dd_function_index_select, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.dd_function_index_select, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_index_select), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                // Label Primary Function Comparotor
-                lv_obj_set_style_text_color(mfc.label_function_name, main_contrast_title_hue, LV_PART_MAIN);
                 // Value Primary Function Comparotor
                 lv_dropdown_set_selected(mfc.dd_function_name, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
-                lv_obj_set_style_outline_color(mfc.dd_function_name, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.dd_function_name, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
-
-                // X
-                lv_obj_set_style_text_color(mfc.label_x, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_function_name), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // X Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
-                lv_obj_set_style_outline_color(mfc.dd_mode_x, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.dd_mode_x, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_x), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
                 // X Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]==0) {
                     // Mode 0: User Defined
@@ -12567,33 +12949,20 @@ void update_display()
                         }
                     lv_obj_add_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_outline_color(mfc.ta_x, main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.ta_x, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
                     lv_obj_add_flag(mfc.ta_x, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_outline_color(mfc.dd_x, main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.dd_x, main_contrast_value_hue, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_value_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_x), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 }
-
-                // Y
-                lv_obj_set_style_text_color(mfc.label_y, main_contrast_title_hue, LV_PART_MAIN);
 
                 // Y Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
-                lv_obj_set_style_outline_color(mfc.dd_mode_y, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.dd_mode_y, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_y), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 // Y Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]==0) {
                     // Mode 0: User Defined
@@ -12605,32 +12974,21 @@ void update_display()
                         }
                     lv_obj_add_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_outline_color(mfc.ta_y, main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.ta_y, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_y, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
                     lv_obj_add_flag(mfc.ta_y, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_text_color(mfc.dd_y, main_contrast_value_hue, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(mfc.dd_y, main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_value_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_y), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 }
 
-                // Z
-                lv_obj_set_style_text_color(mfc.label_z, main_contrast_title_hue, LV_PART_MAIN);
                 // Z Comparitor Mode
                 lv_dropdown_set_selected(mfc.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
-                lv_obj_set_style_outline_color(mfc.dd_mode_z, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.dd_mode_z, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_mode_z), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
                 // Z Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]==0) {
                     // Mode 0: User Defined
@@ -12642,46 +13000,27 @@ void update_display()
                         }
                     lv_obj_add_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_outline_color(mfc.ta_z, main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.ta_z, main_contrast_value_hue, LV_PART_MAIN);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
                     lv_obj_add_flag(mfc.ta_z, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_remove_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_set_style_text_color(mfc.dd_z, main_contrast_value_hue, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(mfc.dd_z, main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_outline_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_value_hue, LV_PART_MAIN);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                    lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_z), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
                 }
 
                 // Operator
-                lv_obj_set_style_text_color(mfc.label_operator, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_operator, matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i]);
-                lv_obj_set_style_outline_color(mfc.dd_operator, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.dd_operator, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_operator), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Inverted
-                lv_obj_set_style_text_color(mfc.label_inverted_logic, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_inverted_logic, matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i]);
-                lv_obj_set_style_outline_color(mfc.dd_inverted_logic, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.dd_inverted_logic, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_inverted_logic), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // PWM Off
-                lv_obj_set_style_text_color(mfc.label_output_pwm_0, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.ta_pwm_0, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.ta_pwm_0, main_contrast_outline_hue, LV_PART_MAIN);
                 if (!strcmp(
                     String(matrixData.output_pwm[0][current_matrix_i][0]).c_str(),
                     lv_textarea_get_text(mfc.ta_pwm_0))==0)
@@ -12690,9 +13029,6 @@ void update_display()
                     }
 
                 // PWM On
-                lv_obj_set_style_text_color(mfc.label_output_pwm_1, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.ta_pwm_1, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.ta_pwm_1, main_contrast_outline_hue, LV_PART_MAIN);
                 if (!strcmp(
                     String(matrixData.output_pwm[0][current_matrix_i][1]).c_str(),
                     lv_textarea_get_text(mfc.ta_pwm_1))==0)
@@ -12701,29 +13037,16 @@ void update_display()
                     }
 
                 // Connected Map Slot
-                lv_obj_set_style_text_color(mfc.label_map_slot, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.dd_map_slot, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
-                lv_obj_set_style_text_color(mfc.dd_map_slot, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_map_slot), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Output Mode
-                lv_obj_set_style_text_color(mfc.label_output_mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.dd_output_mode, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
-                lv_obj_set_style_text_color(mfc.dd_output_mode, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mfc.dd_output_mode), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Output Port
-                lv_obj_set_style_text_color(mfc.label_port_map, lv_color_make(255, 0, 0), LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mfc.ta_port_map, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mfc.ta_port_map, lv_color_make(255, 0, 0), LV_PART_MAIN);
                 if (!strcmp(
                     String(matrixData.matrix_port_map[0][current_matrix_i]).c_str(),
                     lv_textarea_get_text(mfc.ta_port_map))==0)
@@ -12751,7 +13074,7 @@ void update_display()
 
                 // Output Value
                 if (mfc.matrix_switch_output_value) {
-                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, main_contrast_outline_hue, LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, default_outline_hue, LV_PART_MAIN);
                     lv_label_set_text(mfc.matrix_switch_output_value, String(String("") + String(matrixData.output_value[0][current_matrix_i])).c_str());
                     /* Text Color: Switch Intention (blue) */
                     if (matrixData.switch_intention[0][current_matrix_i]==true) {lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);}
@@ -12778,22 +13101,17 @@ void update_display()
 
                 // Switch
                 lv_label_set_text(switch_matrix_mapping_panel.label, "MAP");
-                lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(switch_matrix_mapping_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(switch_matrix_mapping_panel.panel, default_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(switch_matrix_mapping_panel.label, default_value_hue, LV_PART_MAIN);
 
                 // Panel
-                lv_obj_set_style_outline_color(mcc.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(mcc.panel, default_outline_hue, LV_PART_MAIN);
 
                 // Map Slot (Remeains Static Color For Emphasis)
-                lv_obj_set_style_text_color(mcc.slot, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mcc.dd_slot, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mcc.dd_slot, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(mcc.dd_slot, default_value_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
-                lv_obj_set_style_text_color(mcc.dd_slot, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_slot), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_slot), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
                 // Map Mode 0
                 if (mappingData.map_mode[0][current_mapping_i]==MAP_MODE_MIN_TO_MAX) {
@@ -12842,58 +13160,27 @@ void update_display()
                     lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C5]).c_str());
                 }
 
-                lv_obj_set_style_outline_color(mcc.dd_c0, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mcc.c0, main_contrast_title_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_c0, (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
-                lv_obj_set_style_text_color(mcc.dd_c0, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_c0), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                lv_obj_set_style_outline_color(mcc.ta_c1, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mcc.c1, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c1, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C1]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c1, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_outline_color(mcc.ta_c2, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mcc.c2, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c2, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C2]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c2, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_outline_color(mcc.ta_c3, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mcc.c3, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c3, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C3]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c3, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_outline_color(mcc.ta_c4, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mcc.c4, main_contrast_title_hue, LV_PART_MAIN);
                 lv_textarea_set_text(mcc.ta_c4, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C4]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c4, main_contrast_value_hue, LV_PART_MAIN);
-                
-                lv_obj_set_style_outline_color(mcc.ta_c5, main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(mcc.c5, main_contrast_title_hue, LV_PART_MAIN);
+
                 lv_textarea_set_text(mcc.ta_c5, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C5]).c_str());
-                lv_obj_set_style_text_color(mcc.ta_c5, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(mcc.mode, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mcc.dd_mode, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_dropdown_set_selected(mcc.dd_mode, mappingData.map_mode[0][current_mapping_i]);
-                lv_obj_set_style_text_color(mcc.dd_mode, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_outline_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), main_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
+                lv_obj_set_style_text_color(lv_dropdown_get_list(mcc.dd_mode), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
-                lv_obj_set_style_text_color(mcc.input_value, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mcc.value_input, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_mapping_i)).c_str());
-                lv_obj_set_style_text_color(mcc.value_input, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(mcc.map_result, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(mcc.value_map_result, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][current_mapping_i]).c_str());
-                lv_obj_set_style_text_color(mcc.value_map_result, main_contrast_value_hue, LV_PART_MAIN);
             }
         }
     }
@@ -12917,67 +13204,46 @@ void update_display()
 
                 // Switch Panel
                 lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_value_hue, LV_PART_MAIN);
 
                 // Panel
-                lv_obj_set_style_outline_color(satio_c.panel, main_contrast_outline_hue, LV_PART_MAIN);
+                lv_obj_set_style_outline_color(satio_c.panel, default_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // GPS Degrees Latitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_deg_lat, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_deg_lat, String(satioData.degrees_latitude, 7).c_str());
-                lv_obj_set_style_text_color(satio_c.val_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // GPS Degrees Longitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_deg_lon, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_deg_lon, String(satioData.degrees_longitude, 7).c_str());
-                lv_obj_set_style_text_color(satio_c.val_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // User Degrees Latitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_user_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_deg_lat, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_deg_lat, String(satioData.user_degrees_latitude, 7).c_str());
-                lv_obj_set_style_text_color(satio_c.ta_user_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_lat.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // User Degrees Longitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_user_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_deg_lon, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_deg_lon, String(satioData.user_degrees_longitude, 7).c_str());
-                lv_obj_set_style_text_color(satio_c.ta_user_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_lon.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Degrees Latitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_sys_deg_lat, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_deg_lat, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_deg_lat, String(satioData.system_degrees_latitude, 7).c_str());
-                lv_obj_set_style_text_color(satio_c.val_sys_deg_lat, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Degrees Longitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_sys_deg_lon, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_deg_lon, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_deg_lon, String(satioData.system_degrees_longitude, 7).c_str());
-                lv_obj_set_style_text_color(satio_c.val_sys_deg_lon, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Location Value Mode
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_location_mode, main_contrast_title_hue, LV_PART_MAIN);
                 if (satioData.location_value_mode==SATIO_MODE_GPS) {
                     // User lowlight
                     lv_obj_set_style_outline_color(satio_c.btn_location_mode_user.panel, default_off_outline_hue, LV_PART_MAIN);
@@ -13000,172 +13266,110 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // Local Year Day
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_local_yday, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_local_yday, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_local_yday, String(satioData.local_yday).c_str());
-                lv_obj_set_style_text_color(satio_c.val_local_yday, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Local Weekday Name
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_local_wday_name, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_local_wday_name, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_local_wday_name, String(satioData.local_wday_name).c_str());
-                lv_obj_set_style_text_color(satio_c.val_local_wday_name, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Local Month Name
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_local_month_name, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_local_month_name, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_local_month_name, String(satioData.local_month_name).c_str());
-                lv_obj_set_style_text_color(satio_c.val_local_month_name, main_contrast_value_hue, LV_PART_MAIN);
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // ────────────────────────────────────────────────
                 // Formatted Local Time
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_formatted_local_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_local_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_local_time, String(satioData.formatted_local_time_HHMMSS).c_str());
-                lv_obj_set_style_text_color(satio_c.val_formatted_local_time, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Formatted Local Date
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_formatted_local_date, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_local_date, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_local_date, String(satioData.formatted_local_date_DDMMYYYY).c_str());
-                lv_obj_set_style_text_color(satio_c.val_formatted_local_date, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Local Unix Time (μs)
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_local_unixtime_us, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_local_unixtime_us, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_local_unixtime_us, String(satioData.local_unixtime_uS).c_str());
-                lv_obj_set_style_text_color(satio_c.val_local_unixtime_us, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Formatted RTC Sync Time
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_formatted_rtc_sync_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_sync_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_rtc_sync_time, String(satioData.formatted_rtc_sync_time).c_str());
-                lv_obj_set_style_text_color(satio_c.val_formatted_rtc_sync_time, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Formatted RTC Sync Date
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_formatted_rtc_sync_date, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_sync_date, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_rtc_sync_date, String(satioData.formatted_rtc_sync_date_DDMMYYYY).c_str());
-                lv_obj_set_style_text_color(satio_c.val_formatted_rtc_sync_date, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // RTC Sync Latitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_rtcsync_latitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_rtcsync_latitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_rtcsync_latitude, String(satioData.rtcsync_latitude).c_str());
-                lv_obj_set_style_text_color(satio_c.val_rtcsync_latitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // RTC Sync Longitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_rtcsync_longitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_rtcsync_longitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_rtcsync_longitude, String(satioData.rtcsync_longitude).c_str());
-                lv_obj_set_style_text_color(satio_c.val_rtcsync_longitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // RTC Sync Altitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_rtcsync_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_rtcsync_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_rtcsync_altitude, String(satioData.rtcsync_altitude).c_str());
-                lv_obj_set_style_text_color(satio_c.val_rtcsync_altitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Formatted RTC Time
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_formatted_rtc_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_rtc_time, String(satioData.formatted_rtc_time).c_str());
-                lv_obj_set_style_text_color(satio_c.val_formatted_rtc_time, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Formatted RTC Date
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_formatted_rtc_date, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_formatted_rtc_date, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_formatted_rtc_date, String(satioData.formatted_rtc_date).c_str());
-                lv_obj_set_style_text_color(satio_c.val_formatted_rtc_date, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // RTC Unix Time
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_rtc_unixtime, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_rtc_unixtime, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_rtc_unixtime, String(satioData.rtc_unixtime).c_str());
-                lv_obj_set_style_text_color(satio_c.val_rtc_unixtime, main_contrast_value_hue, LV_PART_MAIN);
 
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // ────────────────────────────────────────────────
                 // UTC Second Offset
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_utc_second_offset, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_utc_second_offset, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_utc_second_offset, String(satioData.utc_second_offset).c_str());
-                lv_obj_set_style_text_color(satio_c.ta_utc_second_offset, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // UTC Auto Offset Flag
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_utc_auto_offset_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_utc_auto_offset_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_utc_auto_offset_flag, satioData.utc_auto_offset_flag ? "Yes" : "No");
-                lv_obj_set_style_text_color(satio_c.val_utc_auto_offset_flag, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Set Time Automatically
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_set_time_automatically, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_set_time_automatically, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_set_time_automatically, satioData.set_time_automatically ? "Yes" : "No");
-                lv_obj_set_style_text_color(satio_c.val_set_time_automatically, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // GPS Altitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_altitude, String(satioData.altitude).c_str());
-                lv_obj_set_style_text_color(satio_c.val_altitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // User Altitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_user_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_altitude, String(satioData.user_altitude, 7).c_str());
-                lv_obj_set_style_text_color(satio_c.ta_user_altitude, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_altitude.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Altitude
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_sys_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_altitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_altitude, String(satioData.system_altitude, 7).c_str());
-                lv_obj_set_style_text_color(satio_c.val_sys_altitude, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Altitude Value Mode
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_altitude_mode, main_contrast_title_hue, LV_PART_MAIN);
                 if (satioData.altitude_value_mode==SATIO_MODE_GPS) {
                     // User lowlight
                     lv_obj_set_style_outline_color(satio_c.btn_altitude_mode_user.panel, default_off_outline_hue, LV_PART_MAIN);
@@ -13186,32 +13390,21 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // GPS Speed
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_speed, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_speed, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_speed, String(satioData.speed, 2).c_str());
-                lv_obj_set_style_text_color(satio_c.val_speed, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // User Speed
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_user_speed, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_speed, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_speed, String(satioData.user_speed, 2).c_str());
-                lv_obj_set_style_text_color(satio_c.ta_user_speed, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_speed.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Speed
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_sys_speed, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_speed, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_speed, String(satioData.system_speed, 2).c_str());
-                lv_obj_set_style_text_color(satio_c.val_sys_speed, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Speed Value Mode
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_speed_mode, main_contrast_title_hue, LV_PART_MAIN);
                 if (satioData.speed_value_mode==SATIO_MODE_GPS) {
                     // User lowlight
                     lv_obj_set_style_outline_color(satio_c.btn_speed_mode_user.panel, default_off_outline_hue, LV_PART_MAIN);
@@ -13232,40 +13425,26 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // Ground Heading Name
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_ground_heading_name, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_ground_heading_name, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_ground_heading_name, String(satioData.ground_heading_name).c_str());
-                lv_obj_set_style_text_color(satio_c.val_ground_heading_name, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // GPS Ground Heading
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_ground_heading, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_ground_heading, String(satioData.ground_heading, 2).c_str());
-                lv_obj_set_style_text_color(satio_c.val_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // User Ground Heading
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_user_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.ta_user_ground_heading, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_textarea_set_text(satio_c.ta_user_ground_heading, String(satioData.user_ground_heading, 2).c_str());
-                lv_obj_set_style_text_color(satio_c.ta_user_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.btn_auto_set_user_ground_heading.panel, main_contrast_outline_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // System Ground Heading
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_sys_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_sys_ground_heading, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_sys_ground_heading, String(satioData.system_ground_heading, 2).c_str());
-                lv_obj_set_style_text_color(satio_c.val_sys_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
 
                 // ────────────────────────────────────────────────
                 // Ground Heading Value Mode
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_ground_heading_mode, main_contrast_title_hue, LV_PART_MAIN);
                 if (satioData.ground_heading_value_mode==SATIO_MODE_GPS) {
                     // User lowlight
                     lv_obj_set_style_outline_color(satio_c.btn_ground_heading_mode_user.panel, default_off_outline_hue, LV_PART_MAIN);
@@ -13288,10 +13467,7 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // Mileage
                 // ────────────────────────────────────────────────
-                lv_obj_set_style_text_color(satio_c.lbl_mileage, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(satio_c.val_mileage, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(satio_c.val_mileage, String(satioData.mileage).c_str());
-                lv_obj_set_style_text_color(satio_c.val_mileage, main_contrast_value_hue, LV_PART_MAIN);
             }
         }
 
@@ -13301,71 +13477,35 @@ void update_display()
                 lv_obj_add_flag(gnrmc_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(gpatt_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
-
                 // Show
                 lv_obj_remove_flag(gngga_c.panel, LV_OBJ_FLAG_HIDDEN);
-
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_value_hue, LV_PART_MAIN);
 
-                // Panel
-                lv_obj_set_style_outline_color(gngga_c.panel, main_outline_hue, LV_PART_MAIN);
-
-                lv_obj_set_style_text_color(gngga_c.lbl_utc_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_utc_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_utc_time, String(gnggaData.utc_time).c_str());
-                // lv_label_set_text(gngga_c.val_utc_time, "foobar");
-                lv_obj_set_style_text_color(gngga_c.val_utc_time, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gngga_c.lbl_latitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_latitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_latitude, String(String(gnggaData.latitude_hemisphere) + " " + String(gnggaData.latitude)).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_latitude, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gngga_c.lbl_longitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_longitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_longitude, String(String(gnggaData.longitude_hemisphere) + " " + String(gnggaData.longitude)).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_longitude, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gngga_c.lbl_solution_status, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_solution_status, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_solution_status, String(gnggaData.solution_status).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_solution_status, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gngga_c.lbl_sat_count, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_sat_count, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_sat_count, String(gnggaData.satellite_count).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_sat_count, main_contrast_value_hue, LV_PART_MAIN);     
-                
-                lv_obj_set_style_text_color(gngga_c.lbl_gps_precision_factor, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_gps_precision_factor, main_contrast_outline_hue, LV_PART_MAIN);
+
                 lv_label_set_text(gngga_c.val_gps_precision_factor, String(gnggaData.gps_precision_factor).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_gps_precision_factor, main_contrast_value_hue, LV_PART_MAIN);    
-                
-                lv_obj_set_style_text_color(gngga_c.lbl_altitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_altitude, main_contrast_outline_hue, LV_PART_MAIN);
+
                 lv_label_set_text(gngga_c.val_altitude, String(String(gnggaData.altitude) + " " + String(gnggaData.altitude_units)).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_altitude, main_contrast_value_hue, LV_PART_MAIN);    
 
-                lv_obj_set_style_text_color(gngga_c.lbl_geoidal, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_geoidal, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_geoidal, String(String(gnggaData.geoidal) + " " + String(gnggaData.geoidal_units)).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_geoidal, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gngga_c.lbl_differential_delay, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_differential_delay, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_differential_delay, String(gnggaData.differential_delay).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_differential_delay, main_contrast_value_hue, LV_PART_MAIN); 
 
-                lv_obj_set_style_text_color(gngga_c.lbl_bad_element_count, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gngga_c.val_bad_element_count, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gngga_c.val_bad_element_count, String(gnggaData.total_bad_elements).c_str());
-                lv_obj_set_style_text_color(gngga_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN); 
             }
         }
 
@@ -13375,80 +13515,42 @@ void update_display()
                 lv_obj_add_flag(gngga_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(gpatt_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
-
                 // Show
                 lv_obj_remove_flag(gnrmc_c.panel, LV_OBJ_FLAG_HIDDEN);
-
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, default_value_hue, LV_PART_MAIN);
 
-                // Panel
-                lv_obj_set_style_outline_color(gnrmc_c.panel, main_outline_hue, LV_PART_MAIN);
-
-                lv_obj_set_style_text_color(gnrmc_c.lbl_utc_time, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_utc_time, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_utc_time, String(gnrmcData.utc_time).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_utc_time, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_positioning_status, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_positioning_status, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_positioning_status, String(gnrmcData.positioning_status).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_positioning_status, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_latitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_latitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_latitude,
                                 String(String(gnrmcData.latitude_hemisphere) + " " +
                                         String(gnrmcData.latitude)).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_latitude, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_longitude, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_longitude, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_longitude,
                                 String(String(gnrmcData.longitude_hemisphere) + " " +
                                         String(gnrmcData.longitude)).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_longitude, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_ground_speed, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_ground_speed, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_ground_speed, String(gnrmcData.ground_speed).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_ground_speed, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_ground_heading, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_ground_heading, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_ground_heading, String(gnrmcData.ground_heading).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_ground_heading, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_utc_date, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_utc_date, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_utc_date, String(gnrmcData.utc_date).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_utc_date, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_installation_angle, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_installation_angle, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_installation_angle, String(gnrmcData.installation_angle).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_installation_angle, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_installation_angle_direction, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_installation_angle_direction, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_installation_angle_direction,
                                 String(gnrmcData.installation_angle_direction).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_installation_angle_direction, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_mode_indication, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_mode_indication, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_mode_indication, String(gnrmcData.mode_indication).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_mode_indication, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gnrmc_c.lbl_bad_element_count, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gnrmc_c.val_bad_element_count, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gnrmc_c.val_bad_element_count, String(gnrmcData.total_bad_elements).c_str());
-                lv_obj_set_style_text_color(gnrmc_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN);
             }
         }
 
@@ -13458,125 +13560,57 @@ void update_display()
                 lv_obj_add_flag(gngga_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(gnrmc_c.panel, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
-
                 // Show
                 lv_obj_remove_flag(gpatt_c.panel, LV_OBJ_FLAG_HIDDEN);
-
                 vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
-                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, main_contrast_title_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gngga_panel.label, default_value_hue, LV_PART_MAIN);
+                lv_obj_set_style_text_color(gps_switch_panel.switch_gnrmc_panel.label, default_value_hue, LV_PART_MAIN);
                 lv_obj_set_style_text_color(gps_switch_panel.switch_gpatt_panel.label, rainbow_contrast_title_hue, LV_PART_MAIN);
 
-                // Panel
-                lv_obj_set_style_outline_color(gpatt_c.panel, main_outline_hue, LV_PART_MAIN);
-
-                lv_obj_set_style_text_color(gpatt_c.lbl_pitch, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_pitch, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_pitch, String(gpattData.pitch).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_pitch, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_roll, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_roll, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_roll, String(gpattData.roll).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_roll, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_yaw, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_yaw, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_yaw, String(gpattData.yaw).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_yaw, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_software_version, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_software_version, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_software_version, String(gpattData.software_version).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_software_version, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_product_id, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_product_id, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_product_id, String(gpattData.product_id).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_product_id, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_ins, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_ins, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_ins, String(gpattData.ins).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_ins, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_hardware_version, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_hardware_version, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_hardware_version, String(gpattData.hardware_version).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_hardware_version, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_run_state_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_run_state_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_run_state_flag, String(gpattData.run_state_flag).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_run_state_flag, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_mis_angle_num, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_mis_angle_num, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_mis_angle_num, String(gpattData.mis_angle_num).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_mis_angle_num, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_static_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_static_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_static_flag, String(gpattData.static_flag).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_static_flag, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_user_code, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_user_code, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_user_code, String(gpattData.user_code).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_user_code, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_gst_data, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_gst_data, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_gst_data, String(gpattData.gst_data).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_gst_data, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_line_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_line_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_line_flag, String(gpattData.line_flag).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_line_flag, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_mis_att_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_mis_att_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_mis_att_flag, String(gpattData.mis_att_flag).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_mis_att_flag, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_imu_kind, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_imu_kind, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_imu_kind, String(gpattData.imu_kind).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_imu_kind, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_ubi_car_kind, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_ubi_car_kind, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_ubi_car_kind, String(gpattData.ubi_car_kind).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_ubi_car_kind, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_mileage, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_mileage, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_mileage, String(gpattData.mileage).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_mileage, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_run_inetial_flag, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_run_inetial_flag, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_run_inetial_flag, String(gpattData.run_inetial_flag).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_run_inetial_flag, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_speed_num, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_speed_num, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_speed_num, String(gpattData.speed_num).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_speed_num, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_scalable, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_scalable, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_scalable, String(gpattData.scalable).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_scalable, main_contrast_value_hue, LV_PART_MAIN);
 
-                lv_obj_set_style_text_color(gpatt_c.lbl_bad_element_count, main_contrast_title_hue, LV_PART_MAIN);
-                lv_obj_set_style_outline_color(gpatt_c.val_bad_element_count, main_contrast_outline_hue, LV_PART_MAIN);
                 lv_label_set_text(gpatt_c.val_bad_element_count, String(gpattData.total_bad_elements).c_str());
-                lv_obj_set_style_text_color(gpatt_c.val_bad_element_count, main_contrast_value_hue, LV_PART_MAIN);
             }
         }
     }
@@ -13590,151 +13624,70 @@ void update_display()
 
             vTaskDelay(5 / portTICK_PERIOD_MS);
 
-            lv_obj_set_style_outline_color(gyro_0_c.panel, main_contrast_outline_hue, LV_PART_MAIN);
-
             // ────────────────────────────────────────────────
-            // Angular X
+            // Angular
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_x, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_x, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_ang_x, String(gyroData.gyro_0_ang_x).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_ang_x, main_contrast_value_hue, LV_PART_MAIN);
-
-            // ────────────────────────────────────────────────
-            // Angular Y
-            // ────────────────────────────────────────────────
-            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_y, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_ang_y, String(gyroData.gyro_0_ang_y).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_ang_y, main_contrast_value_hue, LV_PART_MAIN);
-
-            // ────────────────────────────────────────────────
-            // Angular Z
-            // ────────────────────────────────────────────────
-            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_ang_z, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_ang_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_ang_z, String(gyroData.gyro_0_ang_z).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_ang_z, main_contrast_value_hue, LV_PART_MAIN);
 
             // ────────────────────────────────────────────────
-            // Acceleration X
+            // Acceleration
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_x, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_x, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_acc_x, String(gyroData.gyro_0_acc_x).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_acc_x, main_contrast_value_hue, LV_PART_MAIN);
-
-            // ────────────────────────────────────────────────
-            // Acceleration Y
-            // ────────────────────────────────────────────────
-            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_y, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_acc_y, String(gyroData.gyro_0_acc_y).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_acc_y, main_contrast_value_hue, LV_PART_MAIN);
-
-            // ────────────────────────────────────────────────
-            // Acceleration Z
-            // ────────────────────────────────────────────────
-            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_acc_z, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_acc_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_acc_z, String(gyroData.gyro_0_acc_z).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_acc_z, main_contrast_value_hue, LV_PART_MAIN);
 
             // ────────────────────────────────────────────────
-            // Gyroscope X
+            // Gyroscope 
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_x, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_x, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_gyr_x, String(gyroData.gyro_0_gyr_x).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_gyr_x, main_contrast_value_hue, LV_PART_MAIN);
-
-            // ────────────────────────────────────────────────
-            // Gyroscope Y
-            // ────────────────────────────────────────────────
-            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_y, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_gyr_y, String(gyroData.gyro_0_gyr_y).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_gyr_y, main_contrast_value_hue, LV_PART_MAIN);
-
-            // ────────────────────────────────────────────────
-            // Gyroscope Z
-            // ────────────────────────────────────────────────
-            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_gyr_z, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_gyr_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_gyr_z, String(gyroData.gyro_0_gyr_z).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_gyr_z, main_contrast_value_hue, LV_PART_MAIN);
 
             // ────────────────────────────────────────────────
-            // Magnetometer X
+            // Magnetometer 
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_x, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_x, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_mag_x, String(gyroData.gyro_0_mag_x).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_mag_x, main_contrast_value_hue, LV_PART_MAIN);
-
-            // ────────────────────────────────────────────────
-            // Magnetometer Y
-            // ────────────────────────────────────────────────
-            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_y, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_y, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_mag_y, String(gyroData.gyro_0_mag_y).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_mag_y, main_contrast_value_hue, LV_PART_MAIN);
-
-            // ────────────────────────────────────────────────
-            // Magnetometer Z
-            // ────────────────────────────────────────────────
-            // lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_mag_z, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_mag_z, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_mag_z, String(gyroData.gyro_0_mag_z).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_mag_z, main_contrast_value_hue, LV_PART_MAIN);
 
             // ────────────────────────────────────────────────
             // Current UI Baud Rate
             // ────────────────────────────────────────────────
-            lv_obj_set_style_text_color(gyro_0_c.lbl_gyro_0_current_uiBaud, main_contrast_title_hue, LV_PART_MAIN);
-            lv_obj_set_style_outline_color(gyro_0_c.val_gyro_0_current_uiBaud, main_contrast_outline_hue, LV_PART_MAIN);
             lv_label_set_text(gyro_0_c.val_gyro_0_current_uiBaud, String(gyroData.gyro_0_current_uiBaud).c_str());
-            lv_obj_set_style_text_color(gyro_0_c.val_gyro_0_current_uiBaud, main_contrast_value_hue, LV_PART_MAIN);
         }
     }
 
     lv_timer_resume(display_timer);
 }
 
+/**
+ * @brief Set main hue as default.
+ * 
+ */
 void setColorsDefault()
 {
-    // Major
     main_bg_hue      = default_bg_hue;
     main_outline_hue = default_outline_hue;
     main_border_hue  = default_border_hue;
     main_shadow_hue  = default_shadow_hue;
     main_title_hue   = default_title_hue;
     main_value_hue   = default_value_hue;
-    // Minor
-    main_contrast_bg_hue      = default_contrast_bg_hue;
-    main_contrast_outline_hue = default_contrast_outline_hue;
-    main_contrast_border_hue  = default_contrast_border_hue;
-    main_contrast_shadow_hue  = default_contrast_shadow_hue;
-    main_contrast_title_hue   = default_contrast_title_hue;
-    main_contrast_value_hue   = default_contrast_value_hue;
 }
 
+/**
+ * @brief Set main hue as custom.
+ * 
+ */
 void setColorsCustom()
 {
-    // Major
     main_bg_hue      = custom_bg_hue;
     main_outline_hue = custom_outline_hue;
     main_border_hue  = custom_border_hue;
     main_shadow_hue  = custom_shadow_hue;
     main_title_hue   = custom_title_hue;
     main_value_hue   = custom_value_hue;
-    // Minor
-    main_contrast_bg_hue      = custom_contrast_bg_hue;
-    main_contrast_outline_hue = custom_contrast_outline_hue;
-    main_contrast_border_hue  = custom_contrast_border_hue;
-    main_contrast_shadow_hue  = custom_contrast_shadow_hue;
-    main_contrast_title_hue   = custom_contrast_title_hue;
-    main_contrast_value_hue   = custom_contrast_value_hue;
 }
 
 void initSatIOUI() {
@@ -13776,57 +13729,47 @@ void initSatIOUI() {
     font_menu_title = &cobalt_alien_25;
     font_menu_item = &cobalt_alien_17;
 
-    // Default Major
-    default_bg_hue      = lv_color_make(0,0,0);
-    default_outline_hue = lv_color_make(28,28,28); // used instead of border
-    default_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
-    default_shadow_hue  = lv_color_make(0,0,0);
-    default_title_hue   = lv_color_make(0,0, 255);
-    default_value_hue   = lv_color_make(0,255,0);
-    // Default Minor
-    default_contrast_bg_hue      = lv_color_make(14,14,14);
-    default_contrast_outline_hue = lv_color_make(28,28,28); // used instead of border
-    default_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
-    default_contrast_shadow_hue  = lv_color_make(0,0,0);
-    default_contrast_title_hue   = lv_color_make(0,0, 255);
-    default_contrast_value_hue   = lv_color_make(0,255,0);
+    // Default
+    default_bg_hue                = lv_color_make(0,0,0);
+    default_bg_title_hue          = lv_color_make(12,12,12);
+    default_outline_hue           = lv_color_make(28,28,28);
+    default_border_hue            = lv_color_make(0,0,0);
+    default_shadow_hue            = lv_color_make(0,0,0);
+    default_title_hue             = lv_color_make(255,0, 0);
+    default_subtitle_hue          = lv_color_make(0,0, 255);
+    default_value_hue             = lv_color_make(0,255,0);
 
     // Default Off
-    default_off_outline_hue = lv_color_make(28,28,28); // used instead of border
-    default_off_title_hue   = lv_color_make(28,28,28);
-    default_off_value_hue   = lv_color_make(28,28,28);
+    default_off_outline_hue      = lv_color_make(28,28,28);
+    default_off_title_hue        = lv_color_make(28,28,28);
+    default_off_value_hue        = lv_color_make(28,28,28);
     // Default On
-    default_on_outline_hue = lv_color_make(28,28,28); // used instead of border
-    default_on_title_hue   = lv_color_make(0,255,0);
-    default_on_value_hue   = lv_color_make(0,255,0);
+    default_on_outline_hue       = lv_color_make(28,28,28);
+    default_on_title_hue         = lv_color_make(0,255,0);
+    default_on_value_hue         = lv_color_make(0,255,0);
 
-    // Custom Major (can be changed by user)
-    custom_bg_hue      = lv_color_make(0,0,0);
-    custom_outline_hue = lv_color_make(0,0,0); // used instead of border
-    custom_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
-    custom_shadow_hue  = lv_color_make(0,0,0);
-    custom_title_hue   = lv_color_make(0,0, 255);
-    custom_value_hue   = lv_color_make(0,255,0);
-    // Custom Minor (can be changed by user)
-    custom_contrast_bg_hue      = lv_color_make(0,0,0);
-    custom_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
-    custom_contrast_border_hue  = lv_color_make(0,0,0); // hidden by making same as bg
-    custom_contrast_shadow_hue  = lv_color_make(0,0,0);
-    custom_contrast_title_hue   = lv_color_make(0,0, 255);
-    custom_contrast_value_hue   = lv_color_make(0,255,0);
+    // Custom (intended to be changed by user -> sets main_hue)
+    // custom_bg_hue                = lv_color_make(0,0,0);
+    // custom_title_bg_hue          = lv_color_make(12,12,12);
+    // custom_outline_hue           = lv_color_make(0,0,0);
+    // custom_border_hue            = lv_color_make(0,0,0);
+    // custom_shadow_hue            = lv_color_make(0,0,0);
+    // custom_title_hue             = lv_color_make(0,0, 255);
+    // custom_subtitle_hue          = lv_color_make(0,0, 255);
+    // custom_value_hue             = lv_color_make(0,255,0);
 
     // Rainbow Hue Major
-    rainbow_outline_hue = lv_color_make(0,0,0); // used instead of border
-    rainbow_title_hue   = lv_color_make(0,0,255);
-    rainbow_value_hue   = lv_color_make(0,255,0);
+    rainbow_outline_hue          = lv_color_make(0,0,0);
+    rainbow_title_hue            = lv_color_make(0,0,255);
+    rainbow_value_hue            = lv_color_make(0,255,0);
     // Rainbow Hue Minor
-    rainbow_contrast_outline_hue = lv_color_make(0,0,0); // used instead of border
+    rainbow_contrast_outline_hue = lv_color_make(0,0,0);
     rainbow_contrast_title_hue   = lv_color_make(0,0,255);
     rainbow_contrast_value_hue   = lv_color_make(0,255,0);
 
 
     // Set Current Pallette
-    enable_rainbow_effect=false;
+    // enable_rainbow_effect=false;
     setColorsDefault();
 
     // --------------------------------------------------------------
