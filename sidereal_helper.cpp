@@ -522,7 +522,7 @@ void trackSun(void) {
     siderealPlanetData.sun_s = myAstro.getSunsetTime();
 }
 
-void trackMoon(void) {
+void trackLuna(void) {
     myAstro.doMoon();
     siderealPlanetData.luna_ra = myAstro.getRAdec();
     siderealPlanetData.luna_dec = myAstro.getDeclinationDec();
@@ -674,7 +674,7 @@ void clearSun(void) {
     siderealPlanetData.sun_s = NAN;
 }
 
-void clearMoon(void) {
+void clearLuna(void) {
     siderealPlanetData.luna_ra = NAN;
     siderealPlanetData.luna_dec = NAN;
     siderealPlanetData.luna_az = NAN;
@@ -792,7 +792,7 @@ void clearNeptune(void) {
 
 void clearTrackPlanets(void) {
     clearSun();
-    clearMoon();
+    clearLuna();
     clearMercury();
     clearVenus();
     clearMars();
@@ -844,7 +844,7 @@ void trackPlanets(double latitude, double longitude,
     // Now do other plans.
     // -------------------------------------------------------
     trackSun();
-    trackMoon();
+    trackLuna();
     trackMercury();
     trackVenus();
     trackMars();

@@ -173,7 +173,7 @@ void trackObject(double latitude, double longitude,
     double altitude, int object_table_i, int object_i);
 void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m, float dec_s);
 void trackSun(void);
-void trackMoon(void);
+void trackLuna(void);
 void trackMercury(void);
 void trackVenus(void);
 void trackMars(void);
@@ -182,7 +182,7 @@ void trackSaturn(void);
 void trackUranus(void);
 void trackNeptune(void);
 void clearSun(void);
-void clearMoon(void);
+void clearLuna(void);
 void clearMercury(void);
 void clearVenus(void);
 void clearMars(void);

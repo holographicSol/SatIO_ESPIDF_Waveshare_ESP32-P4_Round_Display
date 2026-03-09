@@ -227,9 +227,9 @@ struct MatrixStruct {
     [59] Sun Altitude
     [60] Sun Helio Ecl Lat
     [61] Sun Helio Ecl Lon
-    [62] Moon Azimuth
-    [63] Moon Altitude
-    [64] Moon Phase
+    [62] Luna Azimuth
+    [63] Luna Altitude
+    [64] Luna Phase
     [65] Mercury Azimuth
     [66] Mercury Altitude
     [67] Mercury H.Ecliptic Lat

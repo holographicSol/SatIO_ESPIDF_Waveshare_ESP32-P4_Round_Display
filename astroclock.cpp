@@ -53,8 +53,8 @@ lv_timer_t * astro_timer = NULL;
 #define COLOR_ORBIT_ABOVE      lv_color_make(  0, 128,   0)
 #define COLOR_SUN_BELOW        lv_color_make(128,   0,   0)
 #define COLOR_SUN_ABOVE        lv_color_make(128,   0,   0)
-#define COLOR_ORBIT_MOON_BELOW lv_color_make(  0,   0,  96)
-#define COLOR_ORBIT_MOON_ABOVE lv_color_make(  0, 128,   0)
+#define COLOR_ORBIT_LUNA_BELOW lv_color_make(  0,   0,  96)
+#define COLOR_ORBIT_LUNA_ABOVE lv_color_make(  0, 128,   0)
 #define COLOR_TARGET           lv_color_make(255,   0,   0)
 #define COLOR_ZODIAC           lv_color_make(  0,   0,  96)
 
@@ -79,15 +79,15 @@ typedef struct {
 #define ORBIT_ARC_WIDTH_BELOW 2
 #define ORBIT_ARC_WIDTH_ABOVE 2
 
-#define MOON_ORBIT_ARC_WIDTH_BELOW 3
-#define MOON_ORBIT_ARC_WIDTH_ABOVE 3
+#define LUNA_ORBIT_ARC_WIDTH_BELOW 3
+#define LUNA_ORBIT_ARC_WIDTH_ABOVE 3
 
 #define SUN_ALTITUDE_LINE_WIDTH_BELOW 3
 #define SUN_ALTITUDE_LINE_WIDTH_AVOVE 3
 
 // ============================================================================
 // PLANETS (orbits and sizes calculated from available space)
-// Size scale: Sun=8, Jupiter=6, Saturn/Earth=5, Venus/Mars/Uranus/Neptune=4, Mercury=3, Moon=2
+// Size scale: Sun=8, Jupiter=6, Saturn/Earth=5, Venus/Mars/Uranus/Neptune=4, Mercury=3, Luna=2
 // Scaled by SIZE_UNIT to fit within orbit spacing
 // ============================================================================
 static Planet sun     = {0,              SIZE_UNIT * 8 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Largest
@@ -447,7 +447,7 @@ void astro_clock_update(void) {
             lv_obj_set_pos(earth.target_box, earth.x - 4, earth.y - 4);
         }
         if (earth.orbit) {
-            lv_obj_set_style_arc_color(earth.orbit, COLOR_ORBIT_MOON_ABOVE, LV_PART_MAIN); // change to reflect pos alt
+            lv_obj_set_style_arc_color(earth.orbit, COLOR_ORBIT_LUNA_ABOVE, LV_PART_MAIN); // change to reflect pos alt
         }
 
         // Draw Zodiac lines from earth
@@ -505,12 +505,12 @@ void astro_clock_update(void) {
     }
     
     // -----------------------------------------------------------------
-    //                                                              MOON
+    //                                                              LUNA
     // -----------------------------------------------------------------
 
     if (siderealPlanetData.track_luna) {
         
-        // Moon uses RA mapped from 0-24 hours to 0-360 degrees
+        // Luna uses RA mapped from 0-24 hours to 0-360 degrees
         float luna_angle = (siderealPlanetData.luna_ra / 24.0f) * 360.0f;
         float luna_rad = deg2rad(luna_angle + ANGLE_OFFSET);
         
@@ -534,7 +534,7 @@ void astro_clock_update(void) {
             // Waxing (1-3): shadow on left, shrinking
             // Waning (5-7): shadow on right, growing
             switch (phase) {
-                case 0:  // New Moon - full shadow
+                case 0:  // New Luna - full shadow
                     lv_arc_set_bg_angles(luna_shadow, 0, 360);
                     lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
@@ -550,7 +550,7 @@ void astro_clock_update(void) {
                     lv_arc_set_bg_angles(luna_shadow, 135, 225);
                     lv_obj_clear_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
-                case 4:  // Full Moon - no shadow
+                case 4:  // Full Luna - no shadow
                     lv_obj_add_flag(luna_shadow, LV_OBJ_FLAG_HIDDEN);
                     break;
                 case 5:  // Waning Gibbous - 25% shadow right
@@ -571,9 +571,9 @@ void astro_clock_update(void) {
         // Position luna orbit arc centered on Earth
         if (luna.orbit) {
             lv_obj_align_to(luna.orbit, earth.obj, LV_ALIGN_CENTER, 0, 0);
-            lv_color_t color = (siderealPlanetData.luna_alt <= 0) ? COLOR_ORBIT_MOON_BELOW : COLOR_ORBIT_MOON_ABOVE;
+            lv_color_t color = (siderealPlanetData.luna_alt <= 0) ? COLOR_ORBIT_LUNA_BELOW : COLOR_ORBIT_LUNA_ABOVE;
             lv_obj_set_style_arc_color(luna.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.luna_alt <= 0) ? MOON_ORBIT_ARC_WIDTH_BELOW : MOON_ORBIT_ARC_WIDTH_ABOVE;
+            int32_t width = (siderealPlanetData.luna_alt <= 0) ? LUNA_ORBIT_ARC_WIDTH_BELOW : LUNA_ORBIT_ARC_WIDTH_ABOVE;
             lv_obj_set_style_arc_width(luna.orbit, width, LV_PART_MAIN);
         }
         lv_obj_clear_flag(luna.orbit, LV_OBJ_FLAG_HIDDEN);
@@ -725,7 +725,7 @@ static void update_target_data_content(int target) {
     // 
     // Available targets:
     //   ASTRO_TARGET_SUN, ASTRO_TARGET_MERCURY, ASTRO_TARGET_VENUS,
-    //   ASTRO_TARGET_EARTH, ASTRO_TARGET_MOON, ASTRO_TARGET_MARS,
+    //   ASTRO_TARGET_EARTH, ASTRO_TARGET_LUNA, ASTRO_TARGET_MARS,
     //   ASTRO_TARGET_JUPITER, ASTRO_TARGET_SATURN, ASTRO_TARGET_URANUS,
     //   ASTRO_TARGET_NEPTUNE
     // 
@@ -851,9 +851,9 @@ static void update_target_data_content(int target) {
             );
             lv_label_set_text(label, buf);
             break;
-        case ASTRO_TARGET_MOON:
+        case ASTRO_TARGET_LUNA:
             snprintf(buf, sizeof(buf),
-                "Moon\n\n"
+                "Luna\n\n"
                 "Rise: %.2f\n"
                 "Set: %.2f\n"
                 "Phase: %s\n"
@@ -1067,7 +1067,7 @@ void astro_clock_set_target(int target) {
             obj_center_x = earth.x + earth.radius;
             obj_center_y = earth.y + earth.radius;
             break;
-        case ASTRO_TARGET_MOON:
+        case ASTRO_TARGET_LUNA:
             box = luna.target_box;
             obj_center_x = luna.x + luna.radius;
             obj_center_y = luna.y + luna.radius;
@@ -1327,7 +1327,7 @@ void astro_clock_begin(
     printf("DEBUG: mars.orbit done\n");
 
     printf("DEBUG: Creating earth.orbit\n");
-    earth.orbit = create_orbit(astro_container, earth.orbit_radius, COLOR_ORBIT_MOON_ABOVE);
+    earth.orbit = create_orbit(astro_container, earth.orbit_radius, COLOR_ORBIT_LUNA_ABOVE);
     if (!earth.orbit) { printf("ERROR: Failed to create earth.orbit\n"); return;}
     printf("DEBUG: earth.orbit done\n");
 
@@ -1381,7 +1381,7 @@ void astro_clock_begin(
     // lv_obj_set_style_line_width(venus_altitude_line, SUN_ALTITUDE_LINE_WIDTH_BELOW, 0);
     // lv_obj_set_style_line_rounded(venus_altitude_line, true, 0);
 
-    // Moon altitde line
+    // Luna altitde line
     // printf("DEBUG: Creating luna_altitude_line\n");
     // luna_altitude_line = lv_line_create(astro_container);
     // if (!luna_altitude_line) { printf("ERROR: Failed to create luna_altitude_line\n"); return;}
@@ -1487,9 +1487,9 @@ void astro_clock_begin(
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
     
-    int luna_spacing = SIZE_UNIT;  // Gap between Earth surface and Moon orbit
+    int luna_spacing = SIZE_UNIT;  // Gap between Earth surface and Luna orbit
     luna.orbit_radius = earth.radius + luna_spacing + luna.radius;
-    luna.orbit = create_orbit(astro_container, luna.orbit_radius, COLOR_ORBIT_MOON_BELOW);
+    luna.orbit = create_orbit(astro_container, luna.orbit_radius, COLOR_ORBIT_LUNA_BELOW);
     lv_obj_add_flag(luna.orbit, LV_OBJ_FLAG_HIDDEN);  // Hide until first update positions it
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -1515,7 +1515,7 @@ void astro_clock_begin(
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
     
-    // Moon shadow arc for phase visualization
+    // Luna shadow arc for phase visualization
     luna_shadow = lv_arc_create(astro_container);
     lv_obj_remove_style_all(luna_shadow);
     lv_obj_set_size(luna_shadow, luna.radius * 2, luna.radius * 2);
@@ -1616,7 +1616,7 @@ void astro_clock_begin(
     lv_obj_add_event_cb(mercury.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_MERCURY);
     lv_obj_add_event_cb(venus.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_VENUS);
     lv_obj_add_event_cb(earth.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_EARTH);
-    lv_obj_add_event_cb(luna.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_MOON);
+    lv_obj_add_event_cb(luna.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_LUNA);
     lv_obj_add_event_cb(mars.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_MARS);
     lv_obj_add_event_cb(jupiter.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_JUPITER);
     lv_obj_add_event_cb(saturn.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_SATURN);

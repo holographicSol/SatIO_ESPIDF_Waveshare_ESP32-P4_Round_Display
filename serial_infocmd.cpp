@@ -613,11 +613,10 @@ void setAllSentenceOutput(bool enable) {
   systemData.output_admplex0_enabled=enable;
   systemData.output_gyro_0_enabled=enable;
   systemData.output_sun_enabled=enable;
-  systemData.output_earth_enabled=enable;
-  systemData.output_luna_enabled=enable;
   systemData.output_mercury_enabled=enable;
   systemData.output_venus_enabled=enable;
   systemData.output_earth_enabled=enable;
+  systemData.output_luna_enabled=enable;
   systemData.output_mars_enabled=enable;
   systemData.output_jupiter_enabled=enable;
   systemData.output_saturn_enabled=enable;
@@ -1512,7 +1511,7 @@ void outputSentences(void) {
       strcat(serial0Data.BUFFER, serial0Data.checksum);
       printf("%s\n", serial0Data.BUFFER);
     }
-    if (systemData.output_luna_enabled) {
+    if (systemData.output_earth_enabled) {
       memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
       strcat(serial0Data.BUFFER, "$EARTH,");
       strcat(serial0Data.BUFFER, String(siderealPlanetData.earth_ecliptic_lat + String(",")).c_str());

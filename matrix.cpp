@@ -1033,9 +1033,9 @@ struct MatrixStruct matrixData = {
     "Sun Altitude", //59
     "Sun Helio Ecl Lat", //60
     "Sun Helio Ecl Lon", //61
-    "Moon Azimuth", //62
-    "Moon Altitude", //63
-    "Moon Phase", //64
+    "Luna Azimuth", //62
+    "Luna Altitude", //63
+    "Luna Phase", //64
     "Mercury Azimuth", //65
     "Mercury Altitude", //66
     "Mercury H.Ecliptic Lat", //67
@@ -1620,7 +1620,7 @@ bool matrixSwitch(void) {
         handle_digit=true;
       }
 
-      // Moon
+      // Luna
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_LUNA_AZIMUTH)) {
         tmp_x = siderealPlanetData.luna_az;
         tmp_y = 0;
@@ -2357,7 +2357,7 @@ String get_matrix_function_comparitor(int index_matrix_value_comparitor) {
       result = String(siderealPlanetData.saturn_helio_ecliptic_long);
       break;
 
-    // Moon
+    // Luna
 
     case INDEX_MATRIX_SWITCH_FUNCTION_LUNA_AZIMUTH:
       result = String(siderealPlanetData.luna_az);
