@@ -1,34 +1,16 @@
 /** -------------------------------------------------------------------------------------
-  SatIO - Written by Benjamin Jack Cullen.
-
------
-
-  A general purpose programmable I/O platform for automation, throughput and LLM's.
-
-  A huge matrix switch in a small package, supporting stacks of logic across
-  70 output pins and 70 mapping slots.
-
------
-
-  Inference in Bayesian Reasoning? Moon tracking for example can be used to track the
-  moon, it can also be used for one example; to track the tides, if the system is aware of
-  moon/planetary positioning and datetime then marine life values may also be inferred
-  relative to the inferred tide values and known datetime. There is a lot of data that
-  can be used in many ways, with a kind of network effect.
-
------
+ * SatIO LVGL - Written by Benjamin Jack Cullen.
  */
 
 #include "bsp/esp32_p4_wifi6_touch_lcd_xc.h"
 #include <limits.h>
 #include "esp_log.h"
 #include "lvgl.h"
-// #include "./strval.h"
-#include <stdlib.h>       // malloc/free
-#include "ff.h"           // FatFs core
-#include "diskio.h"       // Disk I/O
-#include "diskio_impl.h"  // ESP32 disk impl
-#include "esp_vfs_fat.h"  // VFS integration
+#include <stdlib.h>
+#include "ff.h"
+#include "diskio.h"
+#include "diskio_impl.h"
+#include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
 #include "driver/sdmmc_host.h"
 #include "esp_err.h"
@@ -40,12 +22,10 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-// #include <iostream>
 #include <assert.h>
 #include <float.h>
 #include <math.h>
 #include <Arduino.h>
-// #include <Wire.h>
 
 #include "./config.h"
 #include "./REG.h"
@@ -102,6 +82,16 @@ lv_obj_t * gyro_screen;
 lv_obj_t * display_screen;
 lv_obj_t * system_screen;
 lv_obj_t * uap_screen;
+
+int32_t current_screen_number = 0;
+#define LOAD_SCREEN    0
+#define HOME_SCREEN    1
+#define MATRIX_SCREEN  2
+#define GPS_SCREEN     3
+#define GYRO_SCREEN    4
+#define DISPLAY_SCREEN 5
+#define SYSTEM_SCREEN  6
+#define UAP_SCREEN     7
 
 bool flag_display_loading_screen = false;
 bool flag_display_home_screen = false;
@@ -259,10 +249,7 @@ int32_t radius_square  = 0;
 int32_t radius_rounded = 5;
 int32_t radius_circle  = 360;
 int32_t general_radius = 0;
-// ---------------------------
-// Font
-// ---------------------------
-static const lv_font_t * font_menu_title;
+
 static const lv_font_t * font_menu_item;
 
 /* ----------------------------------------------------------------------------------------
@@ -270,7 +257,7 @@ static const lv_font_t * font_menu_item;
  * @param level LVGL log level.
  * @param buf Log message buffer.
  */
-static void lv_log_cb(lv_log_level_t level, const char * buf)
+void lv_log_cb(lv_log_level_t level, const char * buf)
 {
     static const char * level_prefix[] = {"TRACE", "INFO", "WARN", "ERROR", "USER"};
 
@@ -357,7 +344,7 @@ static kb_ctx_t user_utc_offset_seconds_ctx = { .target = KB_UTC_OFFSET_SECONDS,
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void set_keyboard_context_cb(lv_event_t * e)
+void set_keyboard_context_cb(lv_event_t * e)
 {
     // Get event code
     lv_event_code_t code = lv_event_get_code(e);
@@ -421,7 +408,7 @@ static void set_keyboard_context_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void keyboard_event_cb(lv_event_t * e)
+void keyboard_event_cb(lv_event_t * e)
 {
     // Get event code
     lv_event_code_t code = lv_event_get_code(e);
@@ -706,7 +693,7 @@ static void keyboard_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void screen_swipe_cb(lv_event_t * e)
+void screen_swipe_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * target = (lv_obj_t *)lv_event_get_target(e);
@@ -775,7 +762,7 @@ static void screen_swipe_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void screen_tap_cb(lv_event_t * e)
+void screen_tap_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * target = (lv_obj_t *)lv_event_get_target(e);
@@ -828,7 +815,7 @@ void slider_brightness_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void tray_close_ready_cb(lv_anim_t * a)
+void tray_close_ready_cb(lv_anim_t * a)
 {
     lv_obj_t * panel = (lv_obj_t *)a->var;
     lv_obj_add_flag(panel, LV_OBJ_FLAG_HIDDEN);
@@ -839,7 +826,7 @@ static void tray_close_ready_cb(lv_anim_t * a)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void system_tray_grid_menu_1_event_cb(lv_event_t * e)
+void system_tray_grid_menu_1_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
 
@@ -880,7 +867,7 @@ static void system_tray_grid_menu_1_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void matrix_overview_grid_1_event_cb(lv_event_t * e)
+void matrix_overview_grid_1_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
 
@@ -911,7 +898,7 @@ static void matrix_overview_grid_1_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_function_index_select_event_cb(lv_event_t * e) 
+void dd_function_index_select_event_cb(lv_event_t * e) 
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -927,7 +914,7 @@ static void dd_function_index_select_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_switch_index_select_event_cb(lv_event_t * e)
+void dd_switch_index_select_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -943,7 +930,7 @@ static void dd_switch_index_select_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_current_map_slot_event_cb(lv_event_t * e)
+void dd_current_map_slot_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -959,7 +946,7 @@ static void dd_current_map_slot_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_function_name_event_cb(lv_event_t * e)
+void dd_function_name_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -975,7 +962,7 @@ static void dd_function_name_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_c0_event_cb(lv_event_t * e)
+void dd_c0_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -991,7 +978,7 @@ static void dd_c0_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_mode_event_cb(lv_event_t * e)
+void dd_mode_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1007,7 +994,7 @@ static void dd_mode_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_mode_x_event_cb(lv_event_t * e)
+void dd_mode_x_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1026,7 +1013,7 @@ static void dd_mode_x_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_mode_y_event_cb(lv_event_t * e)
+void dd_mode_y_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1045,7 +1032,7 @@ static void dd_mode_y_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_mode_z_event_cb(lv_event_t * e)
+void dd_mode_z_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1064,7 +1051,7 @@ static void dd_mode_z_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_inverted_logic_event_cb(lv_event_t * e)
+void dd_inverted_logic_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1081,7 +1068,7 @@ static void dd_inverted_logic_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_x_event_cb(lv_event_t * e)
+void dd_x_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1097,7 +1084,7 @@ static void dd_x_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_y_event_cb(lv_event_t * e)
+void dd_y_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1113,7 +1100,7 @@ static void dd_y_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_z_event_cb(lv_event_t * e)
+void dd_z_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1129,7 +1116,7 @@ static void dd_z_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_operator_event_cb(lv_event_t * e)
+void dd_operator_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1145,7 +1132,7 @@ static void dd_operator_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_output_mode_event_cb(lv_event_t * e)
+void dd_output_mode_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1161,7 +1148,7 @@ static void dd_output_mode_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_matrix_file_slot_select_event_cb(lv_event_t * e)
+void dd_matrix_file_slot_select_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1178,7 +1165,7 @@ static void dd_matrix_file_slot_select_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void dd_link_map_slot_event_cb(lv_event_t * e)
+void dd_link_map_slot_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
@@ -1194,7 +1181,7 @@ static void dd_link_map_slot_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void matrix_new_event_cb(lv_event_t * e)
+void matrix_new_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1216,7 +1203,7 @@ static void matrix_new_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void matrix_save_event_cb(lv_event_t * e)
+void matrix_save_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1244,7 +1231,7 @@ static void matrix_save_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void matrix_load_event_cb(lv_event_t * e)
+void matrix_load_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1272,7 +1259,7 @@ static void matrix_load_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void matrix_delete_event_cb(lv_event_t * e)
+void matrix_delete_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1298,7 +1285,7 @@ static void matrix_delete_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void current_matrix_computer_assist_event_cb(lv_event_t * e)
+void current_matrix_computer_assist_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1320,7 +1307,7 @@ static void current_matrix_computer_assist_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
+void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1342,7 +1329,7 @@ static void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void switch_satio_panel_event_cb(lv_event_t * e)
+void switch_satio_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1363,7 +1350,7 @@ static void switch_satio_panel_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void switch_gngga_panel_event_cb(lv_event_t * e)
+void switch_gngga_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1384,7 +1371,7 @@ static void switch_gngga_panel_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void switch_gnrmc_panel_event_cb(lv_event_t * e)
+void switch_gnrmc_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1405,7 +1392,7 @@ static void switch_gnrmc_panel_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void switch_gpatt_panel_event_cb(lv_event_t * e)
+void switch_gpatt_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1426,7 +1413,7 @@ static void switch_gpatt_panel_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void current_matrix_override_off_event_cb(lv_event_t * e)
+void current_matrix_override_off_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1447,7 +1434,7 @@ static void current_matrix_override_off_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_location_mode_gps_event_cb(lv_event_t * e)
+void btn_location_mode_gps_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1467,7 +1454,7 @@ static void btn_location_mode_gps_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_location_mode_user_event_cb(lv_event_t * e)
+void btn_location_mode_user_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1488,7 +1475,7 @@ static void btn_location_mode_user_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_altitude_mode_gps_event_cb(lv_event_t * e)
+void btn_altitude_mode_gps_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1508,7 +1495,7 @@ static void btn_altitude_mode_gps_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_altitude_mode_user_event_cb(lv_event_t * e)
+void btn_altitude_mode_user_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1529,7 +1516,7 @@ static void btn_altitude_mode_user_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_speed_mode_gps_event_cb(lv_event_t * e)
+void btn_speed_mode_gps_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1549,7 +1536,7 @@ static void btn_speed_mode_gps_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_speed_mode_user_event_cb(lv_event_t * e)
+void btn_speed_mode_user_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1570,7 +1557,7 @@ static void btn_speed_mode_user_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_ground_heading_mode_gps_event_cb(lv_event_t * e)
+void btn_ground_heading_mode_gps_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1590,7 +1577,7 @@ static void btn_ground_heading_mode_gps_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_ground_heading_mode_user_event_cb(lv_event_t * e)
+void btn_ground_heading_mode_user_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1611,7 +1598,7 @@ static void btn_ground_heading_mode_user_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_auto_set_user_lat_event_cb(lv_event_t * e)
+void btn_auto_set_user_lat_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1632,7 +1619,7 @@ static void btn_auto_set_user_lat_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_auto_set_user_lon_event_cb(lv_event_t * e)
+void btn_auto_set_user_lon_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1653,7 +1640,7 @@ static void btn_auto_set_user_lon_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_auto_set_user_altitude_event_cb(lv_event_t * e)
+void btn_auto_set_user_altitude_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1674,7 +1661,7 @@ static void btn_auto_set_user_altitude_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_auto_set_user_speed_event_cb(lv_event_t * e)
+void btn_auto_set_user_speed_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1695,7 +1682,7 @@ static void btn_auto_set_user_speed_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
-static void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
+void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if
@@ -1711,10 +1698,20 @@ static void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
     }
 }
 
-/** ---------------------------------------------------------------------------------------
- * Title Bar
+/** -------------------------------------------------------------------------------------
+ * @brief Create Title Bar.
  * 
- * @param parent 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param title_font Specify title font.
+ * @param subtitle_font Specify subtitle font.
+ * @return title_bar_t.
  */
 title_bar_t create_title_bar (
     lv_obj_t * parent,
@@ -1724,7 +1721,9 @@ title_bar_t create_title_bar (
     int32_t pos_x,
     int32_t pos_y,
     bool show_scrollbar,
-    bool enable_scrolling
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
     )
 {
     // Initialize struct
@@ -1767,7 +1766,7 @@ title_bar_t create_title_bar (
 
     // Main style: text
     lv_obj_set_style_text_align(title_bar.panel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(title_bar.panel, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(title_bar.panel, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(title_bar.panel, default_title_hue, LV_PART_MAIN);
 
     // -------------------------------- Objects --------------------------------- //
@@ -1779,10 +1778,10 @@ title_bar_t create_title_bar (
         24,                   // height
         LV_ALIGN_TOP_MID,     // parent alignment
         0,                    // pos x
-        -10,                    // pos y
+        -10,                  // pos y
         "00:00:00",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_25,     // font
+        font_title,          // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -1803,7 +1802,7 @@ title_bar_t create_title_bar (
         15,                   // pos y
         "00/00/00",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_25,     // font
+        font_title,          // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -1824,7 +1823,7 @@ title_bar_t create_title_bar (
         14,                   // pos y
         "GPS SYNC",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_17,     // font
+        font_sub,       // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -1845,7 +1844,7 @@ title_bar_t create_title_bar (
         14,                   // pos y
         "0:0",                // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_17,     // font
+        font_sub,       // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -1866,7 +1865,7 @@ title_bar_t create_title_bar (
         14,                   // pos y
         "SD",                 // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_17,     // font
+        font_sub,       // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -1884,8 +1883,14 @@ title_bar_t create_title_bar (
  * @brief Create System Tray.
  * 
  * @param parent Specify parent object.
+ * @param title_font Specify title font.
+ * @param subtitle_font Specify subtitle font.
  */
-system_tray_t create_system_tray(lv_obj_t * parent)
+system_tray_t create_system_tray(
+    lv_obj_t * parent,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    )
 {
     
     /* ------------------------------------ TRAY --------------------------------------- */
@@ -1924,7 +1929,7 @@ system_tray_t create_system_tray(lv_obj_t * parent)
 
     // Main style: text
     lv_obj_set_style_text_align(tray.panel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(tray.panel, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(tray.panel, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(tray.panel, default_title_hue, LV_PART_MAIN);
 
     /* ---------------------------------- TRAY BRIGHTNESS ------------------------------- */
@@ -1958,7 +1963,7 @@ system_tray_t create_system_tray(lv_obj_t * parent)
         10,                   // pos y
         "00:00:00",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_25,     // font
+        font_title,          // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -1979,7 +1984,7 @@ system_tray_t create_system_tray(lv_obj_t * parent)
         30,                   // pos y
         "00/00/00",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_25,     // font
+        font_title,          // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2000,7 +2005,7 @@ system_tray_t create_system_tray(lv_obj_t * parent)
         50,                   // pos y
         "",                   // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_17,     // font
+        font_title,       // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2021,7 +2026,7 @@ system_tray_t create_system_tray(lv_obj_t * parent)
         24,                   // pos y
         "GPS SYNC",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_17,     // font
+        font_sub,       // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2042,7 +2047,7 @@ system_tray_t create_system_tray(lv_obj_t * parent)
         24,                   // pos y
         "0:0",                // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_17,     // font
+        font_sub,       // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2063,7 +2068,7 @@ system_tray_t create_system_tray(lv_obj_t * parent)
         24,                   // pos y
         "SD",                 // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        &cobalt_alien_17,     // font
+        font_sub,       // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2076,22 +2081,22 @@ system_tray_t create_system_tray(lv_obj_t * parent)
 
     // Grid Menu 1
     tray.grid_menu_1 = create_menu_grid(
-        tray.panel,          // lv_obj_t
-        7,                   // cols
-        1,                   // rows
-        56,                  // cell size px
-        12,                  // outer padding
-        12,                  // inner padding
-        0,                   // pos x
-        0,                   // pos y
-        LV_ALIGN_CENTER,     // alignment
-        radius_rounded,      // item radius
-        7,                   // Max visbilble columns. Equal or less than cols
-        1,                   // Max visible rows. Equal or less than rows
-        false,               // show scrollbar
-        false,               // enable scrolling
-        LV_TEXT_ALIGN_CENTER,// font alignment
-        &cobalt_alien_17,    // font
+        tray.panel,           // lv_obj_t
+        7,                    // cols
+        1,                    // rows
+        56,                   // cell size px
+        12,                   // outer padding
+        12,                   // inner padding
+        0,                    // pos x
+        0,                    // pos y
+        LV_ALIGN_CENTER,      // alignment
+        radius_rounded,       // item radius
+        7,                    // Max visbilble columns. Equal or less than cols
+        1,                    // Max visible rows. Equal or less than rows
+        false,                // show scrollbar
+        false,                // enable scrolling
+        LV_TEXT_ALIGN_CENTER, // font alignment
+        font_sub,       // font
         true,
         true
     );
@@ -2107,13 +2112,13 @@ system_tray_t create_system_tray(lv_obj_t * parent)
         if(label && lv_obj_has_class(label, &lv_label_class)) {
             // Set label text
             switch (i) {
-                case 0: lv_label_set_text(label, "Home"); break; // Home
-                case 1: lv_label_set_text(label, "Mtx"); break; // Matrix
-                case 2: lv_label_set_text(label, "GPS"); break; // GPS
-                case 3: lv_label_set_text(label, "Gyro"); break; // Gyro
-                case 4: lv_label_set_text(label, "Dis"); break; // Display
-                case 5: lv_label_set_text(label, "Sys"); break; // System
-                case 6: lv_label_set_text(label, "?"); break; // ?
+                case 0: lv_label_set_text(label, "Home"); break;
+                case 1: lv_label_set_text(label, "Mtx"); break;
+                case 2: lv_label_set_text(label, "GPS"); break;
+                case 3: lv_label_set_text(label, "Gyro"); break;
+                case 4: lv_label_set_text(label, "Dis"); break; 
+                case 5: lv_label_set_text(label, "Sys"); break;
+                case 6: lv_label_set_text(label, "?"); break;
                 default: break;
             }
         }
@@ -2126,7 +2131,18 @@ system_tray_t create_system_tray(lv_obj_t * parent)
 }
 
 /** -------------------------------------------------------------------------------------
- * @brief Create Slider
+ * @brief Create Slider.
+ * 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param range_min Specify minimum value.
+ * @param range_max Specify maximum value.
+ * @param value Specify initial value.
+ * @return lv_obj_t.
  */
 lv_obj_t * create_slider(
     lv_obj_t * parent,
@@ -2237,6 +2253,7 @@ lv_obj_t * create_slider(
  * @param expected_number_of_lines Specify expected number of lines (used for alignment).
  * @param color_bg Background color.
  * @param color_text Text color.
+ * @return lv_obj_t.
  */
 lv_obj_t * create_label(
     lv_obj_t * parent,
@@ -2331,23 +2348,24 @@ lv_obj_t * create_label(
     return result;
 }
 
-/** ---------------------------------------------------------------------------------------
- * @brief Text Area
+/** -------------------------------------------------------------------------------------
+ * @brief Create Text Area.
  * 
- * Intention is to be resusable, flexible & while providing a consistent style.
- * 
- * @param parent Pointer to the parent screen object.
- * @param size_w_px Width of the textarea in pixels.
- * @param size_h_px Height of the textarea in pixels.
- * @param alignment Alignment of the textarea within its parent/screen.
- * @param pos_x X position of the textarea within its parent/screen.
- * @param pos_y Y position of the textarea within its parent/screen.
- * @param one_line Boolean indicating if the textarea should be single line or multi-line.
- * @param accepted_chars Specify characters the textarea should accept.
- * @param placeholder_text Placeholder text to display when the textarea is empty.
- * @param show_scrollbar If true, a scrollbar will be shown.
- * @param enable_scrolling If true, scrolling will be enabled.
- * @return Pointer to the created textarea object.
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param one_line Enable/disables multiline.
+ * @param accepted_chars Specify accepted chars.
+ * @param placeholder_text Specify placeholder text.
+ * @param transparent_bg Tranparent background.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font Specify text font.
+ * @param text_align Text alignment on label.
+ * @return lv_obj_t.
  */
 lv_obj_t * create_textarea(
     lv_obj_t * parent,
@@ -2449,29 +2467,28 @@ lv_obj_t * create_textarea(
 }
 
 /** -------------------------------------------------------------------------------------
- * @brief Keyboard
+ * @brief Create Text Area.
  * 
- * Intention is to be resusable, flexible & while providing a consistent style.
- * 
- * @param parent Pointer to the parent screen object.
- * @param size_w_px Width of the keyboard in pixels.
- * @param size_h_px Height of the keyboard in pixels.
- * @param alignment Alignment of the keyboard within its parent/screen.
- * @param pos_x X position of the keyboard within its parent/screen.
- * @param pos_y Y position of the keyboard within its parent/screen.
- * @param kb_ta_padding_px Padding between keyboard and textarea in pixels.
- * @param ta_height_px Height of the textarea in pixels.
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param kb_ta_padding_px Distance between bottom of textarea and top of keyboard.
+ * @param ta_height_px Height of text area.
  * @param keyboard_mode Set keyboard mode:
- *                      LV_KEYBOARD_MODE_TEXT_LOWER,
-                        LV_KEYBOARD_MODE_TEXT_UPPER,
-                        LV_KEYBOARD_MODE_SPECIAL,
-                        LV_KEYBOARD_MODE_NUMBER,
-                        LV_KEYBOARD_MODE_USER_1,
-                        LV_KEYBOARD_MODE_USER_2,
-                        LV_KEYBOARD_MODE_USER_3,
-                        LV_KEYBOARD_MODE_USER_4
- * @return Keyboard struct containing keyboard and textarea objects.
- * 
+ *                      LV_KEYBOARD_MODE_TEXT_LOWER
+ *                      LV_KEYBOARD_MODE_TEXT_UPPER
+ *                      LV_KEYBOARD_MODE_SPECIAL
+ *                      LV_KEYBOARD_MODE_NUMBER
+ *                      LV_KEYBOARD_MODE_USER_1
+ *                      LV_KEYBOARD_MODE_USER_2
+ *                      LV_KEYBOARD_MODE_USER_3
+ *                      LV_KEYBOARD_MODE_USER_4
+ * @param title_font Specify title font.
+ * @param subtitle_font Specify subtitle font.
+ * @return keyboard_t.
  */
 keyboard_t create_keyboard(
     lv_obj_t * parent,
@@ -2482,7 +2499,9 @@ keyboard_t create_keyboard(
     int32_t pos_y,
     int32_t kb_ta_padding_px,
     int32_t ta_height_px,
-    lv_keyboard_mode_t keyboard_mode
+    lv_keyboard_mode_t keyboard_mode,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
     )
 {
     /*----------------------------------------------- KEYBOARD --------------------------------------------*/
@@ -2524,7 +2543,7 @@ keyboard_t create_keyboard(
 
     // Main style: text
     lv_obj_set_style_text_align(result.kb, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.kb, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.kb, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.kb, default_title_hue, LV_PART_MAIN);
 
     /*-------------------------------------- KEYBOARD LV_PART_ITEMS ---------------------------------------*/
@@ -2549,7 +2568,7 @@ keyboard_t create_keyboard(
 
     // Item style: text
     lv_obj_set_style_text_align(result.kb, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.kb, font_menu_item, LV_PART_ITEMS);
+    lv_obj_set_style_text_font(result.kb, font_title, LV_PART_ITEMS);
     lv_obj_set_style_text_color(result.kb, default_title_hue, LV_PART_ITEMS);
     
     // Item style: background checked
@@ -2557,7 +2576,7 @@ keyboard_t create_keyboard(
     
     // Item style: text checked
     lv_obj_set_style_text_align(result.kb, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.kb, font_menu_item, LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_font(result.kb, font_title, LV_PART_ITEMS | LV_STATE_CHECKED);
     lv_obj_set_style_text_color(result.kb, default_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
 
     /*---------------------------------------------- TEXTAREA -----------------------------------------------*/
@@ -2600,20 +2619,19 @@ keyboard_t create_keyboard(
 
     // Main style: text
     lv_obj_set_style_text_align(result.ta, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.ta, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.ta, font_title, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.ta, default_title_hue, LV_PART_MAIN);
 
     return result;
 }
 
-/** -----------------------------------------------------------------------------------------------
- * @brief Create Menu Item.
+/** -------------------------------------------------------------------------------------
+ * @brief Create Menu Item
  * 
- * Intention is to be resusable, flexible & while providing a consistent style.
- * 
- * @param menu_page Pointer to the parent menu_x object.
- * @param title Title of the menu_x page.
- * @return Pointer to the created menu_x page object.
+ * @param menu Specify menu_struct object.
+ * @param num_pages Specify number of pages.
+ * @param title Specify menu title.
+ * @return Void. A menu must be specified as the first parameter.
  */
 void create_menu_item(
     menu_struct * menu,
@@ -2702,14 +2720,12 @@ void create_menu_item(
     }
 }
 
-/** -----------------------------------------------------------------------------------------------
- * @brief Create Menu Page.
+/** -------------------------------------------------------------------------------------
+ * @brief Create Menu Page
  * 
- * Intention is to be resusable, flexible & while providing a consistent style.
- * 
- * @param menu_x Pointer to the parent menu_x object.
- * @param title Title of the menu_x page.
- * @return Pointer to the created menu_x page object.
+ * @param menu Specify menu_struct object.
+ * @param title Specify menu title.
+ * @return lv_obj_t.
  */
 lv_obj_t * create_menu_page(
     lv_obj_t * menu,
@@ -2754,21 +2770,21 @@ lv_obj_t * create_menu_page(
     return menu_page;
 }
 
-/** -----------------------------------------------------------------------------------------------
- * @brief Create Menu
+/** -------------------------------------------------------------------------------------
+ * @brief Create Menu.
  * 
- * Intention is to be resusable, flexible & while providing a consistent style.
- * 
- * @param parent Pointer to the parent screen object.
- * @param max_pages Maximum number of pages in the menu.
- * @param page_titles Array of page titles (NULL-terminated).
- * @param main_menu_items Array of main menu item titles (NULL-terminated).
- * @param size_w_px Width of the menu in pixels.
- * @param size_h_px Height of the menu in pixels.
- * @param alignment Alignment of the menu within its parent/screen.
- * @param pos_x X position of the menu within its parent/screen.
- * @param pos_y Y position of the menu within its parent/screen.
- * 
+ * @param parent Specify parent object.
+ * @param max_pages Specify max pages.
+ * @param page_titles Specify page titles array.
+ * @param main_menu_items
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param title_font Specify title font.
+ * @param subtitle_font Specify subtitle font.
+ * @return menu_struct.
  */
 menu_struct create_menu(
     lv_obj_t * parent,
@@ -2779,7 +2795,9 @@ menu_struct create_menu(
     int32_t size_h_px,
     lv_align_t alignment,
     int32_t pos_x,
-    int32_t pos_y
+    int32_t pos_y,
+    lv_font_t * title_font,
+    lv_font_t * subtitle_font
     )
 {
     /* --- MENU ------------------------------------------------------------------------ */
@@ -2834,7 +2852,7 @@ menu_struct create_menu(
     // Main style: text
     lv_obj_set_style_text_align(result.menu, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.menu, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.menu, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.menu, title_font, LV_PART_MAIN);
 
     /* --- MENU LV_PART_ITEMS ---------------------------------------------------------- */
 
@@ -2871,7 +2889,7 @@ menu_struct create_menu(
     // Main style: text
     lv_obj_set_style_text_align(result.main_header, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.main_header, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.main_header, font_menu_title, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.main_header, title_font, LV_PART_MAIN);
 
     /* --- ROOT BACK BUTTON ------------------------------------------------------------ */
     
@@ -2910,7 +2928,7 @@ menu_struct create_menu(
     // Main style: text
     lv_obj_set_style_text_align(result.back_button, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.back_button, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.back_button, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.back_button, title_font, LV_PART_MAIN);
 
     /* --- ROOT BACK BUTTON LABEL LV_PART_MAIN ----------------------------------------- */
 
@@ -2935,7 +2953,7 @@ menu_struct create_menu(
     // Main style: text
     lv_obj_set_style_text_align(result.back_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_color(result.back_label, default_title_hue, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.back_label, font_menu_item, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.back_label, title_font, LV_PART_MAIN);
 
     /* --- CREATE PAGES ----------------------------------------------------------------- */
 
@@ -2958,27 +2976,28 @@ menu_struct create_menu(
     return result;
 }
 
-/** ----------------------------------------------------------------------------------------
- * @brief Creates Menu Grid.
- * 
- * Intention is to be resusable, flexible & while providing a consistent style.
- * 
- * @param parent Pointer to the parent screen object.
- * @param menu_grid Pointer to the parent menu_grid object.
- * @param cols Number of columns in the grid.
- * @param rows Number of rows in the grid.
- * @param cell_size_px Size of each cell in pixels.
- * @param outer_padding Padding around the grid in pixels.
- * @param inner_padding Padding between cells in pixels.
- * @param pos_x X position of the grid within its parent/screen.
- * @param pos_y Y position of the grid within its parent/screen.
- * @param alignment Alignment of the grid within its parent/screen.
- * @param item_radius Radius of the grid items in pixels.
- * @param max_cols_visible Maximum number of columns visible.
- * @param max_rows_visible Maximum number of rows visible.
- * @param show_scrollbar If true, scrollbars will always be shown.
- * @param enable_scrolling If true, scrolling will be enabled for the grid.
- * @return Pointer to the created grid_menu object.
+/** -------------------------------------------------------------------------------------
+ * @brief Create Menu Grid Layout.
+ *
+ * @param parent Specify parent object.
+ * @param cols Number of columns.
+ * @param rows Number of rows.
+ * @param cell_size_px Size of each cell (square).
+ * @param outer_padding Outer padding around the grid.
+ * @param inner_padding Inner padding between cells.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param lv_alignment Grid alignment on parent.
+ * @param item_radius Radius of individual item panels.
+ * @param max_cols_visible Maximum visible columns (for scrolling).
+ * @param max_rows_visible Maximum visible rows (for scrolling).
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param text_align Text alignment inside cells.
+ * @param font Font used in cells.
+ * @param transparent_bg Transparent background for cells.
+ * @param transparent_outline Transparent outline for cells.
+ * @return lv_obj_t* Pointer to the created grid container.
  */
 lv_obj_t * create_menu_grid(
     lv_obj_t *parent,
@@ -3150,19 +3169,19 @@ lv_obj_t * create_menu_grid(
     return grid_menu;
 }
 
-/** ---------------------------------------------------------------------------------------
- * @brief Dop Down Menu X
- * 
- * Intention is to be resusable, flexible & while providing a consistent style.
- * 
- * @param parent Pointer to the parent screen object.
+/** -------------------------------------------------------------------------------------
+ * @brief Create Dropdown Menu.
+ *
+ * @param parent Specify parent object.
  * @param options Array of option strings.
  * @param option_count Number of options in the array.
- * @param width_px Width of the dropdown menu in pixels.
- * @param height_px Height of the dropdown menu in pixels.
- * @param pos_x X position of the dropdown menu within its parent/screen.
- * @param pos_y Y position of the dropdown menu within its parent/screen.
- * 
+ * @param width_px Dropdown width.
+ * @param height_px Dropdown height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param font Font used in dropdown.
+ * @return lv_obj_t* Pointer to the created dropdown object.
  */
 lv_obj_t * create_dropdown_menu(
     lv_obj_t * parent,
@@ -3263,6 +3282,17 @@ lv_obj_t * create_dropdown_menu(
     return ddlist;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Switch.
+ *
+ * @param parent Specify parent object.
+ * @param size_w_px Switch width.
+ * @param size_h_px Switch height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @return lv_obj_t* Pointer to the created switch object.
+ */
 lv_obj_t * create_switch(
     lv_obj_t *parent,
     int32_t size_w_px,
@@ -3284,6 +3314,25 @@ lv_obj_t * create_switch(
     return sw;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Custom Button (with panel + transparent button + label).
+ *
+ * @param parent Specify parent object.
+ * @param size_w_px Button width.
+ * @param size_h_px Button height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param text Button display text.
+ * @param text_align Text alignment.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font Font used for button text.
+ * @param radius Corner radius.
+ * @param color_bg Background color.
+ * @param color_text Text color.
+ * @return button_t structure containing panel, button and label objects.
+ */
 button_t create_button(
     lv_obj_t *parent,
     int32_t size_w_px,
@@ -3418,6 +3467,30 @@ button_t create_button(
     return result;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create GPS Switch Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gps_switch_container_t structure.
+ */
 gps_switch_container_t create_gps_switch_panel(
     lv_obj_t * parent,
     int32_t width_px,
@@ -3616,6 +3689,30 @@ gps_switch_container_t create_gps_switch_panel(
     return result;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create GNGGA NMEA Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gngga_container_t structure.
+ */
 gngga_container_t create_gngga_panel(
     lv_obj_t * parent,
     int32_t width_px,
@@ -4315,6 +4412,30 @@ gngga_container_t create_gngga_panel(
     return result;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create GNRMC NMEA Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gnrmc_container_t structure.
+ */
 gnrmc_container_t create_gnrmc_panel(
     lv_obj_t * parent,
     int32_t width_px,
@@ -5074,6 +5195,30 @@ gnrmc_container_t create_gnrmc_panel(
     return result;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create GPATT Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gpatt_container_t structure.
+ */
 gpatt_container_t create_gpatt_panel(
     lv_obj_t * parent,
     int32_t width_px,
@@ -6453,6 +6598,30 @@ gpatt_container_t create_gpatt_panel(
     return result;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Satio Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return satio_container_t structure.
+ */
 satio_container_t create_satio_panel(
     lv_obj_t * parent,
     int32_t width_px,
@@ -9370,6 +9539,30 @@ satio_container_t create_satio_panel(
     return result;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Gyro Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return gyro_0_container_t structure.
+ */
 gyro_0_container_t create_gyro_panel(
     lv_obj_t * parent,
     int32_t width_px,
@@ -9928,6 +10121,19 @@ gyro_0_container_t create_gyro_panel(
     return result;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Horizontal Row Container.
+ *
+ * @param parent Specify parent object.
+ * @param sub_row_width Width of each sub-row.
+ * @param sub_row_height Height of each sub-row.
+ * @param inner_pad_all Uniform inner padding.
+ * @param sub_row_padding Padding between sub-rows.
+ * @param sub_column_padding Padding between sub-columns.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @return lv_obj_t* Pointer to the created row container.
+ */
 lv_obj_t * create_row(
     lv_obj_t * parent,
     int32_t sub_row_width,
@@ -9981,25 +10187,31 @@ lv_obj_t * create_row(
     return row;
 }
 
-/** ----------------------------------------------------------------------------------------
- * @brief Create Matrix Function Container
- * 
- * Creates a container panel with all elements needed to display/edit matrix function data:
- * - Function Slot
- * - Function Name
- * - XYZ Coordinates (3 values)
- * - Operator Name
- * - Output Mode
- * - Output PWM (2 values)
- * - Port Map
- * 
- * @param parent Pointer to the parent screen object.
- * @param width_px Width of the container in pixels.
- * @param height_px Height of the container in pixels.
- * @param alignment Alignment of the container within its parent/screen.
- * @param pos_x X position of the container.
- * @param pos_y Y position of the container.
- * @return matrix_function_container_t struct with all UI element pointers.
+/** -------------------------------------------------------------------------------------
+ * @brief Create Matrix Function Container.
+ *
+ * Creates a structured container typically used for matrix-style function key layouts.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return matrix_function_container_t structure.
  */
 matrix_function_container_t create_matrix_function_container(
     lv_obj_t * parent,
@@ -11031,26 +11243,29 @@ matrix_function_container_t create_matrix_function_container(
     return result;
 }
 
-/** ----------------------------------------------------------------------------------------
- * @brief Create Mapping Configuration Container
- * 
- * Creates a container panel with all elements needed to display/edit matrix function data:
- * - Map Slot
- * - Configuration 0
- * - Configuration 1
- * - Configuration 2
- * - Configuration 3
- * - Configuration 4
- * - Configuration 5
- * - Map Mode
- * 
- * @param parent Pointer to the parent screen object.
- * @param width_px Width of the container in pixels.
- * @param height_px Height of the container in pixels.
- * @param alignment Alignment of the container within its parent/screen.
- * @param pos_x X position of the container.
- * @param pos_y Y position of the container.
- * @return mapping_config_container_t struct with all UI element pointers.
+/** -------------------------------------------------------------------------------------
+ * @brief Create Mapping Configuration Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return mapping_config_container_t structure.
  */
 mapping_config_container_t create_mapping_config_container(
     lv_obj_t * parent,
@@ -11755,20 +11970,19 @@ mapping_config_container_t create_mapping_config_container(
     return result;
 }
 
-/** ----------------------------------------------------------------------------------------
- * @brief Display image from SD card.
- * 
- * @param parent Pointer to the parent screen object.
- * @param filename Path to the image file on the SD card.
- * @param width_px Width of the image in pixels.
- * @param height_px Height of the image in pixels.
- * @param color_depth_bits Color depth of the image in bits (e.g., 16 for RGB565).
- * @param pos_x X position of the image within its parent/screen.
- * @param pos_y Y position of the image within its parent/screen.
- * @param alignment Alignment of the image within its parent/screen.
- * 
- * @note Requires sufficient external RAM (PSRAM) for all file bytes.
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Image Loaded from SD Card.
+ *
+ * @param parent Specify parent object.
+ * @param filename Path/filename on SD card.
+ * @param width_px Display width.
+ * @param height_px Display height.
+ * @param color_depth_bits Color depth (16, 32, etc.).
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param alignment Image alignment on parent.
+ * @param discard_after_display Free image data after first display (memory optimization).
+ * @return sdcard_image_t* Pointer to image info structure (or NULL on failure).
  */
 sdcard_image_t * create_image_from_sdcard(
     lv_obj_t * parent,
@@ -11845,6 +12059,9 @@ sdcard_image_t * create_image_from_sdcard(
     return sdcard_image;  // Return full structure
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief  Free's loading image from memor
+ */
 void cleanup_loading_image() {
     if (loading_image) {
         // Delete LVGL image object
@@ -11862,6 +12079,9 @@ void cleanup_loading_image() {
     }
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief  An intermediary function used with loading screens.
+ */
 void lvgl_cleanup_all() {
     // Ensure no pending events
     lv_timer_handler();
@@ -11870,6 +12090,14 @@ void lvgl_cleanup_all() {
     astro_clock_end();
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create Default Screen Objects.
+ *
+ * Initializes and places all default UI elements on the given parent screen.
+ *
+ * @param parent Specify parent object (usually the active screen).
+ * @return Void.
+ */
 void create_default_screen_objects(
     lv_obj_t * parent
     )
@@ -11884,15 +12112,17 @@ void create_default_screen_objects(
 
     // Create keyboard (bootstrapped)
     kb_numdec = create_keyboard(
-        parent,            // lv_obj_t
-        600,                    // width px
-        250,                    // height px
-        LV_ALIGN_CENTER,        // alignment
-        0,                      // pos x
-        23,                     // pos y
-        10,                     // padding between kb and text area
-        36,                     // text area height
-        LV_KEYBOARD_MODE_NUMBER // keyboard mode
+        parent,                  // lv_obj_t
+        600,                     // width px
+        250,                     // height px
+        LV_ALIGN_CENTER,         // alignment
+        0,                       // pos x
+        23,                      // pos y
+        10,                      // padding between kb and text area
+        36,                      // text area height
+        LV_KEYBOARD_MODE_NUMBER, // keyboard mode
+        &cobalt_alien_25,
+        &cobalt_alien_17
     );
     
     // Plug in keyboard callback for kb_numdec
@@ -11904,15 +12134,17 @@ void create_default_screen_objects(
 
     // Create keyboard (bootstrapped)
     kb_alnumsym = create_keyboard(
-        parent,            // lv_obj_t
-        600,                    // width px
-        250,                    // height px
-        LV_ALIGN_CENTER,        // alignment
-        0,                      // pos x
-        23,                     // pos y
-        10,                     // padding between kb and text area
-        36,                     // text area height
-        LV_KEYBOARD_MODE_USER_1 // keyboard mode
+        parent,                  // lv_obj_t
+        600,                     // width px
+        250,                     // height px
+        LV_ALIGN_CENTER,         // alignment
+        0,                       // pos x
+        23,                      // pos y
+        10,                      // padding between kb and text area
+        36,                      // text area height
+        LV_KEYBOARD_MODE_USER_1, // keyboard mode
+        &cobalt_alien_25,
+        &cobalt_alien_17
     );
     
     // Plug in keyboard callback for kb_alnumsym
@@ -11930,13 +12162,19 @@ void create_default_screen_objects(
         0, // pos x
         0, // pos y
         false, // show scrollbar
-        false  // enable scrollbar
+        false,  // enable scrollbar
+        &cobalt_alien_25,
+        &cobalt_alien_17
     );
 
     // ------------------------------ System Tray --------------------------------- //
 
     // Create system tray
-    system_tray = create_system_tray(parent);
+    system_tray = create_system_tray(
+        parent,
+        &cobalt_alien_25,
+        &cobalt_alien_17
+    );
 
     // Plug in event callback for screen click events
     lv_obj_add_event_cb(parent, screen_tap_cb, LV_EVENT_CLICKED, NULL);
@@ -11945,12 +12183,17 @@ void create_default_screen_objects(
     lv_obj_add_event_cb(parent, screen_swipe_cb, LV_EVENT_GESTURE, NULL);
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Show Loading Screen.
+ */
 void display_loading_screen() {
 
     lv_obj_t * current_screen = lv_scr_act();
 
     if (!lv_obj_is_valid(loading_screen)) {loading_screen = lv_obj_create(NULL);}
     if (current_screen == loading_screen) return;
+
+    current_screen_number = LOAD_SCREEN;
 
     lv_obj_set_style_bg_color(loading_screen, lv_color_make(0, 0, 0), LV_PART_MAIN);
     
@@ -11970,9 +12213,8 @@ void display_loading_screen() {
     lv_scr_load(loading_screen);
 }
 
-/** ------------------------------------------------------------------
- * @brief Home Screen
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Show Home Screen.
  */
 void display_home_screen()
 {
@@ -11988,6 +12230,8 @@ void display_home_screen()
         return;
     }
     printf("[display_home_screen] selected new screen, attempting to load new screen\n");
+
+    current_screen_number = HOME_SCREEN;
 
     // Always create a fresh screen
     printf("[display_home_screen] creating screen object\n");
@@ -12026,9 +12270,8 @@ void display_home_screen()
     lv_timer_handler();  // Process events/render
 }
 
-/** ------------------------------------------------------------------
- * @brief Matrix Screen
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Show Matrix Screen.
  */
 void display_matrix_screen()
 {
@@ -12044,6 +12287,8 @@ void display_matrix_screen()
         return;
     }
     printf("[display_matrix_screen] selected new screen, attempting to load new screen\n");
+
+    current_screen_number = MATRIX_SCREEN;
 
     // Always create a fresh screen
     printf("[display_matrix_screen] creating screen object\n");
@@ -12287,9 +12532,8 @@ void display_matrix_screen()
     lv_timer_handler();  // Process events/render
 }
 
-/** ------------------------------------------------------------------
- * @brief GPS Screen
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Show GPS Screen.
  */
 void display_gps_screen()
 {
@@ -12305,6 +12549,8 @@ void display_gps_screen()
         return;
     }
     printf("[display_gps_screen] selected new screen, attempting to load new screen\n");
+
+    current_screen_number = GPS_SCREEN;
 
     // Always create a fresh screen
     printf("[display_gps_screen] creating screen object\n");
@@ -12482,9 +12728,8 @@ void display_gps_screen()
     lv_timer_handler();  // Process events/render
 }
 
-/** ------------------------------------------------------------------
- * @brief Gyro Screen
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Show Gyro Screen.
  */
 void display_gyro_screen()
 {
@@ -12500,6 +12745,8 @@ void display_gyro_screen()
         return;
     }
     printf("[display_gyro_screen] selected new screen, attempting to load new screen\n");
+
+    current_screen_number = GYRO_SCREEN;
 
     // Always create a fresh screen
     printf("[display_gyro_screen] creating screen object\n");
@@ -12547,9 +12794,8 @@ void display_gyro_screen()
     lv_timer_handler();  // Process events/render
 }
 
-/** ------------------------------------------------------------------
- * @brief Display Screen
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Show Display Settings Screen.
  */
 void display_display_screen()
 {
@@ -12565,6 +12811,8 @@ void display_display_screen()
         return;
     }
     printf("[display_display_screen] selected new screen, attempting to load new screen\n");
+
+    current_screen_number = DISPLAY_SCREEN;
 
     // Always create a fresh screen
     printf("[display_display_screen] creating screen object\n");
@@ -12584,9 +12832,8 @@ void display_display_screen()
     lv_timer_handler();  // Process events/render    
 }
 
-/** ------------------------------------------------------------------
- * @brief System Screen
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Show System Settings Screen.
  */
 void display_system_screen()
 {
@@ -12602,6 +12849,8 @@ void display_system_screen()
         return;
     }
     printf("[display_system_screen] selected new screen, attempting to load new screen\n");
+
+    current_screen_number = SYSTEM_SCREEN;
 
     // Always create a fresh screen
     printf("[display_system_screen] creating screen object\n");
@@ -12621,9 +12870,8 @@ void display_system_screen()
     lv_timer_handler();  // Process events/render     
 }
 
-/** ------------------------------------------------------------------
- * @brief UAP Screen
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Show UAP Screen.
  */
 void display_uap_screen()
 {
@@ -12639,6 +12887,8 @@ void display_uap_screen()
         return;
     }
     printf("[display_uap_screen] selected new screen, attempting to load new screen\n");
+
+    current_screen_number = UAP_SCREEN;
 
     // Always create a fresh screen
     printf("[display_uap_screen] creating screen object\n");
@@ -12658,18 +12908,16 @@ void display_uap_screen()
     lv_timer_handler();  // Process events/render     
 }
 
-/** ------------------------------------------------------------------
- * @brief Update Display Timer
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Timer runs update_display function.
  */
 void update_display_on_timer(lv_timer_t * timer) {
     LV_UNUSED(timer);
     update_display();
 };
 
-/** ------------------------------------------------------------------
- * @brief Update Display
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Main function to update screen objects and load screens.
  */
 void update_display()
 {
@@ -12889,19 +13137,19 @@ void update_display()
     // ---------------------
     // loading screen
     // ---------------------
-    if (lv_scr_act() == loading_screen) {
+    if (current_screen_number == LOAD_SCREEN) {
     }
 
     // ---------------------
     // main screen
     // ---------------------
-    else if (lv_scr_act() == home_screen) {
+    else if (current_screen_number == HOME_SCREEN) {
     }
 
     // ---------------------
     // matrix screen
     // ---------------------
-    else if (lv_scr_act() == matrix_screen) {
+    else if (current_screen_number == MATRIX_SCREEN) {
 
         // Matrix Overview Grid 1
         if (matrix_overview_grid_1) {
@@ -13259,8 +13507,7 @@ void update_display()
     // ---------------------
     // gps screen
     // ---------------------
-    else if (lv_scr_act() == gps_screen) {
-        vTaskDelay(5 / portTICK_PERIOD_MS); // these will be wdt reset
+    else if (current_screen_number == GPS_SCREEN) {
 
         if (current_gps_panel == 0) {
             if (satio_c.panel) {
@@ -13271,8 +13518,6 @@ void update_display()
 
                 // Show
                 lv_obj_remove_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
-
-                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
                 lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
@@ -13734,7 +13979,7 @@ void update_display()
     // ---------------------
     // Gyro screen
     // ---------------------
-    else if (lv_scr_act() == gyro_screen) {
+    else if (current_screen_number == GYRO_SCREEN) {
         if (gyro_0_c.panel) {
 
             // ────────────────────────────────────────────────
@@ -13775,9 +14020,8 @@ void update_display()
     lv_timer_resume(display_timer);
 }
 
-/**
- * @brief Set main hue as default.
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Sets global color scheme to default color scheme
  */
 void setColorsDefault()
 {
@@ -13789,9 +14033,8 @@ void setColorsDefault()
     main_value_hue   = default_value_hue;
 }
 
-/**
- * @brief Set main hue as custom.
- * 
+/** -------------------------------------------------------------------------------------
+ * @brief Sets global color scheme to custom color scheme
  */
 void setColorsCustom()
 {
@@ -13803,6 +14046,9 @@ void setColorsCustom()
     main_value_hue   = custom_value_hue;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Initialize LVGL for this device.
+ */
 void initSatIOUI() {
     // --------------------------------------------------------------
     // LVGL Initialization
@@ -13821,16 +14067,6 @@ void initSatIOUI() {
 
     // Set LVGL tick period
     lv_timer_set_period(lv_timer_get_next(NULL), 50);  // ms
-
-    // Set screens
-    loading_screen = lv_obj_create(NULL);
-    home_screen = lv_obj_create(NULL);
-    matrix_screen = lv_obj_create(NULL);
-    gps_screen = lv_obj_create(NULL);
-    gyro_screen = lv_obj_create(NULL);
-    display_screen = lv_obj_create(NULL);
-    system_screen = lv_obj_create(NULL);
-    uap_screen = lv_obj_create(NULL);
     
     // Initialize display brightness and backlight
     bsp_display_brightness_init();
@@ -13838,8 +14074,16 @@ void initSatIOUI() {
     slider_brightness_value = 80;
     bsp_display_brightness_set(slider_brightness_value);
 
-    // Menu styling (menus are bootstrapped for consistant reproducibility so minimal styling is needed here)
-    font_menu_title = &cobalt_alien_25;
+    // Create Screen Objects
+    loading_screen = lv_obj_create(NULL);
+    home_screen    = lv_obj_create(NULL);
+    matrix_screen  = lv_obj_create(NULL);
+    gps_screen     = lv_obj_create(NULL);
+    gyro_screen    = lv_obj_create(NULL);
+    display_screen = lv_obj_create(NULL);
+    system_screen  = lv_obj_create(NULL);
+    uap_screen     = lv_obj_create(NULL);
+
     font_menu_item = &cobalt_alien_17;
 
     // Default
@@ -13917,6 +14161,9 @@ void initSatIOUI() {
     display_loading_screen();
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Start's Update Display Timer.
+ */
 void satio_ui_begin() {
     display_timer = lv_timer_create(update_display_on_timer, 50, NULL);
 }

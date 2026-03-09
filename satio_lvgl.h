@@ -1,5 +1,5 @@
 /** -------------------------------------------------------------------------------------
- * 
+ * SatIO LVGL - Written by Benjamin Jack Cullen.
  */
 
 #ifndef SATIO_LVGL_H
@@ -11,12 +11,11 @@
 #include <limits.h>
 #include "esp_log.h"
 #include "lvgl.h"
-// #include "./strval.h"
-#include <stdlib.h>       // malloc/free
-#include "ff.h"           // FatFs core
-#include "diskio.h"       // Disk I/O
-#include "diskio_impl.h"  // ESP32 disk impl
-#include "esp_vfs_fat.h"  // VFS integration
+#include <stdlib.h>
+#include "ff.h"
+#include "diskio.h"
+#include "diskio_impl.h"
+#include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
 #include "driver/sdmmc_host.h"
 #include "esp_err.h"
@@ -28,12 +27,10 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-// #include <iostream>
 #include <assert.h>
 #include <float.h>
 #include <math.h>
 #include <Arduino.h>
-// #include <Wire.h>
 
 #include "./config.h"
 #include "./REG.h"
@@ -98,8 +95,12 @@ LV_FONT_DECLARE(cobalt_alien_25);
 #define LV_TXT_NUMDEC  "0123456789.-"
 #define LV_TXT_ALNUMDEC "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-"
 
+/** ---------------------------------------------------------------------------------------
+ * @brief Button Struct
+ * 
+ */
 typedef struct {
-    lv_obj_t * panel; // Main container panel
+    lv_obj_t * panel;
     lv_obj_t * label;
     lv_obj_t * button;
 } button_t;
@@ -107,66 +108,49 @@ typedef struct {
 /** ---------------------------------------------------------------------------------------
  * @brief System Tray Struct
  * 
- * @param tray Pointer to the clickable tray bar object (top-right, no icons).
- * @param panel Pointer to the dropdown panel object.
- * @param slider Pointer to the brightness slider object.
- * @param is_open Boolean flag indicating whether the system tray is currently open or closed.
  */
 typedef struct {
-    lv_obj_t * tray;     // Clickable tray bar (top-right, no icons)
-    lv_obj_t * panel;    // Dropdown panel  
-    bool is_open;
+    lv_obj_t * tray;
+    lv_obj_t * panel;
+    bool       is_open;
     lv_obj_t * slider_brightness;
     lv_obj_t * local_time;
     lv_obj_t * local_date;
     lv_obj_t * human_date;
-
-    // Indicators
-    lv_obj_t * datetime_sync; // SYN
-    lv_obj_t * serial_cmommand_enabled; // CMD
-    lv_obj_t * gps_signal_strength; // SIG
-    lv_obj_t * sdcard_mounted; // SD
-
-    // System tray menu
+    lv_obj_t * datetime_sync;
+    lv_obj_t * serial_cmommand_enabled;
+    lv_obj_t * gps_signal_strength;
+    lv_obj_t * sdcard_mounted;
     lv_obj_t * grid_menu_1;
-
 } system_tray_t;
 
 /** ---------------------------------------------------------------------------------------
  * Title Bar Struct
  */
 typedef struct {
-    lv_obj_t * panel; // The title bar object
-
-    // datetime
-    lv_obj_t * time_label; // Label to display local time
-    lv_obj_t * date_label; // Label to display local date
-
-    // Indicators
-    lv_obj_t * datetime_sync; // SYN
-    lv_obj_t * serial_cmommand_enabled; // CMD
-    lv_obj_t * gps_signal_strength; // SIG
-    lv_obj_t * sdcard_mounted; // SD
+    lv_obj_t * panel;
+    lv_obj_t * time_label;
+    lv_obj_t * date_label;
+    lv_obj_t * datetime_sync;
+    lv_obj_t * serial_cmommand_enabled;
+    lv_obj_t * gps_signal_strength;
+    lv_obj_t * sdcard_mounted;
 } title_bar_t;
 
 /** ----------------------------------------------------------------------------------------
- * @brief Structure to hold image data from SD card and associated LVGL objects for display.
+ * @brief Structure to hold image data.
  * 
- * This structure allows us to keep track of the PSRAM pointer, file size, LVGL image object, 
- * and descriptor together.
  */
 typedef struct {
-    uint32_t f_size;
-    uint8_t * bytes_in_psram;
-    lv_obj_t * lv_image_obj;
-    lv_image_dsc_t dsc;
+    uint32_t        f_size;
+    uint8_t       * bytes_in_psram;
+    lv_obj_t      * lv_image_obj;
+    lv_image_dsc_t  dsc;
 } sdcard_image_t;
 
 /** ---------------------------------------------------------------------------------------
  * @brief Keyboard Struct
  * 
- * @param kb Pointer to the LVGL keyboard object.
- * @param ta Pointer to the LVGL textarea object associated with the keyboard.
  */
 
 typedef struct {
@@ -177,16 +161,6 @@ typedef struct {
 /** ---------------------------------------------------------------------------------------
  * @brief Menu Struct
  * 
- * @param main_header Pointer to the main header object of the menu.
- * @param back_button Pointer to the back button object of the menu.
- * @param back_label Pointer to the label object of the back button.
- * @param menu Pointer to the menu object.
- * @param pages Pointer to an array of page objects in the menu.
- * @param max_pages The maximum number of pages allocated for the menu.
- * @param page_count The current number of pages in the menu.
- * @param page_items Pointer to a 2D array of item objects for each page in the menu.
- * @param page_item_counts Pointer to an array that holds the count of items for each page in the menu.
- * @param max_items_per_page The maximum number of items allocated for each page in the menu.
  */
 typedef struct {
     lv_obj_t *   main_header;
@@ -207,69 +181,68 @@ typedef struct {
  * Container for displaying and editing matrix function parameters.
  */
 typedef struct {
-    lv_obj_t * panel;                    // Main container panel
+    lv_obj_t * panel;                   
 
     // Switch selection
-    lv_obj_t * label_switch_index_select;   // Function index select label
-    lv_obj_t * dd_switch_index_select;      // Matrix function index select
+    lv_obj_t * label_switch_index_select;
+    lv_obj_t * dd_switch_index_select;
 
     // Function selection
-    lv_obj_t * label_function_index_select; // Function index select label
-    lv_obj_t * dd_function_index_select;    // Matrix function index select
+    lv_obj_t * label_function_index_select;
+    lv_obj_t * dd_function_index_select;
     
     // Function info
-    lv_obj_t * label_function_name;      // Function name label
-    lv_obj_t * dd_function_name;         // Function name dropdown
+    lv_obj_t * label_function_name;
+    lv_obj_t * dd_function_name;
     
     // XYZ values (textareas for input)
-    lv_obj_t * label_x;                  // X label
-    lv_obj_t * ta_x;                     // X textarea
+    lv_obj_t * label_x;
+    lv_obj_t * ta_x;
     lv_obj_t * dd_x;
     lv_obj_t * label_mode_x;
     lv_obj_t * dd_mode_x;
-    
-    lv_obj_t * label_y;                  // Y label
-    lv_obj_t * ta_y;                     // Y textarea
+    lv_obj_t * label_y;
+    lv_obj_t * ta_y;
     lv_obj_t * dd_y;
     lv_obj_t * label_mode_y;
     lv_obj_t * dd_mode_y;
-    
-    lv_obj_t * label_z;                  // Z label
-    lv_obj_t * ta_z;                     // Z textarea
+    lv_obj_t * label_z;
+    lv_obj_t * ta_z;
     lv_obj_t * dd_z;
     lv_obj_t * label_mode_z;
     lv_obj_t * dd_mode_z;
     
     // Operator
-    lv_obj_t * label_operator;           // Operator label
-    lv_obj_t * dd_operator;              // Operator dropdown
+    lv_obj_t * label_operator;
+    lv_obj_t * dd_operator;
     
     // Flux (textarea for input)
-    lv_obj_t * label_flux;               // Flux label
-    lv_obj_t * ta_flux;                  // Flux textarea
+    lv_obj_t * label_flux;
+    lv_obj_t * ta_flux;
     
     // Output mode (dropdown)
-    lv_obj_t * label_output_mode;        // Output mode label
-    lv_obj_t * dd_output_mode;           // Output mode dropdown
+    lv_obj_t * label_output_mode;
+    lv_obj_t * dd_output_mode;
     
     // PWM values (textareas for input)
-    lv_obj_t * label_output_pwm_0;       // Output PWM label 0
-    lv_obj_t * label_output_pwm_1;       // Output PWM label 1
-    lv_obj_t * ta_pwm_0;                 // PWM 0 textarea
-    lv_obj_t * ta_pwm_1;                 // PWM 1 textarea
+    lv_obj_t * label_output_pwm_0;
+    lv_obj_t * label_output_pwm_1;
+    lv_obj_t * ta_pwm_0;
+    lv_obj_t * ta_pwm_1;
     
     // Invert Function Logic
-    lv_obj_t * label_inverted_logic;     // Inverted logic label
-    lv_obj_t * dd_inverted_logic;        // Inverted logic switch
+    lv_obj_t * label_inverted_logic;
+    lv_obj_t * dd_inverted_logic;
     
     // Map Slot
-    lv_obj_t * label_map_slot;           // Map slot label
-    lv_obj_t * dd_map_slot;              // Map slot dropdown
+    lv_obj_t * label_map_slot;
+    lv_obj_t * dd_map_slot;
 
     // Port
-    lv_obj_t * label_port_map;           // Port map label
-    lv_obj_t * ta_port_map;              // Port map textarea
+    lv_obj_t * label_port_map;
+    lv_obj_t * ta_port_map;
 
+    // Switches
     button_t matrix_switch_computer_assist;
     button_t matrix_switch_override;
     lv_obj_t * matrix_switch_output_value;
@@ -280,7 +253,7 @@ typedef struct {
  * @brief Matrix Mapping Configuration Container Struct
  */
 typedef struct {
-    lv_obj_t * panel; // Main container panel
+    lv_obj_t * panel;
     lv_obj_t * slot;
     lv_obj_t * dd_slot;
     lv_obj_t * c0;
@@ -307,7 +280,7 @@ typedef struct {
  * @brief GPS Switch Panel Container Struct
  */
 typedef struct {
-    lv_obj_t * panel; // Main container panel
+    lv_obj_t * panel;
     button_t switch_satio_panel;
     button_t switch_gngga_panel;
     button_t switch_gnrmc_panel;
@@ -318,7 +291,7 @@ typedef struct {
  * @brief GNGGA Container Struct
  */
 typedef struct {
-    lv_obj_t * panel; // Main container panel
+    lv_obj_t * panel;
     lv_obj_t * lbl_utc_time;
     lv_obj_t * val_utc_time;
     lv_obj_t * lbl_latitude;
@@ -345,7 +318,7 @@ typedef struct {
  * @brief GNRMC Container Struct
  */
 typedef struct {
-    lv_obj_t * panel; // Main container panel
+    lv_obj_t * panel;
     lv_obj_t * lbl_utc_time;
     lv_obj_t * val_utc_time;
     lv_obj_t * lbl_positioning_status;
@@ -374,7 +347,7 @@ typedef struct {
  * @brief GPATT Container Struct
  */
 typedef struct {
-    lv_obj_t * panel; // Main container panel
+    lv_obj_t * panel;
     lv_obj_t * lbl_pitch;
     lv_obj_t * val_pitch;
     lv_obj_t * lbl_roll;
@@ -423,29 +396,26 @@ typedef struct {
  * @brief SATIO Container Struct
  */
 typedef struct {
-    lv_obj_t * panel; // Main container panel
+    lv_obj_t * panel;
 
     /* ---------------------------------------------------------- */
     /* Title Positioning                                          */
     /* ---------------------------------------------------------- */
     lv_obj_t * lbl_title_location;
-
-    lv_obj_t * lbl_deg_lat;      // GPS Latitude
-    lv_obj_t * val_deg_lat;      // GPS Latitude
-    lv_obj_t * lbl_user_deg_lat; // User Latitude
-    lv_obj_t * ta_user_deg_lat;  // User Latitude
-    lv_obj_t * lbl_sys_deg_lat;  // System Latitude
-    lv_obj_t * val_sys_deg_lat;  // System Latitude
-
-    lv_obj_t * lbl_deg_lon;      // GPS Longitude
-    lv_obj_t * val_deg_lon;      // GPS Longitude
+    lv_obj_t * lbl_deg_lat;
+    lv_obj_t * val_deg_lat;
+    lv_obj_t * lbl_user_deg_lat;
+    lv_obj_t * ta_user_deg_lat;
+    lv_obj_t * lbl_sys_deg_lat;
+    lv_obj_t * val_sys_deg_lat;
+    lv_obj_t * lbl_deg_lon;
+    lv_obj_t * val_deg_lon;
     button_t btn_auto_set_user_lat;
-    lv_obj_t * lbl_user_deg_lon; // User Longitude
-    lv_obj_t * ta_user_deg_lon;  // User Longitude
+    lv_obj_t * lbl_user_deg_lon;
+    lv_obj_t * ta_user_deg_lon;
     button_t btn_auto_set_user_lon;
-    lv_obj_t * lbl_sys_deg_lon;  // System Longitude
-    lv_obj_t * val_sys_deg_lon;  // System Longitude
-
+    lv_obj_t * lbl_sys_deg_lon;
+    lv_obj_t * val_sys_deg_lon;
     lv_obj_t * lbl_location_mode; 
     button_t btn_location_mode_gps;
     button_t btn_location_mode_user;
@@ -454,15 +424,13 @@ typedef struct {
     /* Title Altitude                                             */
     /* ---------------------------------------------------------- */
     lv_obj_t * lbl_title_altitude;
-
-    lv_obj_t * lbl_altitude;      // GPS Altitude
-    lv_obj_t * val_altitude;      // GPS Altitude    
-    lv_obj_t * lbl_user_altitude; // User Altitude
+    lv_obj_t * lbl_altitude;
+    lv_obj_t * val_altitude;
+    lv_obj_t * lbl_user_altitude;
     button_t btn_auto_set_user_altitude;
-    lv_obj_t * ta_user_altitude;  // User Altitude
-    lv_obj_t * lbl_sys_altitude;  // System Altitude
-    lv_obj_t * val_sys_altitude;  // System Altitude
-
+    lv_obj_t * ta_user_altitude;
+    lv_obj_t * lbl_sys_altitude;
+    lv_obj_t * val_sys_altitude;
     lv_obj_t * lbl_altitude_mode; 
     button_t btn_altitude_mode_gps;
     button_t btn_altitude_mode_user;
@@ -471,15 +439,13 @@ typedef struct {
     /* Title Speed                                                */
     /* ---------------------------------------------------------- */
     lv_obj_t * lbl_title_speed;
-
-    lv_obj_t * lbl_speed;      // GPS Speed
-    lv_obj_t * val_speed;      // GPS Speed
-    lv_obj_t * lbl_user_speed; // User Speed
+    lv_obj_t * lbl_speed;
+    lv_obj_t * val_speed;
+    lv_obj_t * lbl_user_speed;
     button_t btn_auto_set_user_speed;
-    lv_obj_t * ta_user_speed;  // User Speed
-    lv_obj_t * lbl_sys_speed;  // System Speed
-    lv_obj_t * val_sys_speed;  // System Speed
-
+    lv_obj_t * ta_user_speed;
+    lv_obj_t * lbl_sys_speed;
+    lv_obj_t * val_sys_speed;
     lv_obj_t * lbl_speed_mode; 
     button_t btn_speed_mode_gps;
     button_t btn_speed_mode_user;
@@ -488,17 +454,15 @@ typedef struct {
     /* Title Heading                                              */
     /* ---------------------------------------------------------- */
     lv_obj_t * lbl_title_heading;
-
-    lv_obj_t * lbl_ground_heading_name; // NNW, etc.
-    lv_obj_t * val_ground_heading_name; // NNW, etc
-    lv_obj_t * lbl_ground_heading;      // GPS Ground Heading
-    lv_obj_t * val_ground_heading;      // GPS Ground Heading
-    lv_obj_t * lbl_user_ground_heading; // User Ground Heading
-    lv_obj_t * ta_user_ground_heading;  // User Ground Heading
+    lv_obj_t * lbl_ground_heading_name;
+    lv_obj_t * val_ground_heading_name;
+    lv_obj_t * lbl_ground_heading;
+    lv_obj_t * val_ground_heading;
+    lv_obj_t * lbl_user_ground_heading;
+    lv_obj_t * ta_user_ground_heading;
     button_t btn_auto_set_user_ground_heading;
-    lv_obj_t * lbl_sys_ground_heading;  // System Ground Heading
-    lv_obj_t * val_sys_ground_heading;  // System Ground Heading
-
+    lv_obj_t * lbl_sys_ground_heading;
+    lv_obj_t * val_sys_ground_heading;
     lv_obj_t * lbl_ground_heading_mode; 
     button_t btn_ground_heading_mode_gps;
     button_t btn_ground_heading_mode_user;
@@ -514,7 +478,6 @@ typedef struct {
     /* Title Local Time                                           */
     /* ---------------------------------------------------------- */
     lv_obj_t * lbl_title_local_time;
-
     lv_obj_t * lbl_local_unixtime_us;
     lv_obj_t * val_local_unixtime_us;
     lv_obj_t * lbl_local_yday;
@@ -527,10 +490,8 @@ typedef struct {
     lv_obj_t * val_formatted_local_time;
     lv_obj_t * lbl_formatted_local_date;
     lv_obj_t * val_formatted_local_date;
-
     lv_obj_t * lbl_utc_second_offset;
     lv_obj_t * ta_utc_second_offset;
-    
     lv_obj_t * lbl_utc_auto_offset_flag;
     lv_obj_t * val_utc_auto_offset_flag;
     lv_obj_t * lbl_set_time_automatically;
@@ -540,7 +501,6 @@ typedef struct {
     /* Title RTC Time                                             */
     /* ---------------------------------------------------------- */
     lv_obj_t * lbl_title_rtc_time;
-
     lv_obj_t * lbl_rtc_unixtime;
     lv_obj_t * val_rtc_unixtime;
     lv_obj_t * lbl_formatted_rtc_time;
@@ -552,7 +512,6 @@ typedef struct {
     /* Title RTC Sync                                             */
     /* ---------------------------------------------------------- */
     lv_obj_t * lbl_title_rtc_sync;
-
     lv_obj_t * lbl_formatted_rtc_sync_time;
     lv_obj_t * val_formatted_rtc_sync_time;
     lv_obj_t * lbl_formatted_rtc_sync_date;
@@ -570,86 +529,77 @@ typedef struct {
  * @brief GYRO Container Struct
  */
 typedef struct {
-    lv_obj_t * panel; // Main container panel
-    
+    lv_obj_t * panel;
     lv_obj_t * lbl_gyro_0_ang_x;
     lv_obj_t * val_gyro_0_ang_x;
-    // lv_obj_t * lbl_gyro_0_ang_y;
     lv_obj_t * val_gyro_0_ang_y;
-    // lv_obj_t * lbl_gyro_0_ang_z;
     lv_obj_t * val_gyro_0_ang_z;
-    
     lv_obj_t * lbl_gyro_0_acc_x;
     lv_obj_t * val_gyro_0_acc_x;
-    // lv_obj_t * lbl_gyro_0_acc_y;
     lv_obj_t * val_gyro_0_acc_y;
-    // lv_obj_t * lbl_gyro_0_acc_z;
     lv_obj_t * val_gyro_0_acc_z;
-    
     lv_obj_t * lbl_gyro_0_gyr_x;
     lv_obj_t * val_gyro_0_gyr_x;
-    // lv_obj_t * lbl_gyro_0_gyr_y;
     lv_obj_t * val_gyro_0_gyr_y;
-    // lv_obj_t * lbl_gyro_0_gyr_z;
     lv_obj_t * val_gyro_0_gyr_z;
-    
     lv_obj_t * lbl_gyro_0_mag_x;
     lv_obj_t * val_gyro_0_mag_x;
-    // lv_obj_t * lbl_gyro_0_mag_y;
     lv_obj_t * val_gyro_0_mag_y;
-    // lv_obj_t * lbl_gyro_0_mag_z;
     lv_obj_t * val_gyro_0_mag_z;
-    
     lv_obj_t * lbl_gyro_0_current_uiBaud;
     lv_obj_t * val_gyro_0_current_uiBaud;
 } gyro_0_container_t;
 
 /** --------------------------------------------------------------------------------------- 
- * Function initializations.
+ * Callbacks.
 */
 
-static void tray_close_ready_cb(lv_anim_t * a);
-static void set_keyboard_context_cb(lv_event_t * e);
-static void keyboard_event_cb(lv_event_t * e);
-static void screen_swipe_cb(lv_event_t * e);
-static void screen_tap_cb(lv_event_t * e);
+void tray_close_ready_cb(lv_anim_t * a);
+void set_keyboard_context_cb(lv_event_t * e);
+void keyboard_event_cb(lv_event_t * e);
+void screen_swipe_cb(lv_event_t * e);
+void screen_tap_cb(lv_event_t * e);
 void slider_brightness_event_cb(lv_event_t * e);
-static void tray_close_ready_cb(lv_anim_t * a);
-static void system_tray_grid_menu_1_event_cb(lv_event_t * e);
-static void matrix_overview_grid_1_event_cb(lv_event_t * e);
-static void dd_function_index_select_event_cb(lv_event_t * e);
-static void dd_switch_index_select_event_cb(lv_event_t * e);
-static void dd_current_map_slot_event_cb(lv_event_t * e);
-static void dd_function_name_event_cb(lv_event_t * e);
-static void dd_c0_event_cb(lv_event_t * e);
-static void dd_mode_event_cb(lv_event_t * e);
-static void dd_mode_x_event_cb(lv_event_t * e);
-static void dd_mode_y_event_cb(lv_event_t * e);
-static void dd_mode_z_event_cb(lv_event_t * e);
-static void dd_inverted_logic_event_cb(lv_event_t * e);
-static void dd_x_event_cb(lv_event_t * e);
-static void dd_y_event_cb(lv_event_t * e);
-static void dd_z_event_cb(lv_event_t * e);
-static void dd_operator_event_cb(lv_event_t * e);
-static void dd_output_mode_event_cb(lv_event_t * e);
-static void dd_matrix_file_slot_select_event_cb(lv_event_t * e);
-static void dd_link_map_slot_event_cb(lv_event_t * e);
-static void matrix_new_event_cb(lv_event_t * e);
-static void matrix_save_event_cb(lv_event_t * e);
-static void matrix_load_event_cb(lv_event_t * e);
-static void matrix_delete_event_cb(lv_event_t * e);
-static void current_matrix_computer_assist_event_cb(lv_event_t * e);
-static void switch_matrix_mapping_panel_event_cb(lv_event_t * e);
-static void current_matrix_override_off_event_cb(lv_event_t * e);
-static void switch_gps_panel_event_cb(lv_event_t * e);
+void tray_close_ready_cb(lv_anim_t * a);
+void system_tray_grid_menu_1_event_cb(lv_event_t * e);
+void matrix_overview_grid_1_event_cb(lv_event_t * e);
+void dd_function_index_select_event_cb(lv_event_t * e);
+void dd_switch_index_select_event_cb(lv_event_t * e);
+void dd_current_map_slot_event_cb(lv_event_t * e);
+void dd_function_name_event_cb(lv_event_t * e);
+void dd_c0_event_cb(lv_event_t * e);
+void dd_mode_event_cb(lv_event_t * e);
+void dd_mode_x_event_cb(lv_event_t * e);
+void dd_mode_y_event_cb(lv_event_t * e);
+void dd_mode_z_event_cb(lv_event_t * e);
+void dd_inverted_logic_event_cb(lv_event_t * e);
+void dd_x_event_cb(lv_event_t * e);
+void dd_y_event_cb(lv_event_t * e);
+void dd_z_event_cb(lv_event_t * e);
+void dd_operator_event_cb(lv_event_t * e);
+void dd_output_mode_event_cb(lv_event_t * e);
+void dd_matrix_file_slot_select_event_cb(lv_event_t * e);
+void dd_link_map_slot_event_cb(lv_event_t * e);
+void matrix_new_event_cb(lv_event_t * e);
+void matrix_save_event_cb(lv_event_t * e);
+void matrix_load_event_cb(lv_event_t * e);
+void matrix_delete_event_cb(lv_event_t * e);
+void current_matrix_computer_assist_event_cb(lv_event_t * e);
+void switch_matrix_mapping_panel_event_cb(lv_event_t * e);
+void current_matrix_override_off_event_cb(lv_event_t * e);
+void switch_gps_panel_event_cb(lv_event_t * e);
 
 /** -------------------------------------------------------------------------------------
  * @brief Create System Tray.
  * 
  * @param parent Specify parent object.
+ * @param title_font Specify title font.
+ * @param subtitle_font Specify subtitle font.
  */
 system_tray_t create_system_tray(
-    lv_obj_t * parent
+    lv_obj_t * parent,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
 );
 
 /** -------------------------------------------------------------------------------------
@@ -663,6 +613,8 @@ system_tray_t create_system_tray(
  * @param pos_y Offset from alignment.
  * @param show_scrollbar Show/hide scrollbar.
  * @param enable_scrolling Enable/disable scrolling.
+ * @param title_font Specify title font.
+ * @param subtitle_font Specify subtitle font.
  * @return title_bar_t.
  */
 title_bar_t create_title_bar (
@@ -673,7 +625,9 @@ title_bar_t create_title_bar (
     int32_t pos_x,
     int32_t pos_y,
     bool show_scrollbar,
-    bool enable_scrolling
+    bool enable_scrolling,
+    const lv_font_t * title_font,
+    const lv_font_t * subtitle_font
     );
 
 /** -------------------------------------------------------------------------------------
@@ -800,6 +754,8 @@ lv_obj_t * create_textarea(
  *                      LV_KEYBOARD_MODE_USER_2
  *                      LV_KEYBOARD_MODE_USER_3
  *                      LV_KEYBOARD_MODE_USER_4
+ * @param title_font Specify title font.
+ * @param subtitle_font Specify subtitle font.
  * @return keyboard_t.
  */
 keyboard_t create_keyboard(
@@ -811,7 +767,9 @@ keyboard_t create_keyboard(
     int32_t pos_y,
     int32_t kb_ta_padding_px,
     int32_t ta_height_px,
-    lv_keyboard_mode_t keyboard_mode
+    lv_keyboard_mode_t keyboard_mode,
+    const lv_font_t * title_font,
+    const lv_font_t * subtitle_font
     );
 
 /** -------------------------------------------------------------------------------------
@@ -852,10 +810,12 @@ lv_obj_t * create_menu_page(
  * @param alignment Panel alignment on parent object.
  * @param pos_x Offset from alignment.
  * @param pos_y Offset from alignment.
+ * @param title_font Specify title font.
+ * @param subtitle_font Specify subtitle font.
  * @return menu_struct.
  */
 menu_struct create_menu(
-    lv_obj_t *parent,
+    lv_obj_t * parent,
     int max_pages,
     const char ** page_titles,
     const char ** main_menu_items,
@@ -863,7 +823,9 @@ menu_struct create_menu(
     int32_t size_h_px,
     lv_align_t alignment,
     int32_t pos_x,
-    int32_t pos_y
+    int32_t pos_y,
+    lv_font_t * title_font,
+    lv_font_t * subtitle_font
     );
 
 /** -------------------------------------------------------------------------------------
@@ -1424,26 +1386,69 @@ void create_default_screen_objects(
     lv_obj_t * parent
 );
 
-/* Free's loading image from memory */
+/** -------------------------------------------------------------------------------------
+ * @brief  Free's loading image from memory.
+ */
 void cleanup_loading_image();
 
-/* Sets global color scheme to default color scheme */
+/** -------------------------------------------------------------------------------------
+ * @brief  An intermediary function used with loading screens.
+ */
+void lvgl_cleanup_all();
+
+/** -------------------------------------------------------------------------------------
+ * @brief Sets global color scheme to default color scheme.
+ */
 void setColorsDefault();
 
-/* Sets global color scheme to custom color scheme */
+/** -------------------------------------------------------------------------------------
+ * @brief Sets global color scheme to custom color scheme.
+ */
 void setColorsCustom();
 
-/* Display screen's */
+/** -------------------------------------------------------------------------------------
+ * @brief Show Loading Screen.
+ */
 void display_loading_screen();
+
+/** -------------------------------------------------------------------------------------
+ * @brief Show Home Screen.
+ */
 void display_home_screen();
+
+/** -------------------------------------------------------------------------------------
+ * @brief Show Matrix Screen.
+ */
 void display_matrix_screen();
+
+/** -------------------------------------------------------------------------------------
+ * @brief Show GPS Screen.
+ */
 void display_gps_screen();
+
+/** -------------------------------------------------------------------------------------
+ * @brief Show Gyro Screen.
+ */
 void display_gyro_screen();
+
+/** -------------------------------------------------------------------------------------
+ * @brief Show Display Settings Screen.
+ */
 void display_disp_screen();
+
+/** -------------------------------------------------------------------------------------
+ * @brief Show System Settings Screen.
+ */
 void display_system_screen();
+
+/** -------------------------------------------------------------------------------------
+ * @brief Show UAP Screen.
+ */
 void display_uap_screen();
 
-/* Flags to trigger scrren loading */
+/** -------------------------------------------------------------------------------------
+ * @brief Flags to trigger screen loading.
+ */
 extern bool flag_display_loading_screen;
 extern bool flag_display_home_screen;
 extern bool flag_display_matrix_screen;
@@ -1453,16 +1458,24 @@ extern bool flag_display_disp_screen;
 extern bool flag_display_system_screen;
 extern bool flag_display_uap_screen;
 
-/* Main function to update screen objects and load screens */
+/** -------------------------------------------------------------------------------------
+ * @brief Main function to update screen objects and load screens.
+ */
 void update_display();
 
-/* Timer runs update_display function */
+/** -------------------------------------------------------------------------------------
+ * @brief Timer runs update_display function.
+ */
 void update_display_on_timer(lv_timer_t * timer);
 
-/* Initialize LVGL for this device */
+/** -------------------------------------------------------------------------------------
+ * @brief Initialize LVGL for this device.
+ */
 void initSatIOUI();
 
-/* Start's update_display_on_timer */
+/** -------------------------------------------------------------------------------------
+ * @brief Start's Update Display Timer.
+ */
 void satio_ui_begin();
 
 #endif // SATIO_LVGL_H
