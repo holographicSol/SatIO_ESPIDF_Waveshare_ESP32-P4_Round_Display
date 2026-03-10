@@ -555,66 +555,57 @@ typedef struct {
  */
 typedef struct {
     lv_obj_t * panel;
+
+    lv_obj_t * lbl_title_output_all;
+    lv_obj_t * lbl_title_output_gps;
+    lv_obj_t * lbl_title_output_gyro;
+    lv_obj_t * lbl_title_output_aux;
+    lv_obj_t * lbl_title_output_uni;
+
     lv_obj_t * lbl_output_all;
     lv_obj_t * sw_output_all;
 
     lv_obj_t * lbl_output_satio;
     lv_obj_t * sw_output_satio;
-
     lv_obj_t * lbl_output_gngga;
     lv_obj_t * sw_output_gngga;
-
     lv_obj_t * lbl_output_gnrmc;
     lv_obj_t * sw_output_gnrmc;
-
     lv_obj_t * lbl_output_gpatt;
     lv_obj_t * sw_output_gpatt;
-
     lv_obj_t * lbl_output_ins;
     lv_obj_t * sw_output_ins;
-
-    lv_obj_t * lbl_output_matrix;
-    lv_obj_t * sw_output_matrix;
-
-    lv_obj_t * lbl_output_input_controller;
-    lv_obj_t * sw_output_input_controller;
-
-    lv_obj_t * lbl_output_admplex_0;
-    lv_obj_t * sw_output_admplex_0;
 
     lv_obj_t * lbl_output_gyro_0;
     lv_obj_t * sw_output_gyro_0;
 
+    lv_obj_t * lbl_output_matrix;
+    lv_obj_t * sw_output_matrix;
+    lv_obj_t * lbl_output_input_controller;
+    lv_obj_t * sw_output_input_controller;
+    lv_obj_t * lbl_output_admplex_0;
+    lv_obj_t * sw_output_admplex_0;
+
     lv_obj_t * lbl_output_sun;
     lv_obj_t * sw_output_sun;
-
     lv_obj_t * lbl_output_mercury;
     lv_obj_t * sw_output_mercury;
-
     lv_obj_t * lbl_output_venus;
     lv_obj_t * sw_output_venus;
-
     lv_obj_t * lbl_output_earth;
     lv_obj_t * sw_output_earth;
-
     lv_obj_t * lbl_output_luna;
     lv_obj_t * sw_output_luna;
-
     lv_obj_t * lbl_output_mars;
     lv_obj_t * sw_output_mars;
-
     lv_obj_t * lbl_output_jupiter;
     lv_obj_t * sw_output_jupiter;
-
     lv_obj_t * lbl_output_saturn;
     lv_obj_t * sw_output_saturn;
-
     lv_obj_t * lbl_output_uranus;
     lv_obj_t * sw_output_uranus;
-
     lv_obj_t * lbl_output_neptune;
     lv_obj_t * sw_output_neptune;
-
     lv_obj_t * lbl_output_meteors;
     lv_obj_t * sw_output_meteors;
 } serial_container_t;
