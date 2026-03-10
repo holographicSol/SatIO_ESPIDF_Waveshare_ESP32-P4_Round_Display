@@ -172,6 +172,12 @@ serial_container_t serial_c;
 int32_t outline_width = 2;
 int32_t border_width  = 0;
 int32_t shadow_width  = 0;
+
+int32_t general_menu_w_px = 550;
+int32_t general_menu_h_px = 400;
+int32_t general_menu_row_h_px = 42;
+int32_t interactive_menu_row_h_px = 48;
+
 // ---------------------------
 // Radius
 // ---------------------------
@@ -235,6 +241,15 @@ lv_color_t default_btn_on_value_hue;
 // ---------------------------
 lv_color_t default_btn_toggle_outline_hue;
 lv_color_t default_btn_toggle_value_hue;
+
+// ---------------------------
+// Default Switch
+// ---------------------------
+lv_color_t default_sw_off_bg;
+lv_color_t default_sw_off_knob_bg;
+lv_color_t default_sw_on_bg;
+lv_color_t default_sw_on_knob_bg;
+
 // ---------------------------
 // Custom Color
 // ---------------------------
@@ -3062,10 +3077,16 @@ lv_obj_t * create_switch(
     lv_obj_set_size(sw, size_w_px, size_h_px);
     lv_obj_align(sw, alignment, pos_x, pos_y);
 
-    lv_obj_set_style_bg_color(sw, lv_color_make(58, 58, 58), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(sw, lv_color_make(58, 58, 58), LV_PART_INDICATOR);
-    lv_obj_set_style_bg_color(sw, lv_color_make(0, 64, 0), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(sw, lv_color_make(128, 128, 128), LV_PART_KNOB);
+    // Background
+    lv_obj_set_style_bg_color(sw, default_sw_off_bg, LV_PART_MAIN);
+
+    // Indicator
+    lv_obj_set_style_bg_color(sw, default_sw_off_bg, LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(sw, default_sw_on_bg, LV_PART_INDICATOR | LV_STATE_CHECKED);
+    
+    // Knob
+    lv_obj_set_style_bg_color(sw, default_sw_off_knob_bg, LV_PART_KNOB);
+    lv_obj_set_style_bg_color(sw, default_sw_on_knob_bg, LV_PART_KNOB | LV_STATE_CHECKED);
     
     return sw;
 }
@@ -9990,6 +10011,12 @@ serial_container_t create_serial_panel(
     int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
+    int32_t title_width = sub_row_width - (sub_column_padding);
+
+    // Set row object widths
+    obj_w_0 = ((sub_row_width/16) *13);
+    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*3);
+
     /* ---------------------------------------------------------- */
     /* Title All                                                  */
     /* ---------------------------------------------------------- */
@@ -10014,13 +10041,10 @@ serial_container_t create_serial_panel(
         LV_FLEX_ALIGN_CENTER
     );
 
-    // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding);
-
     // Label Output all
     result.lbl_title_output_all = create_label(
         row_title_output_all,
-        obj_w_0,
+        title_width,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -10038,7 +10062,7 @@ serial_container_t create_serial_panel(
         default_title_hue
     );
 
-    lv_obj_set_size(result.lbl_title_output_all, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_title_output_all, title_width, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Output All                                                 */
@@ -10059,14 +10083,10 @@ serial_container_t create_serial_panel(
     lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
         row_output_all,
-        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    // Set row object widths
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output all
     result.lbl_output_all = create_label(
@@ -10126,13 +10146,10 @@ serial_container_t create_serial_panel(
         LV_FLEX_ALIGN_CENTER
     );
 
-    // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding);
-
     // Label Output all
     result.lbl_title_output_gps = create_label(
         row_title_output_gps,
-        obj_w_0,
+        title_width,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -10150,7 +10167,7 @@ serial_container_t create_serial_panel(
         default_title_hue
     );
 
-    lv_obj_set_size(result.lbl_title_output_gps, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_title_output_gps, title_width, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Output SatIO                                               */
@@ -10168,16 +10185,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_satio, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_satio,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output all
     result.lbl_output_satio = create_label(
@@ -10229,16 +10243,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_gngga, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_gngga,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output GNGGA
     result.lbl_output_gngga = create_label(
@@ -10291,16 +10302,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_gnrmc, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_gnrmc,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output GNRMC
     result.lbl_output_gnrmc = create_label(
@@ -10354,16 +10362,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_gpatt, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_gpatt,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output GPATT
     result.lbl_output_gpatt = create_label(
@@ -10417,16 +10422,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_ins, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_ins,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output INS
     result.lbl_output_ins = create_label(
@@ -10487,13 +10489,10 @@ serial_container_t create_serial_panel(
         LV_FLEX_ALIGN_CENTER
     );
 
-    // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding);
-
     // Label
     result.lbl_title_output_gyro = create_label(
         row_title_output_gyro,
-        obj_w_0,
+        title_width,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -10511,7 +10510,7 @@ serial_container_t create_serial_panel(
         default_title_hue
     );
 
-    lv_obj_set_size(result.lbl_title_output_gyro, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_title_output_gyro, title_width, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Output GYRO 0                                              */
@@ -10529,16 +10528,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_gyro_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_gyro_0,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output GYRO 0
     result.lbl_output_gyro_0 = create_label(
@@ -10599,13 +10595,10 @@ serial_container_t create_serial_panel(
         LV_FLEX_ALIGN_CENTER
     );
 
-    // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding);
-
     // Label Output all
     result.lbl_title_output_aux = create_label(
         row_title_output_aux,
-        obj_w_0,
+        title_width,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -10623,7 +10616,7 @@ serial_container_t create_serial_panel(
         default_title_hue
     );
 
-    lv_obj_set_size(result.lbl_title_output_aux, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_title_output_aux, title_width, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Output MATRIX                                              */
@@ -10641,16 +10634,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_matrix, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_matrix,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output MATRIX
     result.lbl_output_matrix = create_label(
@@ -10703,16 +10693,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_input_controller, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_input_controller,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output INPUT CONTROLLER
     result.lbl_output_input_controller = create_label(
@@ -10766,16 +10753,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_admplex_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_admplex_0,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output ADMplex 0
     result.lbl_output_admplex_0 = create_label(
@@ -10836,13 +10820,10 @@ serial_container_t create_serial_panel(
         LV_FLEX_ALIGN_CENTER
     );
 
-    // Set row object widths
-    obj_w_0 = sub_row_width - (sub_column_padding);
-
     // Label
     result.lbl_title_output_uni = create_label(
         row_title_output_uni,
-        obj_w_0,
+        title_width,
         obj_height,
         LV_ALIGN_CENTER,
         0,
@@ -10860,7 +10841,7 @@ serial_container_t create_serial_panel(
         default_title_hue
     );
 
-    lv_obj_set_size(result.lbl_title_output_uni, obj_w_0, obj_height);
+    lv_obj_set_size(result.lbl_title_output_uni, title_width, obj_height);
 
 
     /* ---------------------------------------------------------- */
@@ -10879,16 +10860,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_sun, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_sun,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output SUN
     result.lbl_output_sun = create_label(
@@ -10941,16 +10919,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_mercury, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_mercury,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);    
 
     // Label Output MERCURY
     result.lbl_output_mercury = create_label(
@@ -11004,16 +10979,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_venus, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_venus,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output VENUS
     result.lbl_output_venus = create_label(
@@ -11067,16 +11039,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_earth, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_earth,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output EARTH
     result.lbl_output_earth = create_label(
@@ -11130,16 +11099,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_luna, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_luna,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output LUNA
     result.lbl_output_luna = create_label(
@@ -11193,16 +11159,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_mars, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_mars,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output MARS
     result.lbl_output_mars = create_label(
@@ -11255,16 +11218,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_jupiter, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_jupiter,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output JUPITER
     result.lbl_output_jupiter = create_label(
@@ -11318,16 +11278,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_saturn, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_saturn,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output SATURN
     result.lbl_output_saturn = create_label(
@@ -11381,16 +11338,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_uranus, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_uranus,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output URANUS
     result.lbl_output_uranus = create_label(
@@ -11444,16 +11398,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_neptune, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_neptune,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output NEPTUNE
     result.lbl_output_neptune = create_label(
@@ -11507,16 +11458,13 @@ serial_container_t create_serial_panel(
     );
 
     // Adjust Flex
-    lv_obj_set_flex_flow(row_output_meteors, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_flow(row_output_all, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(
-        row_output_meteors,
-        LV_FLEX_ALIGN_CENTER,
+        row_output_all,
+        LV_FLEX_ALIGN_START,
         LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER
     );
-
-    obj_w_0 = (((sub_row_width/8) *7)) - (sub_column_padding*4);
-    obj_w_1 = (sub_row_width - obj_w_0) - (sub_column_padding*4);
 
     // Label Output METEORS
     result.lbl_output_meteors = create_label(
@@ -14008,10 +13956,6 @@ void display_gps_screen()
 
     current_gps_panel=0;
 
-    int32_t menu_w_px = 550;
-    int32_t menu_h_px = 400;
-    int32_t menu_row_h_px = 34;
-
     // GPS Switch Panel
     gps_switch_panel = create_gps_switch_panel(
         gps_screen,       // parent
@@ -14037,25 +13981,25 @@ void display_gps_screen()
 
     // SATIO
     satio_c = create_satio_panel(
-        gps_screen,       // parent
-        menu_w_px,        // width px
-        menu_h_px,        // height px
-        LV_ALIGN_CENTER,  // alignment
-        0,                // pos x
-        0,                // pos y
-        radius_rounded,   // radius
-        2,                // outer_pad_all
-        4,                // inner_pad_all
-        2,                // outline_padding
-        2,                // main_row_padding
-        4,                // main_column_padding
-        2,                // sub_row_padding
-        8,                // sub_column_padding
-        42,               // row height
-        true,             // show scrollbar
-        true,             // enable scrolling
-        &cobalt_alien_25, // font for titles,
-        &cobalt_alien_17  // font for text,
+        gps_screen,        // parent
+        general_menu_w_px, // width px
+        general_menu_h_px, // height px
+        LV_ALIGN_CENTER,   // alignment
+        0,                 // pos x
+        0,                 // pos y
+        radius_rounded,    // radius
+        2,                 // outer_pad_all
+        4,                 // inner_pad_all
+        2,                 // outline_padding
+        2,                 // main_row_padding
+        4,                 // main_column_padding
+        2,                 // sub_row_padding
+        8,                 // sub_column_padding
+        general_menu_row_h_px, // row height
+        true,              // show scrollbar
+        true,              // enable scrolling
+        &cobalt_alien_25,  // font for titles,
+        &cobalt_alien_17   // font for text,
     );
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -14067,25 +14011,25 @@ void display_gps_screen()
 
     // GNGGA
     gngga_c = create_gngga_panel(
-        gps_screen,       // parent
-        menu_w_px,        // width px
-        menu_h_px,        // height px
-        LV_ALIGN_CENTER,  // alignment
-        0,                // pos x
-        0,                // pos y
-        radius_rounded,   // radius
-        2,                // outer_pad_all
-        4,                // inner_pad_all
-        2,                // outline_padding
-        2,                // main_row_padding
-        4,                // main_column_padding
-        2,                // sub_row_padding
-        8,                // sub_column_padding
-        42,               // row height
-        true,             // show scrollbar
-        true,             // enable scrolling
-        &cobalt_alien_25, // font for titles,
-        &cobalt_alien_17  // font for text,
+        gps_screen,        // parent
+        general_menu_w_px, // width px
+        general_menu_h_px, // height px
+        LV_ALIGN_CENTER,   // alignment
+        0,                 // pos x
+        0,                 // pos y
+        radius_rounded,    // radius
+        2,                 // outer_pad_all
+        4,                 // inner_pad_all
+        2,                 // outline_padding
+        2,                 // main_row_padding
+        4,                 // main_column_padding
+        2,                 // sub_row_padding
+        8,                 // sub_column_padding
+        general_menu_row_h_px, // row height
+        true,              // show scrollbar
+        true,              // enable scrolling
+        &cobalt_alien_25,  // font for titles,
+        &cobalt_alien_17   // font for text,
     );
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -14097,25 +14041,25 @@ void display_gps_screen()
 
     // GNRMC
     gnrmc_c = create_gnrmc_panel(
-        gps_screen,       // parent
-        menu_w_px,        // width px
-        menu_h_px,        // height px
-        LV_ALIGN_CENTER,  // alignment
-        0,                // pos x
-        0,                // pos y
-        radius_rounded,   // radius
-        2,                // outer_pad_all
-        4,                // inner_pad_all
-        2,                // outline_padding
-        2,                // main_row_padding
-        4,                // main_column_padding
-        2,                // sub_row_padding
-        8,                // sub_column_padding
-        42,               // row height
-        true,             // show scrollbar
-        true,             // enable scrolling
-        &cobalt_alien_25, // font for titles,
-        &cobalt_alien_17  // font for text,
+        gps_screen,        // parent
+        general_menu_w_px, // width px
+        general_menu_h_px, // height px
+        LV_ALIGN_CENTER,   // alignment
+        0,                 // pos x
+        0,                 // pos y
+        radius_rounded,    // radius
+        2,                 // outer_pad_all
+        4,                 // inner_pad_all
+        2,                 // outline_padding
+        2,                 // main_row_padding
+        4,                 // main_column_padding
+        2,                 // sub_row_padding
+        8,                 // sub_column_padding
+        general_menu_row_h_px, // row height
+        true,              // show scrollbar
+        true,              // enable scrolling
+        &cobalt_alien_25,  // font for titles,
+        &cobalt_alien_17   // font for text,
     );
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -14127,25 +14071,25 @@ void display_gps_screen()
 
     // GPATT
     gpatt_c = create_gpatt_panel(
-        gps_screen,       // parent
-        menu_w_px,        // width px
-        menu_h_px,        // height px
-        LV_ALIGN_CENTER,  // alignment
-        0,                // pos x
-        0,                // pos y
-        radius_rounded,   // radius
-        2,                // outer_pad_all
-        4,                // inner_pad_all
-        2,                // outline_padding
-        2,                // main_row_padding
-        4,                // main_column_padding
-        2,                // sub_row_padding
-        8,                // sub_column_padding
-        42,               // row height
-        true,             // show scrollbar
-        true,             // enable scrolling
-        &cobalt_alien_25, // font for titles,
-        &cobalt_alien_17  // font for text,
+        gps_screen,        // parent
+        general_menu_w_px, // width px
+        general_menu_h_px, // height px
+        LV_ALIGN_CENTER,   // alignment
+        0,                 // pos x
+        0,                 // pos y
+        radius_rounded,    // radius
+        2,                 // outer_pad_all
+        4,                 // inner_pad_all
+        2,                 // outline_padding
+        2,                 // main_row_padding
+        4,                 // main_column_padding
+        2,                 // sub_row_padding
+        8,                 // sub_column_padding
+        general_menu_row_h_px, // row height
+        true,              // show scrollbar
+        true,              // enable scrolling
+        &cobalt_alien_25,  // font for titles,
+        &cobalt_alien_17   // font for text,
     );
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -14204,7 +14148,7 @@ void display_gyro_screen()
     gyro_0_c = create_gyro_panel(
         gyro_screen,      // parent
         650,              // width px
-        (42*5)-(outline_width*2)-(2*2), // height px
+        (general_menu_row_h_px*5)-(outline_width*2)-(2*2), // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
         0,                // pos y
@@ -14216,7 +14160,7 @@ void display_gyro_screen()
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        42,               // row height
+        general_menu_row_h_px, // row height
         true,             // show scrollbar
         true,             // enable scrolling
         &cobalt_alien_25, // font for titles,
@@ -14272,25 +14216,25 @@ void display_serial_screen()
 
     // Serial
     serial_c = create_serial_panel(
-        serial_screen,    // parent
-        450,              // width px
-        450,              // height px
-        LV_ALIGN_CENTER,  // alignment
-        0,                // pos x
-        0,                // pos y
-        radius_rounded,   // radius
-        2,                // outer_pad_all
-        4,                // inner_pad_all
-        2,                // outline_padding
-        2,                // main_row_padding
-        4,                // main_column_padding
-        2,                // sub_row_padding
-        8,                // sub_column_padding
-        42,               // row height
-        true,             // show scrollbar
-        true,             // enable scrolling
-        &cobalt_alien_25, // font for titles,
-        &cobalt_alien_17  // font for text,
+        serial_screen,     // parent
+        general_menu_w_px, // width px
+        general_menu_h_px, // height px
+        LV_ALIGN_CENTER,   // alignment
+        0,                 // pos x
+        0,                 // pos y
+        radius_rounded,    // radius
+        2,                 // outer_pad_all
+        4,                 // inner_pad_all
+        2,                 // outline_padding
+        2,                 // main_row_padding
+        4,                 // main_column_padding
+        2,                 // sub_row_padding
+        8,                 // sub_column_padding
+        general_menu_row_h_px, // row height
+        true,              // show scrollbar
+        true,              // enable scrolling
+        &cobalt_alien_25,  // font for titles,
+        &cobalt_alien_17   // font for text,
     );
 
     printf("[display_serial_screen] invalidating display\n");
@@ -15561,27 +15505,33 @@ void initSatIOUI() {
     default_subtitle_hue            = lv_color_make(0,0, 255);
     default_value_hue               = lv_color_make(0,255,0);
 
-    // BTN
+    // Default Button
     default_btn_bg                  = lv_color_make(12,12,12);
     default_btn_outline_hue         = lv_color_make(28,28,28);
     default_btn_border_hue          = lv_color_make(0,0,0);
     default_btn_shadow_hue          = lv_color_make(0,0,0);
     default_btn_value_hue           = lv_color_make(42,42,42);
-    // BTN Default Off
+    // Default Button Off
     default_btn_off_bg              = lv_color_make(0,0,0);
     default_btn_off_outline_hue     = lv_color_make(28,28,28);
     default_btn_off_border_hue      = lv_color_make(0,0,0);
     default_btn_off_shadow_hue      = lv_color_make(0,0,0);
     default_btn_off_value_hue       = lv_color_make(42,42,42);
-    // BTN Default On
+    // Default Button On
     default_btn_on_bg               = lv_color_make(12,12,12);
     default_btn_on_outline_hue      = lv_color_make(28,28,28);
     default_btn_on_border_hue       = lv_color_make(0,0,0);
     default_btn_on_shadow_hue       = lv_color_make(0,0,0);
     default_btn_on_value_hue        = lv_color_make(0,255,0);
-    // BTN Default Toggle
+    // Default Button Toggle
     default_btn_toggle_outline_hue  = lv_color_make(28,28,28);
     default_btn_toggle_value_hue    = lv_color_make(0,0,255);
+
+    // Default Switch
+    default_sw_off_bg               = lv_color_make(28, 28, 28);
+    default_sw_off_knob_bg          = lv_color_make(0, 0, 255);
+    default_sw_on_bg                = lv_color_make(32, 32, 32);
+    default_sw_on_knob_bg           = lv_color_make(0, 255, 0);
 
     // Custom (intended to be changed by user -> sets main_hue)
     // custom_bg_hue                = lv_color_make(0,0,0);
