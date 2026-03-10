@@ -10610,7 +10610,7 @@ serial_container_t create_serial_panel(
         LV_ALIGN_CENTER,
         0,
         0,
-        "GPS",
+        "MATRIX & AUX",
         LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
         false,
