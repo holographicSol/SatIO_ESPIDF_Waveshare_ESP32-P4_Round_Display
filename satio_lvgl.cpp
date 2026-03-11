@@ -568,8 +568,8 @@ void keyboard_event_cb(lv_event_t * e)
                 int32_t val = strtol(input, NULL, 10);
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C1 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
-                mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C1] = val;
-                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
+                mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C1] = val;
+                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -581,8 +581,8 @@ void keyboard_event_cb(lv_event_t * e)
                 int32_t val = strtol(input, NULL, 10);
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C2 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
-                mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C2] = val;
-                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
+                mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C2] = val;
+                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -594,8 +594,8 @@ void keyboard_event_cb(lv_event_t * e)
                 int32_t val = strtol(input, NULL, 10);
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C3 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
-                mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C3] = val;
-                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
+                mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C3] = val;
+                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -607,8 +607,8 @@ void keyboard_event_cb(lv_event_t * e)
                 int32_t val = strtol(input, NULL, 10);
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C4 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
-                mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C4] = val;
-                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
+                mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C4] = val;
+                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -620,8 +620,8 @@ void keyboard_event_cb(lv_event_t * e)
                 int32_t val = strtol(input, NULL, 10);
                 printf("[keyboard_event_cb] Setting KB_MAPPING_C5 to: %ld\n", val);
                 // lv_textarea_set_text(...); // Update relevant object if needed
-                mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C5] = val;
-                matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
+                mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C5] = val;
+                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
                 printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
@@ -993,7 +993,7 @@ void dd_c0_event_cb(lv_event_t * e)
     if(code == LV_EVENT_VALUE_CHANGED) {
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
-        mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C0] = (int)sel;
+        mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0] = (int)sel;
         printf("[dd_c0_event_cb] Set map function: %lu\n", sel);
     }
 }
@@ -1009,7 +1009,7 @@ void dd_mode_event_cb(lv_event_t * e)
     if(code == LV_EVENT_VALUE_CHANGED) {
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
-        mappingData.map_mode[0][matrixData.index_mapped_value[0][current_matrix_i]] = (int)sel;
+        mappingData.map_mode[0][current_mapping_i] = (int)sel;
         printf("[dd_mode_event_cb] Set map mode: %lu\n", sel);
     }
 }
@@ -14050,7 +14050,7 @@ mapping_config_container_t create_mapping_config_container(
         snprintf(dd_c0_name, sizeof(dd_c0_name), "%s", mappingData.char_map_value[i]);
         lv_dropdown_add_option(result.dd_c0, dd_c0_name, LV_DROPDOWN_POS_LAST);
     }
-    lv_dropdown_set_selected(result.dd_c0, mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C0]);
+    lv_dropdown_set_selected(result.dd_c0, 0);
     lv_obj_add_event_cb(result.dd_c0, dd_c0_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Critical for alignment
@@ -14112,7 +14112,7 @@ mapping_config_container_t create_mapping_config_container(
         font_sub,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_textarea_set_text(result.ta_c1, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C1]).c_str());
+    lv_textarea_set_text(result.ta_c1, "");
     lv_obj_add_event_cb(result.ta_c1, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_c1, &mapping_c1_ctx);
 
@@ -14175,7 +14175,7 @@ mapping_config_container_t create_mapping_config_container(
         font_sub,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_textarea_set_text(result.ta_c2, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C2]).c_str());
+    lv_textarea_set_text(result.ta_c2, "");
     lv_obj_add_event_cb(result.ta_c2, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_c2, &mapping_c2_ctx);
 
@@ -14238,7 +14238,7 @@ mapping_config_container_t create_mapping_config_container(
         font_sub,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_textarea_set_text(result.ta_c3, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C3]).c_str());
+    lv_textarea_set_text(result.ta_c3, "");
     lv_obj_add_event_cb(result.ta_c3, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_c3, &mapping_c3_ctx);
 
@@ -14301,7 +14301,7 @@ mapping_config_container_t create_mapping_config_container(
         font_sub,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_textarea_set_text(result.ta_c4, String(mappingData.mapping_config[0][current_matrix_i][INDEX_MAP_C4]).c_str());
+    lv_textarea_set_text(result.ta_c4, "");
     lv_obj_add_event_cb(result.ta_c4, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_c4, &mapping_c4_ctx);
 
@@ -14364,7 +14364,7 @@ mapping_config_container_t create_mapping_config_container(
         font_sub,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_textarea_set_text(result.ta_c5, String(mappingData.mapping_config[0][matrixData.index_mapped_value[0][current_matrix_i]][INDEX_MAP_C5]).c_str());
+    lv_textarea_set_text(result.ta_c5, "");
     lv_obj_add_event_cb(result.ta_c5, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_user_data(result.ta_c5, &mapping_c5_ctx);
 
