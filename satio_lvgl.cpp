@@ -6769,24 +6769,28 @@ satio_container_t create_satio_panel(
         default_subtitle_hue
     );
 
-    result.ta_user_deg_lat = create_textarea(
+    result.val_user_deg_lat = create_label(
         row_user_lat,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
-        true,
-        "0123456789.-",
-        "0",
-        false,
-        false,
-        false,
+        "",
+        LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
-        LV_TEXT_ALIGN_CENTER
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
-    lv_obj_add_event_cb(result.ta_user_deg_lat, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_user_data(result.ta_user_deg_lat, &user_latitude_ctx);
+    lv_obj_add_flag(result.val_user_deg_lat, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(result.val_user_deg_lat, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_user_data(result.val_user_deg_lat, &user_latitude_ctx);
 
     result.btn_auto_set_user_lat = create_button(
         row_user_lat,         // parent
@@ -6807,7 +6811,7 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.btn_auto_set_user_lat.button, btn_auto_set_user_lat_event_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_set_size(result.lbl_user_deg_lat, obj_w_0, obj_height);
-    lv_obj_set_size(result.ta_user_deg_lat, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_user_deg_lat, obj_w_1, obj_height);
     lv_obj_set_size(result.btn_auto_set_user_lat.panel, obj_w_2, obj_height);
 
     /* ---------------------------------------------------------- */
@@ -6850,24 +6854,28 @@ satio_container_t create_satio_panel(
         default_subtitle_hue
     );
 
-    result.ta_user_deg_lon = create_textarea(
+    result.val_user_deg_lon = create_label(
         row_user_lon,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
-        true,
-        "0123456789.-",
-        "0",
-        false,
-        false,
-        false,
+        "",
+        LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
-        LV_TEXT_ALIGN_CENTER
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
-    lv_obj_add_event_cb(result.ta_user_deg_lon, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_user_data(result.ta_user_deg_lon, &user_longitude_ctx);
+    lv_obj_add_flag(result.val_user_deg_lon, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(result.val_user_deg_lon, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_user_data(result.val_user_deg_lon, &user_longitude_ctx);
 
     result.btn_auto_set_user_lon = create_button(
         row_user_lon,         // parent
@@ -6888,7 +6896,7 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.btn_auto_set_user_lon.button, btn_auto_set_user_lon_event_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_set_size(result.lbl_user_deg_lon, obj_w_0, obj_height);
-    lv_obj_set_size(result.ta_user_deg_lon, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_user_deg_lon, obj_w_1, obj_height);
     lv_obj_set_size(result.btn_auto_set_user_lon.panel, obj_w_2, obj_height);
 
     /* ---------------------------------------------------------- */
@@ -7237,24 +7245,28 @@ satio_container_t create_satio_panel(
         default_subtitle_hue
     );
 
-    result.ta_user_altitude = create_textarea(
+    result.val_user_altitude = create_label(
         row_user_alt,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
-        true,
-        "0123456789.-",
-        "0",
-        false,
-        false,
-        false,
+        "",
+        LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
-        LV_TEXT_ALIGN_CENTER
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
-    lv_obj_add_event_cb(result.ta_user_altitude, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_user_data(result.ta_user_altitude, &user_altitude_ctx);
+    lv_obj_add_flag(result.val_user_deg_lon, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(result.val_user_altitude, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_user_data(result.val_user_altitude, &user_altitude_ctx);
 
     result.btn_auto_set_user_altitude = create_button(
         row_user_alt,         // parent
@@ -7275,7 +7287,7 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.btn_auto_set_user_altitude.button, btn_auto_set_user_altitude_event_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_set_size(result.lbl_user_altitude, obj_w_0, obj_height);
-    lv_obj_set_size(result.ta_user_altitude, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_user_altitude, obj_w_1, obj_height);
     lv_obj_set_size(result.btn_auto_set_user_altitude.panel, obj_w_2, obj_height);
 
     /* ---------------------------------------------------------- */
@@ -7562,24 +7574,28 @@ satio_container_t create_satio_panel(
         default_subtitle_hue
     );
 
-    result.ta_user_speed = create_textarea(
+    result.val_user_speed = create_label(
         row_user_speed,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
-        true,
-        "0123456789.-",
-        "0",
-        false,
-        false,
-        false,
+        "",
+        LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
-        LV_TEXT_ALIGN_CENTER
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
-    lv_obj_add_event_cb(result.ta_user_speed, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_user_data(result.ta_user_speed, &user_speed_ctx);
+    lv_obj_add_flag(result.val_user_speed, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(result.val_user_speed, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_user_data(result.val_user_speed, &user_speed_ctx);
 
     result.btn_auto_set_user_speed = create_button(
         row_user_speed,
@@ -7600,7 +7616,7 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.btn_auto_set_user_speed.button, btn_auto_set_user_speed_event_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_set_size(result.lbl_user_speed, obj_w_0, obj_height);
-    lv_obj_set_size(result.ta_user_speed, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_user_speed, obj_w_1, obj_height);
     lv_obj_set_size(result.btn_auto_set_user_speed.panel, obj_w_2, obj_height);
 
     /* ---------------------------------------------------------- */
@@ -7947,24 +7963,28 @@ satio_container_t create_satio_panel(
         default_subtitle_hue
     );
 
-    result.ta_user_ground_heading = create_textarea(
+    result.val_user_ground_heading = create_label(
         row_user_ground_heading,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
-        true,
-        "0123456789.-",
-        "0",
-        false,
-        false,
-        false,
+        "",
+        LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
-        LV_TEXT_ALIGN_CENTER
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
-    lv_obj_add_event_cb(result.ta_user_ground_heading, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_user_data(result.ta_user_ground_heading, &user_ground_heading_ctx);
+    lv_obj_add_flag(result.val_user_ground_heading, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(result.val_user_ground_heading, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_user_data(result.val_user_ground_heading, &user_ground_heading_ctx);
 
     result.btn_auto_set_user_ground_heading = create_button(
         row_user_ground_heading,
@@ -7985,7 +8005,7 @@ satio_container_t create_satio_panel(
     lv_obj_add_event_cb(result.btn_auto_set_user_ground_heading.button, btn_auto_set_user_ground_heading_event_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_set_size(result.lbl_user_ground_heading, obj_w_0, obj_height);
-    lv_obj_set_size(result.ta_user_ground_heading, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_user_ground_heading, obj_w_1, obj_height);
     lv_obj_set_size(result.btn_auto_set_user_ground_heading.panel, obj_w_2, obj_height);
 
     /* ---------------------------------------------------------- */
@@ -8311,27 +8331,31 @@ satio_container_t create_satio_panel(
         default_subtitle_hue
     );
 
-    result.ta_utc_second_offset = create_textarea(
+    result.val_utc_second_offset = create_label(
         row_utc_offset,
         obj_w_1,
         obj_height,
         LV_ALIGN_CENTER,
         0,
         0,
-        true,
-        "0123456789-",
-        "0",
-        false,
-        false,
-        false,
+        "",
+        LV_TEXT_ALIGN_CENTER,
         &cobalt_alien_17,
-        LV_TEXT_ALIGN_CENTER
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
     );
-    lv_obj_add_event_cb(result.ta_utc_second_offset, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_user_data(result.ta_utc_second_offset, &user_utc_offset_seconds_ctx);
+    lv_obj_add_flag(result.val_utc_second_offset, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(result.val_utc_second_offset, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_user_data(result.val_utc_second_offset, &user_utc_offset_seconds_ctx);
 
     lv_obj_set_size(result.lbl_utc_second_offset, obj_w_0, obj_height);
-    lv_obj_set_size(result.ta_utc_second_offset, obj_w_1, obj_height);
+    lv_obj_set_size(result.val_utc_second_offset, obj_w_1, obj_height);
 
     /* ---------------------------------------------------------- */
     /* Row UTC Auto Offset Flag                                   */
@@ -15923,13 +15947,9 @@ void update_display()
         // Matrix Save Slot
         lv_dropdown_set_selected(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
 
+        
         if (current_matrix_panel_view==0) {
 
-            // Hide
-            lv_obj_add_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
-            // Show
-            lv_obj_remove_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN);
             // Switch Panel
             lv_obj_set_style_text_color(matrix_switch_panel.switch_overview_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
             lv_obj_set_style_bg_color(matrix_switch_panel.switch_overview_panel.panel, default_btn_on_bg, LV_PART_MAIN);
@@ -15940,6 +15960,9 @@ void update_display()
 
             // Matrix Overview Grid 1
             if (matrix_overview_grid_1) {
+                lv_obj_set_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN, false);
+                lv_obj_set_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN, true);
+                lv_obj_set_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN, true);
 
                 uint32_t grid_child_cnt = lv_obj_get_child_cnt(matrix_overview_grid_1);
                 for(uint32_t i = 0; i < grid_child_cnt; i++) {
@@ -15976,13 +15999,12 @@ void update_display()
             lv_obj_set_style_bg_color(matrix_switch_panel.switch_matrix_panel.panel, default_btn_on_bg, LV_PART_MAIN);
             lv_obj_set_style_text_color(matrix_switch_panel.switch_mapping_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
             lv_obj_set_style_bg_color(matrix_switch_panel.switch_mapping_panel.panel, default_btn_off_bg, LV_PART_MAIN);
-            // Hide
-            lv_obj_add_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
-            // Show
-            lv_obj_remove_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
 
+            
             if (mfc.panel) {
+                lv_obj_set_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN, true);
+                lv_obj_set_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN, false);
+                lv_obj_set_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN, true);
 
                 // Current Switch
                 lv_dropdown_set_selected(mfc.dd_switch_index_select, current_matrix_i);
@@ -16095,63 +16117,15 @@ void update_display()
             lv_obj_set_style_bg_color(matrix_switch_panel.switch_matrix_panel.panel, default_btn_off_bg, LV_PART_MAIN);
             lv_obj_set_style_text_color(matrix_switch_panel.switch_mapping_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
             lv_obj_set_style_bg_color(matrix_switch_panel.switch_mapping_panel.panel, default_btn_on_bg, LV_PART_MAIN);
-            lv_obj_add_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
-            // Show
-            lv_obj_remove_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
 
+            
             if (mcc.panel) {
-
-                // Hide
+                lv_obj_set_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN, true);
+                lv_obj_set_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN, true);
+                lv_obj_set_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN, false);
 
                 // Map Slot
                 lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
-
-                // // Map Mode 0
-                // if (mappingData.map_mode[0][current_mapping_i]==MAP_MODE_MIN_TO_MAX) {
-                //     // C0
-                //     lv_label_set_text(mcc.c0, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C0]).c_str());
-                //     // C1
-                //     lv_label_set_text(mcc.c1, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C1]).c_str());
-                //     // C2
-                //     lv_label_set_text(mcc.c2, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C2]).c_str());
-                //     // C3
-                //     lv_label_set_text(mcc.c3, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C3]).c_str());
-                //     // C4
-                //     lv_label_set_text(mcc.c4, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C4]).c_str());
-                //     // C5
-                //     lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_MIN_TO_MAX][INDEX_MAP_C5]).c_str());
-                // }
-                // // Map Mode 1
-                // else if (mappingData.map_mode[0][current_mapping_i]==MAP_MODE_CENTER_MAP_AXIS_0) {
-                //     // C0
-                //     lv_label_set_text(mcc.c0, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C0]).c_str());
-                //     // C1
-                //     lv_label_set_text(mcc.c1, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C1]).c_str());
-                //     // C2
-                //     lv_label_set_text(mcc.c2, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C2]).c_str());
-                //     // C3
-                //     lv_label_set_text(mcc.c3, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C3]).c_str());
-                //     // C4
-                //     lv_label_set_text(mcc.c4, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C4]).c_str());
-                //     // C5
-                //     lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_0][INDEX_MAP_C5]).c_str());
-                // }
-                // // Map Mode 2
-                // else if (mappingData.map_mode[0][current_mapping_i]==MAP_MODE_CENTER_MAP_AXIS_1) {
-                //     // C0
-                //     lv_label_set_text(mcc.c0, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C0]).c_str());
-                //     // C1
-                //     lv_label_set_text(mcc.c1, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C1]).c_str());
-                //     // C2
-                //     lv_label_set_text(mcc.c2, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C2]).c_str());
-                //     // C3
-                //     lv_label_set_text(mcc.c3, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C3]).c_str());
-                //     // C4
-                //     lv_label_set_text(mcc.c4, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C4]).c_str());
-                //     // C5
-                //     lv_label_set_text(mcc.c5, String(mappingData.char_map_mode_config_names[MAP_MODE_CENTER_MAP_AXIS_1][INDEX_MAP_C5]).c_str());
-                // }
 
                 lv_dropdown_set_selected(mcc.dd_c0, (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
 
@@ -16217,12 +16191,12 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // User Degrees Latitude
                 // ────────────────────────────────────────────────
-                lv_textarea_set_text(satio_c.ta_user_deg_lat, String(satioData.user_degrees_latitude, 7).c_str());
+                lv_label_set_text(satio_c.val_user_deg_lat, String(satioData.user_degrees_latitude, 7).c_str());
 
                 // ────────────────────────────────────────────────
                 // User Degrees Longitude
                 // ────────────────────────────────────────────────
-                lv_textarea_set_text(satio_c.ta_user_deg_lon, String(satioData.user_degrees_longitude, 7).c_str());
+                lv_label_set_text(satio_c.val_user_deg_lon, String(satioData.user_degrees_longitude, 7).c_str());
 
                 // ────────────────────────────────────────────────
                 // System Degrees Latitude
@@ -16337,7 +16311,7 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // UTC Second Offset
                 // ────────────────────────────────────────────────
-                lv_textarea_set_text(satio_c.ta_utc_second_offset, String(satioData.utc_second_offset).c_str());
+                lv_label_set_text(satio_c.val_utc_second_offset, String(satioData.utc_second_offset).c_str());
 
                 // ────────────────────────────────────────────────
                 // UTC Auto Offset Flag
@@ -16357,7 +16331,7 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // User Altitude
                 // ────────────────────────────────────────────────
-                lv_textarea_set_text(satio_c.ta_user_altitude, String(satioData.user_altitude, 7).c_str());
+                lv_label_set_text(satio_c.val_user_altitude, String(satioData.user_altitude, 7).c_str());
 
                 // ────────────────────────────────────────────────
                 // System Altitude
@@ -16396,7 +16370,7 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // User Speed
                 // ────────────────────────────────────────────────
-                lv_textarea_set_text(satio_c.ta_user_speed, String(satioData.user_speed, 2).c_str());
+                lv_label_set_text(satio_c.val_user_speed, String(satioData.user_speed, 2).c_str());
 
                 // ────────────────────────────────────────────────
                 // System Speed
@@ -16440,7 +16414,7 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // User Ground Heading
                 // ────────────────────────────────────────────────
-                lv_textarea_set_text(satio_c.ta_user_ground_heading, String(satioData.user_ground_heading, 2).c_str());
+                lv_label_set_text(satio_c.val_user_ground_heading, String(satioData.user_ground_heading, 2).c_str());
 
                 // ────────────────────────────────────────────────
                 // System Ground Heading

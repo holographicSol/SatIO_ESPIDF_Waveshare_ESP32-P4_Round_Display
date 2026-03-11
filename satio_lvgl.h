@@ -418,14 +418,14 @@ typedef struct {
     lv_obj_t * lbl_deg_lat;
     lv_obj_t * val_deg_lat;
     lv_obj_t * lbl_user_deg_lat;
-    lv_obj_t * ta_user_deg_lat;
+    lv_obj_t * val_user_deg_lat;
     lv_obj_t * lbl_sys_deg_lat;
     lv_obj_t * val_sys_deg_lat;
     lv_obj_t * lbl_deg_lon;
     lv_obj_t * val_deg_lon;
     button_t btn_auto_set_user_lat;
     lv_obj_t * lbl_user_deg_lon;
-    lv_obj_t * ta_user_deg_lon;
+    lv_obj_t * val_user_deg_lon;
     button_t btn_auto_set_user_lon;
     lv_obj_t * lbl_sys_deg_lon;
     lv_obj_t * val_sys_deg_lon;
@@ -441,7 +441,7 @@ typedef struct {
     lv_obj_t * val_altitude;
     lv_obj_t * lbl_user_altitude;
     button_t btn_auto_set_user_altitude;
-    lv_obj_t * ta_user_altitude;
+    lv_obj_t * val_user_altitude;
     lv_obj_t * lbl_sys_altitude;
     lv_obj_t * val_sys_altitude;
     lv_obj_t * lbl_altitude_mode; 
@@ -456,7 +456,7 @@ typedef struct {
     lv_obj_t * val_speed;
     lv_obj_t * lbl_user_speed;
     button_t btn_auto_set_user_speed;
-    lv_obj_t * ta_user_speed;
+    lv_obj_t * val_user_speed;
     lv_obj_t * lbl_sys_speed;
     lv_obj_t * val_sys_speed;
     lv_obj_t * lbl_speed_mode; 
@@ -472,7 +472,7 @@ typedef struct {
     lv_obj_t * lbl_ground_heading;
     lv_obj_t * val_ground_heading;
     lv_obj_t * lbl_user_ground_heading;
-    lv_obj_t * ta_user_ground_heading;
+    lv_obj_t * val_user_ground_heading;
     button_t btn_auto_set_user_ground_heading;
     lv_obj_t * lbl_sys_ground_heading;
     lv_obj_t * val_sys_ground_heading;
@@ -504,7 +504,7 @@ typedef struct {
     lv_obj_t * lbl_formatted_local_date;
     lv_obj_t * val_formatted_local_date;
     lv_obj_t * lbl_utc_second_offset;
-    lv_obj_t * ta_utc_second_offset;
+    lv_obj_t * val_utc_second_offset;
     lv_obj_t * lbl_utc_auto_offset_flag;
     lv_obj_t * val_utc_auto_offset_flag;
     lv_obj_t * lbl_set_time_automatically;

@@ -35,29 +35,25 @@
 
 SemaphoreHandle_t i2c_bus0_mutex;
 
-TaskHandle_t TaskStorage;
-TaskHandle_t TaskLogging;
-TaskHandle_t TaskSerialInfoCMD;
 TaskHandle_t TaskGPS;
 TaskHandle_t TaskGyro;
 TaskHandle_t TaskMultiplexers;
-TaskHandle_t TaskPortControllerInput;
-TaskHandle_t TaskUniverse;
+TaskHandle_t TaskSerialInfoCMD;
 TaskHandle_t TaskSwitches;
-TaskHandle_t TaskDisplay;
+TaskHandle_t TaskStorage;
+TaskHandle_t TaskLogging;
+TaskHandle_t TaskUniverse;
 
+// PRIORITY
+#define TASK_GPS_PRIORITY                   5    // High: Time/location sync critical
+#define TASK_GYRO_PRIORITY                  4    // High: Sensor reading
+#define TASK_MULTIPLEXERS_PRIORITY          4    // High: Analog multiplexing
 
-#define TASK_DISPLAY_PRIORITY               3    // High: UI updates can be deferred
-
-#define TASK_SWITCHES_PRIORITY              5    // High: Logic processing
-#define TASK_SERIALINFOCMD_PRIORITY         4    // High: User interaction & debugging
-#define TASK_MULTIPLEXERS_PRIORITY          3    // High: Analog multiplexing
-#define TASK_PORTCONTROLLERINPUT_PRIORITY   3    // High: I/O reading
-#define TASK_GYRO_PRIORITY                  3    // High: Sensor reading
+#define TASK_SWITCHES_PRIORITY              4    // High: Logic processing
+#define TASK_SERIALINFOCMD_PRIORITY         3    // High: User interaction & debugging
 #define TASK_UNIVERSE_PRIORITY              2    // LOW: Computational, non-critical delay
 #define TASK_STORAGE_PRIORITY               2    // LOW: I/O operations, can wait
 #define TASK_LOGGING_PRIORITY               2    // LOW: Asynchronous data recording
-#define TASK_GPS_PRIORITY                   5    // High: Time/location sync critical
 
 // CORE 0 ASSIGNMENT
 #define TASK_SERIALINFOCMD_CORE             0    // Core 0: Keep on main (timing-sensitive)
@@ -71,7 +67,7 @@ TaskHandle_t TaskDisplay;
 #define TASK_DISPLAY_CORE                   0    // Core 0: UI responsiveness
 
 // CORE 1 ASSIGNMENT
-#define TASK_GPS_CORE                       1    // Core 1: Critical for system sync
+#define TASK_GPS_CORE                       1    // Critical for system timing regardless of gps
 
 // STACK SIZES (Adjusted for task complexity)
 #define TASK_STORAGE_STACK_SIZE             6144    // +50%: SDMMC operations
@@ -443,46 +439,6 @@ void createTaskMultiplexers() {
 }
 
 /** ----------------------------------------------------------------------------
- * Port Controller Input Task.
- * 
- * @brief Reads pins on portcontroller.
- */
-void taskPortControllerInput(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
-  for (;;) {
-    esp_task_wdt_reset();
-    // ------------------------------------------------
-    // Read Input Port Controller.
-    // ------------------------------------------------
-    if (readInputPortControllerReadPins(iic_2, I2C_ADDR_INPUT_PORTCONTROLLER)==true) {
-      esp_task_wdt_reset();
-      systemData.i_count_portcontroller_input++;
-      if (systemData.i_count_portcontroller_input>=UINT64_MAX-2)
-        {systemData.i_count_portcontroller_input=0;}
-    }
-    esp_task_wdt_reset();
-    // ------------------------------------------------
-    // Delay next iteration of task.
-    // ------------------------------------------------
-    if (TICK_DELAY_TASK_PORTCONTROLLER_INPUT==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_PORTCONTROLLER_INPUT / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_PORTCONTROLLER_INPUT);}
-  }
-}
-
-void createTaskPortControllerInput() {
-    xTaskCreatePinnedToCore(
-    taskPortControllerInput,   /* Function to implement the task */
-    "TaskPortControllerInput", /* Name of the task */
-    TASK_PORTCONTROLLERINPUT_STACK_SIZE, /* Stack size in words */
-    NULL,                      /* Task input parameter */
-    TASK_PORTCONTROLLERINPUT_PRIORITY, /* Priority of the task */
-    &TaskPortControllerInput,          /* Task handle. */
-    TASK_PORTCONTROLLERINPUT_CORE);    /* Core where the task should run */
-}
-
-/** ----------------------------------------------------------------------------
  * Switch Task.
  * 
  * @brief Performs various operations including:
@@ -595,43 +551,6 @@ void createTaskUniverse() {
     TASK_UNIVERSE_CORE);    /* Core where the task should run */
 }
 
-/** ----------------------------------------------------------------------------
- * Display Task.
- */
-
-void taskDisplay(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  
-  for(;;) {
-    esp_task_wdt_reset();
-
-    update_display();
-
-    // ------------------------------------------------
-    // Counters
-    // ------------------------------------------------
-    systemData.i_count_display++;
-    if (systemData.i_count_display>=UINT32_MAX-2)
-      {systemData.i_count_display=0;}
-    esp_task_wdt_reset();
-    // ------------------------------------------------
-    // Delay next iteration of task.
-    // ------------------------------------------------
-    if (TICK_DELAY_TASK_DISPLAY==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_DISPLAY / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_DISPLAY);}
-  }
-}
-void createTaskDisplay() {
-    xTaskCreatePinnedToCore(
-    taskDisplay,   /* Function to implement the task */
-    "TaskDisplay", /* Name of the task */
-    TASK_DISPLAY_STACK_SIZE, /* Stack size in words */
-    NULL,           /* Task input parameter */
-    TASK_DISPLAY_PRIORITY, /* Priority of the task */
-    &TaskDisplay,          /* Task handle. */
-    TASK_DISPLAY_CORE);    /* Core where the task should run */
-}
 
 /** ----------------------------------------------------------------------------
  * PowerCfg: Ultimate Performance.
@@ -662,10 +581,6 @@ void setTasksDelayUltimatePerformance() {
     DELAY_TASK_SWITCHES=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SWITCHES;
     TICK_DELAY_TASK_SWITCHES=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SWITCHES;
     xTaskNotifyGive(TaskSwitches);
-
-    DELAY_TASK_PORTCONTROLLER_INPUT=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_PORTCONTROLLER_INPUT;
-    TICK_DELAY_TASK_PORTCONTROLLER_INPUT=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_PORTCONTROLLER_INPUT;
-    xTaskNotifyGive(TaskPortControllerInput);
 
     DELAY_TASK_LOGGING=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_LOGGING;
     TICK_DELAY_TASK_LOGGING=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_LOGGING;
@@ -705,10 +620,6 @@ void setTasksDelayPowerSaving() {
     DELAY_TASK_SWITCHES=POWER_CONFIG_1_SECOND_DELAY_TASK_SWITCHES;
     TICK_DELAY_TASK_SWITCHES=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_SWITCHES;
     xTaskNotifyGive(TaskSwitches);
-
-    DELAY_TASK_PORTCONTROLLER_INPUT=POWER_CONFIG_1_SECOND_DELAY_TASK_PORTCONTROLLER_INPUT;
-    TICK_DELAY_TASK_PORTCONTROLLER_INPUT=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_PORTCONTROLLER_INPUT;
-    xTaskNotifyGive(TaskPortControllerInput);
 
     DELAY_TASK_LOGGING=POWER_CONFIG_1_SECOND_DELAY_TASK_LOGGING;
     TICK_DELAY_TASK_LOGGING=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_LOGGING;
