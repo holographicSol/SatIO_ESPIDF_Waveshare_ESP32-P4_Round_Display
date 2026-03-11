@@ -123,24 +123,24 @@ struct satioFileStruct satioFileData = {
         "SATIO_SPEED_VALUE_MODE",              // 39
         "SATIO_GROUND_HEADING_VALUE_MODE",     // 40
 
-        "DELAY_TASK_SERIAL_INFOCMD",           // 41
-        "TICK_DELAY_TASK_SERIAL_INFOCMD",      // 42
-        "DELAY_TASK_MULTIPLEXERS",             // 43
-        "TICK_DELAY_TASK_MULTIPLEXERS",        // 44
-        "DELAY_TASK_GYRO0",                    // 45
-        "TICK_DELAY_TASK_GYRO0",               // 46
-        "DELAY_TASK_UNIVERSE",                 // 47
-        "TICK_DELAY_TASK_UNIVERSE",            // 48
-        "DELAY_TASK_GPS",                      // 49
-        "TICK_DELAY_TASK_GPS",                 // 50
-        "DELAY_TASK_SWITCHES",                 // 51
-        "TICK_DELAY_TASK_SWITCHES",            // 52
-        "DELAY_TASK_PORTCONTROLLER_INPUT",     // 53
-        "TICK_DELAY_TASK_PORTCONTROLLER_INPUT",// 54
-        "DELAY_TASK_STORAGE",                  // 55
-        "TICK_DELAY_TASK_STORAGE",             // 56
-        "DELAY_TASK_LOGGING",                  // 57
-        "TICK_DELAY_TASK_LOGGING",             // 58
+        // "DELAY_TASK_SERIAL_INFOCMD",           // 41
+        // "TICK_DELAY_TASK_SERIAL_INFOCMD",      // 42
+        // "DELAY_TASK_MULTIPLEXERS",             // 43
+        // "TICK_DELAY_TASK_MULTIPLEXERS",        // 44
+        // "DELAY_TASK_GYRO0",                    // 45
+        // "TICK_DELAY_TASK_GYRO0",               // 46
+        // "DELAY_TASK_UNIVERSE",                 // 47
+        // "TICK_DELAY_TASK_UNIVERSE",            // 48
+        // "DELAY_TASK_GPS",                      // 49
+        // "TICK_DELAY_TASK_GPS",                 // 50
+        // "DELAY_TASK_SWITCHES",                 // 51
+        // "TICK_DELAY_TASK_SWITCHES",            // 52
+        // "DELAY_TASK_PORTCONTROLLER_INPUT",     // 53
+        // "TICK_DELAY_TASK_PORTCONTROLLER_INPUT",// 54
+        // "DELAY_TASK_STORAGE",                  // 55
+        // "TICK_DELAY_TASK_STORAGE",             // 56
+        // "DELAY_TASK_LOGGING",                  // 57
+        // "TICK_DELAY_TASK_LOGGING",             // 58
     },
     .system_filepath="/SYSTEM/system_conf.csv",
     .log_dir="/LOG/",
@@ -896,24 +896,24 @@ bool saveSystemFile(const char *filepath) {
     WRITE_INT_TAG(39, satioData.speed_value_mode);
     WRITE_INT_TAG(40, satioData.ground_heading_value_mode);
 
-    WRITE_LONG_TAG(41, DELAY_TASK_SERIAL_INFOCMD);
-    WRITE_LONG_TAG(42, TICK_DELAY_TASK_SERIAL_INFOCMD);
-    WRITE_LONG_TAG(43, DELAY_TASK_MULTIPLEXERS);
-    WRITE_LONG_TAG(44, TICK_DELAY_TASK_MULTIPLEXERS);
-    WRITE_LONG_TAG(45, DELAY_TASK_GYRO0);
-    WRITE_LONG_TAG(46, TICK_DELAY_TASK_GYRO0);
-    WRITE_LONG_TAG(47, DELAY_TASK_UNIVERSE);
-    WRITE_LONG_TAG(48, TICK_DELAY_TASK_UNIVERSE);
-    WRITE_LONG_TAG(49, DELAY_TASK_GPS);
-    WRITE_LONG_TAG(50, TICK_DELAY_TASK_GPS);
-    WRITE_LONG_TAG(51, DELAY_TASK_SWITCHES);
-    WRITE_LONG_TAG(52, TICK_DELAY_TASK_SWITCHES);
-    WRITE_LONG_TAG(53, DELAY_TASK_PORTCONTROLLER_INPUT);
-    WRITE_LONG_TAG(54, TICK_DELAY_TASK_PORTCONTROLLER_INPUT);
-    WRITE_LONG_TAG(55, DELAY_TASK_STORAGE);
-    WRITE_LONG_TAG(56, TICK_DELAY_TASK_STORAGE);
-    WRITE_LONG_TAG(57, DELAY_TASK_LOGGING);
-    WRITE_LONG_TAG(58, TICK_DELAY_TASK_LOGGING);
+    // WRITE_LONG_TAG(41, DELAY_TASK_SERIAL_INFOCMD);
+    // WRITE_LONG_TAG(42, TICK_DELAY_TASK_SERIAL_INFOCMD);
+    // WRITE_LONG_TAG(43, DELAY_TASK_MULTIPLEXERS);
+    // WRITE_LONG_TAG(44, TICK_DELAY_TASK_MULTIPLEXERS);
+    // WRITE_LONG_TAG(45, DELAY_TASK_GYRO0);
+    // WRITE_LONG_TAG(46, TICK_DELAY_TASK_GYRO0);
+    // WRITE_LONG_TAG(47, DELAY_TASK_UNIVERSE);
+    // WRITE_LONG_TAG(48, TICK_DELAY_TASK_UNIVERSE);
+    // WRITE_LONG_TAG(49, DELAY_TASK_GPS);
+    // WRITE_LONG_TAG(50, TICK_DELAY_TASK_GPS);
+    // WRITE_LONG_TAG(51, DELAY_TASK_SWITCHES);
+    // WRITE_LONG_TAG(52, TICK_DELAY_TASK_SWITCHES);
+    // WRITE_LONG_TAG(53, DELAY_TASK_PORTCONTROLLER_INPUT);
+    // WRITE_LONG_TAG(54, TICK_DELAY_TASK_PORTCONTROLLER_INPUT);
+    // WRITE_LONG_TAG(55, DELAY_TASK_STORAGE);
+    // WRITE_LONG_TAG(56, TICK_DELAY_TASK_STORAGE);
+    // WRITE_LONG_TAG(57, DELAY_TASK_LOGGING);
+    // WRITE_LONG_TAG(58, TICK_DELAY_TASK_LOGGING);
     
     #undef WRITE_INT_TAG
     #undef WRITE_LONG_TAG
@@ -1005,25 +1005,24 @@ bool loadSystemFile(const char *filepath) {
             else if (tag_index==39) {if (str_is_int8(data_0.c_str())) {satioData.speed_value_mode=atoi(data_0.c_str());}}
             else if (tag_index==40) {if (str_is_int8(data_0.c_str())) {satioData.ground_heading_value_mode=atoi(data_0.c_str());}}
 
-            else if (tag_index==41) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SERIAL_INFOCMD=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==42) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_SERIAL_INFOCMD=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==43) {if (str_is_long(data_0.c_str())) {DELAY_TASK_MULTIPLEXERS=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==44) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_MULTIPLEXERS=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==45) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GYRO0=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==46) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_GYRO0=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==47) {if (str_is_long(data_0.c_str())) {DELAY_TASK_UNIVERSE=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==48) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_UNIVERSE=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==49) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GPS=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==50) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_GPS=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==51) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SWITCHES=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==52) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_SWITCHES=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==53) {if (str_is_long(data_0.c_str())) {DELAY_TASK_PORTCONTROLLER_INPUT=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==54) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_PORTCONTROLLER_INPUT=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==55) {if (str_is_long(data_0.c_str())) {DELAY_TASK_STORAGE=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==56) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_STORAGE=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==57) {if (str_is_long(data_0.c_str())) {DELAY_TASK_LOGGING=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==58) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_LOGGING=strtol(data_0.c_str(), &endptr, 10);}}
-
+            // else if (tag_index==41) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SERIAL_INFOCMD=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==42) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_SERIAL_INFOCMD=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==43) {if (str_is_long(data_0.c_str())) {DELAY_TASK_MULTIPLEXERS=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==44) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_MULTIPLEXERS=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==45) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GYRO0=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==46) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_GYRO0=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==47) {if (str_is_long(data_0.c_str())) {DELAY_TASK_UNIVERSE=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==48) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_UNIVERSE=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==49) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GPS=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==50) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_GPS=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==51) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SWITCHES=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==52) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_SWITCHES=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==53) {if (str_is_long(data_0.c_str())) {DELAY_TASK_PORTCONTROLLER_INPUT=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==54) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_PORTCONTROLLER_INPUT=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==55) {if (str_is_long(data_0.c_str())) {DELAY_TASK_STORAGE=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==56) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_STORAGE=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==57) {if (str_is_long(data_0.c_str())) {DELAY_TASK_LOGGING=strtol(data_0.c_str(), &endptr, 10);}}
+            // else if (tag_index==58) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_LOGGING=strtol(data_0.c_str(), &endptr, 10);}}
 
             currentTag++;
     }

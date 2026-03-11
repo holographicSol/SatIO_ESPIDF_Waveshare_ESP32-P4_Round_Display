@@ -67,7 +67,7 @@ TaskHandle_t TaskDisplay;
 #define TASK_UNIVERSE_CORE                  0    // Core 0: Heavy compute, can defer
 #define TASK_STORAGE_CORE                   0    // Core 0: I/O-heavy, doesn't need Core 0
 #define TASK_LOGGING_CORE                   0    // Core 0: I/O operations
-#define TASK_DISPLAY_CORE             0    // Core 0: UI responsiveness
+#define TASK_DISPLAY_CORE                   0    // Core 0: UI responsiveness
 
 // CORE 1 ASSIGNMENT
 #define TASK_GPS_CORE                       1    // Core 1: Critical for system sync
@@ -410,8 +410,9 @@ void taskMultiplexers(void * pvParameters) {
     // ------------------------------------------------
     for (uint8_t i_chan = 0; i_chan < 16; i_chan++) {
       readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
-      esp_task_wdt_reset();
-      // Serial.println("[ad] " + String(i_chan) + ": " + String(ad_mux_0.data[i_chan]));
+      vTaskDelay(1);
+      // esp_task_wdt_reset();
+      // printf("[ad] %d: %f\n", i_chan, ad_mux_0.data[i_chan]);
     }
     // ------------------------------------------------
     // Counters

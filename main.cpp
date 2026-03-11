@@ -68,13 +68,13 @@
 #include "esp_heap_caps.h"
 #include "nvs_flash.h"
 #include "esp_system.h"
-#include "driver/uart.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "driver/uart.h"
 #include "esp_log.h"
+#include "esp_rom_uart.h"
 
 #define UART0_NUM      UART_NUM_0
 #define UART0_BUF_SIZE         (512)
@@ -247,6 +247,7 @@ extern "C" void app_main(void)
         .trigger_panic = false,          // Trigger panic on timeout
     };
     esp_task_wdt_reconfigure(&wdt_config);
+    
     // esp_task_wdt_deinit();
 
     // --------------------------------------------------------------
@@ -259,6 +260,7 @@ extern "C" void app_main(void)
     // --------------------------------------------------------------
     uart_config_t uart0_config = {
         .baud_rate = 115200,
+        // .baud_rate = 921600,
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
@@ -297,11 +299,6 @@ extern "C" void app_main(void)
     writeOutputPortControllerClear(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER);
 
     // --------------------------------------------------------------
-    // Initialize Multiplexer(s).
-    // --------------------------------------------------------------
-    // // initADMultiplexer(ad_mux_0);
-
-    // --------------------------------------------------------------
     // Initialize Serial 1 (for GPS).
     // --------------------------------------------------------------
     printf("[Serial1] (GPS)\n");
@@ -318,6 +315,13 @@ extern "C" void app_main(void)
     // --------------------------------------------------------------
     // Create Tasks.
     // --------------------------------------------------------------
+
+    // Storage
+    sdcardFlagData.load_system=true; // Set load system flag ready for sdcard flag handler
+    printf("creating storage task\n");
+    createTaskStorage();             // (target: 2/ps)    SD card
+    printf("creating logging task\n");
+    createTaskLogging();             // (target: n/ps)    Log to sdcard
     
     // GPS
     printf("creating GPS task\n");
@@ -328,8 +332,14 @@ extern "C" void app_main(void)
     printf("creating gyro task\n");
     createTaskGyro();                // (target: 200/ps)  Attitude
 
-    // Auxillary Input
-    // createTaskMultiplexers();        // (target: 200/ps)  Fast general input
+    // Auxillary Fast Input
+    // Force non-lazy ADC init on signal pin
+    analogRead(PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG);
+    analogSetAttenuation(ADC_11db);  // Full ~0-3.3V range; call once globally
+    initADMultiplexer(ad_mux_0);
+    createTaskMultiplexers();        // (target: 200/ps)  Fast general input
+    
+    // Auxillary Large Input (Slow if utilizing all (+-50) input pins)
     // createTaskPortControllerInput(); // (target: 1/ps)    Slow general input
 
     // Auxillary Output
@@ -340,13 +350,6 @@ extern "C" void app_main(void)
     printf("creating universe task\n");
     myAstroBegin();
     createTaskUniverse();            // (target: 1/ps)    Star tracking
-
-    // Storage
-    sdcardFlagData.load_system=true; // Set load system flag ready for sdcard flag handler
-    printf("creating storage task\n");
-    createTaskStorage();             // (target: 2/ps)    SD card
-    printf("creating logging task\n");
-    createTaskLogging();             // (target: n/ps)    Log to sdcard
 
     // Info/Command
     printf("creating info command task\n");
