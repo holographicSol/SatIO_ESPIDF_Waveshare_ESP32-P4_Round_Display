@@ -280,6 +280,16 @@ typedef struct {
 } mapping_config_container_t;
 
 /** ---------------------------------------------------------------------------------------
+ * @brief Matrix Switch Panel Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel;
+    button_t switch_overview_panel;
+    button_t switch_matrix_panel;
+    button_t switch_mapping_panel;
+} matrix_switch_container_t;
+
+/** ---------------------------------------------------------------------------------------
  * @brief GPS Switch Panel Container Struct
  */
 typedef struct {
@@ -1134,6 +1144,52 @@ mapping_config_container_t create_mapping_config_container(
     const lv_font_t * font_title,
     const lv_font_t * font_sub
 );
+
+/** -------------------------------------------------------------------------------------
+ * @brief Create Matrix Switch Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return matrix_switch_container_t structure.
+ */
+matrix_switch_container_t create_matrix_switch_panel(
+    lv_obj_t * parent,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    );
 
 /** -------------------------------------------------------------------------------------
  * @brief Create Gyro Panel Container.

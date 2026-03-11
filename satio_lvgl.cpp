@@ -142,7 +142,7 @@ button_t matrix_save;
 button_t matrix_load;
 button_t matrix_delete;
 lv_obj_t * dd_matrix_file_slot_select;
-button_t switch_matrix_mapping_panel;
+matrix_switch_container_t matrix_switch_panel;
 // ---------------------------
 // GPS
 // ---------------------------
@@ -1209,12 +1209,6 @@ void dd_link_map_slot_event_cb(lv_event_t * e)
 void matrix_new_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[matrix_new_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         printf("[matrix_new_event_cb] Setting new matrix.\n");
@@ -1231,12 +1225,6 @@ void matrix_new_event_cb(lv_event_t * e)
 void matrix_save_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[matrix_save_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         if (sdcardData.sdcard_mounted==true) {
@@ -1259,12 +1247,6 @@ void matrix_save_event_cb(lv_event_t * e)
 void matrix_load_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[matrix_load_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         if (sdcardData.sdcard_mounted==true) {
@@ -1287,12 +1269,6 @@ void matrix_load_event_cb(lv_event_t * e)
 void matrix_delete_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[matrix_delete_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         if (sdcardData.sdcard_mounted==true) {
@@ -1313,12 +1289,6 @@ void matrix_delete_event_cb(lv_event_t * e)
 void current_matrix_computer_assist_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[current_matrix_computer_assist_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         bool toggle = !matrixData.computer_assist[0][current_matrix_i];
@@ -1332,20 +1302,43 @@ void current_matrix_computer_assist_event_cb(lv_event_t * e)
  * 
  * @param e Pointer to the LVGL event structure.
  */
+void switch_matrix_overview_panel_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if(code == LV_EVENT_CLICKED) {
+        current_matrix_panel_view=0;
+        printf("[switch_matrix_overview_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+void switch_matrix_matrix_panel_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if(code == LV_EVENT_CLICKED) {
+        current_matrix_panel_view=1;
+        printf("[switch_matrix_matrix_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
+    }
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
 void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[switch_matrix_mapping_panel_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
-        current_matrix_panel_view+=1;
-        if (current_matrix_panel_view>=MAX_MATRIX_PANEL_VIEWS) {current_matrix_panel_view=0;}
-        printf("[switch_matrix_mapping_panel_event_cb] Switching matrix panel view: %d\n", current_matrix_panel_view);
+        current_matrix_panel_view=2;
+        printf("[switch_matrix_mapping_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
     }
 }
 
@@ -1357,12 +1350,6 @@ void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
 void switch_satio_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[switch_satio_panel_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         current_gps_panel=0;
@@ -1378,12 +1365,6 @@ void switch_satio_panel_event_cb(lv_event_t * e)
 void switch_gngga_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[switch_gngga_panel_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         current_gps_panel=1;
@@ -1399,12 +1380,6 @@ void switch_gngga_panel_event_cb(lv_event_t * e)
 void switch_gnrmc_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[switch_gnrmc_panel_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         current_gps_panel=2;
@@ -1420,12 +1395,6 @@ void switch_gnrmc_panel_event_cb(lv_event_t * e)
 void switch_gpatt_panel_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[switch_gpatt_panel_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         current_gps_panel=3;
@@ -1441,12 +1410,6 @@ void switch_gpatt_panel_event_cb(lv_event_t * e)
 void current_matrix_override_off_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[current_matrix_override_off_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         printf("[current_matrix_override_off_event_cb] OVERRIDING matrix switch %d\n", current_matrix_i);
@@ -1462,12 +1425,6 @@ void current_matrix_override_off_event_cb(lv_event_t * e)
 void btn_location_mode_gps_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_location_mode_gps_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.location_value_mode = SATIO_MODE_GPS;
@@ -1482,12 +1439,6 @@ void btn_location_mode_gps_event_cb(lv_event_t * e)
 void btn_location_mode_user_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_location_mode_user_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.location_value_mode = SATIO_MODE_USER;
@@ -1503,12 +1454,6 @@ void btn_location_mode_user_event_cb(lv_event_t * e)
 void btn_altitude_mode_gps_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_altitude_mode_gps_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.altitude_value_mode = SATIO_MODE_GPS;
@@ -1523,12 +1468,6 @@ void btn_altitude_mode_gps_event_cb(lv_event_t * e)
 void btn_altitude_mode_user_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_altitude_mode_user_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.altitude_value_mode = SATIO_MODE_USER;
@@ -1544,12 +1483,6 @@ void btn_altitude_mode_user_event_cb(lv_event_t * e)
 void btn_speed_mode_gps_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_speed_mode_gps_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.speed_value_mode = SATIO_MODE_GPS;
@@ -1564,12 +1497,6 @@ void btn_speed_mode_gps_event_cb(lv_event_t * e)
 void btn_speed_mode_user_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_speed_mode_user_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.speed_value_mode = SATIO_MODE_USER;
@@ -1585,12 +1512,6 @@ void btn_speed_mode_user_event_cb(lv_event_t * e)
 void btn_ground_heading_mode_gps_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_ground_heading_mode_gps_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.ground_heading_value_mode = SATIO_MODE_GPS;
@@ -1605,12 +1526,6 @@ void btn_ground_heading_mode_gps_event_cb(lv_event_t * e)
 void btn_ground_heading_mode_user_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_ground_heading_mode_user_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.ground_heading_value_mode = SATIO_MODE_USER;
@@ -1626,12 +1541,6 @@ void btn_ground_heading_mode_user_event_cb(lv_event_t * e)
 void btn_auto_set_user_lat_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_auto_set_user_lat_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_degrees_latitude = satioData.degrees_latitude;
@@ -1647,12 +1556,6 @@ void btn_auto_set_user_lat_event_cb(lv_event_t * e)
 void btn_auto_set_user_lon_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_auto_set_user_lon_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_degrees_longitude = satioData.degrees_longitude;
@@ -1668,12 +1571,6 @@ void btn_auto_set_user_lon_event_cb(lv_event_t * e)
 void btn_auto_set_user_altitude_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_auto_set_user_altitude_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_altitude = satioData.altitude;
@@ -1689,12 +1586,6 @@ void btn_auto_set_user_altitude_event_cb(lv_event_t * e)
 void btn_auto_set_user_speed_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_auto_set_user_speed_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_speed = satioData.speed;
@@ -1710,12 +1601,6 @@ void btn_auto_set_user_speed_event_cb(lv_event_t * e)
 void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    if
-    (
-        code == LV_EVENT_CLICKED ||
-        code == LV_EVENT_PRESSED ||
-        code == LV_EVENT_RELEASED
-    ) {printf("[btn_auto_set_user_ground_heading_event_cb] event code: %d\n", code);}
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_ground_heading = satioData.ground_heading;
@@ -3406,7 +3291,7 @@ gps_switch_container_t create_gps_switch_panel(
         default_btn_bg,
         default_btn_off_value_hue
     );
-    lv_obj_add_event_cb(result.switch_satio_panel.button, switch_satio_panel_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.switch_satio_panel.button, switch_satio_panel_event_cb, LV_EVENT_CLICKED, NULL);
 
     // GNGGA Panel View
     result.switch_gngga_panel = create_button(
@@ -3424,7 +3309,7 @@ gps_switch_container_t create_gps_switch_panel(
         default_btn_bg,
         default_btn_off_value_hue
     );
-    lv_obj_add_event_cb(result.switch_gngga_panel.button, switch_gngga_panel_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.switch_gngga_panel.button, switch_gngga_panel_event_cb, LV_EVENT_CLICKED, NULL);
 
     // GNRMC Panel View
     result.switch_gnrmc_panel = create_button(
@@ -3442,7 +3327,7 @@ gps_switch_container_t create_gps_switch_panel(
         default_btn_bg,
         default_btn_off_value_hue
     );
-    lv_obj_add_event_cb(result.switch_gnrmc_panel.button, switch_gnrmc_panel_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.switch_gnrmc_panel.button, switch_gnrmc_panel_event_cb, LV_EVENT_CLICKED, NULL);
 
     // GPATT Panel View
     result.switch_gpatt_panel = create_button(
@@ -3460,12 +3345,215 @@ gps_switch_container_t create_gps_switch_panel(
         default_btn_bg,
         default_btn_off_value_hue
     );
-    lv_obj_add_event_cb(result.switch_gpatt_panel.button, switch_gpatt_panel_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.switch_gpatt_panel.button, switch_gpatt_panel_event_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_set_size(result.switch_satio_panel.panel, obj_w_0, obj_height);
     lv_obj_set_size(result.switch_gngga_panel.panel, obj_w_0, obj_height);
     lv_obj_set_size(result.switch_gnrmc_panel.panel, obj_w_0, obj_height);
     lv_obj_set_size(result.switch_gpatt_panel.panel, obj_w_0, obj_height);
+
+    return result;
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Create Matrix Switch Panel Container.
+ *
+ * @param parent Specify parent object.
+ * @param width_px Container width.
+ * @param height_px Container height.
+ * @param alignment Alignment on parent.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @param radius Corner radius.
+ * @param outer_pad_all Outer padding.
+ * @param inner_pad_all Inner uniform padding.
+ * @param outline_padding Padding for outline.
+ * @param main_row_padding Main row padding.
+ * @param main_column_padding Main column padding.
+ * @param sub_row_padding Sub-row padding.
+ * @param sub_column_padding Sub-column padding.
+ * @param row_height Height of each row.
+ * @param show_scrollbar Show/hide scrollbar.
+ * @param enable_scrolling Enable/disable scrolling.
+ * @param font_title Title font.
+ * @param font_sub Subtitle/font for smaller text.
+ * @return matrix_switch_container_t structure.
+ */
+matrix_switch_container_t create_matrix_switch_panel(
+    lv_obj_t * parent,
+    int32_t width_px,
+    int32_t height_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius,
+    int32_t outer_pad_all,
+    int32_t inner_pad_all,
+    int32_t outline_padding,
+    int32_t main_row_padding,
+    int32_t main_column_padding,
+    int32_t sub_row_padding,
+    int32_t sub_column_padding,
+    int32_t row_height,
+    bool show_scrollbar,
+    bool enable_scrolling,
+    const lv_font_t * font_title,
+    const lv_font_t * font_sub
+    )
+{
+    matrix_switch_container_t result = {0};
+    
+    /* --- MAIN PANEL ------------------------------------------------------------------ */
+    result.panel = lv_obj_create(parent);
+
+    // Show scrollbar
+    if (show_scrollbar) {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_AUTO);
+    } else {lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_OFF);}
+
+    // Enable scrolling
+    if (enable_scrolling) {lv_obj_set_scroll_dir(result.panel, LV_DIR_ALL);
+    } else {lv_obj_set_scroll_dir(result.panel, LV_DIR_NONE);}
+
+    // Size & Position
+    lv_obj_set_size(result.panel, width_px, height_px);
+    lv_obj_align(result.panel, alignment, pos_x, pos_y);
+    lv_obj_set_style_radius(result.panel, radius, LV_PART_MAIN);
+
+    // Main Padding
+    lv_obj_set_style_pad_all(result.panel, outer_pad_all, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(result.panel, main_column_padding, LV_PART_MAIN);
+    lv_obj_set_style_pad_row(result.panel, main_row_padding, LV_PART_MAIN);
+
+    // Outline
+    lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
+    lv_obj_set_style_outline_pad(result.panel, outline_padding, LV_PART_MAIN);
+    
+    // Border
+    lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+
+    // Background
+    lv_obj_set_style_bg_color(result.panel, default_bg_hue, LV_PART_MAIN);
+
+    // Flex
+    lv_obj_set_flex_flow(result.panel, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(result.panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+
+    // Row sizes
+    int32_t sub_row_width = width_px - (outer_pad_all*2);
+    int32_t sub_row_height = row_height-(outline_padding*2);
+
+    // Row Object sizes
+    int32_t obj_w_0 = 0;
+    int32_t obj_w_1 = 0;
+    int32_t obj_w_2 = 0;
+    int32_t obj_w_3 = 0;
+    int32_t obj_w_4 = 0;
+    int32_t obj_w_5 = 0;
+    int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
+
+    /* --- Row Buttons ------------------------------------------------------------------ */
+    lv_obj_t * row_0 = lv_obj_create(result.panel);
+
+    // Show scrollbar
+    if (show_scrollbar) {lv_obj_set_scrollbar_mode(row_0, LV_SCROLLBAR_MODE_AUTO);
+    } else {lv_obj_set_scrollbar_mode(row_0, LV_SCROLLBAR_MODE_OFF);}
+
+    // Enable scrolling
+    if (enable_scrolling) {lv_obj_set_scroll_dir(row_0, LV_DIR_ALL);
+    } else {lv_obj_set_scroll_dir(row_0, LV_DIR_NONE);}
+
+    // Size & Position
+    lv_obj_set_size(row_0, sub_row_width, sub_row_height);
+    lv_obj_align(row_0, LV_ALIGN_CENTER, pos_x, pos_y);
+
+    // Row Padding
+    lv_obj_set_style_pad_all(row_0, inner_pad_all, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(row_0, sub_column_padding, LV_PART_MAIN);
+    lv_obj_set_style_pad_row(row_0, sub_row_padding, LV_PART_MAIN);
+
+    // Outline
+    lv_obj_set_style_outline_width(row_0, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(row_0, lv_color_make(0,0,0), LV_PART_MAIN);
+    lv_obj_set_style_outline_pad(row_0, 0, LV_PART_MAIN);
+
+    // Border
+    lv_obj_set_style_border_width(row_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(row_0, lv_color_make(0,0,0), LV_PART_MAIN);
+
+    // Background
+    lv_obj_set_style_bg_opa(row_0, LV_OPA_TRANSP, LV_PART_MAIN);
+
+    // Flex
+    lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(
+        row_0,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    // Set row object widths
+    obj_w_0 = (((sub_row_width/3) *1)) - (sub_column_padding*1);
+
+    // SatIO Panel View
+    result.switch_overview_panel = create_button(
+        row_0,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0, 0,
+        "OVERVIEW",
+        LV_TEXT_ALIGN_CENTER,
+        false,
+        false,
+        &cobalt_alien_17,
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
+    );
+    lv_obj_add_event_cb(result.switch_overview_panel.button, switch_matrix_overview_panel_event_cb, LV_EVENT_CLICKED, NULL);
+
+    // GNGGA Panel View
+    result.switch_matrix_panel = create_button(
+        row_0,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0, 0,
+        "MATRIX",
+        LV_TEXT_ALIGN_CENTER,
+        false,
+        false,
+        &cobalt_alien_17,
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
+    );
+    lv_obj_add_event_cb(result.switch_matrix_panel.button, switch_matrix_matrix_panel_event_cb, LV_EVENT_CLICKED, NULL);
+
+    // GNRMC Panel View
+    result.switch_mapping_panel = create_button(
+        row_0,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0, 0,
+        "MAPPING",
+        LV_TEXT_ALIGN_CENTER,
+        false,
+        false,
+        &cobalt_alien_17,
+        radius_rounded,
+        default_btn_bg,
+        default_btn_off_value_hue
+    );
+    lv_obj_add_event_cb(result.switch_mapping_panel.button, switch_matrix_mapping_panel_event_cb, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_set_size(result.switch_overview_panel.panel, obj_w_0, obj_height);
+    lv_obj_set_size(result.switch_matrix_panel.panel, obj_w_0, obj_height);
+    lv_obj_set_size(result.switch_mapping_panel.panel, obj_w_0, obj_height);
 
     return result;
 }
@@ -6697,7 +6785,7 @@ satio_container_t create_satio_panel(
         &cobalt_alien_17,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_obj_add_event_cb(result.ta_user_deg_lat, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.ta_user_deg_lat, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.ta_user_deg_lat, &user_latitude_ctx);
 
     result.btn_auto_set_user_lat = create_button(
@@ -6778,7 +6866,7 @@ satio_container_t create_satio_panel(
         &cobalt_alien_17,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_obj_add_event_cb(result.ta_user_deg_lon, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.ta_user_deg_lon, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.ta_user_deg_lon, &user_longitude_ctx);
 
     result.btn_auto_set_user_lon = create_button(
@@ -7165,7 +7253,7 @@ satio_container_t create_satio_panel(
         &cobalt_alien_17,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_obj_add_event_cb(result.ta_user_altitude, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.ta_user_altitude, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.ta_user_altitude, &user_altitude_ctx);
 
     result.btn_auto_set_user_altitude = create_button(
@@ -7490,7 +7578,7 @@ satio_container_t create_satio_panel(
         &cobalt_alien_17,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_obj_add_event_cb(result.ta_user_speed, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.ta_user_speed, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.ta_user_speed, &user_speed_ctx);
 
     result.btn_auto_set_user_speed = create_button(
@@ -7875,7 +7963,7 @@ satio_container_t create_satio_panel(
         &cobalt_alien_17,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_obj_add_event_cb(result.ta_user_ground_heading, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.ta_user_ground_heading, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.ta_user_ground_heading, &user_ground_heading_ctx);
 
     result.btn_auto_set_user_ground_heading = create_button(
@@ -8239,7 +8327,7 @@ satio_container_t create_satio_panel(
         &cobalt_alien_17,
         LV_TEXT_ALIGN_CENTER
     );
-    lv_obj_add_event_cb(result.ta_utc_second_offset, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.ta_utc_second_offset, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.ta_utc_second_offset, &user_utc_offset_seconds_ctx);
 
     lv_obj_set_size(result.lbl_utc_second_offset, obj_w_0, obj_height);
@@ -13112,7 +13200,7 @@ matrix_function_container_t create_matrix_function_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_x, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_x, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_x, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_x, &matrix_value_x_ctx);
 
     // System X
@@ -13222,7 +13310,7 @@ matrix_function_container_t create_matrix_function_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_y, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_y, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_y, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_y, &matrix_value_y_ctx);
 
     // System Y
@@ -13332,7 +13420,7 @@ matrix_function_container_t create_matrix_function_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_z, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_z, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_z, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_z, &matrix_value_z_ctx);
 
     // System Z
@@ -13555,7 +13643,7 @@ matrix_function_container_t create_matrix_function_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_pwm_0, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_pwm_0, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_pwm_0, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_pwm_0, &matrix_output_pwm_0_ctx);
 
     // Label PWM1
@@ -13600,7 +13688,7 @@ matrix_function_container_t create_matrix_function_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_pwm_1, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_pwm_1, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_pwm_1, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_pwm_1, &matrix_output_pwm_1_ctx);
 
     // Critical for alignment
@@ -13754,7 +13842,7 @@ matrix_function_container_t create_matrix_function_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_port_map, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_port_map, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_port_map, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_port_map, &matrix_port_map_ctx);
 
     // Critical for alignment
@@ -13807,7 +13895,7 @@ matrix_function_container_t create_matrix_function_container(
         default_btn_bg,
         default_btn_off_value_hue
     );
-    lv_obj_add_event_cb(result.matrix_switch_computer_assist.button, current_matrix_computer_assist_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.matrix_switch_computer_assist.button, current_matrix_computer_assist_event_cb, LV_EVENT_CLICKED, NULL);
 
     // Output Value
     result.matrix_switch_output_value = create_label(
@@ -13847,7 +13935,7 @@ matrix_function_container_t create_matrix_function_container(
         default_btn_bg,
         default_btn_off_value_hue
     );
-    lv_obj_add_event_cb(result.matrix_switch_override.button, current_matrix_override_off_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.matrix_switch_override.button, current_matrix_override_off_event_cb, LV_EVENT_CLICKED, NULL);
     
     return result;
 }
@@ -14132,7 +14220,7 @@ mapping_config_container_t create_mapping_config_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_c1, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_c1, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_c1, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_c1, &mapping_c1_ctx);
 
     // Critical for alignment
@@ -14198,7 +14286,7 @@ mapping_config_container_t create_mapping_config_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_c2, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_c2, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_c2, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_c2, &mapping_c2_ctx);
 
     // Critical for alignment
@@ -14264,7 +14352,7 @@ mapping_config_container_t create_mapping_config_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_c3, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_c3, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_c3, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_c3, &mapping_c3_ctx);
 
     // Critical for alignment
@@ -14330,7 +14418,7 @@ mapping_config_container_t create_mapping_config_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_c4, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_c4, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_c4, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_c4, &mapping_c4_ctx);
 
     // Critical for alignment
@@ -14396,7 +14484,7 @@ mapping_config_container_t create_mapping_config_container(
         default_subtitle_hue
     );
     lv_obj_add_flag(result.val_c5, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(result.val_c5, set_keyboard_context_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(result.val_c5, set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(result.val_c5, &mapping_c5_ctx);
 
     // Critical for alignment
@@ -14593,6 +14681,8 @@ mapping_config_container_t create_mapping_config_container(
 
     return result;
 }
+
+
 
 /** -------------------------------------------------------------------------------------
  * @brief Create Image Loaded from SD Card.
@@ -15026,23 +15116,27 @@ void display_matrix_screen()
     lv_timer_handler();  // Process events/render
 
     // Switch Panel View
-    switch_matrix_mapping_panel = create_button(
-        matrix_screen,        // parent
-        200,                  // width
-        48,                   // height
-        LV_ALIGN_CENTER,      // alignment
-        0,                    // pos x
-        -180,                 // pos y
-        "MATRIX",             // label text
-        LV_TEXT_ALIGN_CENTER, // text align
-        false,                // show scrollbar
-        false,                // enable scrolling
-        &cobalt_alien_17,     // font for labels,
-        radius_rounded,
-        default_btn_bg,
-        default_btn_on_value_hue
+    matrix_switch_panel = create_matrix_switch_panel(
+        matrix_screen,    // parent
+        450,              // width px
+        40+(4*2),         // height px
+        LV_ALIGN_CENTER,  // alignment
+        0,                // pos x
+        -180,             // pos y
+        radius_rounded,   // radius
+        1,                // outer_pad_all
+        1,                // inner_pad_all
+        1,                // outline_padding
+        1,                // main_row_padding
+        1,                // main_column_padding
+        1,                // sub_row_padding
+        10,               // sub_column_padding
+        48,               // row height
+        false,            // show scrollbar
+        false,            // enable scrolling
+        &cobalt_alien_25, // font for titles,
+        &cobalt_alien_17  // font for text,
     );
-    lv_obj_add_event_cb(switch_matrix_mapping_panel.button, switch_matrix_mapping_panel_event_cb, LV_EVENT_ALL, NULL);
 
     printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
@@ -15086,7 +15180,7 @@ void display_matrix_screen()
         default_btn_bg,
         default_btn_on_value_hue
     );
-    lv_obj_add_event_cb(matrix_new.button, matrix_new_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(matrix_new.button, matrix_new_event_cb, LV_EVENT_CLICKED, NULL);
 
     // Save Matrix
     matrix_save = create_button(
@@ -15105,7 +15199,7 @@ void display_matrix_screen()
         default_btn_bg,
         default_btn_on_value_hue
     );
-    lv_obj_add_event_cb(matrix_save.button, matrix_save_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(matrix_save.button, matrix_save_event_cb, LV_EVENT_CLICKED, NULL);
 
     // Load Matrix
     matrix_load = create_button(
@@ -15124,7 +15218,7 @@ void display_matrix_screen()
         default_btn_bg,
         default_btn_on_value_hue
     );
-    lv_obj_add_event_cb(matrix_load.button, matrix_load_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(matrix_load.button, matrix_load_event_cb, LV_EVENT_CLICKED, NULL);
 
     // Delete Matrix
     matrix_delete = create_button(
@@ -15143,7 +15237,7 @@ void display_matrix_screen()
         default_btn_bg,
         default_btn_on_value_hue
     );
-    lv_obj_add_event_cb(matrix_delete.button, matrix_delete_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(matrix_delete.button, matrix_delete_event_cb, LV_EVENT_CLICKED, NULL);
 
     printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
@@ -15828,8 +15922,6 @@ void update_display()
 
         // Matrix Save Slot
         lv_dropdown_set_selected(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
-        lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-        lv_obj_set_style_text_color(lv_dropdown_get_list(dd_matrix_file_slot_select), rainbow_contrast_value_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
         if (current_matrix_panel_view==0) {
 
@@ -15838,9 +15930,13 @@ void update_display()
             lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
             // Show
             lv_obj_remove_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN);
-
-            // Switch
-            lv_label_set_text(switch_matrix_mapping_panel.label, "OVERVIEW");
+            // Switch Panel
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_overview_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_overview_panel.panel, default_btn_on_bg, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_matrix_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_matrix_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_mapping_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_mapping_panel.panel, default_btn_off_bg, LV_PART_MAIN);
 
             // Matrix Overview Grid 1
             if (matrix_overview_grid_1) {
@@ -15872,16 +15968,21 @@ void update_display()
 
         // Matrix Configuration Panel
         else if (current_matrix_panel_view==1) {
+
+            // Switch Panel
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_overview_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_overview_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_matrix_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_matrix_panel.panel, default_btn_on_bg, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_mapping_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_mapping_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+            // Hide
+            lv_obj_add_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
+            // Show
+            lv_obj_remove_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
+
             if (mfc.panel) {
-
-                // Hide
-                lv_obj_add_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
-                // Show
-                lv_obj_remove_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
-
-                // Switch
-                lv_label_set_text(switch_matrix_mapping_panel.label, "MATRIX");
 
                 // Current Switch
                 lv_dropdown_set_selected(mfc.dd_switch_index_select, current_matrix_i);
@@ -15986,16 +16087,22 @@ void update_display()
 
         // Mapping Configuration Panel
         else if (current_matrix_panel_view==2) {
+
+            // Switch Panel
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_overview_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_overview_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_matrix_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_matrix_panel.panel, default_btn_off_bg, LV_PART_MAIN);
+            lv_obj_set_style_text_color(matrix_switch_panel.switch_mapping_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(matrix_switch_panel.switch_mapping_panel.panel, default_btn_on_bg, LV_PART_MAIN);
+            lv_obj_add_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
+            // Show
+            lv_obj_remove_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
+
             if (mcc.panel) {
 
                 // Hide
-                lv_obj_add_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
-                // Show
-                lv_obj_remove_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
-
-                // Switch
-                lv_label_set_text(switch_matrix_mapping_panel.label, "MAP");
 
                 // Map Slot
                 lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
