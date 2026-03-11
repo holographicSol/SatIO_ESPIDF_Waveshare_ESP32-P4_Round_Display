@@ -610,6 +610,62 @@ typedef struct {
     lv_obj_t * sw_output_meteors;
 } serial_container_t;
 
+/** ---------------------------------------------------------------------------------------
+ * @brief Analog/Digital Multiplexer Container Struct
+ */
+typedef struct {
+    lv_obj_t * panel;
+
+    lv_obj_t * lbl_title_chan_0;
+    lv_obj_t * lbl_val_chan_0;
+    
+    lv_obj_t * lbl_title_chan_1;
+    lv_obj_t * lbl_val_chan_1;
+    
+    lv_obj_t * lbl_title_chan_2;
+    lv_obj_t * lbl_val_chan_2;
+    
+    lv_obj_t * lbl_title_chan_3;
+    lv_obj_t * lbl_val_chan_3;
+    
+    lv_obj_t * lbl_title_chan_4;
+    lv_obj_t * lbl_val_chan_4;
+    
+    lv_obj_t * lbl_title_chan_5;
+    lv_obj_t * lbl_val_chan_5;
+    
+    lv_obj_t * lbl_title_chan_6;
+    lv_obj_t * lbl_val_chan_6;
+    
+    lv_obj_t * lbl_title_chan_7;
+    lv_obj_t * lbl_val_chan_7;
+    
+    lv_obj_t * lbl_title_chan_8;
+    lv_obj_t * lbl_val_chan_8;
+    
+    lv_obj_t * lbl_title_chan_9;
+    lv_obj_t * lbl_val_chan_9;
+    
+    lv_obj_t * lbl_title_chan_10;
+    lv_obj_t * lbl_val_chan_10;
+    
+    lv_obj_t * lbl_title_chan_11;
+    lv_obj_t * lbl_val_chan_11;
+    
+    lv_obj_t * lbl_title_chan_12;
+    lv_obj_t * lbl_val_chan_12;
+    
+    lv_obj_t * lbl_title_chan_13;
+    lv_obj_t * lbl_val_chan_13;
+    
+    lv_obj_t * lbl_title_chan_14;
+    lv_obj_t * lbl_val_chan_14;
+    
+    lv_obj_t * lbl_title_chan_15;
+    lv_obj_t * lbl_val_chan_15;
+
+} admplex0_container_t;
+
 /** --------------------------------------------------------------------------------------- 
  * Callbacks.
 */
