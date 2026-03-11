@@ -197,17 +197,19 @@ typedef struct {
     
     // XYZ values (textareas for input)
     lv_obj_t * label_x;
-    lv_obj_t * ta_x;
+    lv_obj_t * val_x;
     lv_obj_t * dd_x;
     lv_obj_t * label_mode_x;
     lv_obj_t * dd_mode_x;
+
     lv_obj_t * label_y;
-    lv_obj_t * ta_y;
+    lv_obj_t * val_y;
     lv_obj_t * dd_y;
     lv_obj_t * label_mode_y;
     lv_obj_t * dd_mode_y;
+
     lv_obj_t * label_z;
-    lv_obj_t * ta_z;
+    lv_obj_t * val_z;
     lv_obj_t * dd_z;
     lv_obj_t * label_mode_z;
     lv_obj_t * dd_mode_z;
@@ -217,8 +219,8 @@ typedef struct {
     lv_obj_t * dd_operator;
     
     // Flux (textarea for input)
-    lv_obj_t * label_flux;
-    lv_obj_t * ta_flux;
+    // lv_obj_t * label_flux;
+    // lv_obj_t * ta_flux;
     
     // Output mode (dropdown)
     lv_obj_t * label_output_mode;
@@ -226,9 +228,10 @@ typedef struct {
     
     // PWM values (textareas for input)
     lv_obj_t * label_output_pwm_0;
+    lv_obj_t * val_pwm_0;
+
     lv_obj_t * label_output_pwm_1;
-    lv_obj_t * ta_pwm_0;
-    lv_obj_t * ta_pwm_1;
+    lv_obj_t * val_pwm_1;
     
     // Invert Function Logic
     lv_obj_t * label_inverted_logic;
@@ -240,7 +243,7 @@ typedef struct {
 
     // Port
     lv_obj_t * label_port_map;
-    lv_obj_t * ta_port_map;
+    lv_obj_t * val_port_map;
 
     // Switches
     button_t matrix_switch_computer_assist;
@@ -259,15 +262,15 @@ typedef struct {
     lv_obj_t * c0;
     lv_obj_t * dd_c0;
     lv_obj_t * c1;
-    lv_obj_t * ta_c1;
+    lv_obj_t * val_c1;
     lv_obj_t * c2;
-    lv_obj_t * ta_c2;
+    lv_obj_t * val_c2;
     lv_obj_t * c3;
-    lv_obj_t * ta_c3;
+    lv_obj_t * val_c3;
     lv_obj_t * c4;
-    lv_obj_t * ta_c4;
+    lv_obj_t * val_c4;
     lv_obj_t * c5;
-    lv_obj_t * ta_c5;
+    lv_obj_t * val_c5;
     lv_obj_t * mode;
     lv_obj_t * dd_mode;
     lv_obj_t * input_value;
