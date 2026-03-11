@@ -16,47 +16,47 @@
  */
 struct MatrixStruct {
   // Count matrix executions per second.
-  volatile int64_t i_count_matrix;
+  int64_t i_count_matrix;
   // Load matrix file automatically every time the system starts.
-  volatile bool load_matrix_on_startup;
+  bool load_matrix_on_startup;
   // Count computer assist enabled.
-  volatile int i_computer_assist_enabled;
+  int i_computer_assist_enabled;
   // Count computer assist disabled.
-  volatile int i_computer_assist_disabled;
+  int i_computer_assist_disabled;
   // Count intention high
-  volatile int i_switch_intention_high;
+  int i_switch_intention_high;
   // Count intention low
-  volatile int i_switch_intention_low;
+  int i_switch_intention_low;
   // Count intention high
-  volatile int i_computer_intention_high;
+  int i_computer_intention_high;
   // Count intention low
-  volatile int i_computer_intention_low;
+  int i_computer_intention_low;
   // Checksummed sentence
   char matrix_sentence[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
 
   // Enable/disable computer assist.
-  volatile bool computer_assist[1][MAX_MATRIX_SWITCHES];
+  bool computer_assist[1][MAX_MATRIX_SWITCHES];
 
   // Final switch high/low intention (true/false).
-  volatile bool switch_intention[1][MAX_MATRIX_SWITCHES];
-  volatile bool prev_switch_intention[1][MAX_MATRIX_SWITCHES];
+  bool switch_intention[1][MAX_MATRIX_SWITCHES];
+  bool prev_switch_intention[1][MAX_MATRIX_SWITCHES];
 
   // Computer high/low intention (true/false). Is switch logic true or false.
   bool computer_intention[1][MAX_MATRIX_SWITCHES];
 
   // Matrix switch ports. Values should correspond to pins on the port controller.
-  volatile int16_t matrix_port_map[1][MAX_MATRIX_SWITCHES];
+  int16_t matrix_port_map[1][MAX_MATRIX_SWITCHES];
 
   // Output values. Values that will be sent to the port controller (digital/mapped).
   int32_t output_value[1][MAX_MATRIX_SWITCHES];
   int32_t prev_output_value[1][MAX_MATRIX_SWITCHES];
 
   // Fluctuation threshold. No output unless threshold breached+- beyond previous output value.
-  volatile uint32_t flux_value[1][MAX_MATRIX_SWITCHES]={};
+  uint32_t flux_value[1][MAX_MATRIX_SWITCHES]={};
 
   // Override output values (computer assist should never ammend these values).
-  volatile signed long override_output_value[1][MAX_MATRIX_SWITCHES];
-  volatile signed long override_prev_output_value[1][MAX_MATRIX_SWITCHES];
+  signed long override_output_value[1][MAX_MATRIX_SWITCHES];
+  signed long override_prev_output_value[1][MAX_MATRIX_SWITCHES];
 
   /**
    * Output mode.
@@ -64,7 +64,7 @@ struct MatrixStruct {
    * 0 : matrix logic (digital) sets output_value as switch_intention value.
    * 1 : mapped value (analog/digital) sets output_value as mapped value.
    */
-  volatile int output_mode[1][MAX_MATRIX_SWITCHES];
+  int output_mode[1][MAX_MATRIX_SWITCHES];
 
   /**
    * Output mode names.
@@ -85,7 +85,7 @@ struct MatrixStruct {
   int index_mapped_value[1][MAX_MAP_SLOTS];
 
   // Matrix switch write required.
-  volatile bool matrix_switch_write_required[1][MAX_MATRIX_SWITCHES];
+  bool matrix_switch_write_required[1][MAX_MATRIX_SWITCHES];
 
   /**
    * Output Pulse Width Modulation.
@@ -93,7 +93,7 @@ struct MatrixStruct {
    * 0 : uS time off period (0uS = remain on).
    * 1 : uS time on period  (0uS = remain off).
    */
-  volatile uint32_t output_pwm[1][MAX_MATRIX_SWITCHES][2];
+  uint32_t output_pwm[1][MAX_MATRIX_SWITCHES][2];
 
   /**
    * Inverted logic Names.
@@ -108,11 +108,11 @@ struct MatrixStruct {
    * 
    * If true then matrix switch function logic return true if false, false if true. 
    */
-  volatile bool matrix_switch_inverted_logic[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
+  bool matrix_switch_inverted_logic[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
   
 
   // Matrix switch function name index (default off = 0).
-  volatile int matrix_function[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
+  int matrix_function[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
 
   /**
    * Matrix function values.
@@ -121,7 +121,7 @@ struct MatrixStruct {
    * 1 : Value Y
    * 2 : Value Z
    */
-  volatile double matrix_function_xyz[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS][3];
+  double matrix_function_xyz[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS][3];
 
   /**
    * Matrix function value mode.
@@ -130,7 +130,7 @@ struct MatrixStruct {
    * 1 : Value Y : Mode=0 User Value  Mode=1 System Value
    * 2 : Value Z : Mode=0 User Value  Mode=1 System Value
    */
-  volatile int matrix_function_mode_xyz[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS][3];
+  int matrix_function_mode_xyz[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS][3];
 
   /**
    * Matrix Comparator Modes
@@ -149,7 +149,7 @@ struct MatrixStruct {
    * 3 : Under
    * 4 : In Range
    */
-  volatile int matrix_switch_operator_index[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
+  int matrix_switch_operator_index[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
 
   /**
    * Matrix switch function operator names.
@@ -281,8 +281,8 @@ struct MatrixStruct {
    */
   char matrix_function_names[MAX_MATRIX_FUNCTION_NAMES][MAX_GLOBAL_ELEMENT_SIZE]={};
   
-  volatile double input_value[1][MAX_MATRIX_SWITCHES];
-  volatile signed int input_port_map[1][MAX_MATRIX_SWITCHES];
+  double input_value[1][MAX_MATRIX_SWITCHES];
+  signed int input_port_map[1][MAX_MATRIX_SWITCHES];
 };
 extern struct MatrixStruct matrixData;
 

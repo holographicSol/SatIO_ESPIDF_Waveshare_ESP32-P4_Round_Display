@@ -62,6 +62,7 @@ struct satioFileStruct satioFileData = {
         "/MATRIX/MATRIX_9.csv",
     },
     .current_matrix_filepath="/MATRIX/MATRIX_0.csv", // default
+    .i_current_matrix_file_path=0,
     .mapping_tags=
     {
         "MAP_MODE",     // 0
@@ -636,9 +637,9 @@ bool deleteMappingFile(const char *filepath) {
 }
 
 // todo: mapping data will saved with matrix data
-bool saveMatrixFile(const char *filepath) {    
+bool saveMatrixFile() {    
     printf("$MATRIXSAVING\n");
-    FILE* f = sd_fopen(filepath, "w");
+    FILE* f = sd_fopen(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path], "w");
     if (!f) { printf("$MATRIXSAVEFAILED\n"); return false; }
     
     char lineBuf[256];
@@ -765,11 +766,11 @@ bool saveMatrixFile(const char *filepath) {
     return true;
 }
 
-bool loadMatrixFile(const char *filepath) {
+bool loadMatrixFile() {
     printf("$MATRIXLOADING\n");
-    if (!sd_exists(filepath)) { printf("$MATRIXLOADFAILED\n"); return false; }
+    if (!sd_exists(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) { printf("$MATRIXLOADFAILED\n"); return false; }
     
-    FILE* f = sd_fopen(filepath, "r");
+    FILE* f = sd_fopen(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path], "r");
     if (!f) { printf("$MATRIXLOADFAILED\n"); return false; }
     
     override_all_computer_assists();
@@ -821,8 +822,8 @@ bool loadMatrixFile(const char *filepath) {
     return true;
 }
 
-bool deleteMatrixFile(const char *filepath) {
-    if (sd_exists(filepath)) {if (sd_remove(filepath)) {printf("$MATRIXDELETED\n"); return true;}}
+bool deleteMatrixFile() {
+    if (sd_exists(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) {if (sd_remove(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) {printf("$MATRIXDELETED\n"); return true;}}
     printf("$MATRIXDELETEFAILED\n");
     return false;
 }
@@ -848,7 +849,7 @@ bool saveSystemFile(const char *filepath) {
     #define WRITE_DBL_TAG(idx, val) snprintf(lineBuf, 256, "%s,%.6f", satioFileData.system_tags[idx], (double)(val)); printLine(f, lineBuf)
     #define WRITE_STR_TAG(idx, val) snprintf(lineBuf, 256, "%s,%s", satioFileData.system_tags[idx], (val)); printLine(f, lineBuf)
     
-    WRITE_STR_TAG(0, satioFileData.current_matrix_filepath);
+    WRITE_INT_TAG(0, satioFileData.i_current_matrix_file_path);
     WRITE_INT_TAG(1, matrixData.load_matrix_on_startup);
     WRITE_INT_TAG(2, systemData.logging_enabled);
  
@@ -957,7 +958,7 @@ bool loadSystemFile(const char *filepath) {
             commaToken = strtok(NULL, ","); // remove tag
             while (commaToken != NULL) {if (tokenCount==0) {data_0=commaToken;} else if (tokenCount==1) {data_1=commaToken;} else if (tokenCount==2) {data_2=commaToken;} commaToken = strtok(NULL, ","); tokenCount++;}
 
-            if     (tag_index==0) {memset(satioFileData.current_matrix_filepath, 0, sizeof(satioFileData.current_matrix_filepath)); strcpy(satioFileData.current_matrix_filepath, data_0.c_str());}
+            if     (tag_index==0) {if (str_is_int8(data_0.c_str())) {satioFileData.i_current_matrix_file_path=atoi(data_0.c_str());}}
             else if (tag_index==1) {if (str_is_bool(data_0.c_str())) {matrixData.load_matrix_on_startup=atoi(data_0.c_str());}}
             else if (tag_index==2) {if (str_is_bool(data_0.c_str())) {systemData.logging_enabled=atoi(data_0.c_str());}}
 
@@ -1096,7 +1097,7 @@ void sdcardFlagHandler() {
 
     else if (sdcardFlagData.save_matrix) {
       printf("saving matrix ...\n");
-      if (saveMatrixFile(satioFileData.current_matrix_filepath))
+      if (saveMatrixFile())
         {printf("saved matrix successfully.\n"); set_storage_success_flag(true);}
       else {printf("save matrix failed.\n"); set_storage_success_flag(false);}
       sdcardFlagData.no_delay_flag=false;
@@ -1104,7 +1105,7 @@ void sdcardFlagHandler() {
     }
     else if (sdcardFlagData.load_matrix) {
       printf("loading matrix...\n");
-      if (loadMatrixFile(satioFileData.current_matrix_filepath))
+      if (loadMatrixFile())
         {printf("loaded matrix successfully.\n"); set_storage_success_flag(true);}
       else {printf("load matrix failed.\n"); set_storage_success_flag(false);}
       sdcardFlagData.no_delay_flag=false;
@@ -1112,7 +1113,7 @@ void sdcardFlagHandler() {
     }
     else if (sdcardFlagData.delete_matrix) {
       printf("deleting matrix...\n");
-      if (deleteMatrixFile(satioFileData.current_matrix_filepath))
+      if (deleteMatrixFile())
         {printf("deleted matrix successfully.\n"); set_storage_success_flag(true);}
       else {printf("delete matrix failed.\n"); set_storage_success_flag(false);}
       sdcardFlagData.no_delay_flag=false;
@@ -1156,7 +1157,7 @@ void sdcardFlagHandler() {
 
         // load matrix
         printf("loading matrix on startup...\n");
-        if (loadMatrixFile(satioFileData.current_matrix_filepath))
+        if (loadMatrixFile())
           {printf("loaded matrix successfully.\n"); set_storage_success_flag(true);}
         else {printf("load matrix failed.\n"); set_storage_success_flag(false);}
         sdcardFlagData.load_matrix=false;

@@ -48,11 +48,12 @@ TaskHandle_t TaskDisplay;
 
 
 #define TASK_DISPLAY_PRIORITY               3    // High: UI updates can be deferred
+
 #define TASK_SWITCHES_PRIORITY              5    // High: Logic processing
 #define TASK_SERIALINFOCMD_PRIORITY         4    // High: User interaction & debugging
-#define TASK_MULTIPLEXERS_PRIORITY          4    // High: Analog multiplexing
-#define TASK_PORTCONTROLLERINPUT_PRIORITY   4    // High: I/O reading
-#define TASK_GYRO_PRIORITY                  4    // High: Sensor reading
+#define TASK_MULTIPLEXERS_PRIORITY          3    // High: Analog multiplexing
+#define TASK_PORTCONTROLLERINPUT_PRIORITY   3    // High: I/O reading
+#define TASK_GYRO_PRIORITY                  3    // High: Sensor reading
 #define TASK_UNIVERSE_PRIORITY              2    // LOW: Computational, non-critical delay
 #define TASK_STORAGE_PRIORITY               2    // LOW: I/O operations, can wait
 #define TASK_LOGGING_PRIORITY               2    // LOW: Asynchronous data recording

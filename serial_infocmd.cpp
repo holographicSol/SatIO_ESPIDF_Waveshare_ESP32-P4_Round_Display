@@ -858,24 +858,21 @@ void setMapSlot(int matrix_switch,
 
 void saveMatrix(int matrix_file_slot) {
   if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_SLOTS) {
-    memset(satioFileData.current_matrix_filepath, 0, sizeof(satioFileData.current_matrix_filepath));
-    strcpy(satioFileData.current_matrix_filepath, satioFileData.matix_filepaths[matrix_file_slot]);
+    satioFileData.i_current_matrix_file_path=matrix_file_slot;
     sdcardFlagData.save_matrix=true;
   }
 }
 
 void loadMatrix(int matrix_file_slot) {
   if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_SLOTS) {
-    memset(satioFileData.current_matrix_filepath, 0, sizeof(satioFileData.current_matrix_filepath));
-    strcpy(satioFileData.current_matrix_filepath, satioFileData.matix_filepaths[matrix_file_slot]);
+    satioFileData.i_current_matrix_file_path=matrix_file_slot;
     sdcardFlagData.load_matrix=true;
   }
 }
 
 void deleteMatrix(int matrix_file_slot) {
   if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_SLOTS) {
-    memset(satioFileData.current_matrix_filepath, 0, sizeof(satioFileData.current_matrix_filepath));
-    strcpy(satioFileData.current_matrix_filepath, satioFileData.matix_filepaths[matrix_file_slot]);
+    satioFileData.i_current_matrix_file_path=matrix_file_slot;
     sdcardFlagData.delete_matrix=true;
   }
 }

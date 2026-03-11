@@ -17,7 +17,7 @@
 #include "meteors.h"
 #include "serial_infocmd.h"
 #include "system_data.h"
-#include "sdmmc_helper.h"
+#include "sdcard_helper.h"
 #include "i2c_helper.h"
 
 // ----------------------------------------------------------------------------------------

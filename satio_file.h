@@ -33,8 +33,8 @@ struct satioFileStruct {
 
     char matrix_tags[MAX_MATRIX_TAGS][MAX_GLOBAL_ELEMENT_SIZE];
     char matix_filepaths[MAX_MATRIX_SLOTS][MAX_GLOBAL_ELEMENT_SIZE];
-    int matrix_file_slots[MAX_MATRIX_SLOTS];
     char current_matrix_filepath[MAX_GLOBAL_ELEMENT_SIZE];
+    int i_current_matrix_file_path;
 
     char mapping_tags[MAX_MAPPING_TAGS][MAX_GLOBAL_ELEMENT_SIZE];
     char mapping_filepath[MAX_GLOBAL_ELEMENT_SIZE];
@@ -80,19 +80,19 @@ bool deleteMappingFile(const char *filepath);
  * Save current matrix data.
  * @param filepath Specify path to file
  */
-bool saveMatrixFile(const char *filepath);
+bool saveMatrixFile();
 
 /**
  * Load matrix data.
  * @param filepath Specify path to file
  */
-bool loadMatrixFile(const char *filepath);
+bool loadMatrixFile();
 
 /**
  * Delete matrix data.
  * @param filepath Specify path to file
  */
-bool deleteMatrixFile(const char *filepath);
+bool deleteMatrixFile();
 
 /**
  * Save system data.
