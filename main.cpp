@@ -258,13 +258,13 @@ extern "C" void app_main(void)
     // --------------------------------------------------------------
     // Initialize Serial 0.
     // --------------------------------------------------------------
+    // .baud_rate = 921600,
     uart_config_t uart0_config = {
-        .baud_rate = 115200,
-        // .baud_rate = 921600,
+        .baud_rate = 921600,
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
     };
     // Install UART driver
     ESP_ERROR_CHECK(uart_param_config(UART0_NUM, &uart0_config));
