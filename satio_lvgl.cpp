@@ -15969,7 +15969,7 @@ void update_display()
                 for(uint32_t i = 0; i < grid_child_cnt; i++) {
                     lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
 
-                    vTaskDelay(1);
+                    // vTaskDelay(1);
 
                     /* Computer Assist (yellow outline) */
                     if (matrixData.computer_assist[0][i]==true) {lv_obj_set_style_outline_color(btn, lv_color_make(255, 255, 0), LV_PART_MAIN);}
@@ -16071,10 +16071,10 @@ void update_display()
                 lv_dropdown_set_selected(mfc.dd_inverted_logic, matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i]);
 
                 // PWM Off
-                // lv_label_set_text(mfc.val_pwm_0, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF]).c_str());
+                lv_label_set_text(mfc.val_pwm_0, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF]).c_str());
                 
-                // // PWM On
-                // lv_label_set_text(mfc.val_pwm_1, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON]).c_str());
+                // PWM On
+                lv_label_set_text(mfc.val_pwm_1, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON]).c_str());
 
                 // Connected Map Slot
                 lv_dropdown_set_selected(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);

@@ -28,26 +28,6 @@ struct satioFileStruct satioFileData = {
     .token={},
     .tmp_chars="",
 
-    .matrix_tags=
-    {
-        "SWITCH_PORT",        // 0
-        "SWITCH_FUNCTION",    // 1
-        "FUNCTION_X",         // 2
-        "FUNCTION_Y",         // 3
-        "FUNCTION_Z",         // 4
-        "FUNCTION_OPERATOR",  // 5
-        "FUNCTION_INVERT",    // 6
-        "SWITCH_OUTPUT_MODE", // 7
-        "SWITCH_PWM_VALUE_0", // 8
-        "SWITCH_PWM_VALUE_1", // 9
-        "SWITCH_FLUX",        // 10
-        "COMPUTER_ASSIST",    // 11
-        "MAP_SLOT",           // 12
-        "XYZ_MODE_X",         // 13      
-        "XYZ_MODE_Y",         // 14      
-        "XYZ_MODE_Z",         // 15            
-        
-    },
     .matix_filepaths=
     {
         "/MATRIX/MATRIX_0.csv",
@@ -63,86 +43,7 @@ struct satioFileStruct satioFileData = {
     },
     .current_matrix_filepath="/MATRIX/MATRIX_0.csv", // default
     .i_current_matrix_file_path=0,
-    .mapping_tags=
-    {
-        "MAP_MODE",     // 0
-        "FUNCTION_N",   // 1
-        "MAP_CONFIG_1", // 2
-        "MAP_CONFIG_2", // 3
-        "MAP_CONFIG_3", // 4
-        "MAP_CONFIG_4", // 5
-        "MAP_CONFIG_5", // 6   
-    },
     .mapping_filepath="/MAPPING/mapping_conf.csv",
-    .system_tags=
-    {
-        "MATRIX_FILE",                         // 0
-        "LOAD_MATRIX_ON_STARTUP",              // 1
-        "LOGGING",                             // 2
-
-        "SERIAL_COMMAND",                      // 3
-        "OUTPUT_ALL",                          // 4
-        "OUTPUT_SATIO",                        // 5
-        "OUTPUT_INS",                          // 6
-        "OUTPUT_GNGGA",                        // 7
-        "OUTPUT_GNRMC",                        // 8
-        "OUTPUT_GPATT",                        // 9
-        "OUTPUT_MATRIX",                       // 10
-        "OUTPUT_ADMPLEX0",                     // 11
-        "OUTPUT_GYRO0",                        // 12
-
-        "OUTPUT_SUN",                          // 13
-        "OUTPUT_MERCURY",                      // 14
-        "OUTPUT_VENUS",                        // 15
-        "OUTPUT_EARTH",                        // 16
-        "OUTPUT_LUNA",                         // 17
-        "OUTPUT_MARS",                         // 18
-        "OUTPUT_JUPITER",                      // 19
-        "OUTPUT_SATURN",                       // 20
-        "OUTPUT_URANUS",                       // 21
-        "OUTPUT_NEPTUNE",                      // 22
-        "OUTPUT_METEORS",                      // 23
-
-        "UTC_SECOND_OFFSET",                   // 24
-        "UTC_AUTO_OFFSET_FLAG",                // 25
-        "SET_DATETIME_AUTOMATICALLY",          // 26
-
-        "INS_REQ_GPS_PRECISION",               // 27
-        "INS_REQ_MIN_SPEED",                   // 28
-        "INS_REQ_HEADING_RANGE_DIFF",          // 29
-        "INS_MODE",                            // 30
-        "INS_USE_GYRO_HEADING",                // 31
-
-        "USER_LATITUDE",                       // 32
-        "USER_LONGITUDE",                      // 33
-        "USER_SPEED",                          // 34
-        "USER_HEADING",                        // 35
-        "USER_ALTITUDE",                       // 36
-
-        "SATIO_LOCATION_VALUE_MODE",           // 37
-        "SATIO_ALTITUDE_VALUE_MODE",           // 38
-        "SATIO_SPEED_VALUE_MODE",              // 39
-        "SATIO_GROUND_HEADING_VALUE_MODE",     // 40
-
-        // "DELAY_TASK_SERIAL_INFOCMD",           // 41
-        // "TICK_DELAY_TASK_SERIAL_INFOCMD",      // 42
-        // "DELAY_TASK_MULTIPLEXERS",             // 43
-        // "TICK_DELAY_TASK_MULTIPLEXERS",        // 44
-        // "DELAY_TASK_GYRO0",                    // 45
-        // "TICK_DELAY_TASK_GYRO0",               // 46
-        // "DELAY_TASK_UNIVERSE",                 // 47
-        // "TICK_DELAY_TASK_UNIVERSE",            // 48
-        // "DELAY_TASK_GPS",                      // 49
-        // "TICK_DELAY_TASK_GPS",                 // 50
-        // "DELAY_TASK_SWITCHES",                 // 51
-        // "TICK_DELAY_TASK_SWITCHES",            // 52
-        // "DELAY_TASK_PORTCONTROLLER_INPUT",     // 53
-        // "TICK_DELAY_TASK_PORTCONTROLLER_INPUT",// 54
-        // "DELAY_TASK_STORAGE",                  // 55
-        // "TICK_DELAY_TASK_STORAGE",             // 56
-        // "DELAY_TASK_LOGGING",                  // 57
-        // "TICK_DELAY_TASK_LOGGING",             // 58
-    },
     .system_filepath="/SYSTEM/system_conf.csv",
     .log_dir="/LOG/",
     .log_files = {},
@@ -552,76 +453,99 @@ void printLine(FILE* f, const char* line) {
 
 char *endptr;
 
+// ---------------------------------------------------------------------------------------------------------------------------
+// MAPPING
+// ---------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Enum and get tag are for order agnostic tag+data reads/writes for ease of maintenance/ammendments.
+ */
+
+typedef enum {
+    MAP_MODE,
+    FUNCTION_N,
+    MAP_CONFIG_1,
+    MAP_CONFIG_2,
+    MAP_CONFIG_3,
+    MAP_CONFIG_4,
+    MAP_CONFIG_5,
+} mapping_tag_t;
+
+char * getMapTag(int t) {
+    switch (t) {
+        case MAP_MODE:     return "MAP_MODE";
+        case FUNCTION_N:   return "FUNCTION_N";
+        case MAP_CONFIG_1: return "MAP_CONFIG_1";
+        case MAP_CONFIG_2: return "MAP_CONFIG_2";
+        case MAP_CONFIG_3: return "MAP_CONFIG_3";
+        case MAP_CONFIG_4: return "MAP_CONFIG_4";
+        case MAP_CONFIG_5: return "MAP_CONFIG_5";
+        default:           return "?";
+    }
+}
 bool saveMappingFile(const char *filepath) {
-    printf("$MAPPINGSAVING\n");
+    printf("[saveMappingFile] Attempting to save mapping file...\n");
+
     FILE* f = sd_fopen(filepath, "w");
-    if (!f) { printf("$MAPPINGSAVEFAILED\n"); return false; }
+    if (!f) { printf("[saveMappingFile] Failed to open mapping file.\n"); return false; }
     
     char lineBuf[256];
     for (int i_tag=0; i_tag<MAX_MAPPING_TAGS; i_tag++) {
 
         for (int i_map=0; i_map<MAX_MAP_SLOTS; i_map++) {
-            if      (i_tag==0) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", satioFileData.mapping_tags[i_tag], i_map, (int)mappingData.map_mode[0][i_map]); }
-            else if (i_tag==1) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", satioFileData.mapping_tags[i_tag], i_map, (long)mappingData.mapping_config[0][i_map][0]); }
-            else if (i_tag==2) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", satioFileData.mapping_tags[i_tag], i_map, (long)mappingData.mapping_config[0][i_map][1]); }
-            else if (i_tag==3) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", satioFileData.mapping_tags[i_tag], i_map, (long)mappingData.mapping_config[0][i_map][2]); }
-            else if (i_tag==4) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", satioFileData.mapping_tags[i_tag], i_map, (long)mappingData.mapping_config[0][i_map][3]); }
-            else if (i_tag==5) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", satioFileData.mapping_tags[i_tag], i_map, (long)mappingData.mapping_config[0][i_map][4]); }
-            else if (i_tag==6) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", satioFileData.mapping_tags[i_tag], i_map, (long)mappingData.mapping_config[0][i_map][5]); }
-            printLine(f, lineBuf);
+            if      (i_tag==MAP_MODE)     { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d",  getMapTag(MAP_MODE), i_map, (int)mappingData.map_mode[0][i_map]); printLine(f, lineBuf);}
+            else if (i_tag==FUNCTION_N)   { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(FUNCTION_N), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C0]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_1) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_1), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C1]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_2) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_2), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C2]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_3) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_3), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C3]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_4) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_4), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C4]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_5) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_5), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C5]); printLine(f, lineBuf);}
         }
     }
     
     fclose(f);
-    printf("$MAPPINGSAVED\n");
+    printf("[saveMappingFile] done.\n");
     return true;
 }
 
 bool loadMappingFile(const char *filepath) {
-    printf("$MAPPINGLOADING\n");
-    if (!sd_exists(filepath)) { printf("$MAPPINGLOADFAILED\n");
-        printf("[loadMappingFile] no mapping file found. attempting to create new file..\n");
-        FILE* f = sd_fopen(filepath, "w");
-        if (!f) {printf("[loadMappingFile] failed to create new mapping file.\n");}
-        else {printf("[loadMappingFile] created new mapping file.\n");}
-        fclose(f);
-    }
+    printf("[loadMappingFile] Attempting to load mapping file...\n");
+    
+    if (!sd_exists(filepath)) {printf("[loadMappingFile] Could not find mapping file.\n");}
     
     FILE* f = sd_fopen(filepath, "r");
-    if (!f) { printf("$MAPPINGLOADFAILED\n"); return false; }
+    if (!f) { printf("[loadMappingFile] Failed to open mapping file.\n"); return false; }
     
     override_all_computer_assists();
     set_all_mapping_default(); // avoid mixing current values with loaded values
+
     char lineBuffer[1024];
     int currentTag = 0;
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
-        // Critical! This may take a moment, yield for other tasks!
         yieldForTasks();
 
-        // Strip newline
         size_t len = strlen(lineBuffer);
         while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) { lineBuffer[--len] = '\0'; }
         if (len == 0) continue;
         // printf("Processing Tag Token Number: %d (data: %s)\n", currentTag, lineBuffer); // uncomment to debug
         
-        char *commaToken = strtok(lineBuffer, ",");
+        char *token = strtok(lineBuffer, ",");
         int tokenCount = 0;
         signed int tag_index=-1;
-        for (int i_find_tag=0; i_find_tag<MAX_MAPPING_TAGS; i_find_tag++) {if (strcmp(satioFileData.mapping_tags[i_find_tag], commaToken)==0) {tag_index=i_find_tag; break;}}
-        if (tag_index==-1) {
-            printf("Unrecognized tag found in mapping file: %s\n", commaToken);
-            continue;
-        }
+        for (int i_find_tag=0; i_find_tag<MAX_MAPPING_TAGS; i_find_tag++) {if (strcmp(getMapTag(i_find_tag), token)==0) {tag_index=i_find_tag; break;}}
+        if (tag_index==-1) {printf("Unrecognized tag found in mapping file: %s\n", token); continue;}
+
         String data_0; String data_1; String data_2;
-        commaToken = strtok(NULL, ","); // remove tag
-        while (commaToken != NULL) {if (tokenCount==0) {data_0=commaToken;} else if (tokenCount==1) {data_1=commaToken;} else if (tokenCount==2) {data_2=commaToken;} commaToken = strtok(NULL, ","); tokenCount++;}
-        if      (tag_index==0) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {mappingData.map_mode[0][atoi(data_0.c_str())]=atoi(data_1.c_str());}}
-        else if (tag_index==1) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][0]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==2) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][1]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==3) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][2]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==4) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][3]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==5) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][4]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==6) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][5]=strtol(data_1.c_str(), &endptr, 10);}}
+        token = strtok(NULL, ","); // remove tag
+
+        while (token != NULL) {if (tokenCount==0) {data_0=token;} else if (tokenCount==1) {data_1=token;} else if (tokenCount==2) {data_2=token;} token = strtok(NULL, ","); tokenCount++;}
+        if      (tag_index==MAP_MODE)     {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {mappingData.map_mode[0][atoi(data_0.c_str())]=atoi(data_1.c_str());}}
+        else if (tag_index==FUNCTION_N)   {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C0]=strtol(data_1.c_str(), &endptr, 10);}}
+        else if (tag_index==MAP_CONFIG_1) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C1]=strtol(data_1.c_str(), &endptr, 10);}}
+        else if (tag_index==MAP_CONFIG_2) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C2]=strtol(data_1.c_str(), &endptr, 10);}}
+        else if (tag_index==MAP_CONFIG_3) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C3]=strtol(data_1.c_str(), &endptr, 10);}}
+        else if (tag_index==MAP_CONFIG_4) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C4]=strtol(data_1.c_str(), &endptr, 10);}}
+        else if (tag_index==MAP_CONFIG_5) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C5]=strtol(data_1.c_str(), &endptr, 10);}}
         currentTag++;
     }
     fclose(f);
@@ -636,285 +560,418 @@ bool deleteMappingFile(const char *filepath) {
     return false;
 }
 
-// todo: mapping data will saved with matrix data
+// ---------------------------------------------------------------------------------------------------------------------------
+// MATRIX
+// ---------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Enum and get tag are for order agnostic tag+data reads/writes for ease of maintenance/ammendments.
+ */
+
+typedef enum {
+    SWITCH_PORT,
+    SWITCH_FUNCTION,
+    FUNCTION_X,
+    FUNCTION_Y,
+    FUNCTION_Z,
+    FUNCTION_OPERATOR,
+    FUNCTION_INVERT,
+    SWITCH_OUTPUT_MODE,
+    SWITCH_PWM_VALUE_0,
+    SWITCH_PWM_VALUE_1,
+    SWITCH_FLUX,
+    COMPUTER_ASSIST,
+    MAP_SLOT,
+    XYZ_MODE_X,
+    XYZ_MODE_Y,
+    XYZ_MODE_Z
+} matrix_tag_t;
+
+char * getMatrixTag(int t) {
+    switch (t) {
+        case SWITCH_PORT:        return "SWITCH_PORT";
+        case SWITCH_FUNCTION:    return "SWITCH_FUNCTION";
+        case FUNCTION_X:         return "FUNCTION_X";
+        case FUNCTION_Y:         return "FUNCTION_Y";
+        case FUNCTION_Z:         return "FUNCTION_Z";
+        case FUNCTION_OPERATOR:  return "FUNCTION_OPERATOR";
+        case FUNCTION_INVERT:    return "FUNCTION_INVERT";
+        case SWITCH_OUTPUT_MODE: return "SWITCH_OUTPUT_MODE";
+        case SWITCH_PWM_VALUE_0: return "SWITCH_PWM_VALUE_0";
+        case SWITCH_PWM_VALUE_1: return "SWITCH_PWM_VALUE_1";
+        case SWITCH_FLUX:        return "SWITCH_FLUX";
+        case COMPUTER_ASSIST:    return "COMPUTER_ASSIST";
+        case MAP_SLOT:           return "MAP_SLOT";
+        case XYZ_MODE_X:         return "XYZ_MODE_X";
+        case XYZ_MODE_Y:         return "XYZ_MODE_Y";
+        case XYZ_MODE_Z:         return "XYZ_MODE_Z";
+        default:                 return "?";
+    }
+}
+
 bool saveMatrixFile() {    
-    printf("$MATRIXSAVING\n");
+    printf("[saveMatrixFile] Attempting to save matrix file.\n");
+
     FILE* f = sd_fopen(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path], "w");
-    if (!f) { printf("$MATRIXSAVEFAILED\n"); return false; }
+    if (!f) {printf("[saveMatrixFile] Failed to open matrix file.\n"); return false;}
     
     char lineBuf[256];
-    for (int i_tag=0; i_tag<MAX_MATRIX_TAGS; i_tag++) {
 
-        if (i_tag==0) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, (int)matrixData.matrix_port_map[0][i_switch]);
-                printLine(f, lineBuf);
-            }
+    // SWITCH_PORT
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", getMatrixTag(SWITCH_PORT), i_switch, (int)matrixData.matrix_port_map[0][i_switch]);
+        printLine(f, lineBuf);
+    }
+
+    // SWITCH_FUNCTION
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(SWITCH_FUNCTION), i_switch, i_func, (int)matrixData.matrix_function[0][i_switch][i_func]);
+            printLine(f, lineBuf);
         }
-        else if (i_tag==1) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_function[0][i_switch][i_func]);
-                    printLine(f, lineBuf);
-                }
-            }
+    }
+
+    // FUNCTION_X
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", getMatrixTag(FUNCTION_X), i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
+            printLine(f, lineBuf);
         }
-        else if (i_tag==2) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", satioFileData.matrix_tags[i_tag], i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
-                    printLine(f, lineBuf);
-                }
-            }
+    }
+
+    // FUNCTION_Y
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", getMatrixTag(FUNCTION_Y), i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
+            printLine(f, lineBuf);
         }
-        else if (i_tag==3) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", satioFileData.matrix_tags[i_tag], i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
-                    printLine(f, lineBuf);
-                }
-            }
+    }
+
+    // FUNCTION_Z
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", getMatrixTag(FUNCTION_Z), i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
+            printLine(f, lineBuf);
         }
-        else if (i_tag==4) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", satioFileData.matrix_tags[i_tag], i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
-                    printLine(f, lineBuf);
-                }
-            }
+    }
+
+    // FUNCTION_OPERATOR
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(FUNCTION_OPERATOR), i_switch, i_func, (int)matrixData.matrix_switch_operator_index[0][i_switch][i_func]);
+            printLine(f, lineBuf);
         }
-        else if (i_tag==5) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_switch_operator_index[0][i_switch][i_func]);
-                    printLine(f, lineBuf);
-                }
-            }
+    }
+
+    // FUNCTION_INVERT
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(FUNCTION_INVERT), i_switch, i_func, (int)matrixData.matrix_switch_inverted_logic[0][i_switch][i_func]);
+            printLine(f, lineBuf);
         }
-        else if (i_tag==6) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_switch_inverted_logic[0][i_switch][i_func]);
-                    printLine(f, lineBuf);
-                }
-            }
+    }
+
+    // SWITCH_OUTPUT_MODE
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", getMatrixTag(SWITCH_OUTPUT_MODE), i_switch, (int)matrixData.output_mode[0][i_switch]);
+        printLine(f, lineBuf);
+    }
+
+    // SWITCH_PWM_VALUE_0
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%lu", getMatrixTag(SWITCH_PWM_VALUE_0), i_switch, (unsigned long)matrixData.output_pwm[0][i_switch][0]);
+        printLine(f, lineBuf);
+    }
+
+    // SWITCH_PWM_VALUE_1
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%lu", getMatrixTag(SWITCH_PWM_VALUE_1), i_switch, (unsigned long)matrixData.output_pwm[0][i_switch][1]);
+        printLine(f, lineBuf);
+    }
+
+    // SWITCH_FLUX
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMatrixTag(SWITCH_FLUX), i_switch, (long)matrixData.flux_value[0][i_switch]);
+        printLine(f, lineBuf);
+    }
+
+    // COMPUTER_ASSIST
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", getMatrixTag(COMPUTER_ASSIST), i_switch, (int)matrixData.computer_assist[0][i_switch]);
+        printLine(f, lineBuf);
+    }
+
+    // MAP_SLOT
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", getMatrixTag(MAP_SLOT), i_switch, (int)matrixData.index_mapped_value[0][i_switch]);
+        printLine(f, lineBuf);
+    }
+
+    // XYZ_MODE_X
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(XYZ_MODE_X), i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
+            printLine(f, lineBuf);
         }
-        else if (i_tag==7) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, (int)matrixData.output_mode[0][i_switch]);
-                printLine(f, lineBuf);
-            }
+    }
+
+    // XYZ_MODE_Y
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(XYZ_MODE_Y), i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
+            printLine(f, lineBuf);
         }
-        else if (i_tag==8) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%lu", satioFileData.matrix_tags[i_tag], i_switch, (unsigned long)matrixData.output_pwm[0][i_switch][0]);
-                printLine(f, lineBuf);
-            }
-        }
-        else if (i_tag==9) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%lu", satioFileData.matrix_tags[i_tag], i_switch, (unsigned long)matrixData.output_pwm[0][i_switch][1]);
-                printLine(f, lineBuf);
-            }
-        }
-        else if (i_tag==10) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", satioFileData.matrix_tags[i_tag], i_switch, (long)matrixData.flux_value[0][i_switch]);
-                printLine(f, lineBuf);
-            }
-        }
-        else if (i_tag==11) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, (int)matrixData.computer_assist[0][i_switch]);
-                printLine(f, lineBuf);
-            }
-        }
-        else if (i_tag==12) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, (int)matrixData.index_mapped_value[0][i_switch]);
-                printLine(f, lineBuf);
-            }
-        }
-        else if (i_tag==13) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
-                    printLine(f, lineBuf);
-                }
-            }
-        }
-        else if (i_tag==14) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
-                    printLine(f, lineBuf);
-                }
-            }
-        }
-        else if (i_tag==15) {
-            for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-                for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-                    snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", satioFileData.matrix_tags[i_tag], i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
-                    printLine(f, lineBuf);
-                }
-            }
+    }
+
+    // XYZ_MODE_Z
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(XYZ_MODE_Z), i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
+            printLine(f, lineBuf);
         }
     }
     
     fclose(f);
-    printf("$MATRIXSAVED\n");
+    printf("[saveMatrixFile] done.\n");
     return true;
 }
 
 bool loadMatrixFile() {
-    printf("$MATRIXLOADING\n");
-    if (!sd_exists(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) { printf("$MATRIXLOADFAILED\n"); return false; }
+    printf("[loadMatrixFile] Attempting to load matrix file...\n");
+
+    if (!sd_exists(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) { printf("[loadMatrixFile] Could not find matrix file.\n"); return false; }
     
     FILE* f = sd_fopen(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path], "r");
-    if (!f) { printf("$MATRIXLOADFAILED\n"); return false; }
+    if (!f) { printf("[loadMatrixFile] Failed to open matrix file.\n"); return false; }
     
+    printf("[loadMatrixFile] attempting to clear matrix...");
     override_all_computer_assists();
     set_all_matrix_default(); // avoid mixing current values with loaded values
+
     char lineBuffer[1024];
     int currentTag = 0;
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
-        // Critical! This may take a moment, yield for other tasks!
         yieldForTasks();
 
-        // Strip newline
         size_t len = strlen(lineBuffer);
         while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) { lineBuffer[--len] = '\0'; }
         if (len == 0) continue;
         // printf("Processing Tag Token Number: %d (data: %s)\n", currentTag, lineBuffer); // uncomment to debug
         
-        char *commaToken = strtok(lineBuffer, ",");
+        char *token = strtok(lineBuffer, ",");
         int tokenCount = 0;
         signed int tag_index = -1;
-        for (int i_find_tag=0; i_find_tag<MAX_MATRIX_TAGS; i_find_tag++) {if (strcmp(satioFileData.matrix_tags[i_find_tag], commaToken)==0) {tag_index=i_find_tag; break;}}
-        if (tag_index==-1) {
-            printf("Unrecognized tag found in matrix file: %s\n", commaToken);
-            continue;
-        }
+        for (int i_find_tag=0; i_find_tag<MAX_MATRIX_TAGS; i_find_tag++) {if (strcmp(getMatrixTag(i_find_tag), token)==0) {tag_index=i_find_tag; break;}}
+        if (tag_index==-1) {printf("Unrecognized tag found in matrix file: %s\n", token); continue;}
+
         String data_0; String data_1; String data_2;
-        commaToken = strtok(NULL, ","); // remove tag
-        while (commaToken != NULL) {if (tokenCount==0) {data_0=commaToken;} else if (tokenCount==1) {data_1=commaToken;} else if (tokenCount==2) {data_2=commaToken;} commaToken = strtok(NULL, ","); tokenCount++;}
-        if      (tag_index==0) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.matrix_port_map[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==1) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==2) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==3) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==4) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Z]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==5) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_switch_operator_index[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==6) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_switch_inverted_logic[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==7) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.output_mode[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==8) {if (str_is_int8(data_0.c_str()) && str_is_uint32(data_1.c_str())) {matrixData.output_pwm[0][atoi(data_0.c_str())][0]=strtoul(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==9) {if (str_is_int8(data_0.c_str()) && str_is_uint32(data_1.c_str())) {matrixData.output_pwm[0][atoi(data_0.c_str())][1]=strtoul(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==10) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {matrixData.flux_value[0][atoi(data_0.c_str())]=strtol(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==11) {if (str_is_int8(data_0.c_str()) && str_is_bool(data_1.c_str())) {matrixData.computer_assist[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==12) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.index_mapped_value[0][atoi(data_0.c_str())]=atoi(data_1.c_str());}}
-        else if (tag_index==13) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==14) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==15) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Z]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        token = strtok(NULL, ","); // remove tag
+        while (token != NULL) {if (tokenCount==0) {data_0=token;} else if (tokenCount==1) {data_1=token;} else if (tokenCount==2) {data_2=token;} token = strtok(NULL, ","); tokenCount++;}
+
+        if      (tag_index==SWITCH_PORT) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.matrix_port_map[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_FUNCTION) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==FUNCTION_X) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==FUNCTION_Y) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==FUNCTION_Z) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Z]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==FUNCTION_OPERATOR) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_switch_operator_index[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==FUNCTION_INVERT) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_switch_inverted_logic[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_OUTPUT_MODE) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.output_mode[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_PWM_VALUE_0) {if (str_is_int8(data_0.c_str()) && str_is_uint32(data_1.c_str())) {matrixData.output_pwm[0][atoi(data_0.c_str())][INDEX_MATRIX_SWITCH_PWM_OFF]=strtoul(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_PWM_VALUE_1) {if (str_is_int8(data_0.c_str()) && str_is_uint32(data_1.c_str())) {matrixData.output_pwm[0][atoi(data_0.c_str())][INDEX_MATRIX_SWITCH_PWM_ON]=strtoul(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_FLUX) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {matrixData.flux_value[0][atoi(data_0.c_str())]=strtol(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==COMPUTER_ASSIST) {if (str_is_int8(data_0.c_str()) && str_is_bool(data_1.c_str())) {matrixData.computer_assist[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==MAP_SLOT) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.index_mapped_value[0][atoi(data_0.c_str())]=atoi(data_1.c_str());}}
+        else if (tag_index==XYZ_MODE_X) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==XYZ_MODE_Y) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==XYZ_MODE_Z) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Z]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         currentTag++;
     }
     fclose(f);
-    if (currentTag == 0) {printf("$MATRIXLOADFAILED\n"); return false;}
-    printf("$MATRIXLOADED\n");
+    if (currentTag == 0) {printf("[loadMatrixFile] No tags found in matrix file.\n"); return false;}
+    printf("[loadMatrixFile] done.\n");
     return true;
 }
 
 bool deleteMatrixFile() {
-    if (sd_exists(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) {if (sd_remove(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) {printf("$MATRIXDELETED\n"); return true;}}
-    printf("$MATRIXDELETEFAILED\n");
+    if (sd_exists(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) {if (sd_remove(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) {printf("[deleteMatrixFile] done.\n"); return true;}}
+    printf("[deleteMatrixFile] Failed.\n");
     return false;
 }
 
-bool saveSystemFile(const char *filepath) {
-    printf("$SYSTEMSAVING\n");
-    printf("[saveSystemFile] filepath: %s\n", filepath);
-    fflush(stdout);
-    FILE* f = sd_fopen(filepath, "w");
-    if (!f) { 
-        printf("[saveSystemFile] fopen failed, errno: %d (%s)\n", errno, strerror(errno));
-        fflush(stdout);
-        printf("$SYSTEMSAVEFAILED\n"); 
-        return false; 
+// ---------------------------------------------------------------------------------------------------------------------------
+// SYSTEM
+// ---------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Enum and get tag are for order agnostic tag+data reads/writes for ease of maintenance/ammendments.
+ * Symmetry is only required between the enum typedef and getTag() function.
+ */
+typedef enum {
+    SYSTEM_FILE_MATRIX_FILE = 0,
+    SYSTEM_FILE_LOAD_MATRIX_ON_STARTUP,
+    SYSTEM_FILE_LOGGING,
+
+    SYSTEM_FILE_SERIAL_COMMAND,
+    SYSTEM_FILE_OUTPUT_ALL,
+    SYSTEM_FILE_OUTPUT_SATIO,
+    SYSTEM_FILE_OUTPUT_INS,
+    SYSTEM_FILE_OUTPUT_GNGGA,
+    SYSTEM_FILE_OUTPUT_GNRMC,
+    SYSTEM_FILE_OUTPUT_GPATT,
+    SYSTEM_FILE_OUTPUT_MATRIX,
+    SYSTEM_FILE_OUTPUT_ADMPLEX0,
+    SYSTEM_FILE_OUTPUT_GYRO0,
+
+    SYSTEM_FILE_OUTPUT_SUN,
+    SYSTEM_FILE_OUTPUT_MERCURY,
+    SYSTEM_FILE_OUTPUT_VENUS,
+    SYSTEM_FILE_OUTPUT_EARTH,
+    SYSTEM_FILE_OUTPUT_LUNA,
+    SYSTEM_FILE_OUTPUT_MARS,
+    SYSTEM_FILE_OUTPUT_JUPITER,
+    SYSTEM_FILE_OUTPUT_SATURN,
+    SYSTEM_FILE_OUTPUT_URANUS,
+    SYSTEM_FILE_OUTPUT_NEPTUNE,
+    SYSTEM_FILE_OUTPUT_METEORS,
+
+    SYSTEM_FILE_UTC_SECOND_OFFSET,
+    SYSTEM_FILE_UTC_AUTO_OFFSET_FLAG,
+    SYSTEM_FILE_SET_DATETIME_AUTOMATICALLY,
+
+    SYSTEM_FILE_INS_REQ_GPS_PRECISION,
+    SYSTEM_FILE_INS_REQ_MIN_SPEED,
+    SYSTEM_FILE_INS_REQ_HEADING_RANGE_DIFF,
+    SYSTEM_FILE_INS_MODE,
+    SYSTEM_FILE_INS_USE_GYRO_HEADING,
+
+    SYSTEM_FILE_USER_LATITUDE,
+    SYSTEM_FILE_USER_LONGITUDE,
+    SYSTEM_FILE_USER_SPEED,
+    SYSTEM_FILE_USER_GROUND_HEADING,
+    SYSTEM_FILE_USER_ALTITUDE,
+
+    SYSTEM_FILE_SATIO_LOCATION_VALUE_MODE,
+    SYSTEM_FILE_SATIO_ALTITUDE_VALUE_MODE,
+    SYSTEM_FILE_SATIO_SPEED_VALUE_MODE,
+    SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE, 
+} system_tag_t;
+
+char * getSystemTag(int t) {
+    switch (t) {
+        case SYSTEM_FILE_MATRIX_FILE:                    return "MATRIX_FILE";
+        case SYSTEM_FILE_LOAD_MATRIX_ON_STARTUP:         return "LOAD_MATRIX_ON_STARTUP";
+        case SYSTEM_FILE_LOGGING:                        return "LOGGING";
+
+        case SYSTEM_FILE_SERIAL_COMMAND:                 return "SERIAL_COMMAND";
+        case SYSTEM_FILE_OUTPUT_ALL:                     return "OUTPUT_ALL";
+        case SYSTEM_FILE_OUTPUT_SATIO:                   return "OUTPUT_SATIO";
+        case SYSTEM_FILE_OUTPUT_INS:                     return "OUTPUT_INS";
+        case SYSTEM_FILE_OUTPUT_GNGGA:                   return "OUTPUT_GNGGA";
+        case SYSTEM_FILE_OUTPUT_GNRMC:                   return "OUTPUT_GNRMC";
+        case SYSTEM_FILE_OUTPUT_GPATT:                   return "OUTPUT_GPATT";
+        case SYSTEM_FILE_OUTPUT_MATRIX:                  return "OUTPUT_MATRIX";
+        case SYSTEM_FILE_OUTPUT_ADMPLEX0:                return "OUTPUT_ADMPLEX0";
+        case SYSTEM_FILE_OUTPUT_GYRO0:                   return "OUTPUT_GYRO0";
+
+        case SYSTEM_FILE_OUTPUT_SUN:                     return "OUTPUT_SUN";
+        case SYSTEM_FILE_OUTPUT_MERCURY:                 return "OUTPUT_MERCURY";
+        case SYSTEM_FILE_OUTPUT_VENUS:                   return "OUTPUT_VENUS";
+        case SYSTEM_FILE_OUTPUT_EARTH:                   return "OUTPUT_EARTH";
+        case SYSTEM_FILE_OUTPUT_LUNA:                    return "OUTPUT_LUNA";
+        case SYSTEM_FILE_OUTPUT_MARS:                    return "OUTPUT_MARS";
+        case SYSTEM_FILE_OUTPUT_JUPITER:                 return "OUTPUT_JUPITER";
+        case SYSTEM_FILE_OUTPUT_SATURN:                  return "OUTPUT_SATURN";
+        case SYSTEM_FILE_OUTPUT_URANUS:                  return "OUTPUT_URANUS";
+        case SYSTEM_FILE_OUTPUT_NEPTUNE:                 return "OUTPUT_NEPTUNE";
+        case SYSTEM_FILE_OUTPUT_METEORS:                 return "OUTPUT_METEORS";
+
+        case SYSTEM_FILE_UTC_SECOND_OFFSET:              return "UTC_SECOND_OFFSET";
+        case SYSTEM_FILE_UTC_AUTO_OFFSET_FLAG:           return "UTC_AUTO_OFFSET_FLAG";
+        case SYSTEM_FILE_SET_DATETIME_AUTOMATICALLY:     return "SET_DATETIME_AUTOMATICALLY";
+
+        case SYSTEM_FILE_INS_REQ_GPS_PRECISION:          return "INS_REQ_GPS_PRECISION";
+        case SYSTEM_FILE_INS_REQ_MIN_SPEED:              return "INS_REQ_MIN_SPEED";
+        case SYSTEM_FILE_INS_REQ_HEADING_RANGE_DIFF:     return "INS_REQ_HEADING_RANGE_DIFF";
+        case SYSTEM_FILE_INS_MODE:                       return "INS_MODE";
+        case SYSTEM_FILE_INS_USE_GYRO_HEADING:           return "INS_USE_GYRO_HEADING";
+
+        case SYSTEM_FILE_USER_LATITUDE:                  return "USER_LATITUDE";
+        case SYSTEM_FILE_USER_LONGITUDE:                 return "USER_LONGITUDE";
+        case SYSTEM_FILE_USER_SPEED:                     return "USER_SPEED";
+        case SYSTEM_FILE_USER_GROUND_HEADING:                   return "USER_HEADING";
+        case SYSTEM_FILE_USER_ALTITUDE:                  return "USER_ALTITUDE";
+
+        case SYSTEM_FILE_SATIO_LOCATION_VALUE_MODE:      return "SATIO_LOCATION_VALUE_MODE";
+        case SYSTEM_FILE_SATIO_ALTITUDE_VALUE_MODE:      return "SATIO_ALTITUDE_VALUE_MODE";
+        case SYSTEM_FILE_SATIO_SPEED_VALUE_MODE:         return "SATIO_SPEED_VALUE_MODE";
+        case SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE:return "SATIO_GROUND_HEADING_VALUE_MODE";
+
+        default:                                         return "?";
     }
+}
+
+bool saveSystemFile(const char *filepath) {
+    printf("[saveSystemFile] Attempting to save system file...\n");
+
+    FILE* f = sd_fopen(filepath, "w");
+    if (!f) { printf("[saveSystemFile] fopen failed, errno: %d (%s)\n", errno, strerror(errno)); return false; }
     
     // Use heap-allocated buffer to avoid stack overflow
     char* lineBuf = (char*)malloc(256);
-    if (!lineBuf) { fclose(f); printf("$SYSTEMSAVEFAILED\n"); return false; }
+    if (!lineBuf) {fclose(f); printf("[saveSystemFile] Failed to allocate memory.\n"); return false;}
     
-    #define WRITE_INT_TAG(idx, val) snprintf(lineBuf, 256, "%s,%d", satioFileData.system_tags[idx], (int)(val)); printLine(f, lineBuf)
-    #define WRITE_LONG_TAG(idx, val) snprintf(lineBuf, 256, "%s,%ld", satioFileData.system_tags[idx], (long)(val)); printLine(f, lineBuf)
-    #define WRITE_DBL_TAG(idx, val) snprintf(lineBuf, 256, "%s,%.6f", satioFileData.system_tags[idx], (double)(val)); printLine(f, lineBuf)
-    #define WRITE_STR_TAG(idx, val) snprintf(lineBuf, 256, "%s,%s", satioFileData.system_tags[idx], (val)); printLine(f, lineBuf)
+    #define WRITE_INT_TAG(idx, val)  snprintf(lineBuf, 256, "%s,%d",   getSystemTag(idx), (int)(val));    printLine(f, lineBuf)
+    #define WRITE_LONG_TAG(idx, val) snprintf(lineBuf, 256, "%s,%ld",  getSystemTag(idx), (long)(val));   printLine(f, lineBuf)
+    #define WRITE_DBL_TAG(idx, val)  snprintf(lineBuf, 256, "%s,%.6f", getSystemTag(idx), (double)(val)); printLine(f, lineBuf)
+    #define WRITE_STR_TAG(idx, val)  snprintf(lineBuf, 256, "%s,%s",   getSystemTag(idx), (val));         printLine(f, lineBuf)
     
-    WRITE_INT_TAG(0, satioFileData.i_current_matrix_file_path);
-    WRITE_INT_TAG(1, matrixData.load_matrix_on_startup);
-    WRITE_INT_TAG(2, systemData.logging_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_MATRIX_FILE, satioFileData.i_current_matrix_file_path);
+    WRITE_INT_TAG(SYSTEM_FILE_LOAD_MATRIX_ON_STARTUP, matrixData.load_matrix_on_startup);
+    WRITE_INT_TAG(SYSTEM_FILE_LOGGING, systemData.logging_enabled);
  
-    WRITE_INT_TAG(3, systemData.serial_command);
-    WRITE_INT_TAG(4, systemData.output_satio_all);
-    WRITE_INT_TAG(5, systemData.output_satio_enabled);
-    WRITE_INT_TAG(6, systemData.output_ins_enabled);
-    WRITE_INT_TAG(7, systemData.output_gngga_enabled);
-    WRITE_INT_TAG(8, systemData.output_gnrmc_enabled);
-    WRITE_INT_TAG(9, systemData.output_gpatt_enabled);
-    WRITE_INT_TAG(10, systemData.output_matrix_enabled);
-    WRITE_INT_TAG(11, systemData.output_admplex0_enabled);
-    WRITE_INT_TAG(12, systemData.output_gyro_0_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_SERIAL_COMMAND, systemData.serial_command);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_ALL, systemData.output_satio_all);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_SATIO, systemData.output_satio_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GNGGA, systemData.output_ins_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GNRMC, systemData.output_gngga_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GPATT, systemData.output_gnrmc_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_INS, systemData.output_gpatt_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_MATRIX, systemData.output_matrix_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_ADMPLEX0, systemData.output_admplex0_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GYRO0, systemData.output_gyro_0_enabled);
 
-    WRITE_INT_TAG(13, systemData.output_sun_enabled);
-    WRITE_INT_TAG(14, systemData.output_mercury_enabled);
-    WRITE_INT_TAG(15, systemData.output_venus_enabled);
-    WRITE_INT_TAG(16, systemData.output_earth_enabled);
-    WRITE_INT_TAG(17, systemData.output_luna_enabled);
-    WRITE_INT_TAG(18, systemData.output_mars_enabled);
-    WRITE_INT_TAG(19, systemData.output_jupiter_enabled);
-    WRITE_INT_TAG(20, systemData.output_saturn_enabled);
-    WRITE_INT_TAG(21, systemData.output_uranus_enabled);
-    WRITE_INT_TAG(22, systemData.output_neptune_enabled);
-    WRITE_INT_TAG(23, systemData.output_meteors_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_SUN, systemData.output_sun_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_MERCURY, systemData.output_mercury_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_VENUS, systemData.output_venus_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_EARTH, systemData.output_earth_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_LUNA, systemData.output_luna_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_MARS, systemData.output_mars_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_JUPITER, systemData.output_jupiter_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_SATURN, systemData.output_saturn_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_URANUS, systemData.output_uranus_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_NEPTUNE, systemData.output_neptune_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_METEORS, systemData.output_meteors_enabled);
 
-    WRITE_LONG_TAG(24, satioData.utc_second_offset);
-    WRITE_INT_TAG(25, satioData.utc_auto_offset_flag);
-    WRITE_INT_TAG(26, satioData.set_time_automatically);
+    WRITE_LONG_TAG(SYSTEM_FILE_UTC_SECOND_OFFSET, satioData.utc_second_offset);
+    WRITE_INT_TAG(SYSTEM_FILE_UTC_AUTO_OFFSET_FLAG, satioData.utc_auto_offset_flag);
+    WRITE_INT_TAG(SYSTEM_FILE_SET_DATETIME_AUTOMATICALLY, satioData.set_time_automatically);
 
-    WRITE_DBL_TAG(27, insData.INS_REQ_GPS_PRECISION);
-    WRITE_DBL_TAG(28, insData.INS_REQ_MIN_SPEED);
-    WRITE_DBL_TAG(29, insData.INS_REQ_HEADING_RANGE_DIFF);
-    WRITE_DBL_TAG(30, insData.INS_MODE);
-    WRITE_INT_TAG(31, insData.INS_USE_GYRO_HEADING);
+    WRITE_DBL_TAG(SYSTEM_FILE_INS_REQ_GPS_PRECISION, insData.INS_REQ_GPS_PRECISION);
+    WRITE_DBL_TAG(SYSTEM_FILE_INS_REQ_MIN_SPEED, insData.INS_REQ_MIN_SPEED);
+    WRITE_DBL_TAG(SYSTEM_FILE_INS_REQ_HEADING_RANGE_DIFF, insData.INS_REQ_HEADING_RANGE_DIFF);
+    WRITE_DBL_TAG(SYSTEM_FILE_INS_MODE, insData.INS_MODE);
+    WRITE_INT_TAG(SYSTEM_FILE_INS_USE_GYRO_HEADING, insData.INS_USE_GYRO_HEADING);
 
-    WRITE_DBL_TAG(32, satioData.user_degrees_latitude);
-    WRITE_DBL_TAG(33, satioData.user_degrees_longitude);
-    WRITE_DBL_TAG(34, satioData.user_speed);
-    WRITE_DBL_TAG(35, satioData.user_ground_heading);
-    WRITE_DBL_TAG(36, satioData.user_altitude);
+    WRITE_DBL_TAG(SYSTEM_FILE_USER_LATITUDE, satioData.user_degrees_latitude);
+    WRITE_DBL_TAG(SYSTEM_FILE_USER_LONGITUDE, satioData.user_degrees_longitude);
+    WRITE_DBL_TAG(SYSTEM_FILE_USER_SPEED, satioData.user_speed);
+    WRITE_DBL_TAG(SYSTEM_FILE_USER_GROUND_HEADING, satioData.user_ground_heading);
+    WRITE_DBL_TAG(SYSTEM_FILE_USER_ALTITUDE, satioData.user_altitude);
 
-    WRITE_INT_TAG(37, satioData.location_value_mode);
-    WRITE_INT_TAG(38, satioData.altitude_value_mode);
-    WRITE_INT_TAG(39, satioData.speed_value_mode);
-    WRITE_INT_TAG(40, satioData.ground_heading_value_mode);
-
-    // WRITE_LONG_TAG(41, DELAY_TASK_SERIAL_INFOCMD);
-    // WRITE_LONG_TAG(42, TICK_DELAY_TASK_SERIAL_INFOCMD);
-    // WRITE_LONG_TAG(43, DELAY_TASK_MULTIPLEXERS);
-    // WRITE_LONG_TAG(44, TICK_DELAY_TASK_MULTIPLEXERS);
-    // WRITE_LONG_TAG(45, DELAY_TASK_GYRO0);
-    // WRITE_LONG_TAG(46, TICK_DELAY_TASK_GYRO0);
-    // WRITE_LONG_TAG(47, DELAY_TASK_UNIVERSE);
-    // WRITE_LONG_TAG(48, TICK_DELAY_TASK_UNIVERSE);
-    // WRITE_LONG_TAG(49, DELAY_TASK_GPS);
-    // WRITE_LONG_TAG(50, TICK_DELAY_TASK_GPS);
-    // WRITE_LONG_TAG(51, DELAY_TASK_SWITCHES);
-    // WRITE_LONG_TAG(52, TICK_DELAY_TASK_SWITCHES);
-    // WRITE_LONG_TAG(53, DELAY_TASK_PORTCONTROLLER_INPUT);
-    // WRITE_LONG_TAG(54, TICK_DELAY_TASK_PORTCONTROLLER_INPUT);
-    // WRITE_LONG_TAG(55, DELAY_TASK_STORAGE);
-    // WRITE_LONG_TAG(56, TICK_DELAY_TASK_STORAGE);
-    // WRITE_LONG_TAG(57, DELAY_TASK_LOGGING);
-    // WRITE_LONG_TAG(58, TICK_DELAY_TASK_LOGGING);
+    WRITE_INT_TAG(SYSTEM_FILE_SATIO_LOCATION_VALUE_MODE, satioData.location_value_mode);
+    WRITE_INT_TAG(SYSTEM_FILE_SATIO_ALTITUDE_VALUE_MODE, satioData.altitude_value_mode);
+    WRITE_INT_TAG(SYSTEM_FILE_SATIO_SPEED_VALUE_MODE, satioData.speed_value_mode);
+    WRITE_INT_TAG(SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE, satioData.ground_heading_value_mode);
     
     #undef WRITE_INT_TAG
     #undef WRITE_LONG_TAG
@@ -923,119 +980,109 @@ bool saveSystemFile(const char *filepath) {
     
     free(lineBuf);
     fclose(f);
-    printf("$SYSTEMSAVED\n");
+    printf("[saveSystemFile] done.\n");
     return true;
 }
 
 bool loadSystemFile(const char *filepath) {
-    printf("$SYSTEMLOADING\n");
-    if (!sd_exists(filepath)) { printf("$SYSTEMLOADFAILED\n"); return false; }
-    
+    printf("[loadSystemFile] Attempting to load system file..\n");
+
+    if (!sd_exists(filepath)) {printf("[loadSystemFile] Could not find system file.\n"); return false;}
+
     FILE* f = sd_fopen(filepath, "r");
-    if (!f) { printf("$SYSTEMLOADFAILED\n"); return false; }
-    
-    char lineBuffer[1024];
-    int currentTag = 0;
+    if (!f) {printf("[loadSystemFile] Could not open system file.\n"); return false;}
+
+    char lineBuffer[256];
+
+    #define READ_BOOL_TAG(idx, var) if (tag_index == idx) { if (str_is_bool(val)) { var = atoi(val); } }
+    #define READ_INT8_TAG(idx, var) if (tag_index == idx) { if (str_is_int8(val)) { var = atoi(val); } }
+    #define READ_LONG_TAG(idx, var) if (tag_index == idx) { if (str_is_long(val)) { var = strtol(val, &endptr, 10); } }
+    #define READ_DBL_TAG(idx, var)  if (tag_index == idx) { if (str_is_double(val)) { var = strtod(val, &endptr); } }
+
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
-        // Critical! This may take a moment, yield for other tasks!
+
         yieldForTasks();
 
-        // Strip newline
         size_t len = strlen(lineBuffer);
-        while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) { lineBuffer[--len] = '\0'; }
+        while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) lineBuffer[--len] = '\0';
         if (len == 0) continue;
-            printf("Processing Tag Token Number: %d (data: %s)\n", currentTag, lineBuffer); // uncomment to debug
-            char *commaToken = strtok(lineBuffer, ",");
-            int tokenCount = 0;
-            signed int tag_index = -1;
-            for (int i_find_tag=0; i_find_tag<MAX_SYSTEM_TAGS; i_find_tag++) {if (strcmp(satioFileData.system_tags[i_find_tag], commaToken)==0) {tag_index=i_find_tag; break;}}
-            if (tag_index==-1) {
-                printf("Unrecognized tag found in system file: %s\n", commaToken);
-                continue;
-            }
-            // Serial.println("Tag Found: " + String(satioFileData.system_tags[tag_index]));
-            String data_0; String data_1; String data_2;
-            commaToken = strtok(NULL, ","); // remove tag
-            while (commaToken != NULL) {if (tokenCount==0) {data_0=commaToken;} else if (tokenCount==1) {data_1=commaToken;} else if (tokenCount==2) {data_2=commaToken;} commaToken = strtok(NULL, ","); tokenCount++;}
 
-            if     (tag_index==0) {if (str_is_int8(data_0.c_str())) {satioFileData.i_current_matrix_file_path=atoi(data_0.c_str());}}
-            else if (tag_index==1) {if (str_is_bool(data_0.c_str())) {matrixData.load_matrix_on_startup=atoi(data_0.c_str());}}
-            else if (tag_index==2) {if (str_is_bool(data_0.c_str())) {systemData.logging_enabled=atoi(data_0.c_str());}}
+        char *token = strtok(lineBuffer, ",");
+        if (!token) continue;
 
-            else if (tag_index==3) {if (str_is_bool(data_0.c_str())) {systemData.serial_command=atoi(data_0.c_str());}}
-            else if (tag_index==4) {if (str_is_bool(data_0.c_str())) {systemData.output_satio_all=atoi(data_0.c_str());}}
-            else if (tag_index==5) {if (str_is_bool(data_0.c_str())) {systemData.output_satio_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==6) {if (str_is_bool(data_0.c_str())) {systemData.output_ins_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==7) {if (str_is_bool(data_0.c_str())) {systemData.output_gngga_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==8) {if (str_is_bool(data_0.c_str())) {systemData.output_gnrmc_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==9) {if (str_is_bool(data_0.c_str())) {systemData.output_gpatt_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==10) {if (str_is_bool(data_0.c_str())) {systemData.output_matrix_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==11) {if (str_is_bool(data_0.c_str())) {systemData.output_admplex0_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==12) {if (str_is_bool(data_0.c_str())) {systemData.output_gyro_0_enabled=atoi(data_0.c_str());}}
+        int tag_index = -1;
+        for (int i = 0; i < MAX_SYSTEM_TAGS; i++) {if (strcmp(getSystemTag(i), token) == 0) {tag_index = i; break;}}
 
-            else if (tag_index==13) {if (str_is_bool(data_0.c_str())) {systemData.output_sun_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==14) {if (str_is_bool(data_0.c_str())) {systemData.output_mercury_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==15) {if (str_is_bool(data_0.c_str())) {systemData.output_venus_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==16) {if (str_is_bool(data_0.c_str())) {systemData.output_earth_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==17) {if (str_is_bool(data_0.c_str())) {systemData.output_luna_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==18) {if (str_is_bool(data_0.c_str())) {systemData.output_mars_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==19) {if (str_is_bool(data_0.c_str())) {systemData.output_jupiter_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==20) {if (str_is_bool(data_0.c_str())) {systemData.output_saturn_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==21) {if (str_is_bool(data_0.c_str())) {systemData.output_uranus_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==22) {if (str_is_bool(data_0.c_str())) {systemData.output_neptune_enabled=atoi(data_0.c_str());}}
-            else if (tag_index==23) {if (str_is_bool(data_0.c_str())) {systemData.output_meteors_enabled=atoi(data_0.c_str());}}
+        if (tag_index == -1) {printf("Unrecognized tag: %s\n", token); continue;}
 
-            else if (tag_index==24) {if (str_is_long(data_0.c_str())) {satioData.utc_second_offset=strtol(data_0.c_str(), &endptr, 10);}}
-            else if (tag_index==25) {if (str_is_bool(data_0.c_str())) {satioData.utc_auto_offset_flag=atoi(data_0.c_str());}}
-            else if (tag_index==26) {if (str_is_bool(data_0.c_str())) {satioData.set_time_automatically=atoi(data_0.c_str());}}
+        char *val = strtok(NULL, ",");
+        if (!val) continue;
 
-            else if (tag_index==27) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_GPS_PRECISION=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==28) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_MIN_SPEED=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==29) {if (str_is_double(data_0.c_str())) {insData.INS_REQ_HEADING_RANGE_DIFF=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==30) {if (str_is_double(data_0.c_str())) {insData.INS_MODE=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==31) {if (str_is_bool(data_0.c_str())) {insData.INS_USE_GYRO_HEADING=atoi(data_0.c_str());}}
+        char *endptr;
 
-            else if (tag_index==32) {if (str_is_double(data_0.c_str())) {satioData.user_degrees_latitude=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==33) {if (str_is_double(data_0.c_str())) {satioData.user_degrees_longitude=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==34) {if (str_is_double(data_0.c_str())) {satioData.user_speed=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==35) {if (str_is_double(data_0.c_str())) {satioData.user_ground_heading=strtod(data_0.c_str(), &endptr);}}
-            else if (tag_index==36) {if (str_is_double(data_0.c_str())) {satioData.user_altitude=strtod(data_0.c_str(), &endptr);}}
+        READ_INT8_TAG(SYSTEM_FILE_MATRIX_FILE, satioFileData.i_current_matrix_file_path);
+        READ_BOOL_TAG(SYSTEM_FILE_LOAD_MATRIX_ON_STARTUP, matrixData.load_matrix_on_startup);
+        READ_BOOL_TAG(SYSTEM_FILE_LOGGING, systemData.logging_enabled);
 
-            else if (tag_index==37) {if (str_is_int8(data_0.c_str())) {satioData.location_value_mode=atoi(data_0.c_str());}}
-            else if (tag_index==38) {if (str_is_int8(data_0.c_str())) {satioData.altitude_value_mode=atoi(data_0.c_str());}}
-            else if (tag_index==39) {if (str_is_int8(data_0.c_str())) {satioData.speed_value_mode=atoi(data_0.c_str());}}
-            else if (tag_index==40) {if (str_is_int8(data_0.c_str())) {satioData.ground_heading_value_mode=atoi(data_0.c_str());}}
+        READ_BOOL_TAG(SYSTEM_FILE_SERIAL_COMMAND, systemData.serial_command);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_ALL, systemData.output_satio_all);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_SATIO, systemData.output_satio_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_INS, systemData.output_ins_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_GNGGA, systemData.output_gngga_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_GNRMC, systemData.output_gnrmc_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_GPATT, systemData.output_gpatt_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_MATRIX, systemData.output_matrix_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_ADMPLEX0, systemData.output_admplex0_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_GYRO0, systemData.output_gyro_0_enabled);
 
-            // else if (tag_index==41) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SERIAL_INFOCMD=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==42) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_SERIAL_INFOCMD=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==43) {if (str_is_long(data_0.c_str())) {DELAY_TASK_MULTIPLEXERS=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==44) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_MULTIPLEXERS=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==45) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GYRO0=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==46) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_GYRO0=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==47) {if (str_is_long(data_0.c_str())) {DELAY_TASK_UNIVERSE=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==48) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_UNIVERSE=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==49) {if (str_is_long(data_0.c_str())) {DELAY_TASK_GPS=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==50) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_GPS=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==51) {if (str_is_long(data_0.c_str())) {DELAY_TASK_SWITCHES=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==52) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_SWITCHES=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==53) {if (str_is_long(data_0.c_str())) {DELAY_TASK_PORTCONTROLLER_INPUT=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==54) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_PORTCONTROLLER_INPUT=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==55) {if (str_is_long(data_0.c_str())) {DELAY_TASK_STORAGE=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==56) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_STORAGE=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==57) {if (str_is_long(data_0.c_str())) {DELAY_TASK_LOGGING=strtol(data_0.c_str(), &endptr, 10);}}
-            // else if (tag_index==58) {if (str_is_long(data_0.c_str())) {TICK_DELAY_TASK_LOGGING=strtol(data_0.c_str(), &endptr, 10);}}
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_SUN, systemData.output_sun_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_MERCURY, systemData.output_mercury_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_VENUS, systemData.output_venus_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_EARTH, systemData.output_earth_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_LUNA, systemData.output_luna_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_MARS, systemData.output_mars_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_JUPITER, systemData.output_jupiter_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_SATURN, systemData.output_saturn_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_URANUS, systemData.output_uranus_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_NEPTUNE, systemData.output_neptune_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_METEORS, systemData.output_meteors_enabled);
 
-            currentTag++;
+        READ_LONG_TAG(SYSTEM_FILE_UTC_SECOND_OFFSET, satioData.utc_second_offset);
+        READ_BOOL_TAG(SYSTEM_FILE_UTC_AUTO_OFFSET_FLAG, satioData.utc_auto_offset_flag);
+        READ_BOOL_TAG(SYSTEM_FILE_SET_DATETIME_AUTOMATICALLY, satioData.set_time_automatically);
+
+        READ_DBL_TAG(SYSTEM_FILE_INS_REQ_GPS_PRECISION, insData.INS_REQ_GPS_PRECISION);
+        READ_DBL_TAG(SYSTEM_FILE_INS_REQ_MIN_SPEED, insData.INS_REQ_MIN_SPEED);
+        READ_DBL_TAG(SYSTEM_FILE_INS_REQ_HEADING_RANGE_DIFF, insData.INS_REQ_HEADING_RANGE_DIFF);
+        READ_DBL_TAG(SYSTEM_FILE_INS_MODE, insData.INS_MODE);
+        READ_BOOL_TAG(SYSTEM_FILE_INS_USE_GYRO_HEADING, insData.INS_USE_GYRO_HEADING);
+
+        READ_DBL_TAG(SYSTEM_FILE_USER_LATITUDE, satioData.user_degrees_latitude);
+        READ_DBL_TAG(SYSTEM_FILE_USER_LONGITUDE, satioData.user_degrees_longitude);
+        READ_DBL_TAG(SYSTEM_FILE_USER_SPEED, satioData.user_speed);
+        READ_DBL_TAG(SYSTEM_FILE_USER_GROUND_HEADING, satioData.user_ground_heading);
+        READ_DBL_TAG(SYSTEM_FILE_USER_ALTITUDE, satioData.user_altitude);
+
+        READ_INT8_TAG(SYSTEM_FILE_SATIO_LOCATION_VALUE_MODE, satioData.location_value_mode);
+        READ_INT8_TAG(SYSTEM_FILE_SATIO_ALTITUDE_VALUE_MODE, satioData.altitude_value_mode);
+        READ_INT8_TAG(SYSTEM_FILE_SATIO_SPEED_VALUE_MODE, satioData.speed_value_mode);
+        READ_INT8_TAG(SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE, satioData.ground_heading_value_mode);
     }
+
+    #undef READ_INT_TAG
+    #undef READ_INT8_TAG
+    #undef READ_LONG_TAG
+    #undef READ_DBL_TAG
+
     fclose(f);
-    if (currentTag == 0) {printf("$SYSTEMLOADFAILED\n"); return false;}
-    printf("$SYSTEMLOADED\n");
+
+    printf("[loadSystemFile] done.\n");
     return true;
 }
 
 bool deleteSystemFile(const char *filepath) {
-    if (sd_exists(filepath)) {if (sd_remove(filepath)) {printf("$SYSTEMDELETED\n"); return true;}}
-    printf("$SYSTEMDELETEFAILED\n");
+    if (sd_exists(filepath)) {if (sd_remove(filepath)) {printf("[deleteSystemFile] done.\n"); return true;}}
+    printf("[deleteSystemFile] Failed.\n");
     return false;
 }
 
@@ -1061,7 +1108,6 @@ void sdcardFlagHandler() {
 //   }
 
   if (sdcardData.sdcard_mounted==false) {
-    
   }
 
   else if (sdcardData.sdcard_mounted==true) {

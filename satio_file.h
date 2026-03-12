@@ -31,15 +31,10 @@ struct satioFileStruct {
     char* token;
     char tmp_chars[MAX_GLOBAL_ELEMENT_SIZE];
 
-    char matrix_tags[MAX_MATRIX_TAGS][MAX_GLOBAL_ELEMENT_SIZE];
     char matix_filepaths[MAX_MATRIX_SLOTS][MAX_GLOBAL_ELEMENT_SIZE];
     char current_matrix_filepath[MAX_GLOBAL_ELEMENT_SIZE];
     int i_current_matrix_file_path;
-
-    char mapping_tags[MAX_MAPPING_TAGS][MAX_GLOBAL_ELEMENT_SIZE];
     char mapping_filepath[MAX_GLOBAL_ELEMENT_SIZE];
-
-    char system_tags[MAX_SYSTEM_TAGS][MAX_GLOBAL_ELEMENT_SIZE];
     char system_filepath[MAX_GLOBAL_ELEMENT_SIZE];
 
     char log_dir[MAX_GLOBAL_ELEMENT_SIZE];
