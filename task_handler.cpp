@@ -412,7 +412,6 @@ void system_timing() {
             gyroData.gyro_0_mag_z
         );
     }
-    systemData.loops_a_second++;
 }
 
 /** ----------------------------------------------------------------------------
@@ -423,6 +422,7 @@ void taskGPS(void * pvParameters) {
   esp_task_wdt_add(NULL);
   for (;;) {
     esp_task_wdt_reset();
+
     system_timing();
     // ------------------------------------------------
     // Get, check and set gps data.
