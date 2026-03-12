@@ -70,16 +70,16 @@
 #include "esp_system.h"
 #include "driver/uart.h"
 
-/* Enable complex draw engine (required for anti-aliasing) */
-#define LV_USE_DRAW_SW              1
+// /* Enable complex draw engine (required for anti-aliasing) */
+// #define LV_USE_DRAW_SW              1
 
-#if LV_USE_DRAW_SW
-    /* Enable complex shapes (arcs, lines, polygons, etc.) */
-    #define LV_DRAW_SW_COMPLEX      1
+// #if LV_USE_DRAW_SW
+//     /* Enable complex shapes (arcs, lines, polygons, etc.) */
+//     #define LV_DRAW_SW_COMPLEX      1
     
-    /* Set to 1 to enable anti-aliasing */
-    #define LV_DRAW_SW_ASM          LV_DRAW_SW_ASM_NONE
-#endif
+//     /* Set to 1 to enable anti-aliasing */
+//     #define LV_DRAW_SW_ASM          LV_DRAW_SW_ASM_NONE
+// #endif
 
 // LV_FONT_DECLARE(active_space_10);
 // LV_FONT_DECLARE(space_ranger_15);
@@ -814,7 +814,7 @@ lv_obj_t * create_label(
     lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
-    char * text,
+    const char * text,
     lv_text_align_t text_align,
     const lv_font_t * font,
     bool transparent_bg,
@@ -854,8 +854,8 @@ lv_obj_t * create_textarea(
     int32_t pos_x,
     int32_t pos_y,
     bool one_line,
-    char * accepted_chars,
-    char * placeholder_text,
+    const char * accepted_chars,
+    const char * placeholder_text,
     bool transparent_bg,
     bool show_scrollbar,
     bool enable_scrolling,
@@ -1017,7 +1017,7 @@ button_t create_button(
     lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
-    char * text,
+    const char * text,
     lv_text_align_t text_align,
     bool show_scrollbar,
     bool enable_scrolling,

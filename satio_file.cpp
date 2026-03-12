@@ -203,14 +203,14 @@ void set_storage_success_flag(bool flag) {
 /**
  * @brief Create full path with /sdcard prefix
  */
-static void sd_fullpath(const char* path, char* fullpath, size_t size) {
+void sd_fullpath(const char* path, char* fullpath, size_t size) {
     snprintf(fullpath, size, "/sdcard%s", path);
 }
 
 /**
  * @brief Check if file exists
  */
-static bool sd_exists(const char* path) {
+bool sd_exists(const char* path) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
     struct stat st;
@@ -220,7 +220,7 @@ static bool sd_exists(const char* path) {
 /**
  * @brief Remove file
  */
-static bool sd_remove(const char* path) {
+bool sd_remove(const char* path) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
     return (remove(fullpath) == 0);
@@ -229,7 +229,7 @@ static bool sd_remove(const char* path) {
 /**
  * @brief Get file size
  */
-static uint64_t sd_file_size(const char* path) {
+uint64_t sd_file_size(const char* path) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
     struct stat st;
@@ -242,7 +242,7 @@ static uint64_t sd_file_size(const char* path) {
 /**
  * @brief Create directory recursively
  */
-static bool sd_mkdir(const char* path) {
+bool sd_mkdir(const char* path) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
     
@@ -269,7 +269,7 @@ static bool sd_mkdir(const char* path) {
 /**
  * @brief Open file with /sdcard prefix
  */
-static FILE* sd_fopen(const char* path, const char* mode) {
+FILE* sd_fopen(const char* path, const char* mode) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
     printf("[sd_fopen] fullpath: %s, mode: %s\n", fullpath, mode);
@@ -316,15 +316,15 @@ static FILE* sd_fopen(const char* path, const char* mode) {
     return f;
 }
 
-/** 
- * @brief Write string to file with newline
- */
-static bool sd_fprintln(FILE* f, const char* str) {
-    if (!f) return false;
-    fputs(str, f);
-    fputc('\n', f);
-    return true;
-}
+// /** 
+//  * @brief Write string to file with newline
+//  */
+// bool sd_fprintln(FILE* f, const char* str) {
+//     if (!f) return false;
+//     fputs(str, f);
+//     fputc('\n', f);
+//     return true;
+// }
 
 // bool isOpen(File root) {
 //  if (!root) {

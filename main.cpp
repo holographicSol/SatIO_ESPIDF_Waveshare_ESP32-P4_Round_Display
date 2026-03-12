@@ -173,60 +173,60 @@ void setup() {
 
 }
 
-/** ----------------------------------------------------------------------------------------
- * @brief Interval breach (System counters).
- */
-int64_t prev_tv_sec;
+// /** ----------------------------------------------------------------------------------------
+//  * @brief Interval breach (System counters).
+//  */
+// int64_t prev_tv_sec;
 
-void intervalBreach1Second(void) {
-  // if (systemData.interval_breach_1_second) {
-    // store system time
-    storeLocalTime();
-    // store rtc time
-    storeRTCTime();
-    // set loop counter
-    systemData.total_loops_a_second = systemData.loops_a_second;
-    systemData.loops_a_second = 0;
-    // set gps counters
-    systemData.total_gps = systemData.i_count_read_gps;
-    systemData.i_count_read_gps = 0;
-    // set ins counters
-    systemData.total_ins = systemData.i_count_read_ins;
-    systemData.i_count_read_ins = 0;
-    // set gyro counters
-    systemData.total_gyro_0 = systemData.i_count_read_gyro_0;
-    systemData.i_count_read_gyro_0 = 0;
-    // set mplex counters
-    systemData.total_mplex_0 = systemData.i_count_read_mplex_0;
-    systemData.i_count_read_mplex_0 = 0;
-    // set mplex counters
-    systemData.total_matrix = systemData.i_count_matrix;
-    systemData.i_count_matrix = 0;
-    // set mplex counters
-    systemData.total_portcontroller_output = systemData.i_count_port_controller_output;
-    systemData.i_count_port_controller_output = 0;
-    // set mplex counters
-    systemData.total_universe = systemData.i_count_track_planets;
-    systemData.i_count_track_planets = 0;
-    // set mplex counters
-    systemData.total_infocmd = systemData.i_count_read_serial_commands;
-    systemData.i_count_read_serial_commands = 0;
-    // set portcontroller input counters
-    systemData.total_portcontroller_input = systemData.i_count_portcontroller_input;
-    systemData.i_count_portcontroller_input = 0;
-    // set display counters
-    systemData.total_display = systemData.i_count_display;
-    systemData.i_count_display = 0;
-    // set second flags
-    systemData.interval_breach_track_planets = 1;
-    // set uptime
-    systemData.uptime_seconds++;
-    if (systemData.uptime_seconds >= LONG_MAX - 2)
-      {systemData.uptime_seconds = 0;
-        printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
-      }
-  // }
-}
+// void intervalBreach1Second(void) {
+//   // if (systemData.interval_breach_1_second) {
+//     // store system time
+//     storeLocalTime();
+//     // store rtc time
+//     storeRTCTime();
+//     // set loop counter
+//     systemData.total_loops_a_second = systemData.loops_a_second;
+//     systemData.loops_a_second = 0;
+//     // set gps counters
+//     systemData.total_gps = systemData.i_count_read_gps;
+//     systemData.i_count_read_gps = 0;
+//     // set ins counters
+//     systemData.total_ins = systemData.i_count_read_ins;
+//     systemData.i_count_read_ins = 0;
+//     // set gyro counters
+//     systemData.total_gyro_0 = systemData.i_count_read_gyro_0;
+//     systemData.i_count_read_gyro_0 = 0;
+//     // set mplex counters
+//     systemData.total_mplex_0 = systemData.i_count_read_mplex_0;
+//     systemData.i_count_read_mplex_0 = 0;
+//     // set mplex counters
+//     systemData.total_matrix = systemData.i_count_matrix;
+//     systemData.i_count_matrix = 0;
+//     // set mplex counters
+//     systemData.total_portcontroller_output = systemData.i_count_port_controller_output;
+//     systemData.i_count_port_controller_output = 0;
+//     // set mplex counters
+//     systemData.total_universe = systemData.i_count_track_planets;
+//     systemData.i_count_track_planets = 0;
+//     // set mplex counters
+//     systemData.total_infocmd = systemData.i_count_read_serial_commands;
+//     systemData.i_count_read_serial_commands = 0;
+//     // set portcontroller input counters
+//     systemData.total_portcontroller_input = systemData.i_count_portcontroller_input;
+//     systemData.i_count_portcontroller_input = 0;
+//     // set display counters
+//     systemData.total_display = systemData.i_count_display;
+//     systemData.i_count_display = 0;
+//     // set second flags
+//     systemData.interval_breach_track_planets = 1;
+//     // set uptime
+//     systemData.uptime_seconds++;
+//     if (systemData.uptime_seconds >= LONG_MAX - 2)
+//       {systemData.uptime_seconds = 0;
+//         printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
+//       }
+//   // }
+// }
 
 /** -----------------------------------------------------------------------------------------------
  * @brief Main application entry point.
@@ -374,99 +374,6 @@ extern "C" void app_main(void)
     // Main Loop (Critical for system timing, do not overload)
     // --------------------------------------------------------------
     while (1) {
-        // printf("[LOOP] %ld\n", systemData.loops_a_second);
-        gettimeofday(&tv_now, NULL);
-        timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
-        satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
-        // printf("[LOOP] localtime: %lld\n", satioData.local_unixtime_uS);
-
-        if (tv_now.tv_sec != prev_tv_sec) {
-            prev_tv_sec = tv_now.tv_sec;
-            systemData.interval_breach_1_second_output=true;
-            intervalBreach1Second();
-            printf(
-                "[ %llu ] "
-                "gps=%s "
-                "rtc=%s "
-                "lcl=%s "
-                "syn=%s "
-                "t_loop=%ld "
-                "t_gps=%ld "
-                "t_ins=%ld "
-                "t_gyr=%ld "
-                "t_mlx=%ld "
-                "t_uni=%ld "
-                "t_pci=%ld "
-                "t_mtx=%ld "
-                "t_pco=%ld "
-                "t_dsp=%ld  "
-
-                "sat=%s "
-                "deg_lat=%.7f "
-                "deg_lon=%.7f "
-                "usr_lat=%.7f "
-                "usr_lon=%.7f "
-                "sys_lat=%.7f "
-                "sys_lon=%.7f "
-                "alt=%.2f "
-                "ghd=%.2f "
-                "spd=%.2f "
-                
-                "ang_x=%.2f "
-                "ang_y=%.2f "
-                "ang_z=%.2f "
-                "gyr_x=%.2f "
-                "gyr_y=%.2f "
-                "gyr_z=%.2f "
-                "acc_x=%.2f "
-                "acc_y=%.2f "
-                "acc_z=%.2f "
-                "mag_x=%d "
-                "mag_y=%d "
-                "mag_z=%d\n",
-                
-                satioData.local_unixtime_uS,
-                gnrmcData.utc_time,
-                satioData.padded_rtc_time_HHMMSS,
-                satioData.padded_local_time_HHMMSS,
-                satioData.padded_rtc_sync_time_HHMMSS,
-                systemData.total_loops_a_second,
-                systemData.total_gps,
-                systemData.total_ins,
-                systemData.total_gyro_0,
-                systemData.total_mplex_0,
-                systemData.total_universe,
-                systemData.total_portcontroller_input,
-                systemData.total_matrix,
-                systemData.total_portcontroller_output,
-                systemData.total_display,
-
-                gnggaData.satellite_count,
-                satioData.degrees_latitude,
-                satioData.degrees_longitude,
-                satioData.user_degrees_latitude,
-                satioData.user_degrees_longitude,
-                satioData.system_degrees_latitude,
-                satioData.system_degrees_longitude,
-                satioData.altitude,
-                satioData.ground_heading,
-                satioData.speed,
-
-                gyroData.gyro_0_ang_x,
-                gyroData.gyro_0_ang_y,
-                gyroData.gyro_0_ang_z,
-                gyroData.gyro_0_gyr_x,
-                gyroData.gyro_0_gyr_y,
-                gyroData.gyro_0_gyr_z,
-                gyroData.gyro_0_acc_x,
-                gyroData.gyro_0_acc_y,
-                gyroData.gyro_0_acc_z,
-                gyroData.gyro_0_mag_x,
-                gyroData.gyro_0_mag_y,
-                gyroData.gyro_0_mag_z
-            );
-        }
-        systemData.loops_a_second++;
-        vTaskDelay(1);
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }

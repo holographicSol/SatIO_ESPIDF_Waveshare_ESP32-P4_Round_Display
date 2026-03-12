@@ -151,7 +151,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
 // ----------------------------------------------------------------------------------------
 #define MAX_MAPPABLE_VALUES 29   // Maximum number of mappable values
 #define MAX_MAPPING_PARAMETERS 6 // Number of parameters per mapping slot
-#define MAX_MAP_SLOTS 70        // Maximum number of map slots.
+#define MAX_MAP_SLOTS 45        // Maximum number of map slots.
 #define MAX_MAP_MODES 3
 #define INDEX_MAPPABLE_VALUES_DIGITAL      0
 #define INDEX_MAPPABLE_VALUES_GYRO0ACCX    1
@@ -228,7 +228,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
 // ----------------------------------------------------------------------------------------
 #define MAX_MATRIX_OUTPUT_MODES 2
 #define MAX_MATRIX_OVERRIDE_TIME 1000000
-#define MAX_MATRIX_SWITCHES 70         // logical max is current subjective max<=sytem memory capacity (actual max is subjective max<=sytem memory capacity and or limited by portcontroller max I/O range if using port controller for output)
+#define MAX_MATRIX_SWITCHES 45         // logical max is current subjective max<=sytem memory capacity (actual max is subjective max<=sytem memory capacity and or limited by portcontroller max I/O range if using port controller for output)
 #define MAX_MATRIX_SWITCH_FUNCTIONS 10 // logical max is current subjective max<=sytem memory capacity (actual max is subjective max<=sytem memory capacity and or limited by portcontroller max I/O range if using port controller for output)
 #define MAX_MATRIX_FUNCTION_NAMES 113 // should match length matrixData.matrix_function_names[]
 #define MAX_MATRIX_OPERATORS 5

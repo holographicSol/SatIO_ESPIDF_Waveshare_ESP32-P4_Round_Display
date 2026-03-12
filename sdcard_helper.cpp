@@ -167,7 +167,7 @@ uint32_t get_file_size(const char* filename) {
  * @param mode File open mode (read, write, etc.).
  * @return Pointer to the opened file object, or NULL on failure.
  */
-static void * sd_file_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
+void * sd_file_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
 {
     printf("LVGL_FS: Got path '%s'\n", path);
 
@@ -194,7 +194,7 @@ static void * sd_file_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mo
  * @return LV_FS_RES_OK.
  * 
  */
-static lv_fs_res_t sd_file_close(lv_fs_drv_t * drv, void * file_p)
+lv_fs_res_t sd_file_close(lv_fs_drv_t * drv, void * file_p)
 {
     FILE * f = (FILE *)file_p;
     fclose(f);
@@ -216,7 +216,7 @@ static lv_fs_res_t sd_file_close(lv_fs_drv_t * drv, void * file_p)
  * @return LV_FS_RES_OK if the read was successful (bytes read > 0 or end of file reached),
  *         otherwise LV_FS_RES_UNKNOWN.
  */
-static lv_fs_res_t sd_file_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_t btr, uint32_t * br)
+lv_fs_res_t sd_file_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_t btr, uint32_t * br)
 {
     FILE * f = (FILE *)file_p;
     *br = fread(buf, 1, btr, f);
@@ -227,7 +227,7 @@ static lv_fs_res_t sd_file_read(lv_fs_drv_t * drv, void * file_p, void * buf, ui
 /** ----------------------------------------------------------------------------------------
  * @brief Seek to a specific position in the file.
 */
-static lv_fs_res_t sd_file_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs_whence_t whence)
+lv_fs_res_t sd_file_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs_whence_t whence)
 {
     FILE * f = (FILE *)file_p;
     // printf("LVGL_FS Seeking file: %p\n", file_p);
@@ -241,7 +241,7 @@ static lv_fs_res_t sd_file_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, 
 /** ----------------------------------------------------------------------------------------
  * @brief Get current file position in bytes.
  */
-static lv_fs_res_t sd_file_tell(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p)
+lv_fs_res_t sd_file_tell(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p)
 {
     FILE * f = (FILE *)file_p;
     *pos_p = ftell(f);
@@ -255,7 +255,7 @@ static lv_fs_res_t sd_file_tell(lv_fs_drv_t * drv, void * file_p, uint32_t * pos
  * @param path Path to the directory to open.
  * @return Pointer to the opened directory object, or NULL on failure.
  */
-static void * sd_dir_open(lv_fs_drv_t * drv, const char * path)
+void * sd_dir_open(lv_fs_drv_t * drv, const char * path)
 {
     printf("LVGL_FS: Got dir path '%s'\n", path);
 
@@ -277,7 +277,7 @@ static void * sd_dir_open(lv_fs_drv_t * drv, const char * path)
 /** ----------------------------------------------------------------------------------------
  * @brief Read the next directory entry.
  */
-static lv_fs_res_t sd_dir_read(lv_fs_drv_t * drv, void * dir_p, char * fn, uint32_t btr)
+lv_fs_res_t sd_dir_read(lv_fs_drv_t * drv, void * dir_p, char * fn, uint32_t btr)
 {
     DIR * d = (DIR *)dir_p;
     struct dirent * entry;
@@ -310,7 +310,7 @@ static lv_fs_res_t sd_dir_read(lv_fs_drv_t * drv, void * dir_p, char * fn, uint3
  * @param dir_p Pointer to the directory object (cast to DIR*).
  * @return LV_FS_RES_OK.
  */
-static lv_fs_res_t sd_dir_close(lv_fs_drv_t * drv, void * dir_p)
+lv_fs_res_t sd_dir_close(lv_fs_drv_t * drv, void * dir_p)
 {
     DIR * d = (DIR *)dir_p;
     closedir(d);
@@ -456,7 +456,7 @@ bool is_fs_ready(const char * dirname) {
  */
 void sd_lvgl_register(void)
 {
-    static lv_fs_drv_t fs_drv;
+    lv_fs_drv_t fs_drv;
     lv_fs_drv_init(&fs_drv);
     fs_drv.letter = 'S';
     fs_drv.open_cb = sd_file_open;
@@ -473,8 +473,8 @@ void sd_lvgl_register(void)
     // printf("LVGL S: drive registered\n");
 }
 
-static int last_cd_state = -1;           // unknown at start
-static bool sd_is_mounted = false;       // track your own mount status
+int last_cd_state = -1;           // unknown at start
+bool sd_is_mounted = false;       // track your own mount status
 
 /** ----------------------------------------------------------------------------------------
  * @brief Unmount

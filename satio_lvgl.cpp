@@ -2273,7 +2273,7 @@ lv_obj_t * create_label(
     lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
-    char * text,
+    const char * text,
     lv_text_align_t text_align,
     const lv_font_t * font,
     bool transparent_bg,
@@ -2386,8 +2386,8 @@ lv_obj_t * create_textarea(
     int32_t pos_x,
     int32_t pos_y,
     bool one_line,
-    char * accepted_chars,
-    char * placeholder_text,
+    const char * accepted_chars,
+    const char * placeholder_text,
     bool transparent_bg,
     bool show_scrollbar,
     bool enable_scrolling,
@@ -3006,7 +3006,7 @@ button_t create_button(
     lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
-    char * text,
+    const char * text,
     lv_text_align_t text_align,
     bool show_scrollbar,
     bool enable_scrolling,
@@ -3179,7 +3179,7 @@ gps_switch_container_t create_gps_switch_panel(
     const lv_font_t * font_sub
     )
 {
-    gps_switch_container_t result = {0};
+    gps_switch_container_t result = {};
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -3401,7 +3401,7 @@ matrix_switch_container_t create_matrix_switch_panel(
     const lv_font_t * font_sub
     )
 {
-    matrix_switch_container_t result = {0};
+    matrix_switch_container_t result = {};
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -3604,7 +3604,7 @@ gngga_container_t create_gngga_panel(
     const lv_font_t * font_sub
     )
 {
-    gngga_container_t result = {0};
+    gngga_container_t result = {};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -4327,7 +4327,7 @@ gnrmc_container_t create_gnrmc_panel(
     const lv_font_t * font_sub
     )
 {
-    gnrmc_container_t result = {0};
+    gnrmc_container_t result = {};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -5110,7 +5110,7 @@ gpatt_container_t create_gpatt_panel(
     const lv_font_t * font_sub
     )
 {
-    gpatt_container_t result = {0};
+    gpatt_container_t result = {};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -6513,7 +6513,7 @@ satio_container_t create_satio_panel(
     const lv_font_t * font_sub
     )
 {
-    satio_container_t result = {0};
+    satio_container_t result = {};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -9478,7 +9478,7 @@ gyro_0_container_t create_gyro_panel(
     const lv_font_t * font_sub
     )
 {
-    gyro_0_container_t result = {0};
+    gyro_0_container_t result = {};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -10099,7 +10099,7 @@ admplex0_container_t create_admplex0_panel(
     const lv_font_t * font_sub
     )
 {
-    admplex0_container_t result = {0};
+    admplex0_container_t result = {};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -11281,7 +11281,7 @@ serial_container_t create_serial_panel(
     const lv_font_t * font_sub
     )
 {
-    serial_container_t result = {0};
+    serial_container_t result = {};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -12945,7 +12945,7 @@ matrix_function_container_t create_matrix_function_container(
     const lv_font_t * font_title,
     const lv_font_t * font_sub
 ) {
-    matrix_function_container_t result = {0};
+    matrix_function_container_t result = {};
 
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -14010,7 +14010,7 @@ mapping_config_container_t create_mapping_config_container(
     const lv_font_t * font_sub
     )
 {
-    mapping_config_container_t result = {0};
+    mapping_config_container_t result = {};
     
     /* --- MAIN PANEL ------------------------------------------------------------------ */
     result.panel = lv_obj_create(parent);
@@ -16022,14 +16022,14 @@ void update_display()
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]==0) {
                     // Mode 0: User Defined
                     lv_label_set_text(mfc.val_x, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]).c_str());
-                    lv_obj_add_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_remove_flag(mfc.val_x, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_set_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN, true);
+                    lv_obj_set_flag(mfc.val_x, LV_OBJ_FLAG_HIDDEN, false);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
-                    lv_obj_add_flag(mfc.val_x, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_remove_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_set_flag(mfc.val_x, LV_OBJ_FLAG_HIDDEN, true);
+                    lv_obj_set_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN, false);
                 }
 
                 // Y Comparitor Mode
@@ -16038,14 +16038,14 @@ void update_display()
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]==0) {
                     // Mode 0: User Defined
                     lv_label_set_text(mfc.val_y, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]).c_str());
-                    lv_obj_add_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_remove_flag(mfc.val_y, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_set_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN, true);
+                    lv_obj_set_flag(mfc.val_y, LV_OBJ_FLAG_HIDDEN, false);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_y, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
-                    lv_obj_add_flag(mfc.val_y, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_remove_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_set_flag(mfc.val_y, LV_OBJ_FLAG_HIDDEN, true);
+                    lv_obj_set_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN, false);
                 }
 
                 // Z Comparitor Mode
@@ -16054,14 +16054,14 @@ void update_display()
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]==0) {
                     // Mode 0: User Defined
                     lv_label_set_text(mfc.val_z, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]).c_str());
-                    lv_obj_add_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_remove_flag(mfc.val_z, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_set_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN, true);
+                    lv_obj_set_flag(mfc.val_z, LV_OBJ_FLAG_HIDDEN, false);
                 }
                 else {
                     // Mode 1: System Defined
                     lv_dropdown_set_selected(mfc.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
-                    lv_obj_add_flag(mfc.val_z, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_remove_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_set_flag(mfc.val_z, LV_OBJ_FLAG_HIDDEN, true);
+                    lv_obj_set_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN, false);
                 }
 
                 // Operator
@@ -16071,10 +16071,10 @@ void update_display()
                 lv_dropdown_set_selected(mfc.dd_inverted_logic, matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i]);
 
                 // PWM Off
-                lv_label_set_text(mfc.val_pwm_0, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF]).c_str());
+                // lv_label_set_text(mfc.val_pwm_0, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF]).c_str());
                 
-                // PWM On
-                lv_label_set_text(mfc.val_pwm_1, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON]).c_str());
+                // // PWM On
+                // lv_label_set_text(mfc.val_pwm_1, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON]).c_str());
 
                 // Connected Map Slot
                 lv_dropdown_set_selected(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
@@ -16098,7 +16098,7 @@ void update_display()
                 }
 
                 // Output Value
-                if (mfc.matrix_switch_output_value) {lv_label_set_text(mfc.matrix_switch_output_value, String(matrixData.output_value[0][current_matrix_i]).c_str());}
+                // if (mfc.matrix_switch_output_value) {lv_label_set_text(mfc.matrix_switch_output_value, String(matrixData.output_value[0][current_matrix_i]).c_str());}
 
                 // Override
                 if (mfc.matrix_switch_override.panel) {
@@ -16836,5 +16836,5 @@ void initSatIOUI() {
  * @brief Start's Update Display Timer.
  */
 void satio_ui_begin() {
-    display_timer = lv_timer_create(update_display_on_timer, 50, NULL);
+    display_timer = lv_timer_create(update_display_on_timer, 30, NULL);
 }
