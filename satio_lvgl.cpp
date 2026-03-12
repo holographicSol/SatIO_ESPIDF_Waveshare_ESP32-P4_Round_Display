@@ -16128,7 +16128,7 @@ void update_display()
                 // Map Slot
                 lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
 
-                lv_dropdown_set_selected(mcc.dd_c0, (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
+                lv_dropdown_set_selected(mcc.dd_c0, (uint32_t)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
 
                 lv_label_set_text(mcc.val_c1, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C1]).c_str());
 
@@ -16140,7 +16140,7 @@ void update_display()
 
                 lv_label_set_text(mcc.val_c5, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C5]).c_str());
 
-                lv_dropdown_set_selected(mcc.dd_mode, mappingData.map_mode[0][current_mapping_i]);
+                lv_dropdown_set_selected(mcc.dd_mode, (uint32_t)mappingData.map_mode[0][current_mapping_i]);
 
                 lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_mapping_i)).c_str());
 
