@@ -204,7 +204,7 @@ void taskLogging(void * pvParameters) {
     // Counters
     // ------------------------------------------------.
     systemData.i_count_logging++;
-    systemData.interval_breach_logging = 1;
+    systemData.interval_breach_logging = true;
     if (systemData.i_count_logging >= UINT32_MAX - 2)
     systemData.i_count_logging = 0;
     esp_task_wdt_reset();
@@ -267,19 +267,17 @@ void createTaskSerialInfoCMD() {
 /** ----------------------------------------------------------------------------
  * GPS Task.
  * 
- * @brief Performas many operations including:
- *  (1) Collects, validates and stores GPS data.
- *  (2) Syncs INS data on successful validation.
- * Consider renaming task to something like 'time and location'
  */
 void taskGPS(void * pvParameters) {
   esp_task_wdt_add(NULL);
-  // while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
   for (;;) {
     esp_task_wdt_reset();
     // ------------------------------------------------
     // Get, check and set gps data.
     // ------------------------------------------------
+    gnggaData.valid_checksum=false;
+    gnrmcData.valid_checksum=false;
+    gpattData.valid_checksum=false;
     readGPS();
     esp_task_wdt_reset();
     validateGPSData();
@@ -292,12 +290,12 @@ void taskGPS(void * pvParameters) {
         (gpattData.valid_checksum=true))
           ||
           satioData.set_rtc_datetime_flag==true) {
+
         // -> syncRTC -- > setRTCDateTime --> setSystemTime, storeRTCSYNCTime
         satioData.set_rtc_datetime_flag=true;
-        // xSemaphoreTake(i2c_bus0_mutex, 1000 / portTICK_PERIOD_MS);
         setSatIOData();
         esp_task_wdt_reset();
-        // xSemaphoreGive(i2c_bus0_mutex);
+
         // --------------------------------------------
         // Set INS data. (Can be used without GPS)
         // --------------------------------------------
@@ -309,6 +307,7 @@ void taskGPS(void * pvParameters) {
                 atof(gnggaData.gps_precision_factor),
                 gyroData.gyro_0_ang_z);
         esp_task_wdt_reset();
+
         // --------------------------------------------
         // Counters.
         // --------------------------------------------
@@ -366,7 +365,7 @@ void taskGyro(void * pvParameters) {
                           satioData.system_speed,
                           satioData.local_unixtime_uS)==true) {
                           systemData.i_count_read_ins++;
-                          systemData.interval_breach_ins=1;
+                          systemData.interval_breach_ins=true;
                           if (systemData.i_count_read_ins>=UINT32_MAX-2)
                             {systemData.i_count_read_ins=0;}}
       esp_task_wdt_reset();
@@ -415,7 +414,7 @@ void taskMultiplexers(void * pvParameters) {
     // Counters
     // ------------------------------------------------
     systemData.i_count_read_mplex_0++;
-    systemData.interval_breach_mplex_0 = 1;
+    systemData.interval_breach_mplex_0 = true;
     if (systemData.i_count_read_mplex_0 >= UINT32_MAX - 2)
     systemData.i_count_read_mplex_0 = 0;
     esp_task_wdt_reset();
@@ -458,6 +457,7 @@ void taskSwitches(void * pvParameters) {
     if (matrixSwitch()) {
       esp_task_wdt_reset();
       systemData.i_count_matrix++;
+      systemData.interval_breach_matrix=true;
       if (systemData.i_count_matrix>=UINT64_MAX-2)
         {systemData.i_count_matrix=0;}
     }

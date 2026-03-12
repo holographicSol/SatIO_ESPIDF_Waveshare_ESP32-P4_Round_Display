@@ -382,7 +382,6 @@ extern "C" void app_main(void)
 
         if (tv_now.tv_sec != prev_tv_sec) {
             prev_tv_sec = tv_now.tv_sec;
-            systemData.interval_breach_1_second=true;
             systemData.interval_breach_1_second_output=true;
             intervalBreach1Second();
             printf(
@@ -465,9 +464,9 @@ extern "C" void app_main(void)
                 gyroData.gyro_0_mag_x,
                 gyroData.gyro_0_mag_y,
                 gyroData.gyro_0_mag_z
-
             );
         }
         systemData.loops_a_second++;
+        vTaskDelay(1);
     }
 }

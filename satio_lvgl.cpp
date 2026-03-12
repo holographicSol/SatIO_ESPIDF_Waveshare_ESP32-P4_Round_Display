@@ -15707,6 +15707,7 @@ void display_uap_screen()
 void update_display_on_timer(lv_timer_t * timer) {
     LV_UNUSED(timer);
     update_display();
+    systemData.i_count_display++;
 };
 
 /** -------------------------------------------------------------------------------------
@@ -16141,7 +16142,7 @@ void update_display()
 
                 lv_dropdown_set_selected(mcc.dd_mode, mappingData.map_mode[0][current_mapping_i]);
 
-                // lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_mapping_i)).c_str());
+                lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_mapping_i)).c_str());
 
                 lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][current_mapping_i]).c_str());
             }

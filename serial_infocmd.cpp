@@ -1904,23 +1904,6 @@ void outputStat(void) {
     // printf("taskGPS", "Unused stack: %u words\n", watermark_task_gps);
     // printf("taskMultiplexers", "Unused stack: %u words\n", watermark_task_multiplexers);
     printf("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-    counter_digits_0[0]=systemData.total_loops_a_second;
-    counter_digits_0[1]=systemData.total_gps;
-    counter_digits_0[2]=systemData.total_ins;
-    counter_digits_0[3]=systemData.total_gyro_0;
-    counter_digits_0[4]=systemData.interval_breach_mplex_0;
-    counter_digits_0[5]=systemData.total_infocmd;
-    counter_digits_0[6]=systemData.total_universe;
-    counter_digits_0[7]=systemData.total_matrix;
-    counter_digits_0[8]=systemData.total_portcontroller_output;
-    counter_digits_0[9]=systemData.total_portcontroller_input;
-    counter_digits_0[10]=systemData.mainLoopTimeTaken;
-    counter_digits_0[11]=systemData.mainLoopTimeTakenMax;
-    counter_digits_0[12]=atoi(gnggaData.satellite_count);
-    counter_digits_0[13]=atof(gnggaData.gps_precision_factor);
-    for (int i = 0; i < 14; i++) {printf("%-16s", counter_chars_0[i]);}
-    printf("\n");
-    printf("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
     for (int i = 0; i < 14; i++) {printf("%-16f", counter_digits_0[i]);}
     printf("\n");
     printf("\n");

@@ -21,7 +21,6 @@ struct systemStruct systemData = {
   .interval_breach_track_planets = false,
   .interval_breach_logging = false,
   .interval_breach_1_second_output = false,
-  .interval_breach_1_second = false,
 
   .debug = false,
   .output_stat = false,
@@ -54,44 +53,19 @@ struct systemStruct systemData = {
   .output_neptune_enabled = false,
   .output_meteors_enabled = false,
 
-  .mainLoopTimeTaken = 0,
-  .mainLoopTimeStart = 0,
-  .mainLoopTimeTakenMax = 0,
   .uptime_seconds = 0,
-  .interval_timer_1_second = 0,
 
   .i_count_read_gps = 0,
-  .prev_i_count_read_gps = 0,
-
   .i_count_read_ins = 0,
-  .prev_i_count_read_ins = 0,
-
   .i_count_read_gyro_0 = 0,
-  .prev_i_count_read_gyro_0 = 0,
-
   .i_count_read_mplex_0 = 0,
-  .prev_i_count_read_mplex_0 = 0,
-
   .i_count_matrix = 0,
-  .prev_i_count_matrix = 0,
-
   .i_count_portcontroller_input = 0,
-  .prev_i_count_portcontroller_input = 0,
-
   .i_count_port_controller_output = 0,
-  .prev_i_count_port_controller_output = 0,
-
   .i_count_track_planets = 0,
-  .prev_i_count_track_planets = 0,
-
   .i_count_read_serial_commands = 0,
-  .prev_i_count_read_serial_commands = 0,
-
   .i_count_logging = 0,
-  .prev_i_count_logging = 0,
-
   .i_count_display = 0,
-  .prev_i_count_display = 0,
 
   .loops_a_second = 0,
   .total_loops_a_second = 0,
