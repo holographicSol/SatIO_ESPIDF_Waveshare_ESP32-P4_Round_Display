@@ -2437,18 +2437,20 @@ void setOutputValues(void) {
     }
 
     // #######################################################################################################
-    // WRITE REQUIRED
+    // PASSTHROUGH (LIMITED BY CHANGE)
     // #######################################################################################################
 
-    // Update and write (passthrough).
-    if (matrixData.matrix_function[0][Mi][0]==1) {
+    // Check existance of function name "On"
+    if (matrixData.matrix_function[0][Mi][0]==INDEX_MATRIX_SWITCH_FUNCTION_ON) {
+      // Limit write required by change
       if (matrixData.output_value[0][Mi]!=matrixData.prev_output_value[0][Mi])
         {matrixData.prev_output_value[0][Mi]=matrixData.output_value[0][Mi];
+          // Limit write required by computer assist enabled
          if (matrixData.computer_assist[0][Mi]==true) {
           matrixData.matrix_switch_write_required[0][Mi]=true;}
         }
     }
-    // else let matrix determine write required...
+    // Else matrix switch will determine if write required according to matrix switch logic.
   }
 }
 
