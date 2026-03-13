@@ -2419,85 +2419,38 @@ void setAllMatrixSwitchesStateTrue() {
   for (int i=0; i<MAX_MATRIX_SWITCHES; i++) {matrixData.switch_intention[0][i]=true;}
 }
 
-void compareOutputs(int Mi) {  
-    // Skip value unchanged
-    if (matrixData.output_value[0][Mi]!=matrixData.prev_output_value[0][Mi]) {
-      // Set previous
-      matrixData.prev_output_value[0][Mi]=matrixData.output_value[0][Mi];
-      // Write Required
-      // matrixData.matrix_switch_write_required[0][Mi]=true;
-    }
-}
-
 void setOutputValues(void) {
   for (int Mi=0; Mi<MAX_MATRIX_SWITCHES; Mi++) {
+
+    // #######################################################################################################
+    // SET OUTPUT VALUE
+    // #######################################################################################################
+
     // A : Default output value: switch intention (digital 0/1).
     if (matrixData.output_mode[0][Mi]==0) {
       matrixData.output_value[0][Mi]=matrixData.switch_intention[0][Mi];
     }
     // B : Mapped values.
-    else if ((matrixData.output_mode[0][Mi]== 1 )) {
-      if ( (mappingData.mapped_value[0][Mi] > matrixData.output_value[0][Mi] + matrixData.flux_value[0][Mi]) || 
-           (mappingData.mapped_value[0][Mi] < matrixData.output_value[0][Mi] - matrixData.flux_value[0][Mi]))
-      {
+    else if ((matrixData.output_mode[0][Mi]==1)) {
         matrixData.output_value[0][Mi]=mappingData.mapped_value[0][matrixData.index_mapped_value[0][Mi]];
-      }
+        // printf("Mi=%d  Imv=%d  Ov=%ld\n", Mi, matrixData.index_mapped_value[0][Mi], mappingData.mapped_value[0][matrixData.index_mapped_value[0][Mi]]);
     }
-    // A : Update and write (passthrough).
-    if (matrixData.matrix_function[0][Mi][0]== 1 ) {
+
+    // #######################################################################################################
+    // WRITE REQUIRED
+    // #######################################################################################################
+
+    // Update and write (passthrough).
+    if (matrixData.matrix_function[0][Mi][0]==1) {
       if (matrixData.output_value[0][Mi]!=matrixData.prev_output_value[0][Mi])
         {matrixData.prev_output_value[0][Mi]=matrixData.output_value[0][Mi];
          if (matrixData.computer_assist[0][Mi]==true) {
           matrixData.matrix_switch_write_required[0][Mi]=true;}
         }
     }
-    // B : Just update & let matrix determine if write required.
-    // else {matrixData.output_value[0][Mi];}
+    // else let matrix determine write required...
   }
 }
-//   for (int Mi=0; Mi<MAX_MATRIX_SWITCHES; Mi++) {
-
-//     // -------- Mode 0 : Default output value: switch intention (digital 0/1) --------
-//     if (matrixData.output_mode[0][Mi]==0) {
-//       // Set Output Value: Digital
-//       matrixData.output_value[0][Mi]=matrixData.switch_intention[0][Mi];
-//       compareOutputs(Mi);
-//     }
-
-//     // -------- Mode 1 : Mapped values (analog/digital) ------------------------------
-//     else if ((matrixData.output_mode[0][Mi]==1)) {
-        
-//         // ---- Always Off ----
-//         if (matrixData.matrix_function[0][Mi][0]==INDEX_MATRIX_SWITCH_FUNCTION_NONE) {
-//           // Set Output Value: Zero
-//           matrixData.output_value[0][Mi]=0;
-//           compareOutputs(Mi);
-//         }
-
-//         // ---- Always Passthrough ----
-//         else if (matrixData.matrix_function[0][Mi][0]==INDEX_MATRIX_SWITCH_FUNCTION_ON) {
-//           // Set Output Value: Mapped
-//           matrixData.output_value[0][Mi]=mappingData.mapped_value[0][matrixData.index_mapped_value[0][Mi]];    
-//           compareOutputs(Mi);
-//           matrixData.matrix_switch_write_required[0][Mi]=true;
-//         }
-
-//         // ---- Conditional Passthrough ----
-//         else {
-//           if (matrixData.switch_intention[0][Mi]==true) {
-//             // Set Output Value: Mapped
-//             matrixData.output_value[0][Mi]=mappingData.mapped_value[0][matrixData.index_mapped_value[0][Mi]];    
-//             compareOutputs(Mi);
-//           }
-//           else {
-//             // Set Output Value: Zero
-//             matrixData.output_value[0][Mi]=0;
-//             compareOutputs(Mi);
-//           }
-//         }
-//     }
-//   }
-// }
 
 // ----------------------------------------------------------------------------------------
 //  MATRIX I/O

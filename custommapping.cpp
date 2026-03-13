@@ -130,6 +130,13 @@ void center_map(int map_slot, int32_t var) {
         {mappingData.mapped_value[0][map_slot]=mappingData.center_map_x0;}
     else if (mappingData.map_mode[0][map_slot]==MAP_CENTER_X1)
         {mappingData.mapped_value[0][map_slot]=mappingData.center_map_x1;}
+    // Check mappingData.mapped_value[0][map_slot] is set to X0/X1:
+    // printf("Ms=%d  X0=%ld  X1=%ld  Mv=%ld\n",
+    //     map_slot,
+    //     mappingData.center_map_x0,
+    //     mappingData.center_map_x1,
+    //     mappingData.mapped_value[0][map_slot]
+    // );
 }
 
 /**
