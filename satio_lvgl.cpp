@@ -130,6 +130,9 @@ title_bar_t main_title_bar;
 // Matrix
 // ---------------------------
 #define MAX_MATRIX_PANEL_VIEWS 3
+#define MATRIX_SWITCH_PANEL_NUMBER_OVERVIEW 0
+#define MATRIX_SWITCH_PANEL_NUMBER_MATRIX   1
+#define MATRIX_SWITCH_PANEL_NUMBER_MAPPING  2
 int current_matrix_panel_view=0;
 int current_matrix_i = 0;
 int current_mapping_i = 0;
@@ -914,7 +917,10 @@ void matrix_overview_grid_1_event_cb(lv_event_t * e)
         const char * text = lv_label_get_text(label);
         printf("Matrix Overview Grid 1: Button %lu (%s) clicked!\n", btn_index, text);
         
-        if (btn_index <= 44) {current_matrix_i = btn_index;}
+        if (btn_index < MAX_MATRIX_SWITCHES) {
+            current_matrix_i = btn_index;
+            current_matrix_panel_view = MATRIX_SWITCH_PANEL_NUMBER_MATRIX;
+        }
     }
 }
 
@@ -1307,7 +1313,7 @@ void switch_matrix_overview_panel_event_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        current_matrix_panel_view=0;
+        current_matrix_panel_view=MATRIX_SWITCH_PANEL_NUMBER_OVERVIEW;
         printf("[switch_matrix_overview_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
     }
 }
@@ -1322,7 +1328,7 @@ void switch_matrix_matrix_panel_event_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        current_matrix_panel_view=1;
+        current_matrix_panel_view=MATRIX_SWITCH_PANEL_NUMBER_MATRIX;
         printf("[switch_matrix_matrix_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
     }
 }
@@ -1337,7 +1343,7 @@ void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        current_matrix_panel_view=2;
+        current_matrix_panel_view=MATRIX_SWITCH_PANEL_NUMBER_MAPPING;
         printf("[switch_matrix_mapping_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
     }
 }
@@ -13884,7 +13890,7 @@ matrix_function_container_t create_matrix_function_container(
     lv_obj_t * row_switches_0 = create_row(
         result.panel,
         sub_row_width,
-        sub_row_height,
+        sub_row_height*2,
         inner_pad_all,
         sub_row_padding,
         sub_column_padding,
@@ -13906,7 +13912,7 @@ matrix_function_container_t create_matrix_function_container(
     result.matrix_switch_computer_assist = create_button(
         row_switches_0,       // parent
         obj_w_0,              // width px
-        obj_height,           // height px
+        obj_height+(obj_height/2),           // height px
         LV_ALIGN_BOTTOM_MID,  // alignment
         0,                    // pos x
         0,                    // pos y
@@ -13925,7 +13931,7 @@ matrix_function_container_t create_matrix_function_container(
     result.matrix_switch_output_value = create_label(
         row_switches_0,       // parent
         obj_w_0,              // width
-        obj_height,           // height
+        obj_height+(obj_height/2),           // height
         LV_ALIGN_BOTTOM_MID,  // parent alignment
         0,                    // pos x
         0,                    // pos y
@@ -13946,7 +13952,7 @@ matrix_function_container_t create_matrix_function_container(
     result.matrix_switch_override = create_button(
         row_switches_0,       // parent
         obj_w_0,              // width px
-        obj_height,           // height px
+        obj_height+(obj_height/2),           // height px
         LV_ALIGN_BOTTOM_MID,  // alignment
         0,                    // pos x
         0,                    // pos y
@@ -14477,7 +14483,7 @@ mapping_config_container_t create_mapping_config_container(
         "C5",                 // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
         &cobalt_alien_17,     // font
-        true,                 // transparent background
+        false,                // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
         2,                    // outline width
@@ -15084,20 +15090,20 @@ void display_matrix_screen()
     // Create Function Panel
     mfc = create_matrix_function_container(
         matrix_screen,    // parent
-        450,              // width px
-        400,              // height px
+        520,              // width px
+        410,              // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        70,               // pos y
+        35,               // pos y
         radius_rounded,   // radius
-        2,                // outer_pad_all
+        0,                // outer_pad_all
         4,                // inner_pad_all
-        2,                // outline_padding
-        2,                // main_row_padding
+        0,                // outline_padding
+        1,                // main_row_padding
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        45,               // row height
+        40,               // row height
         false,            // show scrollbar
         false,            // enable scrolling
         &cobalt_alien_25, // font for titles,
@@ -15113,20 +15119,20 @@ void display_matrix_screen()
     // Create Mapping Panel
     mcc = create_mapping_config_container(
         matrix_screen,    // parent
-        450,              // width px
-        400,              // height px
+        520,              // width px
+        410,              // height 
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        70,               // pos y
+        35,               // pos y
         radius_rounded,   // radius
-        2,                // outer_pad_all
+        0,                // outer_pad_all
         4,                // inner_pad_all
-        2,                // outline_padding
-        2,                // main_row_padding
+        0,                // outline_padding
+        1,                // main_row_padding
         4,                // main_column_padding
         2,                // sub_row_padding
         8,                // sub_column_padding
-        42,               // row height
+        40,               // row height
         true,             // show scrollbar
         false,            // enable scrolling
         &cobalt_alien_25, // font for titles,
@@ -15142,20 +15148,20 @@ void display_matrix_screen()
     // Switch Panel View
     matrix_switch_panel = create_matrix_switch_panel(
         matrix_screen,    // parent
-        450,              // width px
-        40+(4*2),         // height px
+        520,              // width px
+        42,         // height px
         LV_ALIGN_CENTER,  // alignment
         0,                // pos x
-        -180,             // pos y
+        -200,             // pos y
         radius_rounded,   // radius
-        1,                // outer_pad_all
+        0,                // outer_pad_all
         1,                // inner_pad_all
-        1,                // outline_padding
+        0,                // outline_padding
         1,                // main_row_padding
         1,                // main_column_padding
         1,                // sub_row_padding
         10,               // sub_column_padding
-        48,               // row height
+        42,               // row height
         false,            // show scrollbar
         false,            // enable scrolling
         &cobalt_alien_25, // font for titles,
@@ -15176,7 +15182,7 @@ void display_matrix_screen()
         34,                // height px
         LV_ALIGN_TOP_MID,  // alignment
         0,                 // pos x
-        100,               // pos y
+        90,                // pos y
         &cobalt_alien_17   // font
     );
     lv_dropdown_set_selected(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
@@ -15194,7 +15200,7 @@ void display_matrix_screen()
         34,                   // height px
         LV_ALIGN_TOP_LEFT,    // alignment
         130,                  // pos x
-        100,                  // pos y
+        90,                   // pos y
         "N",                  // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
@@ -15213,7 +15219,7 @@ void display_matrix_screen()
         34,                   // height px
         LV_ALIGN_TOP_LEFT,    // alignment
         184,                  // pos x
-        100,                  // pos y
+        90,                   // pos y
         "S",                  // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
@@ -15232,7 +15238,7 @@ void display_matrix_screen()
         34,                   // height px
         LV_ALIGN_TOP_RIGHT,   // alignment
         -184,                 // pos x
-        100,                  // pos y
+        90,                   // pos y
         "L",                  // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
@@ -15251,7 +15257,7 @@ void display_matrix_screen()
         34,                   // height px
         LV_ALIGN_TOP_RIGHT,   // alignment
         -130,                 // pos x
-        100,                  // pos y
+        90,                   // pos y
         "D",                  // label text
         LV_TEXT_ALIGN_CENTER, // text align
         false,                // show scrollbar
@@ -15949,7 +15955,7 @@ void update_display()
         lv_dropdown_set_selected(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
 
         
-        if (current_matrix_panel_view==0) {
+        if (current_matrix_panel_view==MATRIX_SWITCH_PANEL_NUMBER_OVERVIEW) {
 
             // Switch Panel
             lv_obj_set_style_text_color(matrix_switch_panel.switch_overview_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
@@ -15991,7 +15997,7 @@ void update_display()
         }
 
         // Matrix Configuration Panel
-        else if (current_matrix_panel_view==1) {
+        else if (current_matrix_panel_view==MATRIX_SWITCH_PANEL_NUMBER_MATRIX) {
 
             // Switch Panel
             lv_obj_set_style_text_color(matrix_switch_panel.switch_overview_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
@@ -16098,7 +16104,21 @@ void update_display()
                 }
 
                 // Output Value
-                // if (mfc.matrix_switch_output_value) {lv_label_set_text(mfc.matrix_switch_output_value, String(matrixData.output_value[0][current_matrix_i]).c_str());}
+                if (matrixData.switch_intention[0][current_matrix_i]==true) {
+                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);
+                }
+                else {
+                    if (matrixData.computer_assist[0][current_matrix_i]==true) {
+                        lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_make(255, 255, 0), LV_PART_MAIN);
+                        lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(255, 255, 0), LV_PART_MAIN);
+                    }
+                    else {
+                        lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
+                        lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
+                    }
+                }
+                if (mfc.matrix_switch_output_value) {lv_label_set_text(mfc.matrix_switch_output_value, String(matrixData.output_value[0][current_matrix_i]).c_str());}
 
                 // Override
                 if (mfc.matrix_switch_override.panel) {
@@ -16109,7 +16129,7 @@ void update_display()
         }
 
         // Mapping Configuration Panel
-        else if (current_matrix_panel_view==2) {
+        else if (current_matrix_panel_view==MATRIX_SWITCH_PANEL_NUMBER_MAPPING) {
 
             // Switch Panel
             lv_obj_set_style_text_color(matrix_switch_panel.switch_overview_panel.label, default_btn_off_value_hue, LV_PART_MAIN);

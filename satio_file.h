@@ -12,7 +12,7 @@
 #include "config.h"
 
 #define MAX_MATRIX_TAGS   16
-#define MAX_MATRIX_SLOTS  10
+#define MAX_MATRIX_FILE_SLOTS  10
 #define MAX_MAPPING_TAGS  7
 #define MAX_SYSTEM_TAGS   41
 #define MAX_LOG_FILES     3     // maximum number of log files to be kept.
@@ -31,7 +31,7 @@ struct satioFileStruct {
     char* token;
     char tmp_chars[MAX_GLOBAL_ELEMENT_SIZE];
 
-    char matix_filepaths[MAX_MATRIX_SLOTS][MAX_GLOBAL_ELEMENT_SIZE];
+    char matix_filepaths[MAX_MATRIX_FILE_SLOTS][MAX_GLOBAL_ELEMENT_SIZE];
     char current_matrix_filepath[MAX_GLOBAL_ELEMENT_SIZE];
     int i_current_matrix_file_path;
     char mapping_filepath[MAX_GLOBAL_ELEMENT_SIZE];

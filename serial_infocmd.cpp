@@ -857,21 +857,21 @@ void setMapSlot(int matrix_switch,
 }
 
 void saveMatrix(int matrix_file_slot) {
-  if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_SLOTS) {
+  if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_FILE_SLOTS) {
     satioFileData.i_current_matrix_file_path=matrix_file_slot;
     sdcardFlagData.save_matrix=true;
   }
 }
 
 void loadMatrix(int matrix_file_slot) {
-  if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_SLOTS) {
+  if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_FILE_SLOTS) {
     satioFileData.i_current_matrix_file_path=matrix_file_slot;
     sdcardFlagData.load_matrix=true;
   }
 }
 
 void deleteMatrix(int matrix_file_slot) {
-  if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_SLOTS) {
+  if (matrix_file_slot>=0 && matrix_file_slot<MAX_MATRIX_FILE_SLOTS) {
     satioFileData.i_current_matrix_file_path=matrix_file_slot;
     sdcardFlagData.delete_matrix=true;
   }
