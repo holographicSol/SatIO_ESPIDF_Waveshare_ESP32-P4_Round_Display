@@ -1783,12 +1783,17 @@ bool matrixSwitch(void) {
       }
     } // End function iteration for this switch.
 
+    // ##############################################################################################################
+    // FINAL SWITCH START
+    // ##############################################################################################################
+
     /**
-     * Summarize results per switch.
+     * Set Final Bool.
      */
     final_bool=true;
     for (int FC=0; FC < MAX_MATRIX_SWITCH_FUNCTIONS; FC++)
       {if (tmp_matrix[FC]==false) {final_bool=false; break;}}
+
     /**
      * If computer_assist enabled:
      * - Computer_intention true/false is set.
@@ -1798,42 +1803,20 @@ bool matrixSwitch(void) {
      * - Computer_intention true/false is set.
      * - Switch_intention true/false is not set.
      */
-    matrixData.switch_intention[0][Mi]=false; // switch intention default false
-    if (matrixData.computer_assist[0][Mi]==true) {matrixData.switch_intention[0][Mi]=final_bool;}
+
+    // Computer Intent
     matrixData.computer_intention[0][Mi]=final_bool; // computer intention always set
 
-    // 1 : Check state changed before making write required
-    if (matrixData.prev_switch_intention[0][Mi]!=matrixData.switch_intention[0][Mi]) {
-      matrixData.matrix_switch_write_required[0][Mi]=true;
-      matrixData.prev_switch_intention[0][Mi]=matrixData.switch_intention[0][Mi];
+    // Computer Assist
+    if (matrixData.computer_assist[0][Mi]==true) {
+      
+      // Switch Intent
+      matrixData.switch_intention[0][Mi]=final_bool;
     }
-
-    // 2 : Check output value changed before making write required
-    if (final_bool==true) {
-      if ( (matrixData.output_value[0][Mi] > matrixData.prev_output_value[0][Mi] + matrixData.flux_value[0][Mi]) || 
-           (matrixData.output_value[0][Mi] < matrixData.prev_output_value[0][Mi] - matrixData.flux_value[0][Mi]))
-      {
-        matrixData.prev_output_value[0][Mi]=matrixData.output_value[0][Mi];
-        matrixData.matrix_switch_write_required[0][Mi]=true;
-        matrixData.prev_switch_intention[0][Mi]=matrixData.switch_intention[0][Mi];
-      }
-    }
-
-    // 3 : Passthrough
-    else {
-      if ( (matrixData.output_value[0][Mi] > matrixData.prev_output_value[0][Mi] + matrixData.flux_value[0][Mi]) || 
-           (matrixData.output_value[0][Mi] < matrixData.prev_output_value[0][Mi] - matrixData.flux_value[0][Mi]))
-      {
-        matrixData.prev_output_value[0][Mi]=matrixData.output_value[0][Mi];
-        // Function: ON
-        if (matrixData.matrix_function[0][Mi][0]== 1 ) {
-          // Computer Assist: ON
-          if (matrixData.computer_assist[0][Mi]==true) {
-            matrixData.matrix_switch_write_required[0][Mi]=true;
-          }
-        }
-      }
-    }
+    
+    // ##############################################################################################################
+    // FINAL SWITCH END
+    // ##############################################################################################################
 
   } // End switch iteration
   return true;
@@ -2422,35 +2405,37 @@ void setAllMatrixSwitchesStateTrue() {
 void setOutputValues(void) {
   for (int Mi=0; Mi<MAX_MATRIX_SWITCHES; Mi++) {
 
-    // #######################################################################################################
-    // SET OUTPUT VALUE
-    // #######################################################################################################
+    int32_t oval = 0;
 
-    // A : Default output value: switch intention (digital 0/1).
-    if (matrixData.output_mode[0][Mi]==0) {
-      matrixData.output_value[0][Mi]=matrixData.switch_intention[0][Mi];
-    }
-    // B : Mapped values.
-    else if ((matrixData.output_mode[0][Mi]==1)) {
-        matrixData.output_value[0][Mi]=mappingData.mapped_value[0][matrixData.index_mapped_value[0][Mi]];
-        // printf("Mi=%d  Imv=%d  Ov=%ld\n", Mi, matrixData.index_mapped_value[0][Mi], mappingData.mapped_value[0][matrixData.index_mapped_value[0][Mi]]);
+    // Off
+    if (matrixData.matrix_function[0][Mi][0]==INDEX_MATRIX_SWITCH_FUNCTION_NONE) {oval=0;}
+
+    else {
+
+      // A : Default output value: switch intention (digital 0/1).
+      if (matrixData.output_mode[0][Mi]==0) {
+        oval=matrixData.switch_intention[0][Mi];
+      }
+
+      // B : Mapped values.
+      else if ((matrixData.output_mode[0][Mi]==1)) {
+          oval=mappingData.mapped_value[0][matrixData.index_mapped_value[0][Mi]];
+          // printf("Mi=%d  Imv=%d  Ov=%ld\n", Mi, matrixData.index_mapped_value[0][Mi], mappingData.mapped_value[0][matrixData.index_mapped_value[0][Mi]]);
+      }
+
     }
 
-    // #######################################################################################################
-    // PASSTHROUGH (LIMITED BY CHANGE)
-    // #######################################################################################################
+    // Override according to switch intention
+    if (matrixData.switch_intention[0][Mi]==true) {matrixData.output_value[0][Mi]=oval;}
+    else {matrixData.output_value[0][Mi]=0;}
 
-    // Check existance of function name "On"
-    if (matrixData.matrix_function[0][Mi][0]==INDEX_MATRIX_SWITCH_FUNCTION_ON) {
-      // Limit write required by change
-      if (matrixData.output_value[0][Mi]!=matrixData.prev_output_value[0][Mi])
-        {matrixData.prev_output_value[0][Mi]=matrixData.output_value[0][Mi];
-          // Limit write required by computer assist enabled
-         if (matrixData.computer_assist[0][Mi]==true) {
-          matrixData.matrix_switch_write_required[0][Mi]=true;}
-        }
+    // Set write required
+    if ( (matrixData.output_value[0][Mi] > matrixData.prev_output_value[0][Mi] + matrixData.flux_value[0][Mi]) || 
+        (matrixData.output_value[0][Mi] < matrixData.prev_output_value[0][Mi] - matrixData.flux_value[0][Mi]))
+    {
+      matrixData.prev_output_value[0][Mi] = matrixData.output_value[0][Mi];
+      matrixData.matrix_switch_write_required[0][Mi]=true;
     }
-    // Else matrix switch will determine if write required according to matrix switch logic.
   }
 }
 
