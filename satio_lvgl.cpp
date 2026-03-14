@@ -13929,7 +13929,7 @@ matrix_function_container_t create_matrix_function_container(
         default_value_hue
     );
 
-    result.indicator_computer_assist = create_label(
+    result.switch_logic_per_second = create_label(
         row_intent_info,      // parent
         obj_w_0,              // width
         obj_height,           // height
@@ -16258,39 +16258,40 @@ void update_display()
                     lv_obj_set_style_text_color(mfc.indicator_function_non_zero, lv_color_make(58, 58, 58), LV_PART_MAIN);
                 }
 
-                // Computer assist: Enabled/Disabled. Is computer allowed to attempt switching.
-                if (matrixData.computer_assist[0][current_matrix_i]) {
-                    lv_obj_set_style_outline_color(mfc.indicator_computer_assist, lv_color_make(0, 0, 255), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.indicator_computer_assist, lv_color_make(0, 0, 255), LV_PART_MAIN);
-                }
-                else {
-                    lv_obj_set_style_outline_color(mfc.indicator_computer_assist, lv_color_make(58, 58, 58), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.indicator_computer_assist, lv_color_make(58, 58, 58), LV_PART_MAIN);
-                }
+                // Switch Logic p/s
+                lv_obj_set_style_outline_color(mfc.switch_logic_per_second, lv_color_make(255, 0, 0), LV_PART_MAIN);
+                lv_obj_set_style_text_color(mfc.switch_logic_per_second, lv_color_make(255, 0, 0), LV_PART_MAIN);
+                lv_label_set_text(mfc.switch_logic_per_second, String(systemData.total_matrix).c_str());
 
                 /**
-                 * Computer intention digital/mapped
+                 * Poitential Output Value: Computer Intent / Mapped Value
                  * 
                  * This panel is a 'raw' view of switch logic, computer intention could be represented in any other way,
                  * but here it is it's true raw value.
-                 */ 
+                 */
+                if (matrixData.computer_intention[0][current_matrix_i]) {
+                    // Computer Intent True
+                    lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(0, 255, 255), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(0, 255, 255), LV_PART_MAIN);
+                }
+                else {
+                    // Computer Intent False
+                    lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
+                }
                 if (matrixData.output_mode[0][current_matrix_i]==1) {
-                    // Show potential mapped output value
-                    lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(58, 58, 0), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(58, 58, 0), LV_PART_MAIN);
+                    // Mapped Value
                     lv_label_set_text(mfc.potential_output_value, String(mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]).c_str());
                 }
                 else {
-                    // Show potential digital output value
-                    lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
+                    // Computer Intention
                     lv_label_set_text(mfc.potential_output_value, String(matrixData.computer_intention[0][current_matrix_i]).c_str());
                 }
 
                 // Computer Intention: True/False. Does the computer want to attempt switching.
                 if (matrixData.computer_intention[0][current_matrix_i]) {
-                    lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(0, 0, 255), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.indicator_computer_intent, lv_color_make(0, 0, 255), LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(0, 255, 255), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.indicator_computer_intent, lv_color_make(0, 255, 255), LV_PART_MAIN);
                 }
                 else {
                     lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(58, 58, 58), LV_PART_MAIN);
@@ -16328,14 +16329,8 @@ void update_display()
                     lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);
                 }
                 else {
-                    if (matrixData.computer_assist[0][current_matrix_i]==true) {
-                        lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_make(255, 255, 0), LV_PART_MAIN);
-                        lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(255, 255, 0), LV_PART_MAIN);
-                    }
-                    else {
-                        lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
-                        lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
-                    }
+                    lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
                 }
                 if (mfc.matrix_switch_output_value) {lv_label_set_text(mfc.matrix_switch_output_value, String(matrixData.output_value[0][current_matrix_i]).c_str());}
 

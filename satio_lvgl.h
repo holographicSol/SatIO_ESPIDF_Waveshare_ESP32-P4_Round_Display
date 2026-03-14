@@ -247,7 +247,7 @@ typedef struct {
 
     // Indicators
     lv_obj_t * indicator_function_non_zero;
-    lv_obj_t * indicator_computer_assist;
+    lv_obj_t * switch_logic_per_second;
     lv_obj_t * potential_output_value;
     lv_obj_t * indicator_computer_intent;
     lv_obj_t * indicator_switch_intent;
