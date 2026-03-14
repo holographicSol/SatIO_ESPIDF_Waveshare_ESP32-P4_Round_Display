@@ -16248,6 +16248,7 @@ void update_display()
 
                 // ----------------------------------------------------------------------------------------------------------------------------
 
+                // Switch Logic: Enabled/disabled. Is logic actually configured on the switch (function 0 must be set or logic will be ignored).
                 if (matrixData.matrix_function[0][current_matrix_i][0] > INDEX_MATRIX_SWITCH_FUNCTION_NONE) {
                     lv_obj_set_style_outline_color(mfc.indicator_function_non_zero, lv_color_make(0, 0, 255), LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.indicator_function_non_zero, lv_color_make(0, 0, 255), LV_PART_MAIN);
@@ -16257,6 +16258,7 @@ void update_display()
                     lv_obj_set_style_text_color(mfc.indicator_function_non_zero, lv_color_make(58, 58, 58), LV_PART_MAIN);
                 }
 
+                // Computer assist: Enabled/Disabled. Is computer allowed to attempt switching.
                 if (matrixData.computer_assist[0][current_matrix_i]) {
                     lv_obj_set_style_outline_color(mfc.indicator_computer_assist, lv_color_make(0, 0, 255), LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.indicator_computer_assist, lv_color_make(0, 0, 255), LV_PART_MAIN);
@@ -16266,6 +16268,12 @@ void update_display()
                     lv_obj_set_style_text_color(mfc.indicator_computer_assist, lv_color_make(58, 58, 58), LV_PART_MAIN);
                 }
 
+                /**
+                 * Computer intention digital/mapped
+                 * 
+                 * This panel is a 'raw' view of switch logic, computer intention could be represented in any other way,
+                 * but here it is it's true raw value.
+                 */ 
                 if (matrixData.output_mode[0][current_matrix_i]==1) {
                     // Show potential mapped output value
                     lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(58, 58, 0), LV_PART_MAIN);
@@ -16279,6 +16287,7 @@ void update_display()
                     lv_label_set_text(mfc.potential_output_value, String(matrixData.computer_intention[0][current_matrix_i]).c_str());
                 }
 
+                // Computer Intention: True/False. Does the computer want to attempt switching.
                 if (matrixData.computer_intention[0][current_matrix_i]) {
                     lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(0, 0, 255), LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.indicator_computer_intent, lv_color_make(0, 0, 255), LV_PART_MAIN);
@@ -16288,6 +16297,7 @@ void update_display()
                     lv_obj_set_style_text_color(mfc.indicator_computer_intent, lv_color_make(58, 58, 58), LV_PART_MAIN);
                 }
 
+                // Switch Intention: True/False. Will the computer actually attempt to switch.
                 if (matrixData.switch_intention[0][current_matrix_i]) {
                     lv_obj_set_style_outline_color(mfc.indicator_switch_intent, lv_color_make(0, 0, 255), LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.indicator_switch_intent, lv_color_make(0, 0, 255), LV_PART_MAIN);
