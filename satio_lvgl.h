@@ -245,6 +245,13 @@ typedef struct {
     lv_obj_t * label_port_map;
     lv_obj_t * val_port_map;
 
+    // Indicators
+    lv_obj_t * indicator_function_non_zero;
+    lv_obj_t * indicator_computer_assist;
+    lv_obj_t * mapped_value;
+    lv_obj_t * indicator_computer_intent;
+    lv_obj_t * indicator_switch_intent;
+
     // Switches
     button_t matrix_switch_computer_assist;
     button_t matrix_switch_override;

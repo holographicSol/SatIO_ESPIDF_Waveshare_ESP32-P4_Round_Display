@@ -1813,6 +1813,9 @@ bool matrixSwitch(void) {
       // Switch Intent
       matrixData.switch_intention[0][Mi]=final_bool;
     }
+    else {
+      matrixData.switch_intention[0][Mi]=false;
+    }
     
     // ##############################################################################################################
     // FINAL SWITCH END

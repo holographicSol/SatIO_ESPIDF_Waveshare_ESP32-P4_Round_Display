@@ -371,9 +371,9 @@ extern "C" void app_main(void)
     satio_ui_begin();
 
     // --------------------------------------------------------------
-    // Main Loop (Critical for system timing, do not overload)
+    // Main Loop
     // --------------------------------------------------------------
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(500));
-    }
+    // while (1) {
+    //     vTaskDelay(pdMS_TO_TICKS(1000));
+    // }
 }
