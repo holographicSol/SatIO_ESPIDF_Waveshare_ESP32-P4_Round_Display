@@ -16276,7 +16276,7 @@ void update_display()
                     // Show potential digital output value
                     lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
-                    lv_label_set_text(mfc.potential_output_value, String(matrixData.switch_intention[0][current_matrix_i]).c_str());
+                    lv_label_set_text(mfc.potential_output_value, String(matrixData.computer_intention[0][current_matrix_i]).c_str());
                 }
 
                 if (matrixData.computer_intention[0][current_matrix_i]) {
