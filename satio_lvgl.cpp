@@ -16258,7 +16258,7 @@ void update_display()
                     lv_obj_set_style_text_color(mfc.indicator_function_non_zero, lv_color_make(58, 58, 58), LV_PART_MAIN);
                 }
 
-                // Switch Logic p/s
+                // Switch Logic p/s: How many times a second switch logic is calculated
                 lv_obj_set_style_outline_color(mfc.switch_logic_per_second, lv_color_make(255, 0, 0), LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.switch_logic_per_second, lv_color_make(255, 0, 0), LV_PART_MAIN);
                 lv_label_set_text(mfc.switch_logic_per_second, String(systemData.total_matrix).c_str());
@@ -16271,8 +16271,8 @@ void update_display()
                  */
                 if (matrixData.computer_intention[0][current_matrix_i]) {
                     // Computer Intent True
-                    lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(0, 255, 255), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(0, 255, 255), LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(255, 0, 255), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(255, 0, 255), LV_PART_MAIN);
                 }
                 else {
                     // Computer Intent False
@@ -16290,8 +16290,8 @@ void update_display()
 
                 // Computer Intention: True/False. Does the computer want to attempt switching.
                 if (matrixData.computer_intention[0][current_matrix_i]) {
-                    lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(0, 255, 255), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.indicator_computer_intent, lv_color_make(0, 255, 255), LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(255, 0, 255), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.indicator_computer_intent, lv_color_make(255, 0, 255), LV_PART_MAIN);
                 }
                 else {
                     lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(58, 58, 58), LV_PART_MAIN);
