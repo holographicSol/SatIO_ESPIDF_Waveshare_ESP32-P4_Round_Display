@@ -16267,14 +16267,16 @@ void update_display()
                 }
 
                 if (matrixData.output_mode[0][current_matrix_i]==1) {
-                    // lv_obj_set_style_outline_color(mfc.mapped_value, lv_color_make(58, 58, 0), LV_PART_MAIN);
-                    // lv_obj_set_style_text_color(mfc.mapped_value, lv_color_make(58, 58, 0), LV_PART_MAIN);
+                    // Show potential mapped output value
+                    lv_obj_set_style_outline_color(mfc.mapped_value, lv_color_make(58, 58, 0), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.mapped_value, lv_color_make(58, 58, 0), LV_PART_MAIN);
                     lv_label_set_text(mfc.mapped_value, String(mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]).c_str());
                 }
                 else {
+                    // Show potential digital output value
                     lv_obj_set_style_outline_color(mfc.mapped_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.mapped_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
-                    lv_label_set_text(mfc.mapped_value, "N/A");
+                    lv_label_set_text(mfc.mapped_value, String(matrixData.switch_intention[0][current_matrix_i]).c_str());
                 }
 
                 if (matrixData.computer_intention[0][current_matrix_i]) {
