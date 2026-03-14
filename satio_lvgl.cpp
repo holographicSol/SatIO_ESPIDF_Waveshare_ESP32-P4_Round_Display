@@ -16271,8 +16271,8 @@ void update_display()
                  */
                 if (matrixData.computer_intention[0][current_matrix_i]) {
                     // Computer Intent True
-                    lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(255, 0, 255), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(255, 0, 255), LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.potential_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.potential_output_value, lv_color_make(0, 0, 255), LV_PART_MAIN);
                 }
                 else {
                     // Computer Intent False
@@ -16290,8 +16290,8 @@ void update_display()
 
                 // Computer Intention: True/False. Does the computer want to attempt switching.
                 if (matrixData.computer_intention[0][current_matrix_i]) {
-                    lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(255, 0, 255), LV_PART_MAIN);
-                    lv_obj_set_style_text_color(mfc.indicator_computer_intent, lv_color_make(255, 0, 255), LV_PART_MAIN);
+                    lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(0, 0, 255), LV_PART_MAIN);
+                    lv_obj_set_style_text_color(mfc.indicator_computer_intent, lv_color_make(0, 0, 255), LV_PART_MAIN);
                 }
                 else {
                     lv_obj_set_style_outline_color(mfc.indicator_computer_intent, lv_color_make(58, 58, 58), LV_PART_MAIN);
