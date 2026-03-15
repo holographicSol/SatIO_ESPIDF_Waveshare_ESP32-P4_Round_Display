@@ -1980,7 +1980,7 @@ system_tray_t create_system_tray(
         10,                   // pos y
         "00:00:00",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        font_title,          // font
+        font_title,           // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2001,7 +2001,7 @@ system_tray_t create_system_tray(
         30,                   // pos y
         "00/00/00",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        font_title,          // font
+        font_title,           // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2022,7 +2022,7 @@ system_tray_t create_system_tray(
         50,                   // pos y
         "",                   // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        font_title,       // font
+        font_title,           // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2043,7 +2043,7 @@ system_tray_t create_system_tray(
         24,                   // pos y
         "GPS SYNC",           // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        font_sub,       // font
+        font_sub,             // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2064,7 +2064,7 @@ system_tray_t create_system_tray(
         24,                   // pos y
         "0:0",                // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        font_sub,       // font
+        font_sub,             // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -2085,7 +2085,7 @@ system_tray_t create_system_tray(
         24,                   // pos y
         "SD",                 // initial text
         LV_TEXT_ALIGN_CENTER, // font alignment
-        font_sub,       // font
+        font_sub,             // font
         true,                 // transparent background
         false,                // show scrollbar
         false,                // enable scrolling
@@ -15125,8 +15125,10 @@ void display_home_screen()
     printf("[display_home_screen] starting astro clocks\n");
     astro_clock_begin(
         home_screen,
-        582,             // width px
-        582,             // height px
+        720,             // outline width
+        720,             // outline height
+        600,             // astro width
+        600,             // astro height
         LV_ALIGN_CENTER, // alignment
         0,               // pos x
         0,               // pos y

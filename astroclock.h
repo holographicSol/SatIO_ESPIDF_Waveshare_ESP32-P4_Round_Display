@@ -9,8 +9,10 @@
 
 void astro_clock_begin(
     lv_obj_t * parent,
-    int32_t width,
-    int32_t height,
+    int32_t outline_w_px,
+    int32_t outline_h_px,
+    int32_t clock_w_px,
+    int32_t clock_h_px,
     lv_align_t alignment,
     int32_t pos_x,
     int32_t pos_y,
