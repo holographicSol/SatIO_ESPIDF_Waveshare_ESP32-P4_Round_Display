@@ -1565,7 +1565,7 @@ void astro_clock_begin(
         320,             // start degrees
         40,              // end degrees
         // ORBIT_STEP * 9 + (ORBIT_STEP/2),  // from step (full step)
-        ORBIT_STEP * 9 + (ORBIT_STEP/8),  // from step (half step)
+        ORBIT_STEP * 9 + (ORBIT_STEP/4),  // from step (half step)
         ORBIT_STEP * 10, // to step
         COLOR_ZODIAC
     );
