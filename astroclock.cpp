@@ -647,7 +647,7 @@ void astro_clock_update(void) {
     rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, 100, 100);
     current_luna_hue = target_luna_hues[luna_hue_index] + 
                         (target_luna_hues[(luna_hue_index + 1) % 4] - target_luna_hues[luna_hue_index]) * blend_progress;
-    blend_progress += 0.016f;
+    blend_progress += 0.056f;
     if (blend_progress >= 1.0f) {
         blend_progress = 0.0f;
         luna_hue_index = (luna_hue_index + 1) % 4;
@@ -1564,7 +1564,8 @@ void astro_clock_begin(
         astro_container, // parent
         320,             // start degrees
         40,              // end degrees
-        ORBIT_STEP * 9,  // from step
+        // ORBIT_STEP * 9 + (ORBIT_STEP/2),  // from step (full step)
+        ORBIT_STEP * 9 + (ORBIT_STEP/4),  // from step (half step)
         ORBIT_STEP * 10, // to step
         COLOR_ZODIAC
     );
