@@ -642,7 +642,13 @@ void astro_clock_update(void) {
 
     if (!astro_container) {return;}
 
+    // ------------------------------------------------------------------------
+    // SUN MOON BREATHING
+    // ------------------------------------------------------------------------
+
+    // --------------------------------------------
     // Advance solar shine
+    // --------------------------------------------
     current_sun_hue = 47 + (13 * sun_hue_progress);
     rainbow_sun_hue = lv_color_hsv_to_rgb(current_sun_hue, 100, 100);
     sun_hue_progress += 0.01f * sun_sat_direction;
@@ -655,8 +661,9 @@ void astro_clock_update(void) {
     }
     lv_obj_set_style_bg_color(sun.obj, rainbow_sun_hue, LV_PART_MAIN);
 
-
+    // --------------------------------------------
     // Advance luna shine
+    // --------------------------------------------
     current_luna_saturation = 20 + (80 * luna_sat_progress);
     rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, current_luna_saturation % 100, 100);
     luna_sat_progress += 0.01f * luna_sat_direction;
