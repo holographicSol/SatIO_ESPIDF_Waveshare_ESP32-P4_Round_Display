@@ -405,6 +405,8 @@ AstroInfo create_arc_data_panel(
 
     // Segs same way as connecting lines...
 
+    // Meteors
+
     return result;
 }
 
@@ -641,9 +643,11 @@ void astro_clock_update(void) {
 
     if (!astro_container) {return;}
 
-    // Advance blend (smooth transition every ~60 frames = 1 second @60fps)
+    // Advance blend
     rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, 100, 100);
-    blend_progress += 0.016f;  // 1/60
+    current_luna_hue = target_luna_hues[luna_hue_index] + 
+                        (target_luna_hues[(luna_hue_index + 1) % 4] - target_luna_hues[luna_hue_index]) * blend_progress;
+    blend_progress += 0.016f;
     if (blend_progress >= 1.0f) {
         blend_progress = 0.0f;
         luna_hue_index = (luna_hue_index + 1) % 4;
