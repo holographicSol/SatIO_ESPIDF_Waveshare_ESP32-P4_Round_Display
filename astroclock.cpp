@@ -51,17 +51,9 @@ int32_t current_target = 0;
 // Timer for astro clock updates
 lv_timer_t * astro_timer = NULL;
 
-// Cycle through 4 specific bright colors only
-static float blend_progress = 0.0f;
-static int luna_hue_index = 0;
-
-// Smoothly blend from target_hues[luna_hue_index] → target_hues[(luna_hue_index+1)%4]
-static const uint16_t target_luna_hues[] = {30, 60, 240, 330};  // Yel→Cyn→Blu→Pnk
-
-uint16_t current_luna_hue = target_luna_hues[luna_hue_index] + 
-                       (target_luna_hues[(luna_hue_index + 1) % 4] - target_luna_hues[luna_hue_index]) * blend_progress;
-
-lv_color_t rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, 100, 100);
+uint16_t current_luna_hue=340;
+uint16_t current_luna_saturation=20;
+lv_color_t rainbow_luna_hue;
 
 // ============================================================================
 // COLORS
@@ -643,15 +635,9 @@ void astro_clock_update(void) {
 
     if (!astro_container) {return;}
 
-    // Advance blend
-    rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, 100, 100);
-    current_luna_hue = target_luna_hues[luna_hue_index] + 
-                        (target_luna_hues[(luna_hue_index + 1) % 4] - target_luna_hues[luna_hue_index]) * blend_progress;
-    blend_progress += 0.056f;
-    if (blend_progress >= 1.0f) {
-        blend_progress = 0.0f;
-        luna_hue_index = (luna_hue_index + 1) % 4;
-    }
+    // Advance luna shine
+    current_luna_saturation = (current_luna_saturation + 4) % 100;
+    rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, current_luna_saturation % 100, 100);
     
     // -----------------------------------------------------------------
     //                                                           MERCURY
