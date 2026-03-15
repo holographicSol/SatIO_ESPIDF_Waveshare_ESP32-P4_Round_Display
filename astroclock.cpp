@@ -107,16 +107,6 @@ static Planet saturn  = {ORBIT_STEP * 6, SIZE_UNIT * 5 / 2,  0, 0, {0}, NULL, NU
 static Planet uranus  = {ORBIT_STEP * 7, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
 static Planet neptune = {ORBIT_STEP * 8, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
 
-// Some data is displayed extra orbitally
-// static AstroInfo meteors_quadrantids = {ORBIT_STEP * 10, SIZE_UNIT * 10 / 2,  0, 0, {0}, NULL, NULL, NULL};
-// static AstroInfo meteors_lyrids = {ORBIT_STEP * 10, SIZE_UNIT * 10 / 2,  0, 0, {0}, NULL, NULL, NULL};
-// static AstroInfo meteors_eta_aquarlids = {ORBIT_STEP * 10, SIZE_UNIT * 10 / 2,  0, 0, {0}, NULL, NULL, NULL};
-// static AstroInfo meteors_perseids = {ORBIT_STEP * 10, SIZE_UNIT * 10 / 2,  0, 0, {0}, NULL, NULL, NULL};
-// static AstroInfo meteors_orionids = {ORBIT_STEP * 10, SIZE_UNIT * 10 / 2,  0, 0, {0}, NULL, NULL, NULL};
-// static AstroInfo meteors_leonids = {ORBIT_STEP * 10, SIZE_UNIT * 10 / 2,  0, 0, {0}, NULL, NULL, NULL};
-// static AstroInfo meteors_geminids = {ORBIT_STEP * 10, SIZE_UNIT * 10 / 2,  0, 0, {0}, NULL, NULL, NULL};
-// static AstroInfo meteors_ursids = {ORBIT_STEP * 10, SIZE_UNIT * 10 / 2,  0, 0, {0}, NULL, NULL, NULL};
-
 typedef struct {
     int orbit_radius;
     int radius;
@@ -130,7 +120,6 @@ typedef struct {
     lv_obj_t * line_1;
     lv_obj_t * target_box;
 } AstroInfo;
-
 
 static AstroInfo right_data_panel_outline = {ORBIT_STEP*10,  SIZE_UNIT*10/2,  0, 0,  {0},  NULL, NULL, NULL, NULL, NULL, NULL};
 
@@ -336,61 +325,73 @@ static void update_panel_arc_pos(AstroInfo * astro_info, float angle_deg, int cx
 // ============================================================================
 // CREATE RIGHT PANEL
 // ============================================================================
-static void create_right_data_panel() {
+AstroInfo create_arc_data_panel(
+    lv_obj_t * parent,
+    lv_value_precise_t start_degrees,
+    lv_value_precise_t end_degrees,
+    int32_t from_step,
+    int32_t to_step,
+    lv_color_t color
+    )
+{
+    AstroInfo result = {};
+
     // ------------------------------------------------------------------------
     // Right Data Panel: Outer Arc
     // ------------------------------------------------------------------------
-    right_data_panel_outline.arc_0 = create_panel_arc(
+    result.arc_0 = create_panel_arc(
         astro_container,
-        ORBIT_STEP * 10,
-        COLOR_ZODIAC,
-        320,
-        40
+        to_step,
+        color,
+        start_degrees,
+        end_degrees
     );
-    update_panel_arc_pos(&right_data_panel_outline, 0, SOLAR_CENTER_X, SOLAR_CENTER_Y);
+    update_panel_arc_pos(&result, 0, SOLAR_CENTER_X, SOLAR_CENTER_Y);
     // ------------------------------------------------------------------------
     // Right Data Panel: Inner Arc
     // ------------------------------------------------------------------------
-    right_data_panel_outline.arc_1 = create_panel_arc(
+    result.arc_1 = create_panel_arc(
         astro_container,
-        ORBIT_STEP * 9,
-        COLOR_ZODIAC,
-        320,
-        40
+        from_step,
+        color,
+        start_degrees,
+        end_degrees
     );
-    update_panel_arc_pos(&right_data_panel_outline, 0, SOLAR_CENTER_X, SOLAR_CENTER_Y);
+    update_panel_arc_pos(&result, 0, SOLAR_CENTER_X, SOLAR_CENTER_Y);
     // ------------------------------------------------------------------------
     // Top line
     // ------------------------------------------------------------------------
-    right_data_panel_outline.line_0 = lv_line_create(astro_container);
-    lv_obj_remove_style_all(right_data_panel_outline.line_0);
-    lv_obj_set_style_line_width(right_data_panel_outline.line_0, ORBIT_ARC_WIDTH_BELOW, 0);
-    lv_obj_set_style_line_color(right_data_panel_outline.line_0, COLOR_ZODIAC, 0);
-    lv_obj_set_style_line_rounded(right_data_panel_outline.line_0, true, 0);
-    lv_obj_remove_flag(right_data_panel_outline.line_0, LV_OBJ_FLAG_CLICKABLE);
+    result.line_0 = lv_line_create(astro_container);
+    lv_obj_remove_style_all(result.line_0);
+    lv_obj_set_style_line_width(result.line_0, ORBIT_ARC_WIDTH_BELOW, 0);
+    lv_obj_set_style_line_color(result.line_0, color, 0);
+    lv_obj_set_style_line_rounded(result.line_0, true, 0);
+    lv_obj_remove_flag(result.line_0, LV_OBJ_FLAG_CLICKABLE);
     static lv_point_precise_t top_pts[2];
-    float angle_rad = deg2rad(320 + ANGLE_OFFSET);
-    top_pts[0].x = SOLAR_CENTER_X + (lv_value_precise_t)(ORBIT_STEP * 9 * sinf(angle_rad));
-    top_pts[0].y = SOLAR_CENTER_Y + (lv_value_precise_t)(ORBIT_STEP * 9 * cosf(angle_rad));
-    top_pts[1].x = SOLAR_CENTER_X + (lv_value_precise_t)(ORBIT_STEP * 10 * sinf(angle_rad));
-    top_pts[1].y = SOLAR_CENTER_Y + (lv_value_precise_t)(ORBIT_STEP * 10 * cosf(angle_rad));
-    lv_line_set_points(right_data_panel_outline.line_0, top_pts, 2);
+    float angle_rad = deg2rad(start_degrees + ANGLE_OFFSET);
+    top_pts[0].x = SOLAR_CENTER_X + (lv_value_precise_t)(from_step * sinf(angle_rad));
+    top_pts[0].y = SOLAR_CENTER_Y + (lv_value_precise_t)(from_step * cosf(angle_rad));
+    top_pts[1].x = SOLAR_CENTER_X + (lv_value_precise_t)(to_step * sinf(angle_rad));
+    top_pts[1].y = SOLAR_CENTER_Y + (lv_value_precise_t)(to_step * cosf(angle_rad));
+    lv_line_set_points(result.line_0, top_pts, 2);
     // ------------------------------------------------------------------------
     // Bottom line
     // ------------------------------------------------------------------------
-    right_data_panel_outline.line_1 = lv_line_create(astro_container);
-    lv_obj_remove_style_all(right_data_panel_outline.line_1);
-    lv_obj_set_style_line_width(right_data_panel_outline.line_1, ORBIT_ARC_WIDTH_BELOW, 0);
-    lv_obj_set_style_line_color(right_data_panel_outline.line_1, COLOR_ZODIAC, 0);
-    lv_obj_set_style_line_rounded(right_data_panel_outline.line_1, true, 0);
-    lv_obj_remove_flag(right_data_panel_outline.line_1, LV_OBJ_FLAG_CLICKABLE);
+    result.line_1 = lv_line_create(astro_container);
+    lv_obj_remove_style_all(result.line_1);
+    lv_obj_set_style_line_width(result.line_1, ORBIT_ARC_WIDTH_BELOW, 0);
+    lv_obj_set_style_line_color(result.line_1, color, 0);
+    lv_obj_set_style_line_rounded(result.line_1, true, 0);
+    lv_obj_remove_flag(result.line_1, LV_OBJ_FLAG_CLICKABLE);
     static lv_point_precise_t bottom_pts[2];
-    angle_rad = deg2rad(40 + ANGLE_OFFSET);
-    bottom_pts[0].x = SOLAR_CENTER_X + (lv_value_precise_t)(ORBIT_STEP * 9 * sinf(angle_rad));
-    bottom_pts[0].y = SOLAR_CENTER_Y + (lv_value_precise_t)(ORBIT_STEP * 9 * cosf(angle_rad));
-    bottom_pts[1].x = SOLAR_CENTER_X + (lv_value_precise_t)(ORBIT_STEP * 10 * sinf(angle_rad));
-    bottom_pts[1].y = SOLAR_CENTER_Y + (lv_value_precise_t)(ORBIT_STEP * 10 * cosf(angle_rad));
-    lv_line_set_points(right_data_panel_outline.line_1, bottom_pts, 2);
+    angle_rad = deg2rad(end_degrees + ANGLE_OFFSET);
+    bottom_pts[0].x = SOLAR_CENTER_X + (lv_value_precise_t)(from_step * sinf(angle_rad));
+    bottom_pts[0].y = SOLAR_CENTER_Y + (lv_value_precise_t)(from_step * cosf(angle_rad));
+    bottom_pts[1].x = SOLAR_CENTER_X + (lv_value_precise_t)(to_step * sinf(angle_rad));
+    bottom_pts[1].y = SOLAR_CENTER_Y + (lv_value_precise_t)(to_step * cosf(angle_rad));
+    lv_line_set_points(result.line_1, bottom_pts, 2);
+
+    return result;
 }
 
 
@@ -968,30 +969,6 @@ void astro_clock_update(void) {
 static void update_target_data_content(int target) {
     if (!target_data_box) return;
     
-    // ========================================================================
-    // USER: ADD YOUR DATA DISPLAY CODE HERE
-    // ========================================================================
-    // 
-    // The target_data_box is an LVGL container. You can add labels, etc.
-    // Use lv_obj_clean(target_data_box) to clear previous content first.
-    // 
-    // Available targets:
-    //   ASTRO_TARGET_SUN, ASTRO_TARGET_MERCURY, ASTRO_TARGET_VENUS,
-    //   ASTRO_TARGET_EARTH, ASTRO_TARGET_LUNA, ASTRO_TARGET_MARS,
-    //   ASTRO_TARGET_JUPITER, ASTRO_TARGET_SATURN, ASTRO_TARGET_URANUS,
-    //   ASTRO_TARGET_NEPTUNE
-    // 
-    // Example:
-    //   lv_obj_clean(target_data_box);
-    //   lv_obj_t * label = lv_label_create(target_data_box);
-    //   switch (target) {
-    //       case ASTRO_TARGET_SUN:
-    //           lv_label_set_text(label, "Sun\nAlt: 45.2°\nAz: 180.5°");
-    //           break;
-    //       ...
-    //   }
-    // 
-    // ========================================================================
     lv_obj_clean(target_data_box);
     lv_obj_t * label = lv_label_create(target_data_box);
     lv_obj_set_style_text_font(label, &cobalt_alien_17, LV_PART_MAIN);
@@ -1554,55 +1531,15 @@ void astro_clock_begin(
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    // All Meteors
-    // meteors_quadrantids.obj   = create_data_triangle(astro_container, SIZE_UNIT * 16 / 2);
-    // meteors_lyrids.obj        = create_data_triangle(astro_container, SIZE_UNIT * 14 / 2);
-    // meteors_eta_aquarlids.obj = create_data_triangle(astro_container, SIZE_UNIT * 14 / 2);
-    // meteors_perseids.obj      = create_data_triangle(astro_container, SIZE_UNIT * 14 / 2);
-    // meteors_orionids.obj      = create_data_triangle(astro_container, SIZE_UNIT * 14 / 2);
-    // meteors_leonids.obj       = create_data_triangle(astro_container, SIZE_UNIT * 14 / 2);
-    // meteors_geminids.obj      = create_data_triangle(astro_container, SIZE_UNIT * 14 / 2);
-    // meteors_ursids.obj        = create_data_triangle(astro_container, SIZE_UNIT * 14 / 2);
-    // meteors_quadrantids.orbit_radius   = ORBIT_STEP * 10;
-    // meteors_lyrids.orbit_radius        = ORBIT_STEP * 10;
-    // meteors_eta_aquarlids.orbit_radius = ORBIT_STEP * 10;
-    // meteors_perseids.orbit_radius      = ORBIT_STEP * 10;
-    // meteors_orionids.orbit_radius      = ORBIT_STEP * 10;
-    // meteors_leonids.orbit_radius       = ORBIT_STEP * 10;
-    // meteors_geminids.orbit_radius      = ORBIT_STEP * 10;
-    // meteors_ursids.orbit_radius        = ORBIT_STEP * 10;
-    // meteors_quadrantids.radius   = SIZE_UNIT * 10 / 2;
-    // meteors_lyrids.radius        = SIZE_UNIT * 10 / 2;
-    // meteors_eta_aquarlids.radius = SIZE_UNIT * 10 / 2;
-    // meteors_perseids.radius      = SIZE_UNIT * 10 / 2;
-    // meteors_orionids.radius      = SIZE_UNIT * 10 / 2;
-    // meteors_leonids.radius       = SIZE_UNIT * 10 / 2;
-    // meteors_geminids.radius      = SIZE_UNIT * 10 / 2;
-    // meteors_ursids.radius        = SIZE_UNIT * 10 / 2;
-    // update_data_pos(&meteors_quadrantids,   -40, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // update_data_pos(&meteors_lyrids,        -30, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // update_data_pos(&meteors_eta_aquarlids, -20, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // update_data_pos(&meteors_perseids,      -10, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // update_data_pos(&meteors_orionids,        0, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // update_data_pos(&meteors_leonids,        10, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // update_data_pos(&meteors_geminids,       20, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // update_data_pos(&meteors_ursids,         30, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // meteors_quadrantids.color   = COLOR_HAZARD; 
-    // meteors_lyrids.color        = COLOR_HAZARD;
-    // meteors_eta_aquarlids.color = COLOR_HAZARD;
-    // meteors_perseids.color      = COLOR_HAZARD;
-    // meteors_orionids.color      = COLOR_HAZARD;
-    // meteors_leonids.color       = COLOR_HAZARD;
-    // meteors_geminids.color      = COLOR_HAZARD;
-    // meteors_ursids.color        = COLOR_HAZARD;
-
-    create_right_data_panel();
-    
-    // right_data_panel_outline.obj   = create_data_box(astro_container, SIZE_UNIT * 10 / 2, SIZE_UNIT * 10 / 2, "M");
-    // right_data_panel_outline.orbit_radius   = ORBIT_STEP * 10;
-    // right_data_panel_outline.radius   = SIZE_UNIT * 10 / 2;
-    // update_data_pos(&right_data_panel_outline, 40, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // right_data_panel_outline.color   = COLOR_HAZARD;
+    // Right Data Panel
+    right_data_panel_outline = create_arc_data_panel(
+        astro_container, // parent
+        320,             // start degrees
+        40,              // end degrees
+        ORBIT_STEP * 9,  // from step
+        ORBIT_STEP * 10, // to step
+        COLOR_ZODIAC
+    );
 
     // Zodiac lines
     create_zodiac(astro_container);
