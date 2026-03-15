@@ -116,8 +116,8 @@ typedef struct {
     lv_obj_t * obj;
     lv_obj_t * arc_0;
     lv_obj_t * arc_1;
-    lv_obj_t * line_0;
-    lv_obj_t * line_1;
+    lv_obj_t * connector_0;
+    lv_obj_t * connector_1;
     lv_obj_t * target_box;
 } AstroInfo;
 
@@ -361,35 +361,37 @@ AstroInfo create_arc_data_panel(
     // ------------------------------------------------------------------------
     // Top line
     // ------------------------------------------------------------------------
-    result.line_0 = lv_line_create(astro_container);
-    lv_obj_remove_style_all(result.line_0);
-    lv_obj_set_style_line_width(result.line_0, ORBIT_ARC_WIDTH_BELOW, 0);
-    lv_obj_set_style_line_color(result.line_0, color, 0);
-    lv_obj_set_style_line_rounded(result.line_0, true, 0);
-    lv_obj_remove_flag(result.line_0, LV_OBJ_FLAG_CLICKABLE);
+    result.connector_0 = lv_line_create(astro_container);
+    lv_obj_remove_style_all(result.connector_0);
+    lv_obj_set_style_line_width(result.connector_0, ORBIT_ARC_WIDTH_BELOW, 0);
+    lv_obj_set_style_line_color(result.connector_0, color, 0);
+    lv_obj_set_style_line_rounded(result.connector_0, true, 0);
+    lv_obj_remove_flag(result.connector_0, LV_OBJ_FLAG_CLICKABLE);
     static lv_point_precise_t top_pts[2];
     float angle_rad = deg2rad(start_degrees + ANGLE_OFFSET);
     top_pts[0].x = SOLAR_CENTER_X + (lv_value_precise_t)(from_step * sinf(angle_rad));
     top_pts[0].y = SOLAR_CENTER_Y + (lv_value_precise_t)(from_step * cosf(angle_rad));
     top_pts[1].x = SOLAR_CENTER_X + (lv_value_precise_t)(to_step * sinf(angle_rad));
     top_pts[1].y = SOLAR_CENTER_Y + (lv_value_precise_t)(to_step * cosf(angle_rad));
-    lv_line_set_points(result.line_0, top_pts, 2);
+    lv_line_set_points(result.connector_0, top_pts, 2);
     // ------------------------------------------------------------------------
     // Bottom line
     // ------------------------------------------------------------------------
-    result.line_1 = lv_line_create(astro_container);
-    lv_obj_remove_style_all(result.line_1);
-    lv_obj_set_style_line_width(result.line_1, ORBIT_ARC_WIDTH_BELOW, 0);
-    lv_obj_set_style_line_color(result.line_1, color, 0);
-    lv_obj_set_style_line_rounded(result.line_1, true, 0);
-    lv_obj_remove_flag(result.line_1, LV_OBJ_FLAG_CLICKABLE);
+    result.connector_1 = lv_line_create(astro_container);
+    lv_obj_remove_style_all(result.connector_1);
+    lv_obj_set_style_line_width(result.connector_1, ORBIT_ARC_WIDTH_BELOW, 0);
+    lv_obj_set_style_line_color(result.connector_1, color, 0);
+    lv_obj_set_style_line_rounded(result.connector_1, true, 0);
+    lv_obj_remove_flag(result.connector_1, LV_OBJ_FLAG_CLICKABLE);
     static lv_point_precise_t bottom_pts[2];
     angle_rad = deg2rad(end_degrees + ANGLE_OFFSET);
     bottom_pts[0].x = SOLAR_CENTER_X + (lv_value_precise_t)(from_step * sinf(angle_rad));
     bottom_pts[0].y = SOLAR_CENTER_Y + (lv_value_precise_t)(from_step * cosf(angle_rad));
     bottom_pts[1].x = SOLAR_CENTER_X + (lv_value_precise_t)(to_step * sinf(angle_rad));
     bottom_pts[1].y = SOLAR_CENTER_Y + (lv_value_precise_t)(to_step * cosf(angle_rad));
-    lv_line_set_points(result.line_1, bottom_pts, 2);
+    lv_line_set_points(result.connector_1, bottom_pts, 2);
+
+    // Segs same way as connecting lines...
 
     return result;
 }
