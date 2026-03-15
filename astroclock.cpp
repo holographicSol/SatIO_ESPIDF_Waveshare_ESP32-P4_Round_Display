@@ -51,6 +51,8 @@ int32_t current_target = 0;
 // Timer for astro clock updates
 lv_timer_t * astro_timer = NULL;
 
+static float luna_sat_progress = 0.0f;
+static int luna_sat_direction = 1;
 uint16_t current_luna_hue=340;
 uint16_t current_luna_saturation=20;
 lv_color_t rainbow_luna_hue;
@@ -636,7 +638,16 @@ void astro_clock_update(void) {
     if (!astro_container) {return;}
 
     // Advance luna shine
-    current_luna_saturation = (current_luna_saturation + 4) % 100;
+    current_luna_saturation = 20 + (80 * luna_sat_progress);
+    rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, current_luna_saturation % 100, 100);
+    luna_sat_progress += 0.01f * luna_sat_direction;
+    if (luna_sat_progress >= 1.0f) {
+        luna_sat_progress = 1.0f;
+        luna_sat_direction = -1;
+    } else if (luna_sat_progress <= 0.0f) {
+        luna_sat_progress = 0.0f;
+        luna_sat_direction = 1;
+    }
     rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, current_luna_saturation % 100, 100);
     
     // -----------------------------------------------------------------
