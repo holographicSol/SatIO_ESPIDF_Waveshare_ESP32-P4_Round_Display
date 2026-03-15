@@ -51,6 +51,18 @@ int32_t current_target = 0;
 // Timer for astro clock updates
 lv_timer_t * astro_timer = NULL;
 
+// Cycle through 4 specific bright colors only
+static float blend_progress = 0.0f;
+static int luna_hue_index = 0;
+
+// Smoothly blend from target_hues[luna_hue_index] → target_hues[(luna_hue_index+1)%4]
+static const uint16_t target_luna_hues[] = {30, 60, 240, 330};  // Yel→Cyn→Blu→Pnk
+
+uint16_t current_luna_hue = target_luna_hues[luna_hue_index] + 
+                       (target_luna_hues[(luna_hue_index + 1) % 4] - target_luna_hues[luna_hue_index]) * blend_progress;
+
+lv_color_t rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, 100, 100);
+
 // ============================================================================
 // COLORS
 // ============================================================================
@@ -628,6 +640,14 @@ static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle,
 void astro_clock_update(void) {
 
     if (!astro_container) {return;}
+
+    // Advance blend (smooth transition every ~60 frames = 1 second @60fps)
+    rainbow_luna_hue = lv_color_hsv_to_rgb(current_luna_hue, 100, 100);
+    blend_progress += 0.016f;  // 1/60
+    if (blend_progress >= 1.0f) {
+        blend_progress = 0.0f;
+        luna_hue_index = (luna_hue_index + 1) % 4;
+    }
     
     // -----------------------------------------------------------------
     //                                                           MERCURY
@@ -757,6 +777,8 @@ void astro_clock_update(void) {
         if (luna.target_box) {
             lv_obj_set_pos(luna.target_box, luna.x - 4, luna.y - 4);
         }
+
+        lv_obj_set_style_bg_color(luna.obj, rainbow_luna_hue, LV_PART_MAIN);
         
         // Update luna phase visualization
         // luna_p: 0=New, 1=WaxCres, 2=FirstQ, 3=WaxGib, 4=Full, 5=WanGib, 6=ThirdQ, 7=WanCres
