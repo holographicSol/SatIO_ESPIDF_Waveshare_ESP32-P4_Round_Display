@@ -38,7 +38,8 @@ enum {
     ASTRO_TARGET_SATURN,
     ASTRO_TARGET_URANUS,
     ASTRO_TARGET_NEPTUNE,
-    ASTRO_TARGET_MAX
+    ASTRO_TARGET_MAX,
+    INDICATOR_METEORS
 };
 
 extern struct Lv_Astro_Clock lv_astro_clock;

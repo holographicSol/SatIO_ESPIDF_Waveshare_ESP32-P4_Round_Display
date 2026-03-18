@@ -16,6 +16,7 @@ extern "C" {
 }
 
 LV_FONT_DECLARE(cobalt_alien_17);
+LV_FONT_DECLARE(cobalt_alien_25);
 
 // ============================================================================
 // CONFIGURATION
@@ -75,7 +76,7 @@ lv_color_t rainbow_sun_hue;
 #define COLOR_ZODIAC           lv_color_make(  0,   0,  96)
 
 #define COLOR_HAZARD           lv_color_make(255, 255,   0)
-#define COLOR_WARNING         lv_color_make(255,   0,   0)
+#define COLOR_WARNING          lv_color_make(255,   0,   0)
 
 // ============================================================================
 // PLANET DATA STRUCTURE
@@ -102,6 +103,8 @@ typedef struct {
 #define SUN_ALTITUDE_LINE_WIDTH_BELOW 3
 #define SUN_ALTITUDE_LINE_WIDTH_AVOVE 3
 
+#define ASTRO_INFO_LINE_WIDTH 2
+
 // ============================================================================
 // PLANETS (orbits and sizes calculated from available space)
 // Size scale: Sun=8, Jupiter=6, Saturn/Earth=5, Venus/Mars/Uranus/Neptune=4, Mercury=3, Luna=2
@@ -119,20 +122,15 @@ static Planet uranus  = {ORBIT_STEP * 7, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NU
 static Planet neptune = {ORBIT_STEP * 8, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
 
 typedef struct {
-    int orbit_radius;
-    int radius;
-    int32_t x;
-    int32_t y;
-    lv_color_t color;
-    lv_obj_t * obj;
-    lv_obj_t * arc_0;
-    lv_obj_t * arc_1;
-    lv_obj_t * connector_0;
-    lv_obj_t * connector_1;
+    int32_t size_w;
+    int32_t size_h;    
+    int32_t pos_x;
+    int32_t pos_y;
+    lv_obj_t * label;
     lv_obj_t * target_box;
-} AstroInfo;
+} Indicator;
 
-static AstroInfo right_data_panel_outline = {ORBIT_STEP*10,  SIZE_UNIT*10/2,  0, 0,  {0},  NULL, NULL, NULL, NULL, NULL, NULL};
+static Indicator meteors_indicator = {};
 
 // ============================================================================
 // LVGL OBJECTS
@@ -212,205 +210,6 @@ static void container_click_cb(lv_event_t * e) {
 }
 
 // ============================================================================
-// CREATE WARNING OBJECT TEST POSITION
-// ============================================================================
-static lv_obj_t * create_data_triangle(lv_obj_t * parent, int32_t size) {
-    lv_obj_t * canvas = lv_canvas_create(parent);
-    if (!canvas) return NULL;
-
-    lv_obj_set_size(canvas, size, size);
-
-    // Use dynamic buffer - avoid static with fixed 150×150
-    static lv_color_t buf[150 * 150];
-    lv_canvas_set_buffer(canvas, buf, size, size, LV_COLOR_FORMAT_ARGB8888);
-
-    lv_color_t bg = lv_color_black();
-    lv_canvas_fill_bg(canvas, bg, LV_OPA_COVER);
-
-    lv_layer_t layer;
-    lv_canvas_init_layer(canvas, &layer);
-
-    lv_draw_triangle_dsc_t tri_dsc;
-    lv_draw_triangle_dsc_init(&tri_dsc);
-
-    // ── Outer triangle ────────────────────────────────────────
-    tri_dsc.color = COLOR_HAZARD;
-    tri_dsc.opa   = LV_OPA_COVER;
-
-    // Use consistent 1 px padding from edges
-    int pad = 1;
-    lv_point_precise_t outer[3] = {
-        {pad,             size - 1 - pad},               // bottom left
-        {size - 1 - pad,  size - 1 - pad},               // bottom right
-        {size / 2,        pad}                           // top
-    };
-
-    tri_dsc.p[0] = outer[0];
-    tri_dsc.p[1] = outer[1];
-    tri_dsc.p[2] = outer[2];
-    lv_draw_triangle(&layer, &tri_dsc);
-
-    // ── Inner triangle (parallel sides / uniform inset) ───────
-    // inset = how many pixels to move inward perpendicular to each side
-    int inset = 3;           // ← tune this (2–5 usually looks good)
-
-    // For equilateral triangle, inset distance along angle bisector ≈ inset / sin(60°) ≈ inset × 1.1547
-    float offset = inset * 1.1547f;
-
-    // Move each vertex along the direction toward the centroid
-    lv_point_precise_t inner[3];
-
-    // Vertex 0 – bottom left: move right+up
-    inner[0].x = outer[0].x + offset;
-    inner[0].y = outer[0].y - offset * 0.5f;
-
-    // Vertex 1 – bottom right: move left+up
-    inner[1].x = outer[1].x - offset;
-    inner[1].y = outer[1].y - offset * 0.5f;
-
-    // Vertex 2 – top: move down
-    inner[2].x = outer[2].x;
-    inner[2].y = outer[2].y + offset;
-
-    // Optional: clamp to prevent inversion on small inset+size combinations
-    if (inner[2].y >= inner[0].y - 1) {
-        // too much inset — just skip inner or reduce inset
-        inset = 0;
-    }
-
-    tri_dsc.color = bg;   // punch out with background color
-    tri_dsc.opa   = LV_OPA_COVER;
-
-    tri_dsc.p[0] = inner[0];
-    tri_dsc.p[1] = inner[1];
-    tri_dsc.p[2] = inner[2];
-    lv_draw_triangle(&layer, &tri_dsc);
-
-    lv_canvas_finish_layer(canvas, &layer);
-
-    // Important: free the buffer when the canvas is deleted
-    // (you can use lv_obj_add_event_cb to free it on LV_EVENT_DELETE if needed)
-
-    lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE);
-    return canvas;
-}
-
-// ============================================================================
-// CREATE PANEL ARC
-// ============================================================================
-static lv_obj_t * create_panel_arc(
-    lv_obj_t * parent,
-    int32_t radius,
-    lv_color_t color,
-    lv_value_precise_t start,
-    lv_value_precise_t end
-    )
-{
-    printf("DEBUG: creating arc\n");
-    lv_obj_t * arc = lv_arc_create(parent);
-    if (!arc) {printf("ERROR: Failed to create arc\n"); return NULL;}
-    lv_obj_remove_style_all(arc);
-    lv_obj_set_size(arc, radius * 2, radius * 2);
-    lv_obj_set_style_arc_color(arc, color, LV_PART_MAIN);
-    lv_obj_set_style_arc_width(arc, ORBIT_ARC_WIDTH_BELOW, LV_PART_MAIN);  // Slightly wider for smoother appearance
-    lv_obj_set_style_arc_rounded(arc, true, LV_PART_MAIN);
-    lv_arc_set_bg_angles(arc, start, end);
-    lv_arc_set_value(arc, 0);
-    lv_obj_set_style_arc_opa(arc, LV_OPA_TRANSP, LV_PART_INDICATOR);
-    lv_obj_set_style_bg_opa(arc, LV_OPA_TRANSP, LV_PART_KNOB);
-    lv_obj_remove_flag(arc, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_align(arc, LV_ALIGN_CENTER, 0, 0);
-    return arc;
-}
-static void update_panel_arc_pos(AstroInfo * astro_info, float angle_deg, int cx, int cy) {
-    if (!astro_info->obj) return;
-    float rad = deg2rad(angle_deg + ANGLE_OFFSET);
-    astro_info->x = cx + (int)(astro_info->orbit_radius * sinf(rad)) - astro_info->radius;
-    astro_info->y = cy + (int)(astro_info->orbit_radius * cosf(rad)) - astro_info->radius;
-    lv_obj_set_pos(astro_info->obj, astro_info->x, astro_info->y);
-    if (astro_info->target_box) {
-        lv_obj_set_pos(astro_info->target_box, astro_info->x - 4, astro_info->y - 4);
-    }
-}
-
-// ============================================================================
-// CREATE RIGHT PANEL
-// ============================================================================
-AstroInfo create_arc_data_panel(
-    lv_obj_t * parent,
-    lv_value_precise_t start_degrees,
-    lv_value_precise_t end_degrees,
-    int32_t from_step,
-    int32_t to_step,
-    lv_color_t color
-    )
-{
-    AstroInfo result = {};
-
-    // ------------------------------------------------------------------------
-    // Right Data Panel: Outer Arc
-    // ------------------------------------------------------------------------
-    result.arc_0 = create_panel_arc(
-        astro_container,
-        to_step,
-        color,
-        start_degrees,
-        end_degrees
-    );
-    update_panel_arc_pos(&result, 0, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // ------------------------------------------------------------------------
-    // Right Data Panel: Inner Arc
-    // ------------------------------------------------------------------------
-    result.arc_1 = create_panel_arc(
-        astro_container,
-        from_step,
-        color,
-        start_degrees,
-        end_degrees
-    );
-    update_panel_arc_pos(&result, 0, SOLAR_CENTER_X, SOLAR_CENTER_Y);
-    // ------------------------------------------------------------------------
-    // Top line
-    // ------------------------------------------------------------------------
-    result.connector_0 = lv_line_create(astro_container);
-    lv_obj_remove_style_all(result.connector_0);
-    lv_obj_set_style_line_width(result.connector_0, ORBIT_ARC_WIDTH_BELOW, 0);
-    lv_obj_set_style_line_color(result.connector_0, color, 0);
-    lv_obj_set_style_line_rounded(result.connector_0, true, 0);
-    lv_obj_remove_flag(result.connector_0, LV_OBJ_FLAG_CLICKABLE);
-    static lv_point_precise_t top_pts[2];
-    float angle_rad = deg2rad(start_degrees + ANGLE_OFFSET);
-    top_pts[0].x = SOLAR_CENTER_X + (lv_value_precise_t)(from_step * sinf(angle_rad));
-    top_pts[0].y = SOLAR_CENTER_Y + (lv_value_precise_t)(from_step * cosf(angle_rad));
-    top_pts[1].x = SOLAR_CENTER_X + (lv_value_precise_t)(to_step * sinf(angle_rad));
-    top_pts[1].y = SOLAR_CENTER_Y + (lv_value_precise_t)(to_step * cosf(angle_rad));
-    lv_line_set_points(result.connector_0, top_pts, 2);
-    // ------------------------------------------------------------------------
-    // Bottom line
-    // ------------------------------------------------------------------------
-    result.connector_1 = lv_line_create(astro_container);
-    lv_obj_remove_style_all(result.connector_1);
-    lv_obj_set_style_line_width(result.connector_1, ORBIT_ARC_WIDTH_BELOW, 0);
-    lv_obj_set_style_line_color(result.connector_1, color, 0);
-    lv_obj_set_style_line_rounded(result.connector_1, true, 0);
-    lv_obj_remove_flag(result.connector_1, LV_OBJ_FLAG_CLICKABLE);
-    static lv_point_precise_t bottom_pts[2];
-    angle_rad = deg2rad(end_degrees + ANGLE_OFFSET);
-    bottom_pts[0].x = SOLAR_CENTER_X + (lv_value_precise_t)(from_step * sinf(angle_rad));
-    bottom_pts[0].y = SOLAR_CENTER_Y + (lv_value_precise_t)(from_step * cosf(angle_rad));
-    bottom_pts[1].x = SOLAR_CENTER_X + (lv_value_precise_t)(to_step * sinf(angle_rad));
-    bottom_pts[1].y = SOLAR_CENTER_Y + (lv_value_precise_t)(to_step * cosf(angle_rad));
-    lv_line_set_points(result.connector_1, bottom_pts, 2);
-
-    // Segs same way as connecting lines...
-
-    // Meteors
-
-    return result;
-}
-
-
-// ============================================================================
 // CREATE PLANET CIRCLE
 // ============================================================================
 static lv_obj_t * create_planet(lv_obj_t * parent, int radius, lv_color_t color) {
@@ -449,6 +248,65 @@ static lv_obj_t * create_orbit(lv_obj_t * parent, int radius, lv_color_t color) 
     return arc;
 }
 
+static Indicator create_indicator(
+    lv_obj_t * parent,
+    int32_t size_w,
+    int32_t size_h,
+    int32_t pos_x,
+    int32_t pos_y,
+    const char * text
+    )
+{
+    Indicator result = {};
+
+    result.pos_x = pos_x;
+    result.pos_y = pos_y;
+    result.size_w = size_w;
+    result.size_h = size_h;
+
+    result.label = lv_label_create(parent);
+
+    // Size and position
+    lv_obj_set_size(result.label, size_w, size_h);
+    lv_obj_set_pos(result.label, pos_x, pos_y);
+
+    // Main style: radius
+    lv_obj_set_style_radius(result.label, 5, LV_PART_MAIN);
+
+    // Vertical centering: calculate top padding based on font height
+    int32_t font_line_height = lv_font_get_line_height(&cobalt_alien_17) * 1;
+    int32_t pad_top = (size_h - font_line_height) / 2;
+    if (pad_top > 0) {
+        lv_obj_set_style_pad_top(result.label, pad_top, LV_PART_MAIN);
+    }
+
+    // Main style: outline
+    lv_obj_set_style_outline_width(result.label, 2, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.label, COLOR_HAZARD, LV_PART_MAIN);
+    
+    // Main style: border
+    lv_obj_set_style_border_width(result.label, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.label, COLOR_ZODIAC, LV_PART_MAIN);
+
+    // Main style: background
+    lv_obj_set_style_bg_color(result.label, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(result.label, LV_OPA_100, LV_PART_MAIN);
+
+    // Main style: shadow
+    lv_obj_set_style_shadow_width(result.label, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.label, COLOR_ZODIAC, LV_PART_MAIN);
+
+    // Main style: text
+    lv_obj_set_style_text_align(result.label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    lv_obj_set_style_text_font(result.label, &cobalt_alien_17, LV_PART_MAIN);
+    lv_obj_set_style_text_color(result.label, COLOR_HAZARD, LV_PART_MAIN);
+    lv_label_set_text(result.label, text);
+
+    lv_obj_add_flag(result.label, LV_OBJ_FLAG_CLICKABLE);
+
+    return result;
+}
+
 // ============================================================================
 // CREATE TARGET BOX
 // ============================================================================
@@ -485,20 +343,6 @@ static void update_planet_pos(Planet * p, float angle_deg, int cx, int cy) {
     lv_obj_set_pos(p->obj, p->x, p->y);
     if (p->target_box) {
         lv_obj_set_pos(p->target_box, p->x - 4, p->y - 4);
-    }
-}
-
-// ============================================================================
-// UPDATE DATA POSITION
-// ============================================================================
-static void update_data_pos(AstroInfo * astro_info, float angle_deg, int cx, int cy) {
-    if (!astro_info->obj) return;
-    float rad = deg2rad(angle_deg + ANGLE_OFFSET);
-    astro_info->x = cx + (int)(astro_info->orbit_radius * sinf(rad)) - astro_info->radius;
-    astro_info->y = cy + (int)(astro_info->orbit_radius * cosf(rad)) - astro_info->radius;
-    lv_obj_set_pos(astro_info->obj, astro_info->x, astro_info->y);
-    if (astro_info->target_box) {
-        lv_obj_set_pos(astro_info->target_box, astro_info->x - 4, astro_info->y - 4);
     }
 }
 
@@ -958,22 +802,22 @@ void astro_clock_update(void) {
     // -----------------------------------------------------------------
     //                                                           METEORS
     // -----------------------------------------------------------------
-    // if (right_data_panel_outline.obj) {
-    //     // Range
-    //     if (!sumMeteorShowerWarning()) {
-    //         lv_obj_set_style_outline_color(right_data_panel_outline.obj, lv_color_make(58,58,58), LV_PART_MAIN);
-    //         lv_obj_set_style_text_color(right_data_panel_outline.obj, lv_color_make(58,58,58), LV_PART_MAIN);
-    //     }
-    //     else if (sumMeteorShowerWarning()) {
-    //         lv_obj_set_style_outline_color(right_data_panel_outline.obj, COLOR_HAZARD, LV_PART_MAIN);
-    //         lv_obj_set_style_text_color(right_data_panel_outline.obj, COLOR_HAZARD, LV_PART_MAIN);
-    //     }
-    //     // Peak Overrides Range
-    //     if (sumMeteorShowerPeakWarning()) {
-    //         lv_obj_set_style_outline_color(right_data_panel_outline.obj, COLOR_WARNING, LV_PART_MAIN);
-    //         lv_obj_set_style_text_color(right_data_panel_outline.obj, COLOR_WARNING, LV_PART_MAIN);
-    //     }
-    // }
+
+    if (meteors_indicator.label) {
+
+        // if (!sumMeteorShowerWarning()) {
+        //     lv_obj_add_flag(meteors_indicator, LV_OBJ_FLAG_HIDDEN);
+        // }
+
+        // else {
+        //     lv_obj_remove_flag(meteors_indicator, LV_OBJ_FLAG_HIDDEN);
+
+        //     if (sumMeteorShowerWarning())
+        //         {lv_obj_set_style_text_color(meteors_indicator, COLOR_HAZARD, LV_PART_MAIN);}
+        //     if (sumMeteorShowerPeakWarning())
+        //         {lv_obj_set_style_text_color(meteors_indicator, COLOR_WARNING, LV_PART_MAIN);}
+        // }
+    }
 }
 
 // ============================================================================
@@ -984,6 +828,8 @@ void astro_clock_update(void) {
  * @param target The target object ID (ASTRO_TARGET_*)
  * 
  * Called when a celestial object is selected. Add your data display code here.
+ * 
+ * @warning will be replaced with grids for ease of tabulation.
  */
 static void update_target_data_content(int target) {
     if (!target_data_box) return;
@@ -993,7 +839,7 @@ static void update_target_data_content(int target) {
     lv_obj_set_style_text_font(label, &cobalt_alien_17, LV_PART_MAIN);
     lv_obj_set_style_text_color(label, lv_color_make(0, 255, 0), LV_PART_MAIN);
     
-    char buf[256];
+    char buf[2046];
     switch (target) {
         case ASTRO_TARGET_SUN:
             snprintf(buf, sizeof(buf),
@@ -1261,6 +1107,49 @@ static void update_target_data_content(int target) {
             );
             lv_label_set_text(label, buf);
             break;
+        case INDICATOR_METEORS:
+            char range[MAX_METEOR_SHOWERS][64];
+            char peak[MAX_METEOR_SHOWERS][64];
+            for (int i = 0; i < MAX_METEOR_SHOWERS; i++) {
+                snprintf(range[i], sizeof(range[i]), "%s/%d %s/%d",
+                        // month
+                        satioData.abbrev_month_names[meteor_shower_datetime[i][0][0]-1],
+                        // day
+                        meteor_shower_datetime[i][0][1],
+                        // month
+                        satioData.abbrev_month_names[meteor_shower_datetime[i][1][0]-1],
+                        // day
+                        meteor_shower_datetime[i][1][1]);
+
+                snprintf(peak[i], sizeof(peak[i]), "%s/%d %s/%d",
+                        // month
+                        satioData.abbrev_month_names[meteor_shower_peaks[i][0][0]-1],
+                        // day
+                        meteor_shower_peaks[i][0][1],
+                        // month
+                        satioData.abbrev_month_names[meteor_shower_peaks[i][1][0]-1],
+                        meteor_shower_peaks[i][0][2]);
+            }
+            snprintf(buf, sizeof(buf),
+                "Meteor Showers\n\n");
+            int len = strlen(buf);
+            for (int i = 0; i < MAX_METEOR_SHOWERS; i++) {
+                if (len > sizeof(buf) - 120) break;  // safety
+
+                len += snprintf(buf + len, sizeof(buf) - len,
+                    "[ %s ]\n"
+                    "    [ Range: %s ] %s\n"
+                    "    [ Peak:  %s ] %s\n",
+                    meteor_shower_names[i],
+                    range[i],
+                    meteor_shower_warning_system[i][0] ? "ACTIVE" : "INACTIVE",
+                    peak[i],
+                    meteor_shower_warning_system[i][1] ? "ACTIVE" : "INACTIVE"
+                );
+            }
+
+            lv_label_set_text(label, buf);
+            break;
     }
 }
 
@@ -1279,6 +1168,7 @@ void astro_clock_set_target(int target) {
     if (saturn.target_box) lv_obj_add_flag(saturn.target_box, LV_OBJ_FLAG_HIDDEN);
     if (uranus.target_box) lv_obj_add_flag(uranus.target_box, LV_OBJ_FLAG_HIDDEN);
     if (neptune.target_box) lv_obj_add_flag(neptune.target_box, LV_OBJ_FLAG_HIDDEN);
+    if (meteors_indicator.target_box) lv_obj_add_flag(meteors_indicator.target_box, LV_OBJ_FLAG_HIDDEN);
     
     // Hide data box and connector line
     if (target_data_box) lv_obj_add_flag(target_data_box, LV_OBJ_FLAG_HIDDEN);
@@ -1344,6 +1234,11 @@ void astro_clock_set_target(int target) {
             box = neptune.target_box;
             obj_center_x = neptune.x + neptune.radius;
             obj_center_y = neptune.y + neptune.radius;
+            break;
+        case INDICATOR_METEORS:
+            box = meteors_indicator.target_box;
+            obj_center_x = meteors_indicator.pos_x + (meteors_indicator.size_w/2);
+            obj_center_y = meteors_indicator.pos_y + (meteors_indicator.size_w/2);
             break;
     }
     
@@ -1550,16 +1445,16 @@ void astro_clock_begin(
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    // Right Data Panel
-    right_data_panel_outline = create_arc_data_panel(
-        astro_container, // parent
-        320,             // start degrees
-        40,              // end degrees
-        // ORBIT_STEP * 9 + (ORBIT_STEP/2),  // from step (full step)
-        ORBIT_STEP * 9 + (ORBIT_STEP/4),  // from step (half step, try not take away emphasis from clock while also allowing room for indicators)
-        ORBIT_STEP * 10, // to step
-        COLOR_ZODIAC
+    // Meteors Indicator
+    meteors_indicator = create_indicator(
+        astro_container,
+        90,
+        24,
+        SOLAR_CENTER_X+(ORBIT_STEP * 4),
+        SOLAR_CENTER_Y-(ORBIT_STEP * 9)+10,
+        "METEORS"
     );
+    meteors_indicator.target_box = create_target_box(astro_container, meteors_indicator.size_h*2);
 
     // Zodiac lines
     create_zodiac(astro_container);
@@ -1760,6 +1655,8 @@ void astro_clock_begin(
     lv_obj_add_event_cb(saturn.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_SATURN);
     lv_obj_add_event_cb(uranus.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_URANUS);
     lv_obj_add_event_cb(neptune.obj, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)ASTRO_TARGET_NEPTUNE);
+
+    lv_obj_add_event_cb(meteors_indicator.label, celestial_click_cb, LV_EVENT_CLICKED, (void*)(intptr_t)INDICATOR_METEORS);
 
     // Add click handler to container to reset target when clicking background
     lv_obj_add_flag(astro_container, LV_OBJ_FLAG_CLICKABLE);

@@ -11673,7 +11673,6 @@ serial_container_t create_serial_panel(
     lv_obj_set_size(result.lbl_output_gnrmc, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_gnrmc, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Output GPATT                                               */
     /* ---------------------------------------------------------- */
@@ -15127,8 +15126,8 @@ void display_home_screen()
         home_screen,
         720,             // outline width
         720,             // outline height
-        600,             // astro width
-        600,             // astro height
+        556,             // astro width
+        556,             // astro height
         LV_ALIGN_CENTER, // alignment
         0,               // pos x
         0,               // pos y
