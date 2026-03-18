@@ -64,6 +64,7 @@ struct SATIOStruct {
     char tmp_millisecond[MAX_GLOBAL_ELEMENT_SIZE];      // Temp millisecond string
     char week_day_names[MAX_DAYS_OF_THE_WEEK][MAX_GLOBAL_ELEMENT_SIZE]; // Weekday names
     char month_names[MAX_MONTHS_OF_THE_YEAR][MAX_GLOBAL_ELEMENT_SIZE]; // Month names
+    char abbrev_month_names[MAX_MONTHS_OF_THE_YEAR][12];               // Abbreviated Month names
 
     // ------------------------------------------------------------------------------------
     // LOCATION

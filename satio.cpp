@@ -57,6 +57,7 @@ struct SATIOStruct satioData = {
     .tmp_millisecond = {0},
     .week_day_names = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"},
     .month_names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"},
+    .abbrev_month_names = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"},
 
     // ------------------------------------------------------------------------------------
     // LOCATION
