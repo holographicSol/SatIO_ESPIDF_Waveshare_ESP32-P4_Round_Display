@@ -14879,7 +14879,7 @@ uap_t create_uap(
     /*---------------------------------------- PANEL LV_PART_MAIN -----------------------------------------*/
 
     // Main style: radius
-    lv_obj_set_style_radius(result.panel, 360, LV_PART_MAIN);
+    lv_obj_set_style_radius(result.panel, 0, LV_PART_MAIN);
 
     // Main style: outline
     lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
@@ -14896,26 +14896,120 @@ uap_t create_uap(
     lv_obj_set_style_shadow_width(result.panel, 0, LV_PART_MAIN);
     lv_obj_set_style_shadow_color(result.panel, default_shadow_hue, LV_PART_MAIN);
 
+    // Remove padding
+    lv_obj_set_style_pad_all(result.panel, 0, LV_PART_MAIN);
+
+    // Set pivot
     lv_obj_set_style_transform_pivot_x(result.panel, lv_pct(50), LV_PART_MAIN);
     lv_obj_set_style_transform_pivot_y(result.panel, lv_pct(50), LV_PART_MAIN);
 
     // test line
-    int32_t margin = 10;
-    int32_t line_w = size_w_px - (margin * 2);
-    static lv_point_precise_t points[2];
-    points[0].x = 0;
-    points[0].y = 0;
-    points[1].x = line_w;
-    points[1].y = 0;
-    lv_obj_t *line = lv_line_create(result.panel);
-    lv_line_set_points(line, points, 2);
-    lv_obj_set_style_line_width(line, 3, LV_PART_MAIN);
-    lv_obj_set_style_line_color(line, lv_color_make(0, 255, 0), LV_PART_MAIN);
-    lv_obj_set_size(line, line_w, 3);
-    lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);
+    // int32_t margin = 10;
+    // int32_t line_w = size_w_px - (margin * 2);
+    // static lv_point_precise_t points[2];
+    // points[0].x = 0;
+    // points[0].y = 0;
+    // points[1].x = line_w;
+    // points[1].y = 0;
+    // lv_obj_t *line = lv_line_create(result.panel);
+    // lv_line_set_points(line, points, 2);
+    // lv_obj_set_style_line_width(line, 3, LV_PART_MAIN);
+    // lv_obj_set_style_line_color(line, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    // lv_obj_set_size(line, line_w, 3);
+    // lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);
 
-    // draw actual obj to be rolled
-    // ...
+    int32_t r  = size_w_px - 1;   // right edge
+    int32_t b  = size_h_px - 1;   // bottom edge
+    int32_t corner_len = size_w_px / 8;
+    int32_t line_w = 3;
+    lv_color_t col = lv_color_make(0, 255, 0);
+
+
+    // ---- top-left vertical (draws down) ----
+    static lv_point_precise_t tl_v[2];
+    tl_v[0].x = 0; tl_v[0].y = 0;
+    tl_v[1].x = 0; tl_v[1].y = corner_len;
+    lv_obj_t *tl_vert = lv_line_create(result.panel);
+    lv_line_set_points(tl_vert, tl_v, 2);
+    lv_obj_set_style_line_width(tl_vert, line_w, LV_PART_MAIN);
+    lv_obj_set_style_line_color(tl_vert, col, LV_PART_MAIN);
+    lv_obj_set_pos(tl_vert, 0, 0);
+
+    // ---- top-left horizontal (draws right) ----
+    static lv_point_precise_t tl_h[2];
+    tl_h[0].x = 0;          tl_h[0].y = 0;
+    tl_h[1].x = corner_len; tl_h[1].y = 0;
+    lv_obj_t *tl_horiz = lv_line_create(result.panel);
+    lv_line_set_points(tl_horiz, tl_h, 2);
+    lv_obj_set_style_line_width(tl_horiz, line_w, LV_PART_MAIN);
+    lv_obj_set_style_line_color(tl_horiz, col, LV_PART_MAIN);
+    lv_obj_set_pos(tl_horiz, 0, 0);
+
+
+    // ---- top-right vertical (draws down) ----
+    static lv_point_precise_t tr_v[2];
+    tr_v[0].x = 0; tr_v[0].y = 0;
+    tr_v[1].x = 0; tr_v[1].y = corner_len;
+    lv_obj_t *tr_vert = lv_line_create(result.panel);
+    lv_line_set_points(tr_vert, tr_v, 2);
+    lv_obj_set_style_line_width(tr_vert, line_w, LV_PART_MAIN);
+    lv_obj_set_style_line_color(tr_vert, col, LV_PART_MAIN);
+    lv_obj_set_pos(tr_vert, r, 0);
+
+    // ---- top-right horizontal (draws left via offset) ----
+    static lv_point_precise_t tr_h[2];
+    tr_h[0].x = 0;          tr_h[0].y = 0;
+    tr_h[1].x = corner_len; tr_h[1].y = 0;
+    lv_obj_t *tr_horiz = lv_line_create(result.panel);
+    lv_line_set_points(tr_horiz, tr_h, 2);
+    lv_obj_set_style_line_width(tr_horiz, line_w, LV_PART_MAIN);
+    lv_obj_set_style_line_color(tr_horiz, col, LV_PART_MAIN);
+    lv_obj_set_pos(tr_horiz, r - corner_len, 0);
+
+
+    // ---- bottom-left vertical (draws down via offset) ----
+    static lv_point_precise_t bl_v[2];
+    bl_v[0].x = 0; bl_v[0].y = 0;
+    bl_v[1].x = 0; bl_v[1].y = corner_len;
+    lv_obj_t *bl_vert = lv_line_create(result.panel);
+    lv_line_set_points(bl_vert, bl_v, 2);
+    lv_obj_set_style_line_width(bl_vert, line_w, LV_PART_MAIN);
+    lv_obj_set_style_line_color(bl_vert, col, LV_PART_MAIN);
+    lv_obj_set_pos(bl_vert, 0, b - corner_len);
+
+
+    // ---- bottom-right vertical (draws down via offset) ----
+    static lv_point_precise_t br_v[2];
+    br_v[0].x = 0; br_v[0].y = 0;
+    br_v[1].x = 0; br_v[1].y = corner_len;
+    lv_obj_t *br_vert = lv_line_create(result.panel);
+    lv_line_set_points(br_vert, br_v, 2);
+    lv_obj_set_style_line_width(br_vert, line_w, LV_PART_MAIN);
+    lv_obj_set_style_line_color(br_vert, col, LV_PART_MAIN);
+    lv_obj_set_pos(br_vert, r, b - corner_len);
+
+    // ---- bottom horizontal join ----
+    static lv_point_precise_t bot[2];
+    bot[0].x = 0; bot[0].y = 0;
+    bot[1].x = r; bot[1].y = 0;
+    lv_obj_t *bot_line = lv_line_create(result.panel);
+    lv_line_set_points(bot_line, bot, 2);
+    lv_obj_set_style_line_width(bot_line, line_w, LV_PART_MAIN);
+    lv_obj_set_style_line_color(bot_line, col, LV_PART_MAIN);
+    lv_obj_set_pos(bot_line, 0, b);
+
+
+    // ---- center circle ----
+    int32_t center_circle_size = size_w_px / 8;
+    lv_obj_t *arc = lv_arc_create(result.panel);
+    lv_obj_set_size(arc, center_circle_size, center_circle_size);
+    lv_arc_set_angles(arc, 0, 360);
+    lv_arc_set_bg_angles(arc, 0, 360);
+    lv_obj_set_style_arc_width(arc, 3, LV_PART_MAIN);
+    lv_obj_set_style_arc_color(arc, col, LV_PART_MAIN);
+    lv_obj_set_style_arc_width(arc, 0, LV_PART_INDICATOR);
+    lv_obj_remove_style(arc, NULL, LV_PART_KNOB);
+    lv_obj_set_pos(arc, (size_w_px / 2) - ((center_circle_size)/2), (size_h_px / 2) - ((center_circle_size)/2));
 
     return result;
 }
@@ -15919,7 +16013,7 @@ void display_uap_screen()
     uap_c = create_uap(
         uap_screen,
         200,
-        200,
+        100,
         LV_ALIGN_CENTER,
         0,
         0,
