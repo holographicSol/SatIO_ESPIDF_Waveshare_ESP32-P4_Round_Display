@@ -9,6 +9,7 @@
 #include "./SiderealObjects.h"
 #include <cmath>
 #include "esp_heap_caps.h"
+#include "satio_lvgl.h"
 
 // External data - adjust these includes to match your project
 extern "C" {
@@ -1456,6 +1457,7 @@ void astro_clock_begin(
         "METEORS"
     );
     meteors_indicator.target_box = create_target_box(astro_container, meteors_indicator.size_h*2);
+    lv_obj_add_flag(meteors_indicator.label, LV_OBJ_FLAG_HIDDEN);
 
     // Zodiac lines
     create_zodiac(astro_container);

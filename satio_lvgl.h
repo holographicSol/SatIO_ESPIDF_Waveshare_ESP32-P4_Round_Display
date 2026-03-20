@@ -686,6 +686,34 @@ typedef struct {
 
 } admplex0_container_t;
 
+/** ---------------------------------------------------------------------------------------
+ * UAP Struct
+ */
+typedef struct {
+    lv_obj_t * panel;
+} uap_t;
+
+/** -------------------------------------------------------------------------------------
+ * @brief Create UAP.
+ * 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @return lv_obj_t.
+ */
+uap_t create_uap(
+    lv_obj_t * parent,
+    int32_t size_w_px,
+    int32_t size_h_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius
+    );
+
 /** --------------------------------------------------------------------------------------- 
  * Callbacks.
 */

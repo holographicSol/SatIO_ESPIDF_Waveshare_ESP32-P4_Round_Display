@@ -83,15 +83,15 @@ lv_obj_t * serial_screen;
 lv_obj_t * mplex0_screen;
 lv_obj_t * uap_screen;
 
-int32_t current_screen_number = 0;
-#define LOAD_SCREEN    0
-#define HOME_SCREEN    1
-#define MATRIX_SCREEN  2
-#define GPS_SCREEN     3
-#define GYRO_SCREEN    4
-#define MPLEX0_SCREEN  5
-#define SERIAL_SCREEN  6
-#define UAP_SCREEN     7
+int32_t current_screen_number = -1;
+#define LOAD_SCREEN    -1
+#define HOME_SCREEN    0
+#define MATRIX_SCREEN  1
+#define GPS_SCREEN     2
+#define GYRO_SCREEN    3
+#define MPLEX0_SCREEN  4
+#define SERIAL_SCREEN  5
+#define UAP_SCREEN     6
 
 bool flag_display_loading_screen = false;
 bool flag_display_home_screen = false;
@@ -168,6 +168,10 @@ admplex0_container_t admlpex0_c;
 // Serial
 // ---------------------------
 serial_container_t serial_c;
+// ---------------------------
+// UAP
+// ---------------------------
+uap_t uap_c;
 
 /** ---------------------------------------------------------------------------------------
  * @brief Global Style
@@ -14836,6 +14840,85 @@ mapping_config_container_t create_mapping_config_container(
     return result;
 }
 
+/** -------------------------------------------------------------------------------------
+ * @brief Create UAP.
+ * 
+ * @param parent Specify parent object.
+ * @param size_w_px Panel width.
+ * @param size_h_px Panel height
+ * @param alignment Panel alignment on parent object.
+ * @param pos_x Offset from alignment.
+ * @param pos_y Offset from alignment.
+ * @return lv_obj_t.
+ */
+uap_t create_uap(
+    lv_obj_t * parent,
+    int32_t size_w_px,
+    int32_t size_h_px,
+    lv_align_t alignment,
+    int32_t pos_x,
+    int32_t pos_y,
+    int32_t radius
+    )
+{
+    /*----------------------------------------------- LABEL -----------------------------------------------*/
+
+    // Create label
+    uap_t result = {};
+
+    result.panel = lv_obj_create(parent);
+
+    // Hide & disable scrollbar
+    lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.panel, LV_DIR_NONE);
+
+    // Size and position
+    lv_obj_set_size(result.panel, size_w_px, size_h_px);
+    lv_obj_align(result.panel, alignment, pos_x, pos_y);
+
+    /*---------------------------------------- PANEL LV_PART_MAIN -----------------------------------------*/
+
+    // Main style: radius
+    lv_obj_set_style_radius(result.panel, 360, LV_PART_MAIN);
+
+    // Main style: outline
+    lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
+    
+    // Main style: border
+    lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+
+    // Main style: background
+    lv_obj_set_style_bg_opa(result.panel, LV_OPA_0, LV_PART_MAIN);
+
+    // Main style: shadow
+    lv_obj_set_style_shadow_width(result.panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.panel, default_shadow_hue, LV_PART_MAIN);
+
+    lv_obj_set_style_transform_pivot_x(result.panel, lv_pct(50), LV_PART_MAIN);
+    lv_obj_set_style_transform_pivot_y(result.panel, lv_pct(50), LV_PART_MAIN);
+
+    // test line
+    int32_t margin = 10;
+    int32_t line_w = size_w_px - (margin * 2);
+    static lv_point_precise_t points[2];
+    points[0].x = 0;
+    points[0].y = 0;
+    points[1].x = line_w;
+    points[1].y = 0;
+    lv_obj_t *line = lv_line_create(result.panel);
+    lv_line_set_points(line, points, 2);
+    lv_obj_set_style_line_width(line, 3, LV_PART_MAIN);
+    lv_obj_set_style_line_color(line, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_obj_set_size(line, line_w, 3);
+    lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);
+
+    // draw actual obj to be rolled
+    // ...
+
+    return result;
+}
 
 
 /** -------------------------------------------------------------------------------------
@@ -15830,7 +15913,23 @@ void display_uap_screen()
     printf("[display_uap_screen] invalidating display\n");
     lv_obj_invalidate(uap_screen);  // Force redraw
     printf("[display_uap_screen] calling timer handler\n");
-    lv_timer_handler();  // Process events/render     
+    lv_timer_handler();  // Process events/render
+
+    // create UAP
+    uap_c = create_uap(
+        uap_screen,
+        200,
+        200,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        general_radius
+    );
+
+    printf("[display_serial_screen] invalidating display\n");
+    lv_obj_invalidate(serial_screen);  // Force redraw
+    printf("[display_serial_screen] calling timer handler\n");
+    lv_timer_handler();  // Process events/render
 }
 
 /** -------------------------------------------------------------------------------------
@@ -16899,7 +16998,7 @@ void update_display()
     }
 
     // ---------------------
-    // Gyro screen
+    // MPlex screen
     // ---------------------
     else if (current_screen_number == MPLEX0_SCREEN) {
         if (admlpex0_c.panel) {
@@ -16919,6 +17018,15 @@ void update_display()
             lv_label_set_text(admlpex0_c.lbl_val_chan_13, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_13]).c_str());
             lv_label_set_text(admlpex0_c.lbl_val_chan_14, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_14]).c_str());
             lv_label_set_text(admlpex0_c.lbl_val_chan_15, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_15]).c_str());
+        }
+    }
+
+    // ---------------------
+    // UAP screen
+    // ---------------------
+    else if (current_screen_number == UAP_SCREEN) {
+        if (uap_c.panel) {
+            lv_obj_set_style_transform_rotation(uap_c.panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
         }
     }
 
@@ -16971,7 +17079,7 @@ void initSatIOUI() {
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     // Set LVGL tick period
-    lv_timer_set_period(lv_timer_get_next(NULL), 50);  // ms
+    lv_timer_set_period(lv_timer_get_next(NULL), 10);  // ms
     
     // Initialize display brightness and backlight
     bsp_display_brightness_init();
