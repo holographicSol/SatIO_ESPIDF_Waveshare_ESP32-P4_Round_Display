@@ -696,6 +696,9 @@ typedef struct {
     lv_obj_t * pitch_upper_panel;
     lv_obj_t * pitch_lower_panel;
     lv_obj_t * pitch_panel;
+    lv_obj_t * pitch_scale_container;
+    int32_t pixels_per_degree;
+    int32_t pitch_scale_total_height;
 } uap_t;
 
 /** -------------------------------------------------------------------------------------
@@ -835,8 +838,8 @@ lv_obj_t * create_slider(
  * @param pos_x Offset from alignment.
  * @param pos_y Offset from alignment.
  * @param text Specify initial text.
- * @param font Specify text font.
  * @param text_align Text alignment on label.
+ * @param font Specify text font.
  * @param transparent_bg Tranparent background.
  * @param show_scrollbar Show/hide scrollbar.
  * @param enable_scrolling Enable/disable scrolling.
