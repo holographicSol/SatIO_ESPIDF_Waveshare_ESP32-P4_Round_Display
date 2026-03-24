@@ -2264,8 +2264,8 @@ lv_obj_t * create_slider(
  * @param pos_x Offset from alignment.
  * @param pos_y Offset from alignment.
  * @param text Specify initial text.
- * @param font Specify text font.
  * @param text_align Text alignment on label.
+ * @param font Specify text font.
  * @param transparent_bg Tranparent background.
  * @param show_scrollbar Show/hide scrollbar.
  * @param enable_scrolling Enable/disable scrolling.
@@ -15174,7 +15174,7 @@ uap_t create_uap(
     /* Roll Line rotates inside and independently of radial panel */
 
     // Roll Panel
-    int32_t roll_size_w = (size_w_px / 8)*6;
+    int32_t roll_size_w = (size_w_px / 16)*10;
     int32_t roll_size_h = 5;
 
     result.roll_panel = lv_obj_create(result.panel);
@@ -15212,19 +15212,59 @@ uap_t create_uap(
     lv_obj_set_style_transform_pivot_x(result.roll_panel, lv_pct(50), LV_PART_MAIN);
     lv_obj_set_style_transform_pivot_y(result.roll_panel, lv_pct(50), LV_PART_MAIN);
 
-    int32_t margin = 10;
-    int32_t line_w = roll_size_w - (margin * 2);
-    static lv_point_precise_t points[2];
-    points[0].x = 0;
-    points[0].y = 0;
-    points[1].x = line_w;
-    points[1].y = 0;
-    lv_obj_t *line = lv_line_create(result.roll_panel);
-    lv_line_set_points(line, points, 2);
-    lv_obj_set_style_line_width(line, 2, LV_PART_MAIN);
-    lv_obj_set_style_line_color(line, lv_color_make(0, 255, 0), LV_PART_MAIN);
-    lv_obj_set_size(line, line_w, 3);
-    lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);
+    // #############################################################################################
+    // DRAW ROLL INDICATOR LINES
+    // #############################################################################################
+
+    /* Draw left and right roll lines and center rectangle */
+
+    int32_t roll_line_length = 10;  // Height of the vertical lines
+    int32_t roll_line_width = 2;    // Width of the lines
+    int32_t roll_center_x = roll_size_w / 2;
+    int32_t roll_center_y = roll_size_h / 2;
+    lv_color_t roll_line_color = lv_color_make(0, 255, 0); // Green
+
+    // Left roll line
+    {
+        static lv_point_precise_t left_line[2];
+        left_line[0].x = 0;
+        left_line[0].y = 0;
+        left_line[1].x = roll_line_length;
+        left_line[1].y = 0;
+        lv_obj_t *left_roll_line = lv_line_create(result.roll_panel);
+        lv_line_set_points(left_roll_line, left_line, 2);
+        lv_obj_set_style_line_width(left_roll_line, roll_line_width, LV_PART_MAIN);
+        lv_obj_set_style_line_color(left_roll_line, roll_line_color, LV_PART_MAIN);
+        lv_obj_set_pos(left_roll_line, 0, roll_center_y);
+    }
+
+    // Right roll line
+    {
+        static lv_point_precise_t right_line[2];
+        right_line[0].x = 0;
+        right_line[0].y = 0;
+        right_line[1].x = roll_line_length;
+        right_line[1].y = 0;
+        lv_obj_t *right_roll_line = lv_line_create(result.roll_panel);
+        lv_line_set_points(right_roll_line, right_line, 2);
+        lv_obj_set_style_line_width(right_roll_line, roll_line_width, LV_PART_MAIN);
+        lv_obj_set_style_line_color(right_roll_line, roll_line_color, LV_PART_MAIN);
+        lv_obj_set_pos(right_roll_line, roll_size_w - roll_line_length, roll_center_y);
+    }
+
+    // Center rectangle
+    {
+        int32_t rect_width = 8;
+        int32_t rect_height = roll_size_h;
+        lv_obj_t *center_rect = lv_obj_create(result.roll_panel);
+        lv_obj_set_size(center_rect, rect_width, rect_height);
+        lv_obj_set_style_bg_opa(center_rect, LV_OPA_100, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(center_rect, roll_line_color, LV_PART_MAIN);
+        lv_obj_set_style_border_opa(center_rect, LV_OPA_0, LV_PART_MAIN);
+        lv_obj_set_style_outline_opa(center_rect, LV_OPA_0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(center_rect, 0, LV_PART_MAIN);
+        lv_obj_set_pos(center_rect, roll_center_x - (rect_width / 2), roll_center_y - (rect_height / 2));
+    }
 
     // #############################################################################################
     // INNER PITCH PANEL
@@ -15250,7 +15290,7 @@ uap_t create_uap(
     lv_obj_set_style_radius(result.pitch_panel, 0, LV_PART_MAIN);
 
     // Main style: outline
-    lv_obj_set_style_outline_width(result.pitch_panel, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.pitch_panel, 0, LV_PART_MAIN);
     lv_obj_set_style_outline_color(result.pitch_panel, default_outline_hue, LV_PART_MAIN);
     
     // Main style: border
@@ -15292,12 +15332,12 @@ uap_t create_uap(
     lv_obj_set_style_pad_all(pitch_scale_container, 0, LV_PART_MAIN);
 
     // Pitch scale parameters
-    int32_t pixels_per_degree = 2;  // Scale height in pixels per degree
     int32_t total_pitch_range = 180; // -90 to +90
+    int32_t pixels_per_degree = pitch_scale_height / total_pitch_range;  // Scale to fit container
     int32_t pitch_scale_total_height = total_pitch_range * pixels_per_degree;
     
     // Label width for numbers on each side
-    int32_t label_width = pitch_scale_width / 3;
+    int32_t label_width = (pitch_scale_width / 3) /2;
     int32_t tick_area_width = pitch_scale_width / 3;
     int32_t center_gap = pitch_scale_width / 3;
     
@@ -15308,9 +15348,12 @@ uap_t create_uap(
         // Calculate Y position (0° should be at center, positive pitch up, negative pitch down)
         int32_t y_pos = (pitch_scale_total_height / 2) - (pitch * pixels_per_degree);
         
-        // Determine tick length
+        // Determine tick properties - length increases as we approach 0 degrees
+        int32_t distance_from_zero = abs(pitch);
         bool is_major = (pitch % 30 == 0);
-        int32_t tick_length = is_major ? 12 : 6;
+        // Tick length decreases as we approach 0 degrees (zero pitch)
+        int32_t calculated_length = 4 + (distance_from_zero / 10);
+        int32_t tick_length = calculated_length > 20 ? 20 : calculated_length;
         int32_t tick_width = is_major ? 2 : 1;
         
         // Left side tick and label
@@ -15326,6 +15369,19 @@ uap_t create_uap(
             lv_line_set_points(left_tick, tick_pts, 2);
             lv_obj_set_style_line_width(left_tick, tick_width, LV_PART_MAIN);
             lv_obj_set_style_line_color(left_tick, pitch_tick_color, LV_PART_MAIN);
+            
+            // Left side label - only for major ticks
+            if (is_major) {
+                lv_obj_t *left_label = lv_label_create(pitch_scale_container);
+                char pitch_label[8];
+                snprintf(pitch_label, sizeof(pitch_label), "%d", pitch);
+                lv_label_set_text(left_label, pitch_label);
+                lv_obj_set_style_text_font(left_label, &cobalt_alien_17, LV_PART_MAIN);
+                lv_obj_set_style_text_color(left_label, pitch_tick_color, LV_PART_MAIN);
+                lv_obj_set_pos(left_label, 0, y_pos - 4);
+                lv_obj_set_width(left_label, label_width);
+                lv_obj_set_style_text_align(left_label, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
+            }
         }
         
         // Right side tick and label
@@ -15341,6 +15397,19 @@ uap_t create_uap(
             lv_line_set_points(right_tick, tick_pts, 2);
             lv_obj_set_style_line_width(right_tick, tick_width, LV_PART_MAIN);
             lv_obj_set_style_line_color(right_tick, pitch_tick_color, LV_PART_MAIN);
+            
+            // Right side label - only for major ticks
+            if (is_major) {
+                lv_obj_t *right_label = lv_label_create(pitch_scale_container);
+                char pitch_label[8];
+                snprintf(pitch_label, sizeof(pitch_label), "%d", pitch);
+                lv_label_set_text(right_label, pitch_label);
+                lv_obj_set_style_text_font(right_label, &cobalt_alien_17, LV_PART_MAIN);
+                lv_obj_set_style_text_color(right_label, pitch_tick_color, LV_PART_MAIN);
+                lv_obj_set_pos(right_label, pitch_scale_width - 25, y_pos - 4);
+                lv_obj_set_width(right_label, label_width);
+                lv_obj_set_style_text_align(right_label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+            }
         }
     }
 
@@ -17461,7 +17530,7 @@ void update_display()
             // Pitch scale carousel: offset based on pitch angle
             // pixels_per_degree = 2, so pitch angle * 2 = pixel offset
             // Negative offset because positive pitch should scroll scale up
-            int32_t pitch_scale_offset = -(int32_t)(gyroData.gyro_0_ang_y * 2);
+            int32_t pitch_scale_offset = -(int32_t)(gyroData.gyro_0_ang_y);
             
             // Get the pitch scale container (first child of pitch_panel)
             lv_obj_t * pitch_scale_container = lv_obj_get_child(uap_c.pitch_panel, 0);
