@@ -14840,6 +14840,180 @@ mapping_config_container_t create_mapping_config_container(
     return result;
 }
 
+// /** -------------------------------------------------------------------------------------
+//  * @brief Create UAP.
+//  * 
+//  * @param parent Specify parent object.
+//  * @param size_w_px Panel width.
+//  * @param size_h_px Panel height
+//  * @param alignment Panel alignment on parent object.
+//  * @param pos_x Offset from alignment.
+//  * @param pos_y Offset from alignment.
+//  * @return lv_obj_t.
+//  */
+// uap_t create_uap(
+//     lv_obj_t * parent,
+//     int32_t size_w_px,
+//     int32_t size_h_px,
+//     lv_align_t alignment,
+//     int32_t pos_x,
+//     int32_t pos_y,
+//     int32_t radius
+//     )
+// {
+//     /*----------------------------------------------- LABEL -----------------------------------------------*/
+
+//     // Create label
+//     uap_t result = {};
+
+//     result.panel = lv_obj_create(parent);
+
+//     // Hide & disable scrollbar
+//     lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_OFF);
+//     lv_obj_set_scroll_dir(result.panel, LV_DIR_NONE);
+
+//     // Size and position
+//     lv_obj_set_size(result.panel, size_w_px, size_h_px);
+//     lv_obj_align(result.panel, alignment, pos_x, pos_y);
+
+//     /*---------------------------------------- PANEL LV_PART_MAIN -----------------------------------------*/
+
+//     // Main style: radius
+//     lv_obj_set_style_radius(result.panel, 0, LV_PART_MAIN);
+
+//     // Main style: outline
+//     lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
+//     lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
+    
+//     // Main style: border
+//     lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
+//     lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
+
+//     // Main style: background
+//     lv_obj_set_style_bg_opa(result.panel, LV_OPA_0, LV_PART_MAIN);
+
+//     // Main style: shadow
+//     lv_obj_set_style_shadow_width(result.panel, 0, LV_PART_MAIN);
+//     lv_obj_set_style_shadow_color(result.panel, default_shadow_hue, LV_PART_MAIN);
+
+//     // Remove padding
+//     lv_obj_set_style_pad_all(result.panel, 0, LV_PART_MAIN);
+
+//     // Set pivot
+//     lv_obj_set_style_transform_pivot_x(result.panel, lv_pct(50), LV_PART_MAIN);
+//     lv_obj_set_style_transform_pivot_y(result.panel, lv_pct(50), LV_PART_MAIN);
+
+//     // test line
+//     // int32_t margin = 10;
+//     // int32_t line_w = size_w_px - (margin * 2);
+//     // static lv_point_precise_t points[2];
+//     // points[0].x = 0;
+//     // points[0].y = 0;
+//     // points[1].x = line_w;
+//     // points[1].y = 0;
+//     // lv_obj_t *line = lv_line_create(result.panel);
+//     // lv_line_set_points(line, points, 2);
+//     // lv_obj_set_style_line_width(line, 3, LV_PART_MAIN);
+//     // lv_obj_set_style_line_color(line, lv_color_make(0, 255, 0), LV_PART_MAIN);
+//     // lv_obj_set_size(line, line_w, 3);
+//     // lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);
+
+//     int32_t r  = size_w_px - 1;   // right edge
+//     int32_t b  = size_h_px - 1;   // bottom edge
+//     int32_t corner_len = size_w_px / 8;
+//     int32_t line_w = 3;
+//     lv_color_t col = lv_color_make(0, 255, 0);
+
+
+//     // ---- top-left vertical (draws down) ----
+//     static lv_point_precise_t tl_v[2];
+//     tl_v[0].x = 0; tl_v[0].y = 0;
+//     tl_v[1].x = 0; tl_v[1].y = corner_len;
+//     lv_obj_t *tl_vert = lv_line_create(result.panel);
+//     lv_line_set_points(tl_vert, tl_v, 2);
+//     lv_obj_set_style_line_width(tl_vert, line_w, LV_PART_MAIN);
+//     lv_obj_set_style_line_color(tl_vert, col, LV_PART_MAIN);
+//     lv_obj_set_pos(tl_vert, 0, 0);
+
+//     // ---- top-left horizontal (draws right) ----
+//     static lv_point_precise_t tl_h[2];
+//     tl_h[0].x = 0;          tl_h[0].y = 0;
+//     tl_h[1].x = corner_len; tl_h[1].y = 0;
+//     lv_obj_t *tl_horiz = lv_line_create(result.panel);
+//     lv_line_set_points(tl_horiz, tl_h, 2);
+//     lv_obj_set_style_line_width(tl_horiz, line_w, LV_PART_MAIN);
+//     lv_obj_set_style_line_color(tl_horiz, col, LV_PART_MAIN);
+//     lv_obj_set_pos(tl_horiz, 0, 0);
+
+
+//     // ---- top-right vertical (draws down) ----
+//     static lv_point_precise_t tr_v[2];
+//     tr_v[0].x = 0; tr_v[0].y = 0;
+//     tr_v[1].x = 0; tr_v[1].y = corner_len;
+//     lv_obj_t *tr_vert = lv_line_create(result.panel);
+//     lv_line_set_points(tr_vert, tr_v, 2);
+//     lv_obj_set_style_line_width(tr_vert, line_w, LV_PART_MAIN);
+//     lv_obj_set_style_line_color(tr_vert, col, LV_PART_MAIN);
+//     lv_obj_set_pos(tr_vert, r, 0);
+
+//     // ---- top-right horizontal (draws left via offset) ----
+//     static lv_point_precise_t tr_h[2];
+//     tr_h[0].x = 0;          tr_h[0].y = 0;
+//     tr_h[1].x = corner_len; tr_h[1].y = 0;
+//     lv_obj_t *tr_horiz = lv_line_create(result.panel);
+//     lv_line_set_points(tr_horiz, tr_h, 2);
+//     lv_obj_set_style_line_width(tr_horiz, line_w, LV_PART_MAIN);
+//     lv_obj_set_style_line_color(tr_horiz, col, LV_PART_MAIN);
+//     lv_obj_set_pos(tr_horiz, r - corner_len, 0);
+
+
+//     // ---- bottom-left vertical (draws down via offset) ----
+//     static lv_point_precise_t bl_v[2];
+//     bl_v[0].x = 0; bl_v[0].y = 0;
+//     bl_v[1].x = 0; bl_v[1].y = corner_len;
+//     lv_obj_t *bl_vert = lv_line_create(result.panel);
+//     lv_line_set_points(bl_vert, bl_v, 2);
+//     lv_obj_set_style_line_width(bl_vert, line_w, LV_PART_MAIN);
+//     lv_obj_set_style_line_color(bl_vert, col, LV_PART_MAIN);
+//     lv_obj_set_pos(bl_vert, 0, b - corner_len);
+
+
+//     // ---- bottom-right vertical (draws down via offset) ----
+//     static lv_point_precise_t br_v[2];
+//     br_v[0].x = 0; br_v[0].y = 0;
+//     br_v[1].x = 0; br_v[1].y = corner_len;
+//     lv_obj_t *br_vert = lv_line_create(result.panel);
+//     lv_line_set_points(br_vert, br_v, 2);
+//     lv_obj_set_style_line_width(br_vert, line_w, LV_PART_MAIN);
+//     lv_obj_set_style_line_color(br_vert, col, LV_PART_MAIN);
+//     lv_obj_set_pos(br_vert, r, b - corner_len);
+
+//     // ---- bottom horizontal join ----
+//     static lv_point_precise_t bot[2];
+//     bot[0].x = 0; bot[0].y = 0;
+//     bot[1].x = r; bot[1].y = 0;
+//     lv_obj_t *bot_line = lv_line_create(result.panel);
+//     lv_line_set_points(bot_line, bot, 2);
+//     lv_obj_set_style_line_width(bot_line, line_w, LV_PART_MAIN);
+//     lv_obj_set_style_line_color(bot_line, col, LV_PART_MAIN);
+//     lv_obj_set_pos(bot_line, 0, b);
+
+
+//     // ---- center circle ----
+//     int32_t center_circle_size = size_w_px / 8;
+//     lv_obj_t *arc = lv_arc_create(result.panel);
+//     lv_obj_set_size(arc, center_circle_size, center_circle_size);
+//     lv_arc_set_angles(arc, 0, 360);
+//     lv_arc_set_bg_angles(arc, 0, 360);
+//     lv_obj_set_style_arc_width(arc, 3, LV_PART_MAIN);
+//     lv_obj_set_style_arc_color(arc, col, LV_PART_MAIN);
+//     lv_obj_set_style_arc_width(arc, 0, LV_PART_INDICATOR);
+//     lv_obj_remove_style(arc, NULL, LV_PART_KNOB);
+//     lv_obj_set_pos(arc, (size_w_px / 2) - ((center_circle_size)/2), (size_h_px / 2) - ((center_circle_size)/2));
+
+//     return result;
+// }
+
 /** -------------------------------------------------------------------------------------
  * @brief Create UAP.
  * 
@@ -14861,7 +15035,11 @@ uap_t create_uap(
     int32_t radius
     )
 {
-    /*----------------------------------------------- LABEL -----------------------------------------------*/
+    // #############################################################################################
+    // MAIN PANEL
+    // #############################################################################################
+
+    /* This panel houses all sub panels */
 
     // Create label
     uap_t result = {};
@@ -14875,8 +15053,6 @@ uap_t create_uap(
     // Size and position
     lv_obj_set_size(result.panel, size_w_px, size_h_px);
     lv_obj_align(result.panel, alignment, pos_x, pos_y);
-
-    /*---------------------------------------- PANEL LV_PART_MAIN -----------------------------------------*/
 
     // Main style: radius
     lv_obj_set_style_radius(result.panel, 0, LV_PART_MAIN);
@@ -14899,117 +15075,274 @@ uap_t create_uap(
     // Remove padding
     lv_obj_set_style_pad_all(result.panel, 0, LV_PART_MAIN);
 
+    // #############################################################################################
+    // RADIAL PANEL
+    // #############################################################################################
+
+    /* This panel is a circle intended to be static and centered */
+
+    // Radial Panel
+    int32_t radial_size_w = (size_w_px / 8)*6;
+    int32_t radial_size_h = (size_w_px / 8)*6;
+
+    result.radial_panel = lv_obj_create(result.panel);
+
+    // Hide & disable scrollbar
+    lv_obj_set_scrollbar_mode(result.radial_panel, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.radial_panel, LV_DIR_NONE);
+
+    // Size and position
+    lv_obj_set_size(result.radial_panel, radial_size_w, radial_size_h);
+    lv_obj_align(result.radial_panel, alignment, pos_x, pos_y);
+
+    // Main style: radius
+    lv_obj_set_style_radius(result.radial_panel, 360, LV_PART_MAIN);
+
+    // Main style: outline
+    lv_obj_set_style_outline_width(result.radial_panel, 2, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.radial_panel, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    
+    // Main style: border
+    lv_obj_set_style_border_width(result.radial_panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.radial_panel, default_border_hue, LV_PART_MAIN);
+
+    // Main style: background
+    lv_obj_set_style_bg_opa(result.radial_panel, LV_OPA_0, LV_PART_MAIN);
+
+    // Main style: shadow
+    lv_obj_set_style_shadow_width(result.radial_panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.radial_panel, default_shadow_hue, LV_PART_MAIN);
+
+    // Remove padding
+    lv_obj_set_style_pad_all(result.radial_panel, 0, LV_PART_MAIN);
+
+    // #############################################################################################
+    // DEGREE TICK MARKS
+    // #############################################################################################
+
+    /* Draw degree markers around the inside of the radial panel */
+
+    int32_t tick_radius = radial_size_w / 2;
+    int32_t tick_center_x = tick_radius;
+    int32_t tick_center_y = tick_radius;
+    
+    // Major tick length (every 30 degrees - cardinal directions)
+    int32_t major_tick_length = 15;
+    // Minor tick length (every 5 degrees)
+    int32_t minor_tick_length = 8;
+    
+    lv_color_t tick_color = lv_color_make(0, 255, 0); // Green
+    
+    // Draw degree marks
+    for (int degree = 0; degree < 360; degree += 5) {
+        // Convert degree to radians (0° is at top, increases clockwise)
+        float angle_rad = (degree - 90) * M_PI / 180.0f;  // -90 to start from top
+        
+        // Determine if this is a major tick (0, 90, 180, 270)
+        bool is_major = (degree % 30 == 0);
+        int32_t tick_length = is_major ? major_tick_length : minor_tick_length;
+        
+        // Inner and outer radii for tick marks
+        int32_t outer_r = tick_radius - 3;  // Start near the outline
+        int32_t inner_r = outer_r - tick_length;
+        
+        // Calculate outer point (near edge)
+        int32_t outer_x = tick_center_x + (int32_t)(outer_r * cosf(angle_rad));
+        int32_t outer_y = tick_center_y + (int32_t)(outer_r * sinf(angle_rad));
+        
+        // Calculate inner point
+        int32_t inner_x = tick_center_x + (int32_t)(inner_r * cosf(angle_rad));
+        int32_t inner_y = tick_center_y + (int32_t)(inner_r * sinf(angle_rad));
+        
+        // Draw tick line - allocate points array for each line
+        lv_point_precise_t *tick_points = (lv_point_precise_t *)malloc(2 * sizeof(lv_point_precise_t));
+        tick_points[0].x = outer_x;
+        tick_points[0].y = outer_y;
+        tick_points[1].x = inner_x;
+        tick_points[1].y = inner_y;
+        
+        lv_obj_t *tick = lv_line_create(result.radial_panel);
+        lv_line_set_points(tick, tick_points, 2);
+        lv_obj_set_style_line_width(tick, is_major ? 2 : 1, LV_PART_MAIN);
+        lv_obj_set_style_line_color(tick, tick_color, LV_PART_MAIN);
+    }
+
+    // #############################################################################################
+    // ROLL PANEL
+    // #############################################################################################
+
+    /* Roll Line rotates inside and independently of radial panel */
+
+    // Roll Panel
+    int32_t roll_size_w = (size_w_px / 8)*6;
+    int32_t roll_size_h = 5;
+
+    result.roll_panel = lv_obj_create(result.panel);
+
+    // Hide & disable scrollbar
+    lv_obj_set_scrollbar_mode(result.roll_panel, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.roll_panel, LV_DIR_NONE);
+
+    // Size and position
+    lv_obj_set_size(result.roll_panel, roll_size_w, roll_size_h);
+    lv_obj_align(result.roll_panel, alignment, pos_x, pos_y);
+
+    // Main style: radius
+    lv_obj_set_style_radius(result.roll_panel, 0, LV_PART_MAIN);
+
+    // Main style: outline
+    lv_obj_set_style_outline_width(result.roll_panel, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.roll_panel, default_outline_hue, LV_PART_MAIN);
+    
+    // Main style: border
+    lv_obj_set_style_border_width(result.roll_panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.roll_panel, default_border_hue, LV_PART_MAIN);
+
+    // Main style: background
+    lv_obj_set_style_bg_opa(result.roll_panel, LV_OPA_0, LV_PART_MAIN);
+
+    // Main style: shadow
+    lv_obj_set_style_shadow_width(result.roll_panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.roll_panel, default_shadow_hue, LV_PART_MAIN);
+
+    // Remove padding
+    lv_obj_set_style_pad_all(result.roll_panel, 0, LV_PART_MAIN);
+
     // Set pivot
-    lv_obj_set_style_transform_pivot_x(result.panel, lv_pct(50), LV_PART_MAIN);
-    lv_obj_set_style_transform_pivot_y(result.panel, lv_pct(50), LV_PART_MAIN);
+    lv_obj_set_style_transform_pivot_x(result.roll_panel, lv_pct(50), LV_PART_MAIN);
+    lv_obj_set_style_transform_pivot_y(result.roll_panel, lv_pct(50), LV_PART_MAIN);
 
-    // test line
-    // int32_t margin = 10;
-    // int32_t line_w = size_w_px - (margin * 2);
-    // static lv_point_precise_t points[2];
-    // points[0].x = 0;
-    // points[0].y = 0;
-    // points[1].x = line_w;
-    // points[1].y = 0;
-    // lv_obj_t *line = lv_line_create(result.panel);
-    // lv_line_set_points(line, points, 2);
-    // lv_obj_set_style_line_width(line, 3, LV_PART_MAIN);
-    // lv_obj_set_style_line_color(line, lv_color_make(0, 255, 0), LV_PART_MAIN);
-    // lv_obj_set_size(line, line_w, 3);
-    // lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);
+    int32_t margin = 10;
+    int32_t line_w = roll_size_w - (margin * 2);
+    static lv_point_precise_t points[2];
+    points[0].x = 0;
+    points[0].y = 0;
+    points[1].x = line_w;
+    points[1].y = 0;
+    lv_obj_t *line = lv_line_create(result.roll_panel);
+    lv_line_set_points(line, points, 2);
+    lv_obj_set_style_line_width(line, 2, LV_PART_MAIN);
+    lv_obj_set_style_line_color(line, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_obj_set_size(line, line_w, 3);
+    lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);
 
-    int32_t r  = size_w_px - 1;   // right edge
-    int32_t b  = size_h_px - 1;   // bottom edge
-    int32_t corner_len = size_w_px / 8;
-    int32_t line_w = 3;
-    lv_color_t col = lv_color_make(0, 255, 0);
+    // #############################################################################################
+    // INNER PITCH PANEL
+    // #############################################################################################
 
+    /* A pitch scale that rotates with roll line */
 
-    // ---- top-left vertical (draws down) ----
-    static lv_point_precise_t tl_v[2];
-    tl_v[0].x = 0; tl_v[0].y = 0;
-    tl_v[1].x = 0; tl_v[1].y = corner_len;
-    lv_obj_t *tl_vert = lv_line_create(result.panel);
-    lv_line_set_points(tl_vert, tl_v, 2);
-    lv_obj_set_style_line_width(tl_vert, line_w, LV_PART_MAIN);
-    lv_obj_set_style_line_color(tl_vert, col, LV_PART_MAIN);
-    lv_obj_set_pos(tl_vert, 0, 0);
+    // Inner Pitch Panel
+    int32_t inner_pitch_size_w = (size_w_px / 8)*3;
+    int32_t inner_pitch_size_h = (size_w_px / 8)*3;
 
-    // ---- top-left horizontal (draws right) ----
-    static lv_point_precise_t tl_h[2];
-    tl_h[0].x = 0;          tl_h[0].y = 0;
-    tl_h[1].x = corner_len; tl_h[1].y = 0;
-    lv_obj_t *tl_horiz = lv_line_create(result.panel);
-    lv_line_set_points(tl_horiz, tl_h, 2);
-    lv_obj_set_style_line_width(tl_horiz, line_w, LV_PART_MAIN);
-    lv_obj_set_style_line_color(tl_horiz, col, LV_PART_MAIN);
-    lv_obj_set_pos(tl_horiz, 0, 0);
+    result.pitch_panel = lv_obj_create(result.panel);
 
+    // Hide & disable scrollbar
+    lv_obj_set_scrollbar_mode(result.pitch_panel, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.pitch_panel, LV_DIR_NONE);
 
-    // ---- top-right vertical (draws down) ----
-    static lv_point_precise_t tr_v[2];
-    tr_v[0].x = 0; tr_v[0].y = 0;
-    tr_v[1].x = 0; tr_v[1].y = corner_len;
-    lv_obj_t *tr_vert = lv_line_create(result.panel);
-    lv_line_set_points(tr_vert, tr_v, 2);
-    lv_obj_set_style_line_width(tr_vert, line_w, LV_PART_MAIN);
-    lv_obj_set_style_line_color(tr_vert, col, LV_PART_MAIN);
-    lv_obj_set_pos(tr_vert, r, 0);
+    // Size and position
+    lv_obj_set_size(result.pitch_panel, inner_pitch_size_w, inner_pitch_size_h);
+    lv_obj_align(result.pitch_panel, alignment, pos_x, pos_y);
 
-    // ---- top-right horizontal (draws left via offset) ----
-    static lv_point_precise_t tr_h[2];
-    tr_h[0].x = 0;          tr_h[0].y = 0;
-    tr_h[1].x = corner_len; tr_h[1].y = 0;
-    lv_obj_t *tr_horiz = lv_line_create(result.panel);
-    lv_line_set_points(tr_horiz, tr_h, 2);
-    lv_obj_set_style_line_width(tr_horiz, line_w, LV_PART_MAIN);
-    lv_obj_set_style_line_color(tr_horiz, col, LV_PART_MAIN);
-    lv_obj_set_pos(tr_horiz, r - corner_len, 0);
+    // Main style: radius
+    lv_obj_set_style_radius(result.pitch_panel, 0, LV_PART_MAIN);
 
+    // Main style: outline
+    lv_obj_set_style_outline_width(result.pitch_panel, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.pitch_panel, default_outline_hue, LV_PART_MAIN);
+    
+    // Main style: border
+    lv_obj_set_style_border_width(result.pitch_panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.pitch_panel, default_border_hue, LV_PART_MAIN);
 
-    // ---- bottom-left vertical (draws down via offset) ----
-    static lv_point_precise_t bl_v[2];
-    bl_v[0].x = 0; bl_v[0].y = 0;
-    bl_v[1].x = 0; bl_v[1].y = corner_len;
-    lv_obj_t *bl_vert = lv_line_create(result.panel);
-    lv_line_set_points(bl_vert, bl_v, 2);
-    lv_obj_set_style_line_width(bl_vert, line_w, LV_PART_MAIN);
-    lv_obj_set_style_line_color(bl_vert, col, LV_PART_MAIN);
-    lv_obj_set_pos(bl_vert, 0, b - corner_len);
+    // Main style: background
+    lv_obj_set_style_bg_opa(result.pitch_panel, LV_OPA_0, LV_PART_MAIN);
 
+    // Main style: shadow
+    lv_obj_set_style_shadow_width(result.pitch_panel, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.pitch_panel, default_shadow_hue, LV_PART_MAIN);
 
-    // ---- bottom-right vertical (draws down via offset) ----
-    static lv_point_precise_t br_v[2];
-    br_v[0].x = 0; br_v[0].y = 0;
-    br_v[1].x = 0; br_v[1].y = corner_len;
-    lv_obj_t *br_vert = lv_line_create(result.panel);
-    lv_line_set_points(br_vert, br_v, 2);
-    lv_obj_set_style_line_width(br_vert, line_w, LV_PART_MAIN);
-    lv_obj_set_style_line_color(br_vert, col, LV_PART_MAIN);
-    lv_obj_set_pos(br_vert, r, b - corner_len);
+    // Remove padding
+    lv_obj_set_style_pad_all(result.pitch_panel, 0, LV_PART_MAIN);
 
-    // ---- bottom horizontal join ----
-    static lv_point_precise_t bot[2];
-    bot[0].x = 0; bot[0].y = 0;
-    bot[1].x = r; bot[1].y = 0;
-    lv_obj_t *bot_line = lv_line_create(result.panel);
-    lv_line_set_points(bot_line, bot, 2);
-    lv_obj_set_style_line_width(bot_line, line_w, LV_PART_MAIN);
-    lv_obj_set_style_line_color(bot_line, col, LV_PART_MAIN);
-    lv_obj_set_pos(bot_line, 0, b);
+    // Set pivot
+    lv_obj_set_style_transform_pivot_x(result.pitch_panel, lv_pct(50), LV_PART_MAIN);
+    lv_obj_set_style_transform_pivot_y(result.pitch_panel, lv_pct(50), LV_PART_MAIN);
 
+    // #############################################################################################
+    // PITCH SCALE
+    // #############################################################################################
 
-    // ---- center circle ----
-    int32_t center_circle_size = size_w_px / 8;
-    lv_obj_t *arc = lv_arc_create(result.panel);
-    lv_obj_set_size(arc, center_circle_size, center_circle_size);
-    lv_arc_set_angles(arc, 0, 360);
-    lv_arc_set_bg_angles(arc, 0, 360);
-    lv_obj_set_style_arc_width(arc, 3, LV_PART_MAIN);
-    lv_obj_set_style_arc_color(arc, col, LV_PART_MAIN);
-    lv_obj_set_style_arc_width(arc, 0, LV_PART_INDICATOR);
-    lv_obj_remove_style(arc, NULL, LV_PART_KNOB);
-    lv_obj_set_pos(arc, (size_w_px / 2) - ((center_circle_size)/2), (size_h_px / 2) - ((center_circle_size)/2));
+    /* Pitch scale showing degrees from -90 to +90 */
+    
+    int32_t pitch_scale_width = inner_pitch_size_w;
+    int32_t pitch_scale_height = inner_pitch_size_h;
+    
+    // Create pitch scale container
+    lv_obj_t * pitch_scale_container = lv_obj_create(result.pitch_panel);
+    lv_obj_set_size(pitch_scale_container, pitch_scale_width, pitch_scale_height);
+    lv_obj_align(pitch_scale_container, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_scrollbar_mode(pitch_scale_container, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(pitch_scale_container, LV_DIR_NONE);
+    lv_obj_set_style_bg_opa(pitch_scale_container, LV_OPA_0, LV_PART_MAIN);
+    lv_obj_set_style_border_opa(pitch_scale_container, LV_OPA_0, LV_PART_MAIN);
+    lv_obj_set_style_outline_opa(pitch_scale_container, LV_OPA_0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(pitch_scale_container, 0, LV_PART_MAIN);
+
+    // Pitch scale parameters
+    int32_t pixels_per_degree = 2;  // Scale height in pixels per degree
+    int32_t total_pitch_range = 180; // -90 to +90
+    int32_t pitch_scale_total_height = total_pitch_range * pixels_per_degree;
+    
+    // Label width for numbers on each side
+    int32_t label_width = pitch_scale_width / 3;
+    int32_t tick_area_width = pitch_scale_width / 3;
+    int32_t center_gap = pitch_scale_width / 3;
+    
+    lv_color_t pitch_tick_color = lv_color_make(0, 255, 0); // Green
+    
+    // Draw pitch scale marks and labels from -90 to +90
+    for (int pitch = -90; pitch <= 90; pitch += 10) {
+        // Calculate Y position (0° should be at center, positive pitch up, negative pitch down)
+        int32_t y_pos = (pitch_scale_total_height / 2) - (pitch * pixels_per_degree);
+        
+        // Determine tick length
+        bool is_major = (pitch % 30 == 0);
+        int32_t tick_length = is_major ? 12 : 6;
+        int32_t tick_width = is_major ? 2 : 1;
+        
+        // Left side tick and label
+        {
+            // Tick line on left
+            lv_point_precise_t *tick_pts = (lv_point_precise_t *)malloc(2 * sizeof(lv_point_precise_t));
+            tick_pts[0].x = tick_area_width - tick_length;
+            tick_pts[0].y = y_pos;
+            tick_pts[1].x = tick_area_width;
+            tick_pts[1].y = y_pos;
+            
+            lv_obj_t *left_tick = lv_line_create(pitch_scale_container);
+            lv_line_set_points(left_tick, tick_pts, 2);
+            lv_obj_set_style_line_width(left_tick, tick_width, LV_PART_MAIN);
+            lv_obj_set_style_line_color(left_tick, pitch_tick_color, LV_PART_MAIN);
+        }
+        
+        // Right side tick and label
+        {
+            // Tick line on right
+            lv_point_precise_t *tick_pts = (lv_point_precise_t *)malloc(2 * sizeof(lv_point_precise_t));
+            tick_pts[0].x = pitch_scale_width - tick_area_width;
+            tick_pts[0].y = y_pos;
+            tick_pts[1].x = pitch_scale_width - tick_area_width + tick_length;
+            tick_pts[1].y = y_pos;
+            
+            lv_obj_t *right_tick = lv_line_create(pitch_scale_container);
+            lv_line_set_points(right_tick, tick_pts, 2);
+            lv_obj_set_style_line_width(right_tick, tick_width, LV_PART_MAIN);
+            lv_obj_set_style_line_color(right_tick, pitch_tick_color, LV_PART_MAIN);
+        }
+    }
 
     return result;
 }
@@ -16012,8 +16345,8 @@ void display_uap_screen()
     // create UAP
     uap_c = create_uap(
         uap_screen,
-        200,
-        100,
+        500,
+        500,
         LV_ALIGN_CENTER,
         0,
         0,
@@ -17113,14 +17446,28 @@ void update_display()
             lv_label_set_text(admlpex0_c.lbl_val_chan_14, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_14]).c_str());
             lv_label_set_text(admlpex0_c.lbl_val_chan_15, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_15]).c_str());
         }
-    }
+}
 
     // ---------------------
     // UAP screen
     // ---------------------
     else if (current_screen_number == UAP_SCREEN) {
-        if (uap_c.panel) {
-            lv_obj_set_style_transform_rotation(uap_c.panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
+        if (uap_c.roll_panel) {
+            // inner roll: roates with roll
+            lv_obj_set_style_transform_rotation(uap_c.roll_panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
+            // inner pitch: rotates with roll
+            lv_obj_set_style_transform_rotation(uap_c.pitch_panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
+            
+            // Pitch scale carousel: offset based on pitch angle
+            // pixels_per_degree = 2, so pitch angle * 2 = pixel offset
+            // Negative offset because positive pitch should scroll scale up
+            int32_t pitch_scale_offset = -(int32_t)(gyroData.gyro_0_ang_y * 2);
+            
+            // Get the pitch scale container (first child of pitch_panel)
+            lv_obj_t * pitch_scale_container = lv_obj_get_child(uap_c.pitch_panel, 0);
+            if (pitch_scale_container) {
+                lv_obj_set_y(pitch_scale_container, pitch_scale_offset);
+            }
         }
     }
 

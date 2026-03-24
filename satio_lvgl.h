@@ -691,6 +691,11 @@ typedef struct {
  */
 typedef struct {
     lv_obj_t * panel;
+    lv_obj_t * radial_panel;
+    lv_obj_t * roll_panel;
+    lv_obj_t * pitch_upper_panel;
+    lv_obj_t * pitch_lower_panel;
+    lv_obj_t * pitch_panel;
 } uap_t;
 
 /** -------------------------------------------------------------------------------------
