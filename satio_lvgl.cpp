@@ -2318,7 +2318,7 @@ lv_obj_t * create_label(
     // Main style: radius
     lv_obj_set_style_radius(result, radius, LV_PART_MAIN);
 
-    // Vertical centering: calculate top padding based on font height
+    // Vertical centering: calculate top padding based on font height and number of lines
     int32_t font_line_height = lv_font_get_line_height(font) * expected_number_of_lines;
     int32_t pad_top = (size_h_px - font_line_height) / 2;
     if (pad_top > 0) {
@@ -15429,6 +15429,101 @@ uap_t create_uap(
         }
     }
 
+    // #############################################################################################
+    // HEADING SCALE
+    // #############################################################################################
+    
+    // ---------------------------------------------------------
+    // Create tape
+    // ---------------------------------------------------------
+    result.gh_roller = lv_obj_create(result.panel);
+
+    // Container scrolling enabled horizontally
+    lv_obj_set_scrollbar_mode(result.gh_roller, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.gh_roller, LV_DIR_HOR);
+    
+    // Size and position
+    result.gh_tape_width_px = size_w_px / 2;
+    int32_t tape_height_px = (size_h_px / 32)*2;
+    lv_obj_set_size(result.gh_roller, result.gh_tape_width_px, tape_height_px);
+    lv_obj_align(result.gh_roller, LV_ALIGN_TOP_MID, 0, 10);
+
+    // Main style: radius
+    lv_obj_set_style_radius(result.gh_roller, 0, LV_PART_MAIN);
+
+    // Main style: outline
+    lv_obj_set_style_outline_width(result.gh_roller, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.gh_roller, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    
+    // Main style: border
+    lv_obj_set_style_border_width(result.gh_roller, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.gh_roller, default_border_hue, LV_PART_MAIN);
+
+    // Main style: background
+    lv_obj_set_style_bg_opa(result.gh_roller, LV_OPA_0, LV_PART_MAIN);
+
+    // Main style: shadow
+    lv_obj_set_style_shadow_width(result.gh_roller, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.gh_roller, default_shadow_hue, LV_PART_MAIN);
+
+    // Remove padding
+    lv_obj_set_style_pad_all(result.gh_roller, 0, LV_PART_MAIN);
+
+    // ---------------------------------------------------------
+    // Label the tape
+    // ---------------------------------------------------------
+    lv_obj_t *gh_label = lv_label_create(result.gh_roller);
+
+    // Label must not scroll independently
+    lv_obj_set_scrollbar_mode(gh_label, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(gh_label, LV_DIR_NONE);
+    lv_obj_clear_flag(gh_label, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Vertical centering: calculate Y position to center the text (monospace is required for this object)
+    int32_t font_line_height = lv_font_get_line_height(&lv_font_unscii_16) * 1;
+    int32_t center_y = (tape_height_px - font_line_height) / 2;
+
+    // Size label to content width not container width
+    lv_obj_set_size(gh_label, LV_SIZE_CONTENT, tape_height_px);
+    lv_obj_set_pos(gh_label, 0, center_y);
+
+    // Main style: radius
+    lv_obj_set_style_radius(gh_label, 0, LV_PART_MAIN);
+
+    // Main style: outline
+    lv_obj_set_style_outline_width(gh_label, 0, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(gh_label, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    
+    // Main style: border
+    lv_obj_set_style_border_width(gh_label, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(gh_label, default_border_hue, LV_PART_MAIN);
+
+    // Main style: background
+    lv_obj_set_style_bg_opa(gh_label, LV_OPA_0, LV_PART_MAIN);
+
+    // Main style: shadow
+    lv_obj_set_style_shadow_width(gh_label, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(gh_label, default_shadow_hue, LV_PART_MAIN);
+
+    // Remove padding
+    lv_obj_set_style_pad_all(gh_label, 0, LV_PART_MAIN);
+
+    // Main style: text
+    char tape_text[360 * 6] = {0};
+    for (int i = 0; i < 360; i++) {
+        char tmp[8];
+        snprintf(tmp, sizeof(tmp), i == 359 ? "%03d" : "%03d  ", i);
+        strcat(tape_text, tmp);
+    }
+    // lv_obj_set_style_text_align(gh_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    lv_obj_set_style_text_font(gh_label, &lv_font_unscii_16, LV_PART_MAIN);
+    lv_obj_set_style_text_color(gh_label, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_label_set_text(gh_label, tape_text);
+
+    // Store total width for scrolling calculations
+    lv_obj_update_layout(gh_label);
+    result.gh_roller_content_width_px = lv_obj_get_width(gh_label);
+
     return result;
 }
 
@@ -17531,31 +17626,48 @@ void update_display()
             lv_label_set_text(admlpex0_c.lbl_val_chan_14, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_14]).c_str());
             lv_label_set_text(admlpex0_c.lbl_val_chan_15, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_15]).c_str());
         }
-}
+    }
 
     // ---------------------
     // UAP screen
     // ---------------------
     else if (current_screen_number == UAP_SCREEN) {
+        
+        // ────────────────────────────────────────────────
+        // Roll
+        // ────────────────────────────────────────────────
         if (uap_c.roll_panel) {
             // inner roll: roates with roll
             lv_obj_set_style_transform_rotation(uap_c.roll_panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
         }
 
+        // ────────────────────────────────────────────────
+        // Pitch
+        // ────────────────────────────────────────────────
         if (uap_c.pitch_panel) {
+
             // inner pitch: rotates with roll
             lv_obj_set_style_transform_rotation(uap_c.pitch_panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
             
-            // Pitch scale carousel: offset based on pitch angle
-            // pixels_per_degree = 2, so pitch angle * 2 = pixel offset
-            // Negative offset because positive pitch should scroll scale up
+            // inner pitch: also moves up & down
             int32_t pitch_scale_offset = -(int32_t)(gyroData.gyro_0_ang_y);
-            
-            // Get the pitch scale container (first child of pitch_panel)
             lv_obj_t * pitch_scale_container = lv_obj_get_child(uap_c.pitch_panel, 0);
             if (pitch_scale_container) {
                 lv_obj_set_y(pitch_scale_container, pitch_scale_offset);
             }
+        }
+
+        // ────────────────────────────────────────────────
+        // Yaw
+        // ────────────────────────────────────────────────
+        if (uap_c.gh_roller) {
+            // Convert from [-180, 180] to [0, 360]
+            float angle_0_360 = fmod(gyroData.gyro_0_ang_z + 360.0f, 360.0f);
+            float normalized = angle_0_360 / 360.0f;
+            int32_t scroll_x = (int32_t)(normalized * uap_c.gh_roller_content_width_px)
+                            - (uap_c.gh_tape_width_px / 2);  // subtract half the visible container width
+            if (scroll_x < 0) scroll_x = 0;
+            lv_obj_scroll_to_x(uap_c.gh_roller, scroll_x, LV_ANIM_OFF);
         }
     }
 
