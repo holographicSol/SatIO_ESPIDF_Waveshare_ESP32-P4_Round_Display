@@ -15175,7 +15175,7 @@ uap_t create_uap(
 
     // Roll Panel
     int32_t roll_size_w = (size_w_px / 16)*10;
-    int32_t roll_size_h = 5;
+    int32_t roll_size_h = (size_w_px / 16)*1;
 
     result.roll_panel = lv_obj_create(result.panel);
 
@@ -15191,7 +15191,7 @@ uap_t create_uap(
     lv_obj_set_style_radius(result.roll_panel, 0, LV_PART_MAIN);
 
     // Main style: outline
-    lv_obj_set_style_outline_width(result.roll_panel, outline_width, LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.roll_panel, 0, LV_PART_MAIN);
     lv_obj_set_style_outline_color(result.roll_panel, default_outline_hue, LV_PART_MAIN);
     
     // Main style: border
@@ -15212,17 +15212,11 @@ uap_t create_uap(
     lv_obj_set_style_transform_pivot_x(result.roll_panel, lv_pct(50), LV_PART_MAIN);
     lv_obj_set_style_transform_pivot_y(result.roll_panel, lv_pct(50), LV_PART_MAIN);
 
-    // #############################################################################################
-    // DRAW ROLL INDICATOR LINES
-    // #############################################################################################
-
-    /* Draw left and right roll lines and center rectangle */
-
-    int32_t roll_line_length = 10;  // Height of the vertical lines
-    int32_t roll_line_width = 2;    // Width of the lines
+    int32_t roll_line_length = (size_w_px / 32)*1;
+    int32_t roll_line_width = 2;
     int32_t roll_center_x = roll_size_w / 2;
     int32_t roll_center_y = roll_size_h / 2;
-    lv_color_t roll_line_color = lv_color_make(0, 255, 0); // Green
+    lv_color_t roll_line_color = lv_color_make(0, 255, 0);
 
     // Left roll line
     {
@@ -15254,16 +15248,38 @@ uap_t create_uap(
 
     // Center rectangle
     {
-        int32_t rect_width = 8;
-        int32_t rect_height = roll_size_h;
+        int32_t rect_width = (size_w_px / 32)*1;
+        int32_t rect_height = (size_w_px / 32)*1;
         lv_obj_t *center_rect = lv_obj_create(result.roll_panel);
+
+        // Hide & disable scrollbar
+        lv_obj_set_scrollbar_mode(center_rect, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(center_rect, LV_DIR_NONE);
+
+        // Size and position
         lv_obj_set_size(center_rect, rect_width, rect_height);
-        lv_obj_set_style_bg_opa(center_rect, LV_OPA_100, LV_PART_MAIN);
-        lv_obj_set_style_bg_color(center_rect, roll_line_color, LV_PART_MAIN);
-        lv_obj_set_style_border_opa(center_rect, LV_OPA_0, LV_PART_MAIN);
-        lv_obj_set_style_outline_opa(center_rect, LV_OPA_0, LV_PART_MAIN);
+        lv_obj_align(center_rect, alignment, pos_x, pos_y);
+
+        // Main style: radius
+        lv_obj_set_style_radius(center_rect, 0, LV_PART_MAIN);
+
+        // Main style: outline
+        lv_obj_set_style_outline_width(center_rect, 2, LV_PART_MAIN);
+        lv_obj_set_style_outline_color(center_rect, lv_color_make(0, 255, 0), LV_PART_MAIN);
+        
+        // Main style: border
+        lv_obj_set_style_border_width(center_rect, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_color(center_rect, default_border_hue, LV_PART_MAIN);
+
+        // Main style: background
+        lv_obj_set_style_bg_opa(center_rect, LV_OPA_0, LV_PART_MAIN);
+
+        // Main style: shadow
+        lv_obj_set_style_shadow_width(center_rect, 0, LV_PART_MAIN);
+        lv_obj_set_style_shadow_color(center_rect, default_shadow_hue, LV_PART_MAIN);
+
+        // Remove padding
         lv_obj_set_style_pad_all(center_rect, 0, LV_PART_MAIN);
-        lv_obj_set_pos(center_rect, roll_center_x - (rect_width / 2), roll_center_y - (rect_height / 2));
     }
 
     // #############################################################################################
@@ -17524,6 +17540,9 @@ void update_display()
         if (uap_c.roll_panel) {
             // inner roll: roates with roll
             lv_obj_set_style_transform_rotation(uap_c.roll_panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
+        }
+
+        if (uap_c.pitch_panel) {
             // inner pitch: rotates with roll
             lv_obj_set_style_transform_rotation(uap_c.pitch_panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
             
