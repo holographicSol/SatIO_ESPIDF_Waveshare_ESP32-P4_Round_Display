@@ -81,6 +81,10 @@
 //     #define LV_DRAW_SW_ASM          LV_DRAW_SW_ASM_NONE
 // #endif
 
+LV_FONT_DECLARE(Mono_Bold_12);
+LV_FONT_DECLARE(Mono_Bold_14);
+LV_FONT_DECLARE(Mono_Bold_16);
+
 // LV_FONT_DECLARE(active_space_10);
 // LV_FONT_DECLARE(space_ranger_15);
 LV_FONT_DECLARE(cobalt_alien_17);
@@ -703,9 +707,11 @@ typedef struct {
     int32_t pixels_per_degree;
     int32_t pitch_scale_total_height;
 
+    lv_obj_t * gh_panel;
     lv_obj_t * gh_roller;
     int32_t gh_tape_width_px;
     int32_t gh_roller_content_width_px;
+    int32_t outline_padding_px;
 
 } uap_t;
 
