@@ -15283,167 +15283,11 @@ uap_t create_uap(
     }
 
     // #############################################################################################
-    // INNER PITCH PANEL
-    // #############################################################################################
-
-    /* A pitch scale that rotates with roll line */
-
-    // Inner Pitch Panel
-    // int32_t inner_pitch_size_w = (size_w_px / 8)*3;
-    // int32_t inner_pitch_size_h = (size_w_px / 8)*3;
-
-    // result.pitch_panel = lv_obj_create(result.panel);
-
-    // // Hide & disable scrollbar
-    // lv_obj_set_scrollbar_mode(result.pitch_panel, LV_SCROLLBAR_MODE_OFF);
-    // lv_obj_set_scroll_dir(result.pitch_panel, LV_DIR_NONE);
-
-    // // Size and position
-    // lv_obj_set_size(result.pitch_panel, inner_pitch_size_w, inner_pitch_size_h);
-    // lv_obj_align(result.pitch_panel, alignment, pos_x, pos_y);
-
-    // // Main style: radius
-    // lv_obj_set_style_radius(result.pitch_panel, 0, LV_PART_MAIN);
-
-    // // Main style: outline
-    // lv_obj_set_style_outline_width(result.pitch_panel, 0, LV_PART_MAIN);
-    // lv_obj_set_style_outline_color(result.pitch_panel, default_outline_hue, LV_PART_MAIN);
-    
-    // // Main style: border
-    // lv_obj_set_style_border_width(result.pitch_panel, 0, LV_PART_MAIN);
-    // lv_obj_set_style_border_color(result.pitch_panel, default_border_hue, LV_PART_MAIN);
-
-    // // Main style: background
-    // lv_obj_set_style_bg_opa(result.pitch_panel, LV_OPA_0, LV_PART_MAIN);
-
-    // // Main style: shadow
-    // lv_obj_set_style_shadow_width(result.pitch_panel, 0, LV_PART_MAIN);
-    // lv_obj_set_style_shadow_color(result.pitch_panel, default_shadow_hue, LV_PART_MAIN);
-
-    // // Remove padding
-    // lv_obj_set_style_pad_all(result.pitch_panel, 0, LV_PART_MAIN);
-
-    // // Set pivot
-    // lv_obj_set_style_transform_pivot_x(result.pitch_panel, lv_pct(50), LV_PART_MAIN);
-    // lv_obj_set_style_transform_pivot_y(result.pitch_panel, lv_pct(50), LV_PART_MAIN);
-
-    // #############################################################################################
-    // PITCH SCALE
-    // #############################################################################################
-
-    /* Pitch scale showing degrees from -90 to +90 */
-    
-    // int32_t pitch_scale_width = inner_pitch_size_w;
-    // int32_t pitch_scale_height = inner_pitch_size_h;
-    
-    // // Create pitch scale container
-    // lv_obj_t * pitch_scale_container = lv_obj_create(result.pitch_panel);
-    // lv_obj_set_size(pitch_scale_container, pitch_scale_width, pitch_scale_height);
-    // lv_obj_align(pitch_scale_container, LV_ALIGN_CENTER, 0, 0);
-    // lv_obj_set_scrollbar_mode(pitch_scale_container, LV_SCROLLBAR_MODE_OFF);
-    // lv_obj_set_scroll_dir(pitch_scale_container, LV_DIR_NONE);
-    // lv_obj_set_style_bg_opa(pitch_scale_container, LV_OPA_0, LV_PART_MAIN);
-    // lv_obj_set_style_border_opa(pitch_scale_container, LV_OPA_0, LV_PART_MAIN);
-    // lv_obj_set_style_outline_opa(pitch_scale_container, LV_OPA_0, LV_PART_MAIN);
-    // lv_obj_set_style_pad_all(pitch_scale_container, 0, LV_PART_MAIN);
-
-    // int32_t pitch_font_line_height = lv_font_get_line_height(&cobalt_alien_17) * 1;
-
-    // // Pitch scale parameters
-    // int32_t total_pitch_range = 180; // -90 to +90
-    // int32_t pixels_per_degree = pitch_scale_height / total_pitch_range;  // Scale to fit container
-    // int32_t pitch_scale_total_height = total_pitch_range * pixels_per_degree;
-    
-    // // Label width for numbers on each side
-    // int32_t label_width = (pitch_scale_width / 3) /2;
-    // int32_t tick_area_width = pitch_scale_width / 3;
-    // int32_t center_gap = pitch_scale_width / 3;
-    
-    // lv_color_t pitch_tick_color = lv_color_make(0, 255, 0); // Green
-    
-    // // Draw pitch scale marks and labels from -90 to +90
-    // for (int pitch = -90; pitch <= 90; pitch += 10) {
-    //     // Calculate Y position (0° should be at center, positive pitch up, negative pitch down)
-    //     int32_t y_pos = (pitch_scale_total_height / 2) - (pitch * pixels_per_degree);
-        
-    //     // Determine tick properties - length increases as we approach 0 degrees
-    //     int32_t distance_from_zero = abs(pitch);
-    //     bool is_major = (pitch % 30 == 0);
-    //     // Tick length decreases as we approach 0 degrees (zero pitch)
-    //     int32_t calculated_length = 4 + (distance_from_zero / 10);
-    //     int32_t tick_length = calculated_length > 20 ? 20 : calculated_length;
-    //     int32_t tick_width = is_major ? 2 : 1;
-        
-    //     // Calculate label Y position with bounds checking to prevent clipping
-    //     int32_t label_y = y_pos - pitch_font_line_height / 2;
-    //     int32_t min_label_y = 0;
-    //     int32_t max_label_y = pitch_scale_height - pitch_font_line_height;
-    //     if (label_y < min_label_y) label_y = min_label_y;
-    //     if (label_y > max_label_y) label_y = max_label_y;
-        
-    //     // Left side tick and label
-    //     {
-    //         // Tick line on left
-    //         lv_point_precise_t *tick_pts = (lv_point_precise_t *)malloc(2 * sizeof(lv_point_precise_t));
-    //         tick_pts[0].x = tick_area_width - tick_length;
-    //         tick_pts[0].y = y_pos;
-    //         tick_pts[1].x = tick_area_width;
-    //         tick_pts[1].y = y_pos;
-            
-    //         lv_obj_t *left_tick = lv_line_create(pitch_scale_container);
-    //         lv_line_set_points(left_tick, tick_pts, 2);
-    //         lv_obj_set_style_line_width(left_tick, tick_width, LV_PART_MAIN);
-    //         lv_obj_set_style_line_color(left_tick, pitch_tick_color, LV_PART_MAIN);
-            
-    //         // Left side label - only for major ticks
-    //         if (is_major) {
-    //             lv_obj_t *left_label = lv_label_create(pitch_scale_container);
-    //             char pitch_label[8];
-    //             snprintf(pitch_label, sizeof(pitch_label), "%d", pitch);
-    //             lv_label_set_text(left_label, pitch_label);
-    //             lv_obj_set_style_text_font(left_label, &cobalt_alien_17, LV_PART_MAIN);
-    //             lv_obj_set_style_text_color(left_label, pitch_tick_color, LV_PART_MAIN);
-    //             lv_obj_set_pos(left_label, 0, label_y);
-    //             lv_obj_set_width(left_label, label_width);
-    //             lv_obj_set_style_text_align(left_label, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
-    //         }
-    //     }
-        
-    //     // Right side tick and label
-    //     {
-    //         // Tick line on right
-    //         lv_point_precise_t *tick_pts = (lv_point_precise_t *)malloc(2 * sizeof(lv_point_precise_t));
-    //         tick_pts[0].x = pitch_scale_width - tick_area_width;
-    //         tick_pts[0].y = y_pos;
-    //         tick_pts[1].x = pitch_scale_width - tick_area_width + tick_length;
-    //         tick_pts[1].y = y_pos;
-            
-    //         lv_obj_t *right_tick = lv_line_create(pitch_scale_container);
-    //         lv_line_set_points(right_tick, tick_pts, 2);
-    //         lv_obj_set_style_line_width(right_tick, tick_width, LV_PART_MAIN);
-    //         lv_obj_set_style_line_color(right_tick, pitch_tick_color, LV_PART_MAIN);
-            
-    //         // Right side label - only for major ticks
-    //         if (is_major) {
-    //             lv_obj_t *right_label = lv_label_create(pitch_scale_container);
-    //             char pitch_label[8];
-    //             snprintf(pitch_label, sizeof(pitch_label), "%d", pitch);
-    //             lv_label_set_text(right_label, pitch_label);
-    //             lv_obj_set_style_text_font(right_label, &cobalt_alien_17, LV_PART_MAIN);
-    //             lv_obj_set_style_text_color(right_label, pitch_tick_color, LV_PART_MAIN);
-    //             lv_obj_set_pos(right_label, pitch_scale_width - 25, label_y);
-    //             lv_obj_set_width(right_label, label_width);
-    //             lv_obj_set_style_text_align(right_label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
-    //         }
-    //     }
-    // }
-
-    // #############################################################################################
     // PITCH TAPE
     // #############################################################################################
 
-    result.pitch_tape_height_px = size_w_px / 2;
-    int32_t pitch_tape_width_px = (size_h_px / 32)*3;
+    result.pitch_tape_height_px = (size_h_px / 32)*24;
+    int32_t pitch_tape_width_px = (size_h_px / 32)*2;
 
     // ---------------------------------------------------------
     // Create panel
@@ -15455,14 +15299,14 @@ uap_t create_uap(
     lv_obj_set_scroll_dir(result.pitch_panel, LV_DIR_NONE);
     
     // Size and position
-    lv_obj_set_size(result.pitch_panel, pitch_tape_width_px+6, result.pitch_tape_height_px+24);
+    lv_obj_set_size(result.pitch_panel, pitch_tape_width_px+6, result.pitch_tape_height_px+18);
     lv_obj_align(result.pitch_panel, LV_ALIGN_LEFT_MID, outline_width, 0);
 
     // Main style: radius
     lv_obj_set_style_radius(result.pitch_panel, 0, LV_PART_MAIN);
 
     // Main style: outline
-    lv_obj_set_style_outline_width(result.pitch_panel, 2, LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.pitch_panel, 1, LV_PART_MAIN);
     lv_obj_set_style_outline_color(result.pitch_panel, lv_color_make(0, 255, 0), LV_PART_MAIN);
     
     // Main style: border
@@ -15482,41 +15326,41 @@ uap_t create_uap(
     // ---------------------------------------------------------
     // Create tape
     // ---------------------------------------------------------
-    result.pitch_roller = lv_obj_create(result.pitch_panel);
+    result.pitch_tape = lv_obj_create(result.pitch_panel);
 
     // Container scrolling enabled horizontally
-    lv_obj_set_scrollbar_mode(result.pitch_roller, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scroll_dir(result.pitch_roller, LV_DIR_HOR);
+    lv_obj_set_scrollbar_mode(result.pitch_tape, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.pitch_tape, LV_DIR_HOR);
     
     // Size and position
-    lv_obj_set_size(result.pitch_roller, pitch_tape_width_px, result.pitch_tape_height_px);
-    lv_obj_align(result.pitch_roller, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_size(result.pitch_tape, pitch_tape_width_px, result.pitch_tape_height_px);
+    lv_obj_align(result.pitch_tape, LV_ALIGN_CENTER, 0, 0);
 
     // Main style: radius
-    lv_obj_set_style_radius(result.pitch_roller, 0, LV_PART_MAIN);
+    lv_obj_set_style_radius(result.pitch_tape, 0, LV_PART_MAIN);
 
     // Main style: outline
-    lv_obj_set_style_outline_width(result.pitch_roller, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.pitch_roller, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.pitch_tape, 0, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.pitch_tape, lv_color_make(0, 255, 0), LV_PART_MAIN);
     
     // Main style: border
-    lv_obj_set_style_border_width(result.pitch_roller, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.pitch_roller, default_border_hue, LV_PART_MAIN);
+    lv_obj_set_style_border_width(result.pitch_tape, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.pitch_tape, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_opa(result.pitch_roller, LV_OPA_0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(result.pitch_tape, LV_OPA_0, LV_PART_MAIN);
 
     // Main style: shadow
-    lv_obj_set_style_shadow_width(result.pitch_roller, 0, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.pitch_roller, default_shadow_hue, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(result.pitch_tape, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.pitch_tape, default_shadow_hue, LV_PART_MAIN);
 
     // Remove padding
-    lv_obj_set_style_pad_all(result.pitch_roller, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(result.pitch_tape, 0, LV_PART_MAIN);
 
     // ---------------------------------------------------------
     // Label the tape
     // ---------------------------------------------------------
-    lv_obj_t *pitch_label = lv_label_create(result.pitch_roller);
+    lv_obj_t *pitch_label = lv_label_create(result.pitch_tape);
 
     // Label must not scroll independently
     lv_obj_set_scrollbar_mode(pitch_label, LV_SCROLLBAR_MODE_OFF);
@@ -15569,13 +15413,13 @@ uap_t create_uap(
 
     // Store total width for scrolling calculations
     lv_obj_update_layout(pitch_label);
-    result.pitch_roller_content_height_px = lv_obj_get_height(pitch_label);
+    result.pitch_tape_content_height_px = lv_obj_get_height(pitch_label);
 
     // #############################################################################################
     // HEADING TAPE
     // #############################################################################################
 
-    result.gh_tape_width_px = size_w_px / 2;
+    result.gh_tape_width_px = (size_h_px / 32)*24;
     int32_t tape_height_px = (size_h_px / 32)*2;
 
     // ---------------------------------------------------------
@@ -15588,14 +15432,14 @@ uap_t create_uap(
     lv_obj_set_scroll_dir(result.gh_panel, LV_DIR_NONE);
     
     // Size and position
-    lv_obj_set_size(result.gh_panel, result.gh_tape_width_px+12, tape_height_px);
+    lv_obj_set_size(result.gh_panel, result.gh_tape_width_px+18, tape_height_px);
     lv_obj_align(result.gh_panel, LV_ALIGN_TOP_MID, 0, outline_width);
 
     // Main style: radius
     lv_obj_set_style_radius(result.gh_panel, 0, LV_PART_MAIN);
 
     // Main style: outline
-    lv_obj_set_style_outline_width(result.gh_panel, 2, LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.gh_panel, 1, LV_PART_MAIN);
     lv_obj_set_style_outline_color(result.gh_panel, lv_color_make(0, 255, 0), LV_PART_MAIN);
     
     // Main style: border
@@ -15615,41 +15459,41 @@ uap_t create_uap(
     // ---------------------------------------------------------
     // Create tape
     // ---------------------------------------------------------
-    result.gh_roller = lv_obj_create(result.gh_panel);
+    result.gh_tape = lv_obj_create(result.gh_panel);
 
     // Container scrolling enabled horizontally
-    lv_obj_set_scrollbar_mode(result.gh_roller, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scroll_dir(result.gh_roller, LV_DIR_HOR);
+    lv_obj_set_scrollbar_mode(result.gh_tape, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.gh_tape, LV_DIR_HOR);
     
     // Size and position
-    lv_obj_set_size(result.gh_roller, result.gh_tape_width_px, tape_height_px);
-    lv_obj_align(result.gh_roller, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_size(result.gh_tape, result.gh_tape_width_px, tape_height_px);
+    lv_obj_align(result.gh_tape, LV_ALIGN_CENTER, 0, 0);
 
     // Main style: radius
-    lv_obj_set_style_radius(result.gh_roller, 0, LV_PART_MAIN);
+    lv_obj_set_style_radius(result.gh_tape, 0, LV_PART_MAIN);
 
     // Main style: outline
-    lv_obj_set_style_outline_width(result.gh_roller, 0, LV_PART_MAIN);
-    lv_obj_set_style_outline_color(result.gh_roller, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.gh_tape, 0, LV_PART_MAIN);
+    lv_obj_set_style_outline_color(result.gh_tape, lv_color_make(0, 255, 0), LV_PART_MAIN);
     
     // Main style: border
-    lv_obj_set_style_border_width(result.gh_roller, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_color(result.gh_roller, default_border_hue, LV_PART_MAIN);
+    lv_obj_set_style_border_width(result.gh_tape, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_color(result.gh_tape, default_border_hue, LV_PART_MAIN);
 
     // Main style: background
-    lv_obj_set_style_bg_opa(result.gh_roller, LV_OPA_0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(result.gh_tape, LV_OPA_0, LV_PART_MAIN);
 
     // Main style: shadow
-    lv_obj_set_style_shadow_width(result.gh_roller, 0, LV_PART_MAIN);
-    lv_obj_set_style_shadow_color(result.gh_roller, default_shadow_hue, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(result.gh_tape, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_color(result.gh_tape, default_shadow_hue, LV_PART_MAIN);
 
     // Remove padding
-    lv_obj_set_style_pad_all(result.gh_roller, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(result.gh_tape, 0, LV_PART_MAIN);
 
     // ---------------------------------------------------------
     // Label the tape
     // ---------------------------------------------------------
-    lv_obj_t *gh_label = lv_label_create(result.gh_roller);
+    lv_obj_t *gh_label = lv_label_create(result.gh_tape);
 
     // Label must not scroll independently
     lv_obj_set_scrollbar_mode(gh_label, LV_SCROLLBAR_MODE_OFF);
@@ -15701,7 +15545,7 @@ uap_t create_uap(
 
     // Store total width for scrolling calculations
     lv_obj_update_layout(gh_label);
-    result.gh_roller_content_width_px = lv_obj_get_width(gh_label);
+    result.gh_tape_content_width_px = lv_obj_get_width(gh_label);
 
     // todo: write actual values to display, roll, pitch, yaw, gforce xyz, speed, altitude, etc.
     // todo: special labels/slots that can be connected to matrix switches to convey true/false, enable/disable, etc.
@@ -17983,31 +17827,31 @@ void update_display()
             //     lv_obj_set_y(pitch_scale_container, pitch_scale_offset);
             // }
         }
-        if (uap_c.pitch_roller) {
+        if (uap_c.pitch_tape) {
             // Pitch range is 90..-90 (181 entries per cycle)
             float pitch_val = gyroData.gyro_0_ang_y;
             if (pitch_val > 90.0f) pitch_val = 90.0f;
             if (pitch_val < -90.0f) pitch_val = -90.0f;
             float normalized = (pitch_val + 90.0f) / 180.0f;  // map -90->0, +90->1
-            float one_cycle_height = (float)uap_c.pitch_roller_content_height_px / 3.0f;
+            float one_cycle_height = (float)uap_c.pitch_tape_content_height_px / 3.0f;
             float degree_height = one_cycle_height / 181.0f;
             float center_pos = one_cycle_height + normalized * one_cycle_height + degree_height / 2.0f;
             int32_t scroll_y = (int32_t)(center_pos - (uap_c.pitch_tape_height_px / 2.0f));
-            lv_obj_scroll_to_y(uap_c.pitch_roller, scroll_y, LV_ANIM_OFF);
+            lv_obj_scroll_to_y(uap_c.pitch_tape, scroll_y, LV_ANIM_OFF);
         }
 
         // ────────────────────────────────────────────────
         // Yaw
         // ────────────────────────────────────────────────
-        if (uap_c.gh_roller) {
+        if (uap_c.gh_tape) {
             // Convert from [-180, 180] to [0, 360]
             float angle_0_360 = fmod(gyroData.gyro_0_ang_z + 360.0f, 360.0f);
             float normalized = angle_0_360 / 360.0f;
-            int32_t one_cycle_width = uap_c.gh_roller_content_width_px / 3;
-            float degree_width = (float)uap_c.gh_roller_content_width_px / 1080.0f;
+            int32_t one_cycle_width = uap_c.gh_tape_content_width_px / 3;
+            float degree_width = (float)uap_c.gh_tape_content_width_px / 1080.0f;
             float center_pos = one_cycle_width + normalized * one_cycle_width + degree_width / 2.0f;
             int32_t scroll_x = (int32_t)(center_pos - (uap_c.gh_tape_width_px / 2.0f));
-            lv_obj_scroll_to_x(uap_c.gh_roller, scroll_x, LV_ANIM_OFF);
+            lv_obj_scroll_to_x(uap_c.gh_tape, scroll_x, LV_ANIM_OFF);
         }
 
         lv_label_set_text(uap_c.latitude_label, String("LAT " + String(satioData.degrees_latitude, 7)).c_str());
