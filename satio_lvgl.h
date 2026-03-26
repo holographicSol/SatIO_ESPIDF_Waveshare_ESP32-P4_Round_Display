@@ -700,18 +700,22 @@ typedef struct {
 
     lv_obj_t * roll_panel;
 
-    lv_obj_t * pitch_upper_panel;
-    lv_obj_t * pitch_lower_panel;
+    // lv_obj_t * pitch_upper_panel;
+    // lv_obj_t * pitch_lower_panel;
+    // lv_obj_t * pitch_panel;
+    // lv_obj_t * pitch_scale_container;
+    // int32_t pixels_per_degree;
+    // int32_t pitch_scale_total_height;
+
     lv_obj_t * pitch_panel;
-    lv_obj_t * pitch_scale_container;
-    int32_t pixels_per_degree;
-    int32_t pitch_scale_total_height;
+    lv_obj_t * pitch_roller;
+    int32_t pitch_tape_height_px;
+    int32_t pitch_roller_content_height_px;
 
     lv_obj_t * gh_panel;
     lv_obj_t * gh_roller;
     int32_t gh_tape_width_px;
     int32_t gh_roller_content_width_px;
-    int32_t outline_padding_px;
     
     lv_obj_t * latitude_label;
     lv_obj_t * longitude_label;
