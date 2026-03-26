@@ -712,6 +712,16 @@ typedef struct {
     int32_t gh_tape_width_px;
     int32_t gh_roller_content_width_px;
     int32_t outline_padding_px;
+    
+    lv_obj_t * latitude_label;
+    lv_obj_t * longitude_label;
+
+    lv_obj_t * speed_label;
+    lv_obj_t * altitude_label;
+
+    lv_obj_t * roll_label;
+    lv_obj_t * pitch_label;
+    lv_obj_t * yaw_label;
 
 } uap_t;
 

@@ -15574,6 +15574,150 @@ uap_t create_uap(
     // todo: special labels/slots that can be connected to matrix switches to convey true/false, enable/disable, etc.
     // monospace font between 8 and 16 px: 8 too small, 16 too big.
 
+    // #############################################################################################
+    // COORD
+    // #############################################################################################
+
+    result.latitude_label = create_label(
+        result.panel,         // parent
+        200,                  // width
+        20,                   // height
+        LV_ALIGN_BOTTOM_LEFT, // parent alignment
+        0,                    // pos x
+        -20,                  // pos y
+        "LAT ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    result.longitude_label = create_label(
+        result.panel,         // parent
+        200,                  // width
+        20,                   // height
+        LV_ALIGN_BOTTOM_LEFT, // parent alignment
+        0,                    // pos x
+        0,                    // pos y
+        "LON ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    result.speed_label = create_label(
+        result.panel,         // parent
+        200,                  // width
+        20,                   // height
+        LV_ALIGN_BOTTOM_MID,  // parent alignment
+        0,                    // pos x
+        0,                  // pos y
+        "SPD ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    result.altitude_label = create_label(
+        result.panel,         // parent
+        200,                  // width
+        20,                   // height
+        LV_ALIGN_BOTTOM_MID,  // parent alignment
+        0,                    // pos x
+        -20,                  // pos y
+        "ALT ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    result.roll_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_BOTTOM_RIGHT, // parent alignment
+        0,                    // pos x
+        -40,                  // pos y
+        "Roll: ",             // initial text
+        LV_TEXT_ALIGN_RIGHT,  // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    result.pitch_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_BOTTOM_RIGHT, // parent alignment
+        0,                    // pos x
+        -20,                  // pos y
+        "PIT ",               // initial text
+        LV_TEXT_ALIGN_RIGHT,  // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    result.yaw_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_BOTTOM_RIGHT, // parent alignment
+        0,                    // pos x
+        0,                    // pos y
+        "YAW ",               // initial text
+        LV_TEXT_ALIGN_RIGHT,  // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
     return result;
 }
 
@@ -17715,9 +17859,20 @@ void update_display()
             float angle_0_360 = fmod(gyroData.gyro_0_ang_z + 360.0f, 360.0f);
             float normalized = angle_0_360 / 360.0f;
             int32_t one_cycle_width = uap_c.gh_roller_content_width_px / 3;
-            int32_t scroll_x = (int32_t)(normalized * one_cycle_width) + one_cycle_width - (uap_c.gh_tape_width_px / 2);
+            float degree_width = (float)uap_c.gh_roller_content_width_px / 1080.0f;
+            float center_pos = one_cycle_width + normalized * one_cycle_width + degree_width / 2.0f;
+            int32_t scroll_x = (int32_t)(center_pos - (uap_c.gh_tape_width_px / 2.0f));
             lv_obj_scroll_to_x(uap_c.gh_roller, scroll_x, LV_ANIM_OFF);
         }
+
+        lv_label_set_text(uap_c.latitude_label, String("LAT " + String(satioData.degrees_latitude, 7)).c_str());
+        lv_label_set_text(uap_c.longitude_label, String("LON " + String(satioData.degrees_longitude, 7)).c_str());
+        lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
+        lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
+
+        lv_label_set_text(uap_c.roll_label, String("ROL " + String(gyroData.gyro_0_ang_x, 2)).c_str());
+        lv_label_set_text(uap_c.pitch_label, String("PIT " + String(gyroData.gyro_0_ang_y, 2)).c_str());
+        lv_label_set_text(uap_c.yaw_label, String("YAW " + String(gyroData.gyro_0_ang_z, 2)).c_str());
     }
 
     lv_timer_resume(display_timer);
