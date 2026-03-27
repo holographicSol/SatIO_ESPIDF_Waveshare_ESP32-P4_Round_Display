@@ -15287,7 +15287,7 @@ uap_t create_uap(
     // PITCH TAPE
     // #############################################################################################
 
-    result.pitch_tape_height_px = (size_h_px / 32)*24;
+    result.pitch_tape_height_px = (size_h_px / 16)*10;
     int32_t pitch_tape_width_px = (size_h_px / 32)*3;
 
     // ---------------------------------------------------------
@@ -15449,7 +15449,7 @@ uap_t create_uap(
     // HEADING TAPE
     // #############################################################################################
     
-    result.gh_tape_width_px = (size_h_px / 32)*24;
+    result.gh_tape_width_px = (size_h_px / 16)*10;
     int32_t tape_height_px = (size_h_px / 32)*3;
 
     // ---------------------------------------------------------
