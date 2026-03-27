@@ -15082,8 +15082,9 @@ uap_t create_uap(
     /* This panel is a circle intended to be static and centered */
 
     // Radial Panel
-    int32_t radial_size_w = (size_w_px / 8)*6;
-    int32_t radial_size_h = (size_w_px / 8)*6;
+    // int32_t radial_size_w = (size_w_px / 8)*6;
+    int32_t radial_size_w = (size_w_px / 16)*10;
+    int32_t radial_size_h = (size_w_px / 16)*10;
 
     result.radial_panel = lv_obj_create(result.panel);
 
@@ -15174,7 +15175,7 @@ uap_t create_uap(
     /* Roll Line rotates inside and independently of radial panel */
 
     // Roll Panel
-    int32_t roll_size_w = (size_w_px / 16)*10;
+    int32_t roll_size_w = (size_w_px / 16)*8;
     int32_t roll_size_h = (size_w_px / 16)*1;
 
     result.roll_panel = lv_obj_create(result.panel);
@@ -15418,55 +15419,31 @@ uap_t create_uap(
     // ---------------------------------------------------------
     // Create center marker: right-pointing triangle beside pitch tape
     // ---------------------------------------------------------
-    {
-        // Triangle geometry: apex points right, base on the left.
-        // Parented to pitch_panel, sits at vertical center on the right edge.
-        const int32_t tri_w = 8;  // depth (left-to-right)
-        const int32_t tri_h = 12; // half-height of base
+    result.pitch_center_marker_0 = lv_obj_create(result.pitch_panel);
+    lv_obj_set_scrollbar_mode(result.pitch_center_marker_0, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.pitch_center_marker_0, LV_DIR_NONE);
+    lv_obj_set_size(result.pitch_center_marker_0, 6, 6);
+    lv_obj_align(result.pitch_center_marker_0, LV_ALIGN_LEFT_MID, 0, 0);
+    lv_obj_set_style_radius(result.pitch_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(result.pitch_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.pitch_center_marker_0, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.pitch_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(result.pitch_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(result.pitch_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(result.pitch_center_marker_0, LV_OBJ_FLAG_SCROLLABLE);
 
-        result.pitch_center_marker = lv_obj_create(result.pitch_panel);
-        lv_obj_set_scrollbar_mode(result.pitch_center_marker, LV_SCROLLBAR_MODE_OFF);
-        lv_obj_set_scroll_dir(result.pitch_center_marker, LV_DIR_NONE);
-        lv_obj_set_size(result.pitch_center_marker, tri_w, tri_h * 2);
-        lv_obj_align(result.pitch_center_marker, LV_ALIGN_LEFT_MID, 0, 0);
-        lv_obj_set_style_radius(result.pitch_center_marker, 0, LV_PART_MAIN);
-        lv_obj_set_style_border_width(result.pitch_center_marker, 0, LV_PART_MAIN);
-        lv_obj_set_style_bg_opa(result.pitch_center_marker, LV_OPA_0, LV_PART_MAIN);
-        lv_obj_set_style_outline_width(result.pitch_center_marker, 0, LV_PART_MAIN);
-        lv_obj_set_style_shadow_width(result.pitch_center_marker, 0, LV_PART_MAIN);
-        lv_obj_set_style_pad_all(result.pitch_center_marker, 0, LV_PART_MAIN);
-        lv_obj_clear_flag(result.pitch_center_marker, LV_OBJ_FLAG_SCROLLABLE);
-
-        lv_color_t tri_color = lv_color_make(0, 255, 0);
-        const int32_t lw = 2;
-
-        // Top-left (0,0) -> apex (tri_w-1, tri_h)
-        static lv_point_precise_t pitch_tri_top[2];
-        pitch_tri_top[0].x = 0;        pitch_tri_top[0].y = 0;
-        pitch_tri_top[1].x = tri_w - 1; pitch_tri_top[1].y = tri_h;
-        lv_obj_t *pt_top = lv_line_create(result.pitch_center_marker);
-        lv_line_set_points(pt_top, pitch_tri_top, 2);
-        lv_obj_set_style_line_width(pt_top, lw, LV_PART_MAIN);
-        lv_obj_set_style_line_color(pt_top, tri_color, LV_PART_MAIN);
-
-        // Bottom-left (0, tri_h*2-1) -> apex (tri_w-1, tri_h)
-        static lv_point_precise_t pitch_tri_bot[2];
-        pitch_tri_bot[0].x = 0;        pitch_tri_bot[0].y = tri_h * 2 - 1;
-        pitch_tri_bot[1].x = tri_w - 1; pitch_tri_bot[1].y = tri_h;
-        lv_obj_t *pt_bot = lv_line_create(result.pitch_center_marker);
-        lv_line_set_points(pt_bot, pitch_tri_bot, 2);
-        lv_obj_set_style_line_width(pt_bot, lw, LV_PART_MAIN);
-        lv_obj_set_style_line_color(pt_bot, tri_color, LV_PART_MAIN);
-
-        // Left base: (0,0) -> (0, tri_h*2-1)
-        static lv_point_precise_t pitch_tri_base[2];
-        pitch_tri_base[0].x = 0; pitch_tri_base[0].y = 0;
-        pitch_tri_base[1].x = 0; pitch_tri_base[1].y = tri_h * 2 - 1;
-        lv_obj_t *pt_base = lv_line_create(result.pitch_center_marker);
-        lv_line_set_points(pt_base, pitch_tri_base, 2);
-        lv_obj_set_style_line_width(pt_base, lw, LV_PART_MAIN);
-        lv_obj_set_style_line_color(pt_base, tri_color, LV_PART_MAIN);
-    }
+    result.pitch_center_marker_1 = lv_obj_create(result.pitch_panel);
+    lv_obj_set_scrollbar_mode(result.pitch_center_marker_1, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.pitch_center_marker_1, LV_DIR_NONE);
+    lv_obj_set_size(result.pitch_center_marker_1, 6, 6);
+    lv_obj_align(result.pitch_center_marker_1, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_set_style_radius(result.pitch_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(result.pitch_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.pitch_center_marker_1, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.pitch_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(result.pitch_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(result.pitch_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(result.pitch_center_marker_1, LV_OBJ_FLAG_SCROLLABLE);
 
     // #############################################################################################
     // HEADING TAPE
@@ -15603,56 +15580,31 @@ uap_t create_uap(
     // ---------------------------------------------------------
     // Create center marker: downward-pointing triangle below gh tape
     // ---------------------------------------------------------
-    {
-        // Triangle geometry: apex at bottom-center, base across the top
-        // Tip points down into the tape, parented to gh_panel so it sits
-        // just below the tape at horizontal center.
-        const int32_t tri_w = 12; // half-width of base
-        const int32_t tri_h = 8;  // height of triangle
+    result.gh_center_marker_0 = lv_obj_create(result.gh_panel);
+    lv_obj_set_scrollbar_mode(result.gh_center_marker_0, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.gh_center_marker_0, LV_DIR_NONE);
+    lv_obj_set_size(result.gh_center_marker_0, 6, 6);
+    lv_obj_align(result.gh_center_marker_0, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_style_radius(result.gh_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(result.gh_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.gh_center_marker_0, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.gh_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(result.gh_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(result.gh_center_marker_0, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(result.gh_center_marker_0, LV_OBJ_FLAG_SCROLLABLE);
 
-        result.gh_center_marker = lv_obj_create(result.gh_panel);
-        lv_obj_set_scrollbar_mode(result.gh_center_marker, LV_SCROLLBAR_MODE_OFF);
-        lv_obj_set_scroll_dir(result.gh_center_marker, LV_DIR_NONE);
-        lv_obj_set_size(result.gh_center_marker, tri_w * 2, tri_h);
-        lv_obj_align(result.gh_center_marker, LV_ALIGN_TOP_MID, 0, 0);
-        lv_obj_set_style_radius(result.gh_center_marker, 0, LV_PART_MAIN);
-        lv_obj_set_style_border_width(result.gh_center_marker, 0, LV_PART_MAIN);
-        lv_obj_set_style_bg_opa(result.gh_center_marker, LV_OPA_0, LV_PART_MAIN);
-        lv_obj_set_style_outline_width(result.gh_center_marker, 0, LV_PART_MAIN);
-        lv_obj_set_style_shadow_width(result.gh_center_marker, 0, LV_PART_MAIN);
-        lv_obj_set_style_pad_all(result.gh_center_marker, 0, LV_PART_MAIN);
-        lv_obj_clear_flag(result.gh_center_marker, LV_OBJ_FLAG_SCROLLABLE);
-
-        lv_color_t tri_color = lv_color_make(0, 255, 0);
-        const int32_t lw = 2;
-
-        // Left side: top-left (0,0) -> apex (tri_w, tri_h-1)
-        static lv_point_precise_t gh_tri_left[2];
-        gh_tri_left[0].x = 0;          gh_tri_left[0].y = 0;
-        gh_tri_left[1].x = tri_w;      gh_tri_left[1].y = tri_h - 1;
-        lv_obj_t *gh_tri_l = lv_line_create(result.gh_center_marker);
-        lv_line_set_points(gh_tri_l, gh_tri_left, 2);
-        lv_obj_set_style_line_width(gh_tri_l, lw, LV_PART_MAIN);
-        lv_obj_set_style_line_color(gh_tri_l, tri_color, LV_PART_MAIN);
-
-        // Right side: top-right (tri_w*2-1, 0) -> apex (tri_w, tri_h-1)
-        static lv_point_precise_t gh_tri_right[2];
-        gh_tri_right[0].x = tri_w * 2 - 1; gh_tri_right[0].y = 0;
-        gh_tri_right[1].x = tri_w;          gh_tri_right[1].y = tri_h - 1;
-        lv_obj_t *gh_tri_r = lv_line_create(result.gh_center_marker);
-        lv_line_set_points(gh_tri_r, gh_tri_right, 2);
-        lv_obj_set_style_line_width(gh_tri_r, lw, LV_PART_MAIN);
-        lv_obj_set_style_line_color(gh_tri_r, tri_color, LV_PART_MAIN);
-
-        // Top base: (0,0) -> (tri_w*2-1, 0)
-        static lv_point_precise_t gh_tri_top[2];
-        gh_tri_top[0].x = 0;              gh_tri_top[0].y = 0;
-        gh_tri_top[1].x = tri_w * 2 - 1; gh_tri_top[1].y = 0;
-        lv_obj_t *gh_tri_t = lv_line_create(result.gh_center_marker);
-        lv_line_set_points(gh_tri_t, gh_tri_top, 2);
-        lv_obj_set_style_line_width(gh_tri_t, lw, LV_PART_MAIN);
-        lv_obj_set_style_line_color(gh_tri_t, tri_color, LV_PART_MAIN);
-    }
+    result.gh_center_marker_1 = lv_obj_create(result.gh_panel);
+    lv_obj_set_scrollbar_mode(result.gh_center_marker_1, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(result.gh_center_marker_1, LV_DIR_NONE);
+    lv_obj_set_size(result.gh_center_marker_1, 6, 6);
+    lv_obj_align(result.gh_center_marker_1, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_set_style_radius(result.gh_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(result.gh_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(result.gh_center_marker_1, lv_color_make(0, 255, 0), LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.gh_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(result.gh_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(result.gh_center_marker_1, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(result.gh_center_marker_1, LV_OBJ_FLAG_SCROLLABLE);
 
     // todo: write actual values to display, roll, pitch, yaw, gforce xyz, speed, altitude, etc.
     // todo: special labels/slots that can be connected to matrix switches to convey true/false, enable/disable, etc.
