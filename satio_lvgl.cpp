@@ -15100,7 +15100,7 @@ uap_t create_uap(
     lv_obj_set_style_radius(result.radial_panel, 360, LV_PART_MAIN);
 
     // Main style: outline
-    lv_obj_set_style_outline_width(result.radial_panel, 2, LV_PART_MAIN);
+    lv_obj_set_style_outline_width(result.radial_panel, 0, LV_PART_MAIN);
     lv_obj_set_style_outline_color(result.radial_panel, lv_color_make(0, 255, 0), LV_PART_MAIN);
     
     // Main style: border
