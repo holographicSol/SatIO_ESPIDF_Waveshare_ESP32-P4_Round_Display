@@ -15287,7 +15287,7 @@ uap_t create_uap(
     // #############################################################################################
 
     result.pitch_tape_height_px = (size_h_px / 32)*24;
-    int32_t pitch_tape_width_px = (size_h_px / 32)*2;
+    int32_t pitch_tape_width_px = (size_h_px / 32)*3;
 
     // ---------------------------------------------------------
     // Create panel
@@ -15399,9 +15399,9 @@ uap_t create_uap(
     // Main style: text (vertical tape, one value per line, 90 -> -90)
     static char pitch_tape_text[181 * 3 * 8 + 1] = {0};
     for (int rep = 0; rep < 3; rep++) {
-        for (int pitch = -90; pitch <= 90; pitch++) {
+        for (int pitch = 90; pitch >= -90; pitch--) {
             char tmp[16];
-            snprintf(tmp, sizeof(tmp), "%+03d\n", pitch);
+            snprintf(tmp, sizeof(tmp), "%+03d\n\n", pitch);
             strcat(pitch_tape_text, tmp);
         }
     }
@@ -15415,12 +15415,65 @@ uap_t create_uap(
     lv_obj_update_layout(pitch_label);
     result.pitch_tape_content_height_px = lv_obj_get_height(pitch_label);
 
+    // ---------------------------------------------------------
+    // Create center marker: right-pointing triangle beside pitch tape
+    // ---------------------------------------------------------
+    {
+        // Triangle geometry: apex points right, base on the left.
+        // Parented to pitch_panel, sits at vertical center on the right edge.
+        const int32_t tri_w = 8;  // depth (left-to-right)
+        const int32_t tri_h = 12; // half-height of base
+
+        result.pitch_center_marker = lv_obj_create(result.pitch_panel);
+        lv_obj_set_scrollbar_mode(result.pitch_center_marker, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(result.pitch_center_marker, LV_DIR_NONE);
+        lv_obj_set_size(result.pitch_center_marker, tri_w, tri_h * 2);
+        lv_obj_align(result.pitch_center_marker, LV_ALIGN_LEFT_MID, 0, 0);
+        lv_obj_set_style_radius(result.pitch_center_marker, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_width(result.pitch_center_marker, 0, LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(result.pitch_center_marker, LV_OPA_0, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(result.pitch_center_marker, 0, LV_PART_MAIN);
+        lv_obj_set_style_shadow_width(result.pitch_center_marker, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(result.pitch_center_marker, 0, LV_PART_MAIN);
+        lv_obj_clear_flag(result.pitch_center_marker, LV_OBJ_FLAG_SCROLLABLE);
+
+        lv_color_t tri_color = lv_color_make(0, 255, 0);
+        const int32_t lw = 2;
+
+        // Top-left (0,0) -> apex (tri_w-1, tri_h)
+        static lv_point_precise_t pitch_tri_top[2];
+        pitch_tri_top[0].x = 0;        pitch_tri_top[0].y = 0;
+        pitch_tri_top[1].x = tri_w - 1; pitch_tri_top[1].y = tri_h;
+        lv_obj_t *pt_top = lv_line_create(result.pitch_center_marker);
+        lv_line_set_points(pt_top, pitch_tri_top, 2);
+        lv_obj_set_style_line_width(pt_top, lw, LV_PART_MAIN);
+        lv_obj_set_style_line_color(pt_top, tri_color, LV_PART_MAIN);
+
+        // Bottom-left (0, tri_h*2-1) -> apex (tri_w-1, tri_h)
+        static lv_point_precise_t pitch_tri_bot[2];
+        pitch_tri_bot[0].x = 0;        pitch_tri_bot[0].y = tri_h * 2 - 1;
+        pitch_tri_bot[1].x = tri_w - 1; pitch_tri_bot[1].y = tri_h;
+        lv_obj_t *pt_bot = lv_line_create(result.pitch_center_marker);
+        lv_line_set_points(pt_bot, pitch_tri_bot, 2);
+        lv_obj_set_style_line_width(pt_bot, lw, LV_PART_MAIN);
+        lv_obj_set_style_line_color(pt_bot, tri_color, LV_PART_MAIN);
+
+        // Left base: (0,0) -> (0, tri_h*2-1)
+        static lv_point_precise_t pitch_tri_base[2];
+        pitch_tri_base[0].x = 0; pitch_tri_base[0].y = 0;
+        pitch_tri_base[1].x = 0; pitch_tri_base[1].y = tri_h * 2 - 1;
+        lv_obj_t *pt_base = lv_line_create(result.pitch_center_marker);
+        lv_line_set_points(pt_base, pitch_tri_base, 2);
+        lv_obj_set_style_line_width(pt_base, lw, LV_PART_MAIN);
+        lv_obj_set_style_line_color(pt_base, tri_color, LV_PART_MAIN);
+    }
+
     // #############################################################################################
     // HEADING TAPE
     // #############################################################################################
-
+    
     result.gh_tape_width_px = (size_h_px / 32)*24;
-    int32_t tape_height_px = (size_h_px / 32)*2;
+    int32_t tape_height_px = (size_h_px / 32)*3;
 
     // ---------------------------------------------------------
     // Create panel
@@ -15546,6 +15599,60 @@ uap_t create_uap(
     // Store total width for scrolling calculations
     lv_obj_update_layout(gh_label);
     result.gh_tape_content_width_px = lv_obj_get_width(gh_label);
+
+    // ---------------------------------------------------------
+    // Create center marker: downward-pointing triangle below gh tape
+    // ---------------------------------------------------------
+    {
+        // Triangle geometry: apex at bottom-center, base across the top
+        // Tip points down into the tape, parented to gh_panel so it sits
+        // just below the tape at horizontal center.
+        const int32_t tri_w = 12; // half-width of base
+        const int32_t tri_h = 8;  // height of triangle
+
+        result.gh_center_marker = lv_obj_create(result.gh_panel);
+        lv_obj_set_scrollbar_mode(result.gh_center_marker, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(result.gh_center_marker, LV_DIR_NONE);
+        lv_obj_set_size(result.gh_center_marker, tri_w * 2, tri_h);
+        lv_obj_align(result.gh_center_marker, LV_ALIGN_TOP_MID, 0, 0);
+        lv_obj_set_style_radius(result.gh_center_marker, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_width(result.gh_center_marker, 0, LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(result.gh_center_marker, LV_OPA_0, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(result.gh_center_marker, 0, LV_PART_MAIN);
+        lv_obj_set_style_shadow_width(result.gh_center_marker, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(result.gh_center_marker, 0, LV_PART_MAIN);
+        lv_obj_clear_flag(result.gh_center_marker, LV_OBJ_FLAG_SCROLLABLE);
+
+        lv_color_t tri_color = lv_color_make(0, 255, 0);
+        const int32_t lw = 2;
+
+        // Left side: top-left (0,0) -> apex (tri_w, tri_h-1)
+        static lv_point_precise_t gh_tri_left[2];
+        gh_tri_left[0].x = 0;          gh_tri_left[0].y = 0;
+        gh_tri_left[1].x = tri_w;      gh_tri_left[1].y = tri_h - 1;
+        lv_obj_t *gh_tri_l = lv_line_create(result.gh_center_marker);
+        lv_line_set_points(gh_tri_l, gh_tri_left, 2);
+        lv_obj_set_style_line_width(gh_tri_l, lw, LV_PART_MAIN);
+        lv_obj_set_style_line_color(gh_tri_l, tri_color, LV_PART_MAIN);
+
+        // Right side: top-right (tri_w*2-1, 0) -> apex (tri_w, tri_h-1)
+        static lv_point_precise_t gh_tri_right[2];
+        gh_tri_right[0].x = tri_w * 2 - 1; gh_tri_right[0].y = 0;
+        gh_tri_right[1].x = tri_w;          gh_tri_right[1].y = tri_h - 1;
+        lv_obj_t *gh_tri_r = lv_line_create(result.gh_center_marker);
+        lv_line_set_points(gh_tri_r, gh_tri_right, 2);
+        lv_obj_set_style_line_width(gh_tri_r, lw, LV_PART_MAIN);
+        lv_obj_set_style_line_color(gh_tri_r, tri_color, LV_PART_MAIN);
+
+        // Top base: (0,0) -> (tri_w*2-1, 0)
+        static lv_point_precise_t gh_tri_top[2];
+        gh_tri_top[0].x = 0;              gh_tri_top[0].y = 0;
+        gh_tri_top[1].x = tri_w * 2 - 1; gh_tri_top[1].y = 0;
+        lv_obj_t *gh_tri_t = lv_line_create(result.gh_center_marker);
+        lv_line_set_points(gh_tri_t, gh_tri_top, 2);
+        lv_obj_set_style_line_width(gh_tri_t, lw, LV_PART_MAIN);
+        lv_obj_set_style_line_color(gh_tri_t, tri_color, LV_PART_MAIN);
+    }
 
     // todo: write actual values to display, roll, pitch, yaw, gforce xyz, speed, altitude, etc.
     // todo: special labels/slots that can be connected to matrix switches to convey true/false, enable/disable, etc.
@@ -17808,35 +17915,25 @@ void update_display()
         // Roll
         // ────────────────────────────────────────────────
         if (uap_c.roll_panel) {
-            // inner roll: roates with roll
             lv_obj_set_style_transform_rotation(uap_c.roll_panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
         }
 
         // ────────────────────────────────────────────────
         // Pitch
         // ────────────────────────────────────────────────
-        if (uap_c.pitch_panel) {
-
-            // inner pitch: rotates with roll
-            // lv_obj_set_style_transform_rotation(uap_c.pitch_panel, (int32_t)gyroData.gyro_0_ang_x*10, LV_PART_MAIN);
-            
-            // inner pitch: also moves up & down
-            // int32_t pitch_scale_offset = -(int32_t)(gyroData.gyro_0_ang_y);
-            // lv_obj_t * pitch_scale_container = lv_obj_get_child(uap_c.pitch_panel, 0);
-            // if (pitch_scale_container) {
-            //     lv_obj_set_y(pitch_scale_container, pitch_scale_offset);
-            // }
-        }
         if (uap_c.pitch_tape) {
-            // Pitch range is 90..-90 (181 entries per cycle)
+            // Pitch tape: "%+03d\n\n" per entry = exactly 2 line-heights each.
+            // Derive entry_h from the font directly to avoid any measured-height drift.
             float pitch_val = gyroData.gyro_0_ang_y;
             if (pitch_val > 90.0f) pitch_val = 90.0f;
             if (pitch_val < -90.0f) pitch_val = -90.0f;
-            float normalized = (pitch_val + 90.0f) / 180.0f;  // map -90->0, +90->1
-            float one_cycle_height = (float)uap_c.pitch_tape_content_height_px / 3.0f;
-            float degree_height = one_cycle_height / 181.0f;
-            float center_pos = one_cycle_height + normalized * one_cycle_height + degree_height / 2.0f;
-            int32_t scroll_y = (int32_t)(center_pos - (uap_c.pitch_tape_height_px / 2.0f));
+            const int32_t line_h   = lv_font_get_line_height(&Mono_Bold_14);
+            const int32_t entry_h  = 2 * line_h;          // 2 lines per "%+03d\n\n"
+            const int32_t cycle_px = 181 * entry_h;       // exact offset to 2nd repeat
+            float index = 90.0f - pitch_val;              // 0=+90, 180=-90
+            // Center viewport on the middle of the text line (top line of entry)
+            int32_t center_pos = cycle_px + (int32_t)(index * entry_h) + line_h / 2;
+            int32_t scroll_y = center_pos - uap_c.pitch_tape_height_px / 2;
             lv_obj_scroll_to_y(uap_c.pitch_tape, scroll_y, LV_ANIM_OFF);
         }
 
