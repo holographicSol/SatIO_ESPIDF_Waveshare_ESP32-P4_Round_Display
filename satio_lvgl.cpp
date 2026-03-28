@@ -14840,180 +14840,6 @@ mapping_config_container_t create_mapping_config_container(
     return result;
 }
 
-// /** -------------------------------------------------------------------------------------
-//  * @brief Create UAP.
-//  * 
-//  * @param parent Specify parent object.
-//  * @param size_w_px Panel width.
-//  * @param size_h_px Panel height
-//  * @param alignment Panel alignment on parent object.
-//  * @param pos_x Offset from alignment.
-//  * @param pos_y Offset from alignment.
-//  * @return lv_obj_t.
-//  */
-// uap_t create_uap(
-//     lv_obj_t * parent,
-//     int32_t size_w_px,
-//     int32_t size_h_px,
-//     lv_align_t alignment,
-//     int32_t pos_x,
-//     int32_t pos_y,
-//     int32_t radius
-//     )
-// {
-//     /*----------------------------------------------- LABEL -----------------------------------------------*/
-
-//     // Create label
-//     uap_t result = {};
-
-//     result.panel = lv_obj_create(parent);
-
-//     // Hide & disable scrollbar
-//     lv_obj_set_scrollbar_mode(result.panel, LV_SCROLLBAR_MODE_OFF);
-//     lv_obj_set_scroll_dir(result.panel, LV_DIR_NONE);
-
-//     // Size and position
-//     lv_obj_set_size(result.panel, size_w_px, size_h_px);
-//     lv_obj_align(result.panel, alignment, pos_x, pos_y);
-
-//     /*---------------------------------------- PANEL LV_PART_MAIN -----------------------------------------*/
-
-//     // Main style: radius
-//     lv_obj_set_style_radius(result.panel, 0, LV_PART_MAIN);
-
-//     // Main style: outline
-//     lv_obj_set_style_outline_width(result.panel, outline_width, LV_PART_MAIN);
-//     lv_obj_set_style_outline_color(result.panel, default_outline_hue, LV_PART_MAIN);
-    
-//     // Main style: border
-//     lv_obj_set_style_border_width(result.panel, 0, LV_PART_MAIN);
-//     lv_obj_set_style_border_color(result.panel, default_border_hue, LV_PART_MAIN);
-
-//     // Main style: background
-//     lv_obj_set_style_bg_opa(result.panel, LV_OPA_0, LV_PART_MAIN);
-
-//     // Main style: shadow
-//     lv_obj_set_style_shadow_width(result.panel, 0, LV_PART_MAIN);
-//     lv_obj_set_style_shadow_color(result.panel, default_shadow_hue, LV_PART_MAIN);
-
-//     // Remove padding
-//     lv_obj_set_style_pad_all(result.panel, 0, LV_PART_MAIN);
-
-//     // Set pivot
-//     lv_obj_set_style_transform_pivot_x(result.panel, lv_pct(50), LV_PART_MAIN);
-//     lv_obj_set_style_transform_pivot_y(result.panel, lv_pct(50), LV_PART_MAIN);
-
-//     // test line
-//     // int32_t margin = 10;
-//     // int32_t line_w = size_w_px - (margin * 2);
-//     // static lv_point_precise_t points[2];
-//     // points[0].x = 0;
-//     // points[0].y = 0;
-//     // points[1].x = line_w;
-//     // points[1].y = 0;
-//     // lv_obj_t *line = lv_line_create(result.panel);
-//     // lv_line_set_points(line, points, 2);
-//     // lv_obj_set_style_line_width(line, 3, LV_PART_MAIN);
-//     // lv_obj_set_style_line_color(line, lv_color_make(0, 255, 0), LV_PART_MAIN);
-//     // lv_obj_set_size(line, line_w, 3);
-//     // lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);
-
-//     int32_t r  = size_w_px - 1;   // right edge
-//     int32_t b  = size_h_px - 1;   // bottom edge
-//     int32_t corner_len = size_w_px / 8;
-//     int32_t line_w = 3;
-//     lv_color_t col = lv_color_make(0, 255, 0);
-
-
-//     // ---- top-left vertical (draws down) ----
-//     static lv_point_precise_t tl_v[2];
-//     tl_v[0].x = 0; tl_v[0].y = 0;
-//     tl_v[1].x = 0; tl_v[1].y = corner_len;
-//     lv_obj_t *tl_vert = lv_line_create(result.panel);
-//     lv_line_set_points(tl_vert, tl_v, 2);
-//     lv_obj_set_style_line_width(tl_vert, line_w, LV_PART_MAIN);
-//     lv_obj_set_style_line_color(tl_vert, col, LV_PART_MAIN);
-//     lv_obj_set_pos(tl_vert, 0, 0);
-
-//     // ---- top-left horizontal (draws right) ----
-//     static lv_point_precise_t tl_h[2];
-//     tl_h[0].x = 0;          tl_h[0].y = 0;
-//     tl_h[1].x = corner_len; tl_h[1].y = 0;
-//     lv_obj_t *tl_horiz = lv_line_create(result.panel);
-//     lv_line_set_points(tl_horiz, tl_h, 2);
-//     lv_obj_set_style_line_width(tl_horiz, line_w, LV_PART_MAIN);
-//     lv_obj_set_style_line_color(tl_horiz, col, LV_PART_MAIN);
-//     lv_obj_set_pos(tl_horiz, 0, 0);
-
-
-//     // ---- top-right vertical (draws down) ----
-//     static lv_point_precise_t tr_v[2];
-//     tr_v[0].x = 0; tr_v[0].y = 0;
-//     tr_v[1].x = 0; tr_v[1].y = corner_len;
-//     lv_obj_t *tr_vert = lv_line_create(result.panel);
-//     lv_line_set_points(tr_vert, tr_v, 2);
-//     lv_obj_set_style_line_width(tr_vert, line_w, LV_PART_MAIN);
-//     lv_obj_set_style_line_color(tr_vert, col, LV_PART_MAIN);
-//     lv_obj_set_pos(tr_vert, r, 0);
-
-//     // ---- top-right horizontal (draws left via offset) ----
-//     static lv_point_precise_t tr_h[2];
-//     tr_h[0].x = 0;          tr_h[0].y = 0;
-//     tr_h[1].x = corner_len; tr_h[1].y = 0;
-//     lv_obj_t *tr_horiz = lv_line_create(result.panel);
-//     lv_line_set_points(tr_horiz, tr_h, 2);
-//     lv_obj_set_style_line_width(tr_horiz, line_w, LV_PART_MAIN);
-//     lv_obj_set_style_line_color(tr_horiz, col, LV_PART_MAIN);
-//     lv_obj_set_pos(tr_horiz, r - corner_len, 0);
-
-
-//     // ---- bottom-left vertical (draws down via offset) ----
-//     static lv_point_precise_t bl_v[2];
-//     bl_v[0].x = 0; bl_v[0].y = 0;
-//     bl_v[1].x = 0; bl_v[1].y = corner_len;
-//     lv_obj_t *bl_vert = lv_line_create(result.panel);
-//     lv_line_set_points(bl_vert, bl_v, 2);
-//     lv_obj_set_style_line_width(bl_vert, line_w, LV_PART_MAIN);
-//     lv_obj_set_style_line_color(bl_vert, col, LV_PART_MAIN);
-//     lv_obj_set_pos(bl_vert, 0, b - corner_len);
-
-
-//     // ---- bottom-right vertical (draws down via offset) ----
-//     static lv_point_precise_t br_v[2];
-//     br_v[0].x = 0; br_v[0].y = 0;
-//     br_v[1].x = 0; br_v[1].y = corner_len;
-//     lv_obj_t *br_vert = lv_line_create(result.panel);
-//     lv_line_set_points(br_vert, br_v, 2);
-//     lv_obj_set_style_line_width(br_vert, line_w, LV_PART_MAIN);
-//     lv_obj_set_style_line_color(br_vert, col, LV_PART_MAIN);
-//     lv_obj_set_pos(br_vert, r, b - corner_len);
-
-//     // ---- bottom horizontal join ----
-//     static lv_point_precise_t bot[2];
-//     bot[0].x = 0; bot[0].y = 0;
-//     bot[1].x = r; bot[1].y = 0;
-//     lv_obj_t *bot_line = lv_line_create(result.panel);
-//     lv_line_set_points(bot_line, bot, 2);
-//     lv_obj_set_style_line_width(bot_line, line_w, LV_PART_MAIN);
-//     lv_obj_set_style_line_color(bot_line, col, LV_PART_MAIN);
-//     lv_obj_set_pos(bot_line, 0, b);
-
-
-//     // ---- center circle ----
-//     int32_t center_circle_size = size_w_px / 8;
-//     lv_obj_t *arc = lv_arc_create(result.panel);
-//     lv_obj_set_size(arc, center_circle_size, center_circle_size);
-//     lv_arc_set_angles(arc, 0, 360);
-//     lv_arc_set_bg_angles(arc, 0, 360);
-//     lv_obj_set_style_arc_width(arc, 3, LV_PART_MAIN);
-//     lv_obj_set_style_arc_color(arc, col, LV_PART_MAIN);
-//     lv_obj_set_style_arc_width(arc, 0, LV_PART_INDICATOR);
-//     lv_obj_remove_style(arc, NULL, LV_PART_KNOB);
-//     lv_obj_set_pos(arc, (size_w_px / 2) - ((center_circle_size)/2), (size_h_px / 2) - ((center_circle_size)/2));
-
-//     return result;
-// }
-
 /** -------------------------------------------------------------------------------------
  * @brief Create UAP.
  * 
@@ -15083,8 +14909,8 @@ uap_t create_uap(
 
     // Radial Panel
     // int32_t radial_size_w = (size_w_px / 8)*6;
-    int32_t radial_size_w = (size_w_px / 16)*10;
-    int32_t radial_size_h = (size_w_px / 16)*10;
+    int32_t radial_size_w = (size_w_px / 32)*20;
+    int32_t radial_size_h = (size_w_px / 32)*20;
 
     result.radial_panel = lv_obj_create(result.panel);
 
@@ -15175,8 +15001,8 @@ uap_t create_uap(
     /* Roll Line rotates inside and independently of radial panel */
 
     // Roll Panel
-    int32_t roll_size_w = (size_w_px / 16)*8;
-    int32_t roll_size_h = (size_w_px / 16)*1;
+    int32_t roll_size_w = (size_w_px / 32)*16;
+    int32_t roll_size_h = (size_w_px / 32)*2;
 
     result.roll_panel = lv_obj_create(result.panel);
 
@@ -15287,7 +15113,7 @@ uap_t create_uap(
     // PITCH TAPE
     // #############################################################################################
 
-    result.pitch_tape_height_px = (size_h_px / 16)*10;
+    result.pitch_tape_height_px = (size_h_px / 32)*20;
     int32_t pitch_tape_width_px = (size_h_px / 32)*3;
 
     // ---------------------------------------------------------
@@ -15398,12 +15224,15 @@ uap_t create_uap(
     lv_obj_set_style_pad_all(pitch_label, 0, LV_PART_MAIN);
 
     // Main style: text (vertical tape, one value per line, 90 -> -90)
+    // Keep this buffer static so create_uap does not consume ~4 KB of task stack.
     static char pitch_tape_text[181 * 3 * 8 + 1] = {0};
-    for (int rep = 0; rep < 3; rep++) {
-        for (int pitch = 90; pitch >= -90; pitch--) {
-            char tmp[16];
-            snprintf(tmp, sizeof(tmp), "%+03d\n\n", pitch);
-            strcat(pitch_tape_text, tmp);
+    if (pitch_tape_text[0] == '\0') {
+        for (int rep = 0; rep < 3; rep++) {
+            for (int pitch = 90; pitch >= -90; pitch--) {
+                char tmp[16];
+                snprintf(tmp, sizeof(tmp), "%+03d\n\n", pitch);
+                strcat(pitch_tape_text, tmp);
+            }
         }
     }
     // lv_obj_set_style_text_align(pitch_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
@@ -15449,7 +15278,7 @@ uap_t create_uap(
     // HEADING TAPE
     // #############################################################################################
     
-    result.gh_tape_width_px = (size_h_px / 16)*10;
+    result.gh_tape_width_px = (size_h_px / 32)*20;
     int32_t tape_height_px = (size_h_px / 32)*3;
 
     // ---------------------------------------------------------
@@ -15560,18 +15389,20 @@ uap_t create_uap(
     lv_obj_set_style_pad_all(gh_label, 0, LV_PART_MAIN);
 
     // Main style: text
-    static char tape_text[1080 * 6 + 1] = {0};
-    for (int rep = 0; rep < 3; rep++) {
-        for (int i = 0; i < 360; i++) {
-            char tmp[8];
-            snprintf(tmp, sizeof(tmp), "%03d  ", i);
-            strcat(tape_text, tmp);
+    static char gh_tape_text[1080 * 6 + 1] = {0};
+    if (gh_tape_text[0] == '\0') {
+        for (int rep = 0; rep < 3; rep++) {
+            for (int i = 0; i < 360; i++) {
+                char tmp[8];
+                snprintf(tmp, sizeof(tmp), "%03d  ", i);
+                strcat(gh_tape_text, tmp);
+            }
         }
     }
     // lv_obj_set_style_text_align(gh_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(gh_label, &Mono_Bold_14, LV_PART_MAIN);
     lv_obj_set_style_text_color(gh_label, lv_color_make(0, 255, 0), LV_PART_MAIN);
-    lv_label_set_text(gh_label, tape_text);
+    lv_label_set_text(gh_label, gh_tape_text);
 
     // Store total width for scrolling calculations
     lv_obj_update_layout(gh_label);
@@ -15694,65 +15525,65 @@ uap_t create_uap(
         default_value_hue
     );
 
-    result.roll_label = create_label(
-        result.panel,         // parent
-        100,                  // width
-        20,                   // height
-        LV_ALIGN_BOTTOM_RIGHT, // parent alignment
-        0,                    // pos x
-        -40,                  // pos y
-        "Roll: ",             // initial text
-        LV_TEXT_ALIGN_RIGHT,  // font alignment
-        &Mono_Bold_14,     // font
-        true,                 // transparent background
-        false,                // show scrollbar
-        false,                // enable scrolling
-        0,                    // outline width
-        general_radius,       // outline radius
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
+    // result.roll_label = create_label(
+    //     result.panel,         // parent
+    //     100,                  // width
+    //     20,                   // height
+    //     LV_ALIGN_BOTTOM_RIGHT, // parent alignment
+    //     0,                    // pos x
+    //     -40,                  // pos y
+    //     "Roll: ",             // initial text
+    //     LV_TEXT_ALIGN_RIGHT,  // font alignment
+    //     &Mono_Bold_14,     // font
+    //     true,                 // transparent background
+    //     false,                // show scrollbar
+    //     false,                // enable scrolling
+    //     0,                    // outline width
+    //     general_radius,       // outline radius
+    //     1,
+    //     default_bg_hue,
+    //     default_value_hue
+    // );
 
-    result.pitch_label = create_label(
-        result.panel,         // parent
-        100,                  // width
-        20,                   // height
-        LV_ALIGN_BOTTOM_RIGHT, // parent alignment
-        0,                    // pos x
-        -20,                  // pos y
-        "PIT ",               // initial text
-        LV_TEXT_ALIGN_RIGHT,  // font alignment
-        &Mono_Bold_14,     // font
-        true,                 // transparent background
-        false,                // show scrollbar
-        false,                // enable scrolling
-        0,                    // outline width
-        general_radius,       // outline radius
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
+    // result.pitch_label = create_label(
+    //     result.panel,         // parent
+    //     100,                  // width
+    //     20,                   // height
+    //     LV_ALIGN_BOTTOM_RIGHT, // parent alignment
+    //     0,                    // pos x
+    //     -20,                  // pos y
+    //     "PIT ",               // initial text
+    //     LV_TEXT_ALIGN_RIGHT,  // font alignment
+    //     &Mono_Bold_14,     // font
+    //     true,                 // transparent background
+    //     false,                // show scrollbar
+    //     false,                // enable scrolling
+    //     0,                    // outline width
+    //     general_radius,       // outline radius
+    //     1,
+    //     default_bg_hue,
+    //     default_value_hue
+    // );
 
-    result.yaw_label = create_label(
-        result.panel,         // parent
-        100,                  // width
-        20,                   // height
-        LV_ALIGN_BOTTOM_RIGHT, // parent alignment
-        0,                    // pos x
-        0,                    // pos y
-        "YAW ",               // initial text
-        LV_TEXT_ALIGN_RIGHT,  // font alignment
-        &Mono_Bold_14,     // font
-        true,                 // transparent background
-        false,                // show scrollbar
-        false,                // enable scrolling
-        0,                    // outline width
-        general_radius,       // outline radius
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
+    // result.yaw_label = create_label(
+    //     result.panel,         // parent
+    //     100,                  // width
+    //     20,                   // height
+    //     LV_ALIGN_BOTTOM_RIGHT, // parent alignment
+    //     0,                    // pos x
+    //     0,                    // pos y
+    //     "YAW ",               // initial text
+    //     LV_TEXT_ALIGN_RIGHT,  // font alignment
+    //     &Mono_Bold_14,     // font
+    //     true,                 // transparent background
+    //     false,                // show scrollbar
+    //     false,                // enable scrolling
+    //     0,                    // outline width
+    //     general_radius,       // outline radius
+    //     1,
+    //     default_bg_hue,
+    //     default_value_hue
+    // );
 
     return result;
 }
@@ -17903,14 +17734,14 @@ void update_display()
             lv_obj_scroll_to_x(uap_c.gh_tape, scroll_x, LV_ANIM_OFF);
         }
 
-        lv_label_set_text(uap_c.latitude_label, String("LAT " + String(satioData.degrees_latitude, 7)).c_str());
-        lv_label_set_text(uap_c.longitude_label, String("LON " + String(satioData.degrees_longitude, 7)).c_str());
-        lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
-        lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
+        // lv_label_set_text(uap_c.latitude_label, String("LAT " + String(satioData.degrees_latitude, 7)).c_str());
+        // lv_label_set_text(uap_c.longitude_label, String("LON " + String(satioData.degrees_longitude, 7)).c_str());
+        // lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
+        // lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
 
-        lv_label_set_text(uap_c.roll_label, String("ROL " + String(gyroData.gyro_0_ang_x, 2)).c_str());
-        lv_label_set_text(uap_c.pitch_label, String("PIT " + String(gyroData.gyro_0_ang_y, 2)).c_str());
-        lv_label_set_text(uap_c.yaw_label, String("YAW " + String(gyroData.gyro_0_ang_z, 2)).c_str());
+        // lv_label_set_text(uap_c.roll_label, String("ROL " + String(gyroData.gyro_0_ang_x, 2)).c_str());
+        // lv_label_set_text(uap_c.pitch_label, String("PIT " + String(gyroData.gyro_0_ang_y, 2)).c_str());
+        // lv_label_set_text(uap_c.yaw_label, String("YAW " + String(gyroData.gyro_0_ang_z, 2)).c_str());
     }
 
     lv_timer_resume(display_timer);
