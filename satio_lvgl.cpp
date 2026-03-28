@@ -17734,10 +17734,10 @@ void update_display()
             lv_obj_scroll_to_x(uap_c.gh_tape, scroll_x, LV_ANIM_OFF);
         }
 
-        // lv_label_set_text(uap_c.latitude_label, String("LAT " + String(satioData.degrees_latitude, 7)).c_str());
-        // lv_label_set_text(uap_c.longitude_label, String("LON " + String(satioData.degrees_longitude, 7)).c_str());
-        // lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
-        // lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
+        lv_label_set_text(uap_c.latitude_label, String("LAT " + String(satioData.degrees_latitude, 7)).c_str());
+        lv_label_set_text(uap_c.longitude_label, String("LON " + String(satioData.degrees_longitude, 7)).c_str());
+        lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
+        lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
 
         // lv_label_set_text(uap_c.roll_label, String("ROL " + String(gyroData.gyro_0_ang_x, 2)).c_str());
         // lv_label_set_text(uap_c.pitch_label, String("PIT " + String(gyroData.gyro_0_ang_y, 2)).c_str());
