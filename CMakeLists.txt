@@ -1,5 +1,8 @@
 idf_component_register(
     SRCS
+        Mono_Bold_12.c
+        Mono_Bold_14.c
+        Mono_Bold_16.c
         cobalt_alien_17.c
         cobalt_alien_25.c
         RTCLib.cpp
@@ -33,6 +36,7 @@ idf_component_register(
         wtgps300p.cpp
         astroclock.cpp
         satio_lvgl.cpp
+        # srtm_reader.cpp
     INCLUDE_DIRS
         .
 )

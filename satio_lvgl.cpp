@@ -14909,8 +14909,8 @@ uap_t create_uap(
 
     // Radial Panel
     // int32_t radial_size_w = (size_w_px / 8)*6;
-    int32_t radial_size_w = (size_w_px / 32)*20;
-    int32_t radial_size_h = (size_w_px / 32)*20;
+    int32_t radial_size_w = (size_w_px / 32)*14;
+    int32_t radial_size_h = (size_w_px / 32)*14;
 
     result.radial_panel = lv_obj_create(result.panel);
 
@@ -15001,7 +15001,7 @@ uap_t create_uap(
     /* Roll Line rotates inside and independently of radial panel */
 
     // Roll Panel
-    int32_t roll_size_w = (size_w_px / 32)*16;
+    int32_t roll_size_w = (size_w_px / 32)*10;
     int32_t roll_size_h = (size_w_px / 32)*2;
 
     result.roll_panel = lv_obj_create(result.panel);
@@ -15113,7 +15113,7 @@ uap_t create_uap(
     // PITCH TAPE
     // #############################################################################################
 
-    result.pitch_tape_height_px = (size_h_px / 32)*20;
+    result.pitch_tape_height_px = (size_h_px / 32)*12;
     int32_t pitch_tape_width_px = (size_h_px / 32)*3;
 
     // ---------------------------------------------------------
@@ -15223,9 +15223,9 @@ uap_t create_uap(
     // Remove padding
     lv_obj_set_style_pad_all(pitch_label, 0, LV_PART_MAIN);
 
-    // Main style: text (vertical tape, one value per line, 90 -> -90)
-    // Keep this buffer static so create_uap does not consume ~4 KB of task stack.
+    // Main style: text
     static char pitch_tape_text[181 * 3 * 8 + 1] = {0};
+    // Only populate the tape text buffer on first run
     if (pitch_tape_text[0] == '\0') {
         for (int rep = 0; rep < 3; rep++) {
             for (int pitch = 90; pitch >= -90; pitch--) {
@@ -15278,7 +15278,7 @@ uap_t create_uap(
     // HEADING TAPE
     // #############################################################################################
     
-    result.gh_tape_width_px = (size_h_px / 32)*20;
+    result.gh_tape_width_px = (size_h_px / 32)*12;
     int32_t tape_height_px = (size_h_px / 32)*3;
 
     // ---------------------------------------------------------
@@ -15390,6 +15390,7 @@ uap_t create_uap(
 
     // Main style: text
     static char gh_tape_text[1080 * 6 + 1] = {0};
+    // Only populate the tape text buffer on first run
     if (gh_tape_text[0] == '\0') {
         for (int rep = 0; rep < 3; rep++) {
             for (int i = 0; i < 360; i++) {
@@ -15773,18 +15774,20 @@ void create_default_screen_objects(
 
     // -------------------------------- Title Bar --------------------------------- //
 
-    main_title_bar = create_title_bar(
-        parent, // parent
-        720, // width px
-        64,  // height px
-        LV_ALIGN_TOP_MID,
-        0, // pos x
-        0, // pos y
-        false, // show scrollbar
-        false,  // enable scrollbar
-        &cobalt_alien_25,
-        &cobalt_alien_17
-    );
+    if (current_screen_number != HOME_SCREEN) {
+        main_title_bar = create_title_bar(
+            parent, // parent
+            720, // width px
+            64,  // height px
+            LV_ALIGN_TOP_MID,
+            0, // pos x
+            0, // pos y
+            false, // show scrollbar
+            false,  // enable scrollbar
+            &cobalt_alien_25,
+            &cobalt_alien_17
+        );
+    }
 
     // ------------------------------ System Tray --------------------------------- //
 
