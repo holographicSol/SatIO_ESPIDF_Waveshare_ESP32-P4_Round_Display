@@ -174,6 +174,16 @@ struct SATIOStruct satioData = {
     // ------------------------------------------------------------------------------------
     .padded_rtc_sync_time_HHMMSS = "000000",
     .padded_rtc_sync_date_DDMMYYYY = "00000000",
+    // ------------------------------------------------------------------------------------
+    // Geo-Positional Time
+    // ------------------------------------------------------------------------------------
+    .geo_positional_hour = 0.0,
+    .geo_positional_minute = 0.0,
+    .geo_positional_second = 0.0,
+    .geo_positional_millisecond = 0.0,
+    .geo_positional_year = 0.0,
+    .geo_positional_month = 0.0,
+    .geo_positional_day = 0.0,
 
     // ------------------------------------------------------------------------------------
     // FLAGS
@@ -625,7 +635,55 @@ void storeLocalTime(void) {
     // Format padded year (YY)
     memset(satioData.padded_local_year, 0, sizeof(satioData.padded_local_year));
     snprintf(satioData.padded_local_year, MAX_GLOBAL_ELEMENT_SIZE, "%s", String(String(year_str[2]) + String(year_str[3])).c_str());
+
+    updateGeoPositionalTime();
   }
+
+// ----------------------------------------------------------------------------------------
+// updateGeoPositionalTime.
+// Computes true solar (geo-positional) time by snapshotting the RTC (UTC) and
+// offsetting by longitude. Each degree of longitude = 240 seconds offset.
+// Positive East (ahead of UTC), negative West (behind UTC).
+// ----------------------------------------------------------------------------------------
+void updateGeoPositionalTime(void) {
+    // Build UTC time_t from stored RTC values (RTC always holds UTC).
+    struct tm utc_tm = {0};
+    utc_tm.tm_year  = satioData.rtc_year  - LAST_EPOCH;
+    utc_tm.tm_mon   = satioData.rtc_month - 1;
+    utc_tm.tm_mday  = satioData.rtc_mday;
+    utc_tm.tm_hour  = satioData.rtc_hour;
+    utc_tm.tm_min   = satioData.rtc_minute;
+    utc_tm.tm_sec   = satioData.rtc_second;
+    utc_tm.tm_isdst = 0;
+    time_t utc_sec  = mktime(&utc_tm);
+
+    // Longitude offset in seconds: 1 deg = 240 s (15 deg/h * 3600 s/h / 15).
+    time_t lon_offset_sec = (time_t)(satioData.system_degrees_longitude * 240.0);
+
+    // Geo-positional unix time.
+    time_t geo_sec = utc_sec + lon_offset_sec;
+
+    // Decompose into calendar fields.
+    struct tm geo_tm;
+    gmtime_r(&geo_sec, &geo_tm);
+
+    satioData.geo_positional_hour        = (double)geo_tm.tm_hour;
+    satioData.geo_positional_minute      = (double)geo_tm.tm_min;
+    satioData.geo_positional_second      = (double)geo_tm.tm_sec;
+    satioData.geo_positional_millisecond = (double)(tv_now.tv_usec / 1000);
+    satioData.geo_positional_year        = (double)(geo_tm.tm_year + LAST_EPOCH);
+    satioData.geo_positional_month       = (double)(geo_tm.tm_mon + 1);
+    satioData.geo_positional_day         = (double)geo_tm.tm_mday;
+
+    printf("Geo-positional Time: %02d:%02d:%02d.%03d %02d/%02d/%04d\n",
+           (int)satioData.geo_positional_hour,
+           (int)satioData.geo_positional_minute,
+           (int)satioData.geo_positional_second,
+           (int)satioData.geo_positional_millisecond,
+           (int)satioData.geo_positional_day,
+           (int)satioData.geo_positional_month,
+           (int)satioData.geo_positional_year);
+}
 
 // ----------------------------------------------------------------------------------------
 // storeRTCSYNCTime.

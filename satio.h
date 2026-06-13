@@ -64,8 +64,8 @@ struct SATIOStruct {
     char tmp_millisecond[MAX_GLOBAL_ELEMENT_SIZE];      // Temp millisecond string
     char week_day_names[MAX_DAYS_OF_THE_WEEK][MAX_GLOBAL_ELEMENT_SIZE]; // Weekday names
     char month_names[MAX_MONTHS_OF_THE_YEAR][MAX_GLOBAL_ELEMENT_SIZE]; // Month names
-    char abbrev_month_names[MAX_MONTHS_OF_THE_YEAR][12];               // Abbreviated Month names
-
+    char abbrev_month_names[MAX_MONTHS_OF_THE_YEAR][12];
+    
     // ------------------------------------------------------------------------------------
     // LOCATION
     // ------------------------------------------------------------------------------------
@@ -183,6 +183,18 @@ struct SATIOStruct {
     char padded_rtc_sync_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded RTC sync date
 
     // ------------------------------------------------------------------------------------
+    // Geo-Positional Time
+    // ------------------------------------------------------------------------------------
+    double geo_positional_hour; // Hour for geo-positional time
+    double geo_positional_minute; // Minute for geo-positional time
+    double geo_positional_second; // Second for geo-positional time
+    double geo_positional_millisecond; // Millisecond for geo-positional time
+
+    double geo_positional_year; // Year for geo-positional time
+    double geo_positional_month; // Month for geo-positional time
+    double geo_positional_day; // Day for geo-positional time
+
+    // ------------------------------------------------------------------------------------
     // FLAGS
     // ------------------------------------------------------------------------------------
     bool set_rtc_datetime_flag;
@@ -234,6 +246,7 @@ void padDigitsZero(int digits, char* output, size_t output_size);
 void printAllTimes(void);
 void storeRTCTime(void);
 void storeLocalTime(void);
+void updateGeoPositionalTime(void);
 void storeRTCSYNCTime(void) ;
 void extractDateTimeFromGPSData(void);
 void setSystemTime(long usec);

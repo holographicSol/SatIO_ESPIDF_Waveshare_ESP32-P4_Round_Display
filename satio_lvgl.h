@@ -704,13 +704,15 @@ typedef struct {
     lv_obj_t * pitch_tape;
     int32_t pitch_tape_height_px;
     int32_t pitch_tape_content_height_px;
-    lv_obj_t * pitch_center_marker;
+    lv_obj_t * pitch_center_marker_0;
+    lv_obj_t * pitch_center_marker_1;
 
     lv_obj_t * gh_panel;
     lv_obj_t * gh_tape;
     int32_t gh_tape_width_px;
     int32_t gh_tape_content_width_px;
-    lv_obj_t * gh_center_marker;
+    lv_obj_t * gh_center_marker_0;
+    lv_obj_t * gh_center_marker_1;
     
     lv_obj_t * latitude_label;
     lv_obj_t * longitude_label;
