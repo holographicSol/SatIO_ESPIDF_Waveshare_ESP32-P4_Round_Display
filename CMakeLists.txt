@@ -36,7 +36,6 @@ idf_component_register(
         wtgps300p.cpp
         astroclock.cpp
         satio_lvgl.cpp
-        # srtm_reader.cpp
     INCLUDE_DIRS
         .
 )
