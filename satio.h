@@ -20,6 +20,134 @@ extern struct timeval tv_now;
 extern bool sync_rtc_bool;
 extern RTC_DS3231 rtc;
 
+// ── Twilight stage types ─────────────────────────────────────────────────────
+
+enum class TwilightZone : int {
+    FullDaylight         = 0,
+    GoldenHour           = 1,
+    Sunset               = 2,
+    CivilTwilight        = 3,
+    CivilDusk            = 4,
+    NauticalTwilight     = 5,
+    NauticalDusk         = 6,
+    AstronomicalTwilight = 7,
+    AstronomicalDusk     = 8,
+    AstronomicalNight    = 9
+};
+
+struct AltitudeRange {
+    float lower;   // degrees, inclusive; use -999.0f for "no lower bound"
+    float upper;   // degrees, inclusive; use +999.0f for "no upper bound"
+};
+
+typedef struct {
+    TwilightZone    zone;
+    const char*     zoneName;
+    AltitudeRange   sunAltitude;   // geometric, sun centre, degrees
+    const char*     description;
+} TwilightStageEntry;
+
+typedef struct {
+	const char* zoneName;    // from TwilightStages::stages[z].zoneName
+	double dusk_start;       // evening: time zone begins (HH.MM); -1.0 if N/A
+	double dusk_end;         // evening: time zone ends   (HH.MM); -1.0 if N/A
+	double dawn_start;       // morning: time zone begins (HH.MM); -1.0 if N/A
+	double dawn_end;         // morning: time zone ends   (HH.MM); -1.0 if N/A
+} TwilightStageScheduleEntry;
+
+struct TwilightStages {
+    static constexpr int COUNT = 10;
+
+    static constexpr std::array<TwilightStageEntry, COUNT> stages = {{
+        {
+            TwilightZone::FullDaylight,
+            "Full Daylight",
+            { 6.0f, 999.0f },
+            "Sun clearly above horizon; full illumination; shadows well-defined."
+        },
+
+        {
+            TwilightZone::GoldenHour,
+            "Golden Hour",
+            { 0.0f, 6.0f },
+            "Low-angle warm light; long soft shadows; beloved by photographers."
+        },
+        {
+            TwilightZone::Sunset,
+            "Sunset / Sunrise",
+            { 0.0f, 0.0f },
+            "Upper limb of sun at geometric horizon; atmospheric refraction lifts "
+            "apparent disc ~0.5 degrees above true horizon."
+        },
+        {
+            TwilightZone::CivilTwilight,
+            "Civil Twilight",
+            { -6.0f, 0.0f },
+            "Sky still bright; outdoor work possible without artificial light; "
+            "horizon clearly defined; brightest stars and Venus visible near end."
+        },
+
+        {
+            TwilightZone::CivilDusk,
+            "Civil Dusk / Dawn",
+            { -6.0f, -6.0f },
+            "Legal definition of 'lights required' in most countries; "
+            "end of civil twilight."
+        },
+        {
+            TwilightZone::NauticalTwilight,
+            "Nautical Twilight",
+            { -12.0f, -6.0f },
+            "Horizon still visible at sea; enough sky glow to use a sextant; "
+            "many stars visible; sky appears deep blue then indigo."
+        },
+        {
+            TwilightZone::NauticalDusk,
+            "Nautical Dusk / Dawn",
+            { -12.0f, -12.0f },
+            "Horizon at sea becomes indistinct; end of nautical twilight."
+        },
+        {
+            TwilightZone::AstronomicalTwilight,
+            "Astronomical Twilight",
+            { -18.0f, -12.0f },
+            "Sky glow fades toward true dark; faint objects still partially washed out; "
+            "Milky Way begins to emerge; airglow and faint aurora may appear."
+        },
+        {
+            TwilightZone::AstronomicalDusk,
+            "Astronomical Dusk / Dawn",
+            { -18.0f, -18.0f },
+            "Last trace of solar illumination in the atmosphere; "
+            "end of astronomical twilight."
+        },
+        {
+            TwilightZone::AstronomicalNight,
+            "Astronomical Night",
+            { -999.0f, -18.0f },
+            "True darkness; no solar contribution to sky brightness; "
+            "best conditions for deep-sky observing (light pollution permitting)."
+        }
+    }};
+
+    // Key lookup — returns nullptr if zone is out of range
+    static constexpr const TwilightStageEntry* get(TwilightZone zone) {
+        const int idx = static_cast<int>(zone);
+        if (idx < 0 || idx >= COUNT) return nullptr;
+        return &stages[idx];
+    }
+
+    // Classify a measured sun altitude (degrees) into the appropriate phase
+    static constexpr TwilightZone classify(float altitudeDeg) {
+        if (altitudeDeg >   6.0f) return TwilightZone::FullDaylight;
+        if (altitudeDeg >   0.0f) return TwilightZone::GoldenHour;
+        if (altitudeDeg >  -6.0f) return TwilightZone::CivilTwilight;
+        if (altitudeDeg > -12.0f) return TwilightZone::NauticalTwilight;
+        if (altitudeDeg > -18.0f) return TwilightZone::AstronomicalTwilight;
+        return TwilightZone::AstronomicalNight;
+    }
+};
+
 // ----------------------------------------------------------------------------------------
 // SATIO Struct.
 // ----------------------------------------------------------------------------------------
@@ -208,43 +336,10 @@ struct SATIOStruct {
     double geo_positional_anomaly; // Anomaly for geo-positional time
     double geo_positional_sunrise; // Sunrise for geo-positional time
     double geo_positional_sunset; // Sunset for geo-positional time
+
+    TwilightStageEntry geo_positional_twilight_stage; // current according to geo-positional time
+    TwilightStageScheduleEntry geo_positional_twilight_schedule[10]; // schedule according to geo-positional time
     
-    // ── Noon cache ───────────────────────────────────────────────────────────────
-    time_t   geo_cache_last_updated;          // SI epoch of last cache compute
-    double   geo_cache_lat;                   // latitude at cache time
-    double   geo_cache_lon;                   // longitude at cache time
-    time_t   geo_noon_last;                   // SI epoch of last solar noon
-    time_t   geo_noon_next;                   // SI epoch of next solar noon
-    double   geo_noon_sharpness_last;         // degrees/hour at last noon
-    double   geo_noon_sharpness_next;         // degrees/hour at next noon
-    
-    // ── Proportional day ─────────────────────────────────────────────────────────
-    double   geo_abs_day_span_sec;            // SI seconds in this geo day (noon to noon)
-    double   geo_abs_day_elapsed_sec;         // SI seconds since last noon
-    double   geo_abs_day_fraction;            // 0.0 (noon) → 1.0 (next noon)
-    double   geo_abs_prop_second_si;          // SI seconds per one proportional second
-    double   geo_abs_prop_hour;               // proportional hours since noon
-    double   geo_abs_prop_minute;             // proportional minutes
-    double   geo_abs_prop_second;             // proportional seconds
-    double   geo_abs_wobble;                  // uncertainty in proportional second (SI)
-    double   geo_abs_anomaly;                 // 0.0 normal → 1.0 pole undefined
-    double   geo_abs_noon_sharpness;
-
-    // ── Geo calendar (J2000.0 epoch, vernal equinox = month 1) ───────────────────
-    double   geo_abs_year_j2000;              // elapsed tropical years from J2000.0
-    double   geo_abs_year_position;           // 0.0-1.0 within current tropical year
-    int      geo_abs_cal_month;               // 1-12 from vernal equinox (March=1)
-    int      geo_abs_cal_day;                 // day within geo month
-    int      geo_abs_solar_quarter;           // 0=spring 1=summer 2=autumn 3=winter
-    double   geo_abs_days_to_next_quarter;    // SI days until next solstice/equinox
-
-    // ── Formatted strings (new, alongside existing) ───────────────────────────────
-    char     formatted_geo_abs_prop_time[MAX_GLOBAL_ELEMENT_SIZE]; // proportional HH:MM:SS from noon
-    char     formatted_geo_abs_cal_date[MAX_GLOBAL_ELEMENT_SIZE];  // geo calendar DD/MM/YY (geo months)
-    char     geo_abs_year_decimal[MAX_GLOBAL_ELEMENT_SIZE];        // "26.4763"
-    char     geo_abs_quarter_str[MAX_GLOBAL_ELEMENT_SIZE];          // "SPRING" "SUMMER" "AUTUMN" "WINTER"
-    char     geo_abs_polar_status[MAX_GLOBAL_ELEMENT_SIZE];        // "" "POLAR DAY" "POLAR NIGHT" "UNDEFINED"    
-
     // ------------------------------------------------------------------------------------
     // FLAGS
     // ------------------------------------------------------------------------------------
@@ -305,6 +400,9 @@ void getSystemTime(void);
 void syncRTC(void);
 void setSatIOData(void);
 void initSystemTime(void);
+
+TwilightStageEntry getTwilightStage(float sunAltDeg);
+TwilightStageScheduleEntry getTwilightScheduleEntry(int zone);
 
 /**
    * @brief Calculates the speed between two GPS points in any direction.

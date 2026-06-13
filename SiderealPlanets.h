@@ -42,126 +42,6 @@ TODO:
 
 #define EARTH_OBLIQ  23.439281f  // obliquity of ecliptic (degrees)
 
-// ── Twilight stage types ─────────────────────────────────────────────────────
-
-enum class TwilightZone : int {
-    FullDaylight         = 0,
-    GoldenHour           = 1,
-    Sunset               = 2,
-    CivilTwilight        = 3,
-    CivilDusk            = 4,
-    NauticalTwilight     = 5,
-    NauticalDusk         = 6,
-    AstronomicalTwilight = 7,
-    AstronomicalDusk     = 8,
-    AstronomicalNight    = 9
-};
-
-struct AltitudeRange {
-    float lower;   // degrees, inclusive; use -999.0f for "no lower bound"
-    float upper;   // degrees, inclusive; use +999.0f for "no upper bound"
-};
-
-struct TwilightStageEntry {
-    TwilightZone    zone;
-    const char*     zoneName;
-    AltitudeRange   sunAltitude;   // geometric, sun centre, degrees
-    const char*     description;
-};
-
-struct TwilightStages {
-    static constexpr int COUNT = 10;
-
-    static constexpr std::array<TwilightStageEntry, COUNT> stages = {{
-        {
-            TwilightZone::FullDaylight,
-            "Full Daylight",
-            { 6.0f, 999.0f },
-            "Sun clearly above horizon; full illumination; shadows well-defined."
-        },
-
-        {
-            TwilightZone::GoldenHour,
-            "Golden Hour",
-            { 1.0f, 6.0f },
-            "Low-angle warm light; long soft shadows; beloved by photographers."
-        },
-        {
-            TwilightZone::Sunset,
-            "Sunset / Sunrise",
-            { -1.0f, 1.0f },
-            "Upper limb of sun at geometric horizon; atmospheric refraction lifts "
-            "apparent disc ~0.5 degrees above true horizon."
-        },
-        {
-            TwilightZone::CivilTwilight,
-            "Civil Twilight",
-            { -6.0f, -1.0f },
-            "Sky still bright; outdoor work possible without artificial light; "
-            "horizon clearly defined; brightest stars and Venus visible near end."
-        },
-
-        {
-            TwilightZone::CivilDusk,
-            "Civil Dusk / Dawn",
-            { -6.0f, -6.0f },
-            "Legal definition of 'lights required' in most countries; "
-            "end of civil twilight."
-        },
-        {
-            TwilightZone::NauticalTwilight,
-            "Nautical Twilight",
-            { -12.0f, -6.0f },
-            "Horizon still visible at sea; enough sky glow to use a sextant; "
-            "many stars visible; sky appears deep blue then indigo."
-        },
-        {
-            TwilightZone::NauticalDusk,
-            "Nautical Dusk / Dawn",
-            { -12.0f, -12.0f },
-            "Horizon at sea becomes indistinct; end of nautical twilight."
-        },
-        {
-            TwilightZone::AstronomicalTwilight,
-            "Astronomical Twilight",
-            { -18.0f, -12.0f },
-            "Sky glow fades toward true dark; faint objects still partially washed out; "
-            "Milky Way begins to emerge; airglow and faint aurora may appear."
-        },
-        {
-            TwilightZone::AstronomicalDusk,
-            "Astronomical Dusk / Dawn",
-            { -18.0f, -18.0f },
-            "Last trace of solar illumination in the atmosphere; "
-            "end of astronomical twilight."
-        },
-        {
-            TwilightZone::AstronomicalNight,
-            "Astronomical Night",
-            { -999.0f, -18.0f },
-            "True darkness; no solar contribution to sky brightness; "
-            "best conditions for deep-sky observing (light pollution permitting)."
-        }
-    }};
-
-    // Key lookup — returns nullptr if zone is out of range
-    static constexpr const TwilightStageEntry* get(TwilightZone zone) {
-        const int idx = static_cast<int>(zone);
-        if (idx < 0 || idx >= COUNT) return nullptr;
-        return &stages[idx];
-    }
-
-    // Classify a measured sun altitude (degrees) into the appropriate phase
-    static constexpr TwilightZone classify(float altitudeDeg) {
-        if (altitudeDeg >   6.0f) return TwilightZone::FullDaylight;
-        if (altitudeDeg >   0.0f) return TwilightZone::GoldenHour;
-        if (altitudeDeg >  -6.0f) return TwilightZone::CivilTwilight;
-        if (altitudeDeg > -12.0f) return TwilightZone::NauticalTwilight;
-        if (altitudeDeg > -18.0f) return TwilightZone::AstronomicalTwilight;
-        return TwilightZone::AstronomicalNight;
-    }
-};
-
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Structure to hold data
@@ -268,7 +148,6 @@ class SiderealPlanets {
 	double getEarthEclipticLongitude(void);
 	double getDegreesAltitudeOffsetByElevationM(double meters);
 	double inRange90(double degrees);
-	TwilightStageEntry getTwilightStage(float sunAltDeg) const;
 
   // library-accessible "private" interface
   private:

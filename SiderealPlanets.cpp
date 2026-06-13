@@ -181,12 +181,6 @@ char SiderealPlanets::day_of_week(int year, int month, int day)
   return (year + year/4 - year/100 + year/400 + t[month-1] + day) % 7;
 }
 
-TwilightStageEntry SiderealPlanets::getTwilightStage(float sunAltDeg) const {
-    TwilightZone zone       = TwilightStages::classify(sunAltDeg);
-    const TwilightStageEntry* entry = TwilightStages::get(zone);
-    return *entry;  // classify() always yields a valid index (0-9)
-}
-
 double SiderealPlanets::modifiedJulianDate1900(void) {
   // Based on Year 1900
   if (MJDdone) return mjd1900;

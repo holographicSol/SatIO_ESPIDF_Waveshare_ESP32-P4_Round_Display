@@ -41,13 +41,6 @@ struct SiderealPlantetsStruct siderealPlanetData = {
     .sun_radius_vector = NAN,
     .sun_distance = NAN,
     .sun_ecliptic_lat = NAN,
-    .sun_twilight_stage = {
-        TwilightZone::AstronomicalNight,
-        "Astronomical Night",
-        { -999.0f, -18.0f },
-        "True darkness; no solar contribution to sky brightness; "
-        "best conditions for deep-sky observing (light pollution permitting)."
-    },
     .luna_ra = NAN,
     .luna_dec = NAN,
     .luna_az = NAN,
@@ -848,15 +841,6 @@ void trackPlanets(double latitude, double longitude,
     myAstro.doPlanetElements();
     myAstro.doSun();
     trackSun();
-    siderealPlanetData.sun_twilight_stage = myAstro.getTwilightStage(
-        (float)(myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM));
-    printf("SunAlt=%f  TwilightZone=%d ( %s ) ZoneAltRange=[%.1f, %.1f]  %s\n",
-        siderealPlanetData.sun_alt,
-        static_cast<int>(siderealPlanetData.sun_twilight_stage.zone),
-        siderealPlanetData.sun_twilight_stage.zoneName,
-        siderealPlanetData.sun_twilight_stage.sunAltitude.lower,
-        siderealPlanetData.sun_twilight_stage.sunAltitude.upper,
-        siderealPlanetData.sun_twilight_stage.description);
 
     // -------------------------------------------------------
     // Now do other plans.
