@@ -17899,5 +17899,5 @@ void initSatIOUI() {
  * @brief Start's Update Display Timer.
  */
 void satio_ui_begin() {
-    display_timer = lv_timer_create(update_display_on_timer, 100, NULL);
+    display_timer = lv_timer_create(update_display_on_timer, 10, NULL);
 }
