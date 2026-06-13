@@ -850,13 +850,13 @@ void trackPlanets(double latitude, double longitude,
     trackSun();
     siderealPlanetData.sun_twilight_stage = myAstro.getTwilightStage(
         (float)(myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM));
-    // printf("SunAlt=%f  TwilightZone=%d ( %s ) ZoneAltRange=[%.1f, %.1f]  %s\n",
-    //     siderealPlanetData.sun_alt,
-    //     static_cast<int>(siderealPlanetData.sun_twilight_stage.zone),
-    //     siderealPlanetData.sun_twilight_stage.zoneName,
-    //     siderealPlanetData.sun_twilight_stage.sunAltitude.lower,
-    //     siderealPlanetData.sun_twilight_stage.sunAltitude.upper,
-    //     siderealPlanetData.sun_twilight_stage.description);
+    printf("SunAlt=%f  TwilightZone=%d ( %s ) ZoneAltRange=[%.1f, %.1f]  %s\n",
+        siderealPlanetData.sun_alt,
+        static_cast<int>(siderealPlanetData.sun_twilight_stage.zone),
+        siderealPlanetData.sun_twilight_stage.zoneName,
+        siderealPlanetData.sun_twilight_stage.sunAltitude.lower,
+        siderealPlanetData.sun_twilight_stage.sunAltitude.upper,
+        siderealPlanetData.sun_twilight_stage.description);
 
     // -------------------------------------------------------
     // Now do other plans.

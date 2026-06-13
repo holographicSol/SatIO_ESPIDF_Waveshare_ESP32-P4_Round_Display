@@ -79,26 +79,28 @@ struct TwilightStages {
             { 6.0f, 999.0f },
             "Sun clearly above horizon; full illumination; shadows well-defined."
         },
+
         {
             TwilightZone::GoldenHour,
             "Golden Hour",
-            { 0.0f, 6.0f },
+            { 1.0f, 6.0f },
             "Low-angle warm light; long soft shadows; beloved by photographers."
         },
         {
             TwilightZone::Sunset,
             "Sunset / Sunrise",
-            { 0.0f, 0.0f },
+            { -1.0f, 1.0f },
             "Upper limb of sun at geometric horizon; atmospheric refraction lifts "
             "apparent disc ~0.5 degrees above true horizon."
         },
         {
             TwilightZone::CivilTwilight,
             "Civil Twilight",
-            { -6.0f, 0.0f },
+            { -6.0f, -1.0f },
             "Sky still bright; outdoor work possible without artificial light; "
             "horizon clearly defined; brightest stars and Venus visible near end."
         },
+
         {
             TwilightZone::CivilDusk,
             "Civil Dusk / Dawn",
