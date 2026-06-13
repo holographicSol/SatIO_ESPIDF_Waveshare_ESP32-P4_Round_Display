@@ -555,6 +555,16 @@ typedef struct {
     lv_obj_t * val_geo_positional_time;
     lv_obj_t * lbl_geo_positional_date;
     lv_obj_t * val_geo_positional_date;
+    lv_obj_t * lbl_geo_positional_day_hours;
+    lv_obj_t * val_geo_positional_day_hours;
+    lv_obj_t * lbl_geo_positional_night_hours;
+    lv_obj_t * val_geo_positional_night_hours;
+    lv_obj_t * lbl_geo_positional_anomaly;
+    lv_obj_t * val_geo_positional_anomaly;
+    lv_obj_t * lbl_geo_positional_sunrise;
+    lv_obj_t * val_geo_positional_sunrise;
+    lv_obj_t * lbl_geo_positional_sunset;
+    lv_obj_t * val_geo_positional_sunset;
 
 } satio_container_t;
 

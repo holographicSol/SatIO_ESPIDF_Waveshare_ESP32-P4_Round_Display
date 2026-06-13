@@ -768,17 +768,11 @@ void updateGeoPositionalTime(void) {
     double sunrise_h = 12.0 - (day_hours / 2.0);
     double sunset_h  = 12.0 + (day_hours / 2.0);
 
-    satioData.geo_positional_day_hours   = day_hours;
-    satioData.geo_positional_night_hours = night_hours;
+    satioData.geo_positional_day_hours   = hoursToHHMM(day_hours);
+    satioData.geo_positional_night_hours = hoursToHHMM(night_hours);
     satioData.geo_positional_anomaly     = anomaly;
-    satioData.geo_positional_sunrise     = sunrise_h;
-    satioData.geo_positional_sunset      = sunset_h;
-
-    // Convert all four photoperiod values to HH.MM for display.
-    double day_hhmm     = hoursToHHMM(day_hours);
-    double night_hhmm   = hoursToHHMM(night_hours);
-    double sunrise_hhmm = hoursToHHMM(sunrise_h);
-    double sunset_hhmm  = hoursToHHMM(sunset_h);
+    satioData.geo_positional_sunrise     = hoursToHHMM(sunrise_h);
+    satioData.geo_positional_sunset      = hoursToHHMM(sunset_h);
 
     printf("Geo-positional Time : %02d:%02d:%02d %02d/%02d/%04d\n",
            (int)satioData.geo_positional_hour,
@@ -789,13 +783,43 @@ void updateGeoPositionalTime(void) {
            (int)satioData.geo_positional_year);
 
     printf("Photoperiod         : day=%05.2f  night=%05.2f  sunrise=%05.2f  sunset=%05.2f  anomaly=%.4f%s\n",
-           day_hhmm,
-           night_hhmm,
-           sunrise_hhmm,
-           sunset_hhmm,
+           satioData.geo_positional_day_hours,
+           satioData.geo_positional_night_hours,
+           satioData.geo_positional_sunrise,
+           satioData.geo_positional_sunset,
            anomaly,
            cos_omega <= -1.0 ? "  [POLAR DAY]"  :
            cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
+
+    // Format geo-positional time (HH:MM:SS)
+    char hour_str[3], min_str[3], sec_str[3];
+    padDigitsZero(satioData.geo_positional_hour, hour_str, sizeof(hour_str));
+    padDigitsZero(satioData.geo_positional_minute, min_str, sizeof(min_str));
+    padDigitsZero(satioData.geo_positional_second, sec_str, sizeof(sec_str));
+    memset(satioData.formatted_geo_positional_time, 0, sizeof(satioData.formatted_geo_positional_time));
+    snprintf(satioData.formatted_geo_positional_time, sizeof(satioData.formatted_geo_positional_time), "%s:%s:%s", hour_str, min_str, sec_str);
+
+    // Format geo-positional date (DD/MM/YYYY)
+    char day_str[3], month_str[3], year_str[5];
+    padDigitsZero(satioData.geo_positional_day, day_str, sizeof(day_str));
+    padDigitsZero(satioData.geo_positional_month, month_str, sizeof(month_str));
+    padDigitsZero(satioData.geo_positional_year, year_str, sizeof(year_str));
+    memset(satioData.formatted_geo_positional_date_DDMMYYYY, 0, sizeof(satioData.formatted_geo_positional_date_DDMMYYYY));
+    snprintf(satioData.formatted_geo_positional_date_DDMMYYYY, sizeof(satioData.formatted_geo_positional_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
+
+    // Format geo-positional short date (DD/MM/YY)
+    char short_year_str[3] = { year_str[2], year_str[3], '\0' };
+    memset(satioData.formatted_geo_positional_short_date_DDMMYY, 0, sizeof(satioData.formatted_geo_positional_short_date_DDMMYY));
+    snprintf(satioData.formatted_geo_positional_short_date_DDMMYY, sizeof(satioData.formatted_geo_positional_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
+
+    // Format padded geo-positional time (HHMMSS)
+    memset(satioData.padded_geo_positional_time_HHMMSS, 0, sizeof(satioData.padded_geo_positional_time_HHMMSS));
+    snprintf(satioData.padded_geo_positional_time_HHMMSS, sizeof(satioData.padded_geo_positional_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
+
+    // Format padded geo-positional date (DDMMYYYY)
+    memset(satioData.padded_geo_positional_date_DDMMYYYY, 0, sizeof(satioData.padded_geo_positional_date_DDMMYYYY));
+    snprintf(satioData.padded_geo_positional_date_DDMMYYYY, sizeof(satioData.padded_geo_positional_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
+
 }
 
 // ----------------------------------------------------------------------------------------

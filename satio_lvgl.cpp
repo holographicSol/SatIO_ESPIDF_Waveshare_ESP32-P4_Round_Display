@@ -9603,6 +9603,316 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.lbl_geo_positional_date, obj_w_0, obj_height);
     lv_obj_set_size(result.val_geo_positional_date, obj_w_1, obj_height);
 
+    /* ---------------------------------------------------------- */
+    /* Row Geo-Positional Day Hours                               */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_geo_positional_day_hours = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_geo_positional_day_hours = create_label(
+        row_geo_positional_day_hours,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Geo Day Hours HH.MM",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_geo_positional_day_hours = create_label(
+        row_geo_positional_day_hours,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_geo_positional_day_hours, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_geo_positional_day_hours, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Geo-Positional Night Hours                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_geo_positional_night_hours = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_geo_positional_night_hours = create_label(
+        row_geo_positional_night_hours,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Geo Night Hours HH.MM",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_geo_positional_night_hours = create_label(
+        row_geo_positional_night_hours,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_geo_positional_night_hours, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_geo_positional_night_hours, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Geo-Positional Anomaly                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_geo_positional_anomaly = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_geo_positional_anomaly = create_label(
+        row_geo_positional_anomaly,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Geo Anomaly",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_geo_positional_anomaly = create_label(
+        row_geo_positional_anomaly,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_geo_positional_anomaly, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_geo_positional_anomaly, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Geo-Positional Sunrise                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_geo_positional_sunrise = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_geo_positional_sunrise = create_label(
+        row_geo_positional_sunrise,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Geo Sunrise HH.MM",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_geo_positional_sunrise = create_label(
+        row_geo_positional_sunrise,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_geo_positional_sunrise, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_geo_positional_sunrise, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Geo-Positional Sunset                                  */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_geo_positional_sunset = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_geo_positional_sunset = create_label(
+        row_geo_positional_sunset,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Geo Sunset HH.MM",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_geo_positional_sunset = create_label(
+        row_geo_positional_sunset,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_geo_positional_sunset, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_geo_positional_sunset, obj_w_1, obj_height);
+
     return result;
 }
 
@@ -17474,6 +17784,31 @@ void update_display()
                 // Geo-Positional Date
                 // ────────────────────────────────────────────────
                 lv_label_set_text(satio_c.val_geo_positional_date, String(satioData.formatted_geo_positional_date_DDMMYYYY).c_str());
+
+                // ────────────────────────────────────────────────
+                // Geo-Positional Day Hours
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_geo_positional_day_hours, String(satioData.geo_positional_day_hours).c_str());
+
+                // ────────────────────────────────────────────────
+                // Geo-Positional Night Hours
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_geo_positional_night_hours, String(satioData.geo_positional_night_hours).c_str());
+
+                // ────────────────────────────────────────────────
+                // Geo-Positional Anomaly
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_geo_positional_anomaly, String(satioData.geo_positional_anomaly).c_str());
+
+                // ────────────────────────────────────────────────
+                // Geo-Positional Sunrise
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_geo_positional_sunrise, String(satioData.geo_positional_sunrise).c_str());
+
+                // ────────────────────────────────────────────────
+                // Geo-Positional Sunset
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_geo_positional_sunset, String(satioData.geo_positional_sunset).c_str());
 
                 // ────────────────────────────────────────────────
                 // Formatted RTC Time
