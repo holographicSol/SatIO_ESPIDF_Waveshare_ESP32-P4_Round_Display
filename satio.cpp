@@ -194,6 +194,12 @@ struct SATIOStruct satioData = {
     .padded_geo_positional_time_HHMMSS = "000000",
     .padded_geo_positional_date_DDMMYYYY = "00000000",
 
+    .geo_positional_day_hours = 0.0,
+    .geo_positional_night_hours = 0.0,
+    .geo_positional_anomaly = 0.0,
+    .geo_positional_sunrise = 0.0,
+    .geo_positional_sunset = 0.0,
+
     // ------------------------------------------------------------------------------------
     // FLAGS
     // ------------------------------------------------------------------------------------
@@ -649,80 +655,6 @@ void storeLocalTime(void) {
   }
 
 // ----------------------------------------------------------------------------------------
-// updateGeoPositionalTime.
-// Assumes UTC accurately pertains to longitude 0.0, then offsets UTC by current longitude. 
-// Positive East (ahead of UTC), negative West (behind UTC).
-// DST is intentionally disregarded for geo-positional time, for 'true' 'geo-positional time'.
-// Assuming UTC is accurate (which it might not be) then 'geo-positional' time is true local time,
-// rather than geo-political time which is bs, as is DST.
-// ----------------------------------------------------------------------------------------
-// void updateGeoPositionalTime(void) {
-//     // Build UTC time_t from stored RTC values (RTC always holds UTC).
-//     struct tm utc_tm = {0};
-//     utc_tm.tm_year  = satioData.rtc_year  - LAST_EPOCH;
-//     utc_tm.tm_mon   = satioData.rtc_month - 1;
-//     utc_tm.tm_mday  = satioData.rtc_mday;
-//     utc_tm.tm_hour  = satioData.rtc_hour;
-//     utc_tm.tm_min   = satioData.rtc_minute;
-//     utc_tm.tm_sec   = satioData.rtc_second;
-//     utc_tm.tm_isdst = 0;
-//     time_t utc_sec  = mktime(&utc_tm);
-
-//     // Longitude offset in seconds: 1 deg = 240 s (15 deg/h * 3600 s/h / 15).
-//     time_t lon_offset_sec = (time_t)(satioData.system_degrees_longitude * 240.0);
-
-//     // Geo-positional unix time.
-//     time_t geo_sec = utc_sec + lon_offset_sec;
-
-//     // Decompose into calendar fields.
-//     struct tm geo_tm;
-//     gmtime_r(&geo_sec, &geo_tm);
-
-//     satioData.geo_positional_hour        = (uint8_t)geo_tm.tm_hour;
-//     satioData.geo_positional_minute      = (uint8_t)geo_tm.tm_min;
-//     satioData.geo_positional_second      = (uint8_t)geo_tm.tm_sec;
-//     // satioData.geo_positional_millisecond = (double)(geo_tm.tm_msec);
-//     satioData.geo_positional_year        = (uint16_t)(geo_tm.tm_year + LAST_EPOCH);
-//     satioData.geo_positional_month       = (uint8_t)(geo_tm.tm_mon + 1);
-//     satioData.geo_positional_day         = (uint8_t)geo_tm.tm_mday;
-
-//     // Format geo-positional time (HH:MM:SS)
-//     char hour_str[3], min_str[3], sec_str[3];
-//     padDigitsZero(satioData.geo_positional_hour, hour_str, sizeof(hour_str));
-//     padDigitsZero(satioData.geo_positional_minute, min_str, sizeof(min_str));
-//     padDigitsZero(satioData.geo_positional_second, sec_str, sizeof(sec_str));
-//     memset(satioData.formatted_geo_positional_time, 0, sizeof(satioData.formatted_geo_positional_time));
-//     snprintf(satioData.formatted_geo_positional_time, sizeof(satioData.formatted_geo_positional_time), "%s:%s:%s", hour_str, min_str, sec_str);
-
-//     char day_str[3], month_str[3], year_str[5];
-//     padDigitsZero(satioData.geo_positional_day, day_str, sizeof(day_str));
-//     padDigitsZero(satioData.geo_positional_month, month_str, sizeof(month_str));
-//     padDigitsZero(satioData.geo_positional_year, year_str, sizeof(year_str));
-
-//     memset(satioData.formatted_geo_positional_date_DDMMYYYY, 0, sizeof(satioData.formatted_geo_positional_date_DDMMYYYY));
-//     snprintf(satioData.formatted_geo_positional_date_DDMMYYYY, sizeof(satioData.formatted_geo_positional_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
-
-//     char short_year_str[3] = { year_str[2], year_str[3], '\0' };
-//     memset(satioData.formatted_geo_positional_short_date_DDMMYY, 0, sizeof(satioData.formatted_geo_positional_short_date_DDMMYY));
-//     snprintf(satioData.formatted_geo_positional_short_date_DDMMYY, sizeof(satioData.formatted_geo_positional_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
-
-//     memset(satioData.padded_geo_positional_time_HHMMSS, 0, sizeof(satioData.padded_geo_positional_time_HHMMSS));
-//     snprintf(satioData.padded_geo_positional_time_HHMMSS, sizeof(satioData.padded_geo_positional_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
-
-//     memset(satioData.padded_geo_positional_date_DDMMYYYY, 0, sizeof(satioData.padded_geo_positional_date_DDMMYYYY));
-//     snprintf(satioData.padded_geo_positional_date_DDMMYYYY, sizeof(satioData.padded_geo_positional_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
-
-//     printf("Geo-positional Time: %02d:%02d:%02d %02d/%02d/%04d\n",
-//            (int)satioData.geo_positional_hour,
-//            (int)satioData.geo_positional_minute,
-//            (int)satioData.geo_positional_second,
-//           //  (int)satioData.geo_positional_millisecond,
-//            (int)satioData.geo_positional_day,
-//            (int)satioData.geo_positional_month,
-//            (int)satioData.geo_positional_year);
-// }
-
-// ----------------------------------------------------------------------------------------
 // updateGeoPositionalTime - With latitude weighting for true break down of time (time anomaly at poles).
 // Computes true solar (geo-positional) time by snapshotting the RTC (UTC) and
 // offsetting by longitude, weighted by latitude.
@@ -738,7 +670,7 @@ void storeLocalTime(void) {
   Anomaly Thresholds (Optional Extension)
   These thresholds can be used to categorize the severity of the time anomaly based on the
   latitude weight:
-  
+
   0.9< ~26° Normal solar time
   0.5 – 0.926°–60°Partial solar validity
   0.1 – 0.560°–84°High anomaly zone
@@ -747,6 +679,20 @@ void storeLocalTime(void) {
   The genuine breakdown isn't in the time offset formula — it's in the meaningfulness of
   solar time as a concept.
 */
+
+// ----------------------------------------------------------------------------------------
+// hoursToHHMM
+// Converts a fractional hour value (e.g. 16.28) to a HH.MM display double (e.g. 16.17)
+// where the decimal part represents minutes, not hundredths of an hour.
+// ----------------------------------------------------------------------------------------
+static inline double hoursToHHMM(double frac_hours) {
+    int    h   = (int)frac_hours;
+    int    m   = (int)((frac_hours - h) * 60.0);
+    return (double)h + (double)m / 100.0;
+}
+
+// ----------------------------------------------------------------------------------------
+// updateGeoPositionalTime.
 // ----------------------------------------------------------------------------------------
 void updateGeoPositionalTime(void) {
     // Build UTC time_t from stored RTC values (RTC always holds UTC).
@@ -760,13 +706,8 @@ void updateGeoPositionalTime(void) {
     utc_tm.tm_isdst = 0;
     time_t utc_sec  = mktime(&utc_tm);
 
-    // Latitude weight: cos(lat) smoothly reduces the solar offset toward the poles.
-    // At ±90° the offset is zero — solar time is undefined (all meridians converge).
-    double lat_rad    = satioData.system_degrees_latitude * M_PI / 180.0;
-    double lat_weight = cos(lat_rad);   // 1.0 at equator, 0.0 at poles
-
-    // Longitude offset in seconds, scaled by latitude weight.
-    double lon_offset_sec_f = satioData.system_degrees_longitude * 240.0 * lat_weight;
+    // True solar time offset is purely longitudinal — no latitude factor.
+    double lon_offset_sec_f = satioData.system_degrees_longitude * 240.0;
     time_t lon_offset_sec   = (time_t)lon_offset_sec_f;
 
     // Geo-positional unix time.
@@ -779,24 +720,82 @@ void updateGeoPositionalTime(void) {
     satioData.geo_positional_hour        = (double)geo_tm.tm_hour;
     satioData.geo_positional_minute      = (double)geo_tm.tm_min;
     satioData.geo_positional_second      = (double)geo_tm.tm_sec;
-    satioData.geo_positional_millisecond = (double)(tv_now.tv_usec / 1000);
     satioData.geo_positional_year        = (double)(geo_tm.tm_year + LAST_EPOCH);
     satioData.geo_positional_month       = (double)(geo_tm.tm_mon + 1);
     satioData.geo_positional_day         = (double)geo_tm.tm_mday;
 
-    // Expose the raw weight for downstream use (e.g. display, anomaly warnings).
-    satioData.geo_positional_lat_weight  = lat_weight;
+    // ------------------------------------------------------------------------
+    // Photoperiod calculation.
+    // Day of year (1-365) from the geo-positional date.
+    // ------------------------------------------------------------------------
+    int day_of_year = geo_tm.tm_yday + 1;  // tm_yday is 0-based
 
-    printf("Geo-positional Time: %02d:%02d:%02d.%03d %02d/%02d/%04d  [lat_weight=%.4f lon_offset=%+.1fs]\n",
+    // Solar declination (degrees): where the sun sits relative to the equator.
+    // +23.45° at summer solstice, -23.45° at winter solstice.
+    double decl_deg = -23.45 * cos((360.0 / 365.0) * (day_of_year + 10) * M_PI / 180.0);
+    double decl_rad = decl_deg * M_PI / 180.0;
+
+    double lat_rad  = satioData.system_degrees_latitude * M_PI / 180.0;
+
+    // Hour angle at sunrise/sunset: arccos(-tan(lat) * tan(decl)).
+    // The argument can exceed ±1 at the poles — clamp to handle polar day/night.
+    double cos_omega = -tan(lat_rad) * tan(decl_rad);
+
+    double day_hours;
+    if (cos_omega <= -1.0) {
+        // Sun never sets — polar day (midnight sun).
+        day_hours = 24.0;
+    } else if (cos_omega >= 1.0) {
+        // Sun never rises — polar night.
+        day_hours = 0.0;
+    } else {
+        double omega_deg = acos(cos_omega) * 180.0 / M_PI;
+        day_hours = 2.0 * omega_deg / 15.0;
+    }
+
+    double night_hours = 24.0 - day_hours;
+
+    // Anomaly flag: how far into polar conditions we are.
+    // 0.0 = normal photoperiod, 1.0 = fully at the pole.
+    double abs_lat = fabs(satioData.system_degrees_latitude);
+    double anomaly = 0.0;
+    if (abs_lat > 66.5) {
+        anomaly = (abs_lat - 66.5) / (90.0 - 66.5);
+    }
+
+    // Sunrise and sunset as fractional hours from midnight (solar noon = 12.0).
+    // Only meaningful when 0 < day_hours < 24.
+    double sunrise_h = 12.0 - (day_hours / 2.0);
+    double sunset_h  = 12.0 + (day_hours / 2.0);
+
+    satioData.geo_positional_day_hours   = day_hours;
+    satioData.geo_positional_night_hours = night_hours;
+    satioData.geo_positional_anomaly     = anomaly;
+    satioData.geo_positional_sunrise     = sunrise_h;
+    satioData.geo_positional_sunset      = sunset_h;
+
+    // Convert all four photoperiod values to HH.MM for display.
+    double day_hhmm     = hoursToHHMM(day_hours);
+    double night_hhmm   = hoursToHHMM(night_hours);
+    double sunrise_hhmm = hoursToHHMM(sunrise_h);
+    double sunset_hhmm  = hoursToHHMM(sunset_h);
+
+    printf("Geo-positional Time : %02d:%02d:%02d %02d/%02d/%04d\n",
            (int)satioData.geo_positional_hour,
            (int)satioData.geo_positional_minute,
            (int)satioData.geo_positional_second,
-           (int)satioData.geo_positional_millisecond,
            (int)satioData.geo_positional_day,
            (int)satioData.geo_positional_month,
-           (int)satioData.geo_positional_year,
-           lat_weight,
-           lon_offset_sec_f);
+           (int)satioData.geo_positional_year);
+
+    printf("Photoperiod         : day=%05.2f  night=%05.2f  sunrise=%05.2f  sunset=%05.2f  anomaly=%.4f%s\n",
+           day_hhmm,
+           night_hhmm,
+           sunrise_hhmm,
+           sunset_hhmm,
+           anomaly,
+           cos_omega <= -1.0 ? "  [POLAR DAY]"  :
+           cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
 }
 
 // ----------------------------------------------------------------------------------------

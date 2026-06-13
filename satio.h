@@ -185,6 +185,8 @@ struct SATIOStruct {
     // ------------------------------------------------------------------------------------
     // Geo-Positional Time
     // ------------------------------------------------------------------------------------
+    double geo_positional_lat_weight;
+    
     uint8_t geo_positional_hour; // Hour for geo-positional time
     uint8_t geo_positional_minute; // Minute for geo-positional time
     uint8_t geo_positional_second; // Second for geo-positional time
@@ -201,6 +203,11 @@ struct SATIOStruct {
     char padded_geo_positional_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE]; // Padded geo_positional time (HHMMSS)
     char padded_geo_positional_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded geo_positional date
 
+    double geo_positional_day_hours; // Day hours for geo-positional time
+    double geo_positional_night_hours; // Night hours for geo-positional time
+    double geo_positional_anomaly; // Anomaly for geo-positional time
+    double geo_positional_sunrise; // Sunrise for geo-positional time
+    double geo_positional_sunset; // Sunset for geo-positional time
     // ------------------------------------------------------------------------------------
     // FLAGS
     // ------------------------------------------------------------------------------------
