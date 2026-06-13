@@ -670,16 +670,16 @@ void updateGeoPositionalTime(void) {
     satioData.geo_positional_hour        = (double)geo_tm.tm_hour;
     satioData.geo_positional_minute      = (double)geo_tm.tm_min;
     satioData.geo_positional_second      = (double)geo_tm.tm_sec;
-    satioData.geo_positional_millisecond = (double)(tv_now.tv_usec / 1000);
+    // satioData.geo_positional_millisecond = (double)(geo_tm.tm_msec);
     satioData.geo_positional_year        = (double)(geo_tm.tm_year + LAST_EPOCH);
     satioData.geo_positional_month       = (double)(geo_tm.tm_mon + 1);
     satioData.geo_positional_day         = (double)geo_tm.tm_mday;
 
-    printf("Geo-positional Time: %02d:%02d:%02d.%03d %02d/%02d/%04d\n",
+    printf("Geo-positional Time: %02d:%02d:%02d %02d/%02d/%04d\n",
            (int)satioData.geo_positional_hour,
            (int)satioData.geo_positional_minute,
            (int)satioData.geo_positional_second,
-           (int)satioData.geo_positional_millisecond,
+          //  (int)satioData.geo_positional_millisecond,
            (int)satioData.geo_positional_day,
            (int)satioData.geo_positional_month,
            (int)satioData.geo_positional_year);
