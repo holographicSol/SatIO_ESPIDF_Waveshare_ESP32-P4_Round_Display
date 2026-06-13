@@ -684,6 +684,12 @@ void storeLocalTime(void) {
   side of noon, at any position on Earth, if using this real local time. We can start to see
   the elegance of real local time, and possibly apply it to ancient sites, built around
   the movement of the sun and celestial objects.
+
+  Time should now change as you move around the globe, even just a little, and not be artificially
+  fixed to an imaginary timezone. The time should be a function of your position on the globe, and not a
+  function of political boundaries. This is the real local time.
+
+  Now you may know and keep the real time, anywhere on earth.
 */
 
 // ----------------------------------------------------------------------------------------
