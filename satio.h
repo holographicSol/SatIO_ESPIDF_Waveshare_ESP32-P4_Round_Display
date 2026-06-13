@@ -185,14 +185,21 @@ struct SATIOStruct {
     // ------------------------------------------------------------------------------------
     // Geo-Positional Time
     // ------------------------------------------------------------------------------------
-    double geo_positional_hour; // Hour for geo-positional time
-    double geo_positional_minute; // Minute for geo-positional time
-    double geo_positional_second; // Second for geo-positional time
-    double geo_positional_millisecond; // Millisecond for geo-positional time
+    uint8_t geo_positional_hour; // Hour for geo-positional time
+    uint8_t geo_positional_minute; // Minute for geo-positional time
+    uint8_t geo_positional_second; // Second for geo-positional time
+    uint8_t geo_positional_millisecond; // Millisecond for geo-positional time
 
-    double geo_positional_year; // Year for geo-positional time
-    double geo_positional_month; // Month for geo-positional time
-    double geo_positional_day; // Day for geo-positional time
+    uint16_t geo_positional_year; // Year for geo-positional time
+    uint8_t geo_positional_month; // Month for geo-positional time
+    uint8_t geo_positional_day; // Day for geo-positional time
+
+    char formatted_geo_positional_time[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted geo_positional time
+    char formatted_geo_positional_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted geo_positional date
+    char formatted_geo_positional_short_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted geo_positional date
+
+    char padded_geo_positional_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE]; // Padded geo_positional time (HHMMSS)
+    char padded_geo_positional_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded geo_positional date
 
     // ------------------------------------------------------------------------------------
     // FLAGS

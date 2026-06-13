@@ -9439,6 +9439,170 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.lbl_rtcsync_altitude, obj_w_0, obj_height);
     lv_obj_set_size(result.val_rtcsync_altitude, obj_w_1, obj_height);
 
+    /* ---------------------------------------------------------- */
+    /* Title Geo-Positional Time                                  */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_title_geo_positional_time = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = sub_row_width - (sub_column_padding);
+
+    result.lbl_title_geo_positional_time = create_label(
+        row_title_geo_positional_time,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "GEO-POSITIONAL TIME",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_title_hue,
+        default_title_hue
+    );
+
+    lv_obj_set_size(result.lbl_title_geo_positional_time, obj_w_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Geo-Positional Time                                    */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_geo_positional_time = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_geo_positional_time = create_label(
+        row_geo_positional_time,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Geo-Positional Time",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_geo_positional_time = create_label(
+        row_geo_positional_time,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_geo_positional_time, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_geo_positional_time, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row Geo-Positional Date                                    */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_geo_positional_date = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_geo_positional_date = create_label(
+        row_geo_positional_date,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "Geo-Positional Date",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_geo_positional_date = create_label(
+        row_geo_positional_date,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_geo_positional_date, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_geo_positional_date, obj_w_1, obj_height);
+
     return result;
 }
 
@@ -17300,6 +17464,16 @@ void update_display()
                 // RTC Sync Altitude
                 // ────────────────────────────────────────────────
                 lv_label_set_text(satio_c.val_rtcsync_altitude, String(satioData.rtcsync_altitude).c_str());
+
+                // ────────────────────────────────────────────────
+                // Geo-Positional Time
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_geo_positional_time, String(satioData.formatted_geo_positional_time).c_str());
+
+                // ────────────────────────────────────────────────
+                // Geo-Positional Date
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_geo_positional_date, String(satioData.formatted_geo_positional_date_DDMMYYYY).c_str());
 
                 // ────────────────────────────────────────────────
                 // Formatted RTC Time
