@@ -678,6 +678,12 @@ void storeLocalTime(void) {
 
   The genuine breakdown of time at the poles isn't in the time offset formula — it's in the
   meaningfulness of solar time as a concept.
+
+  This real local time should be legitimately perspective building over manufactured fudged,
+  authoritative time. For example I realize now that there are equal hours of daylight either
+  side of noon, at any position on Earth, if using this real local time. We can start to see
+  the elegance of real local time, and possibly apply it to ancient sites, built around
+  the movement of the sun and celestial objects.
 */
 
 // ----------------------------------------------------------------------------------------
