@@ -208,6 +208,43 @@ struct SATIOStruct {
     double geo_positional_anomaly; // Anomaly for geo-positional time
     double geo_positional_sunrise; // Sunrise for geo-positional time
     double geo_positional_sunset; // Sunset for geo-positional time
+    
+    // ── Noon cache ───────────────────────────────────────────────────────────────
+    time_t   geo_cache_last_updated;          // SI epoch of last cache compute
+    double   geo_cache_lat;                   // latitude at cache time
+    double   geo_cache_lon;                   // longitude at cache time
+    time_t   geo_noon_last;                   // SI epoch of last solar noon
+    time_t   geo_noon_next;                   // SI epoch of next solar noon
+    double   geo_noon_sharpness_last;         // degrees/hour at last noon
+    double   geo_noon_sharpness_next;         // degrees/hour at next noon
+    
+    // ── Proportional day ─────────────────────────────────────────────────────────
+    double   geo_abs_day_span_sec;            // SI seconds in this geo day (noon to noon)
+    double   geo_abs_day_elapsed_sec;         // SI seconds since last noon
+    double   geo_abs_day_fraction;            // 0.0 (noon) → 1.0 (next noon)
+    double   geo_abs_prop_second_si;          // SI seconds per one proportional second
+    double   geo_abs_prop_hour;               // proportional hours since noon
+    double   geo_abs_prop_minute;             // proportional minutes
+    double   geo_abs_prop_second;             // proportional seconds
+    double   geo_abs_wobble;                  // uncertainty in proportional second (SI)
+    double   geo_abs_anomaly;                 // 0.0 normal → 1.0 pole undefined
+    double   geo_abs_noon_sharpness;
+
+    // ── Geo calendar (J2000.0 epoch, vernal equinox = month 1) ───────────────────
+    double   geo_abs_year_j2000;              // elapsed tropical years from J2000.0
+    double   geo_abs_year_position;           // 0.0-1.0 within current tropical year
+    int      geo_abs_cal_month;               // 1-12 from vernal equinox (March=1)
+    int      geo_abs_cal_day;                 // day within geo month
+    int      geo_abs_solar_quarter;           // 0=spring 1=summer 2=autumn 3=winter
+    double   geo_abs_days_to_next_quarter;    // SI days until next solstice/equinox
+
+    // ── Formatted strings (new, alongside existing) ───────────────────────────────
+    char     formatted_geo_abs_prop_time[MAX_GLOBAL_ELEMENT_SIZE]; // proportional HH:MM:SS from noon
+    char     formatted_geo_abs_cal_date[MAX_GLOBAL_ELEMENT_SIZE];  // geo calendar DD/MM/YY (geo months)
+    char     geo_abs_year_decimal[MAX_GLOBAL_ELEMENT_SIZE];        // "26.4763"
+    char     geo_abs_quarter_str[MAX_GLOBAL_ELEMENT_SIZE];          // "SPRING" "SUMMER" "AUTUMN" "WINTER"
+    char     geo_abs_polar_status[MAX_GLOBAL_ELEMENT_SIZE];        // "" "POLAR DAY" "POLAR NIGHT" "UNDEFINED"    
+
     // ------------------------------------------------------------------------------------
     // FLAGS
     // ------------------------------------------------------------------------------------

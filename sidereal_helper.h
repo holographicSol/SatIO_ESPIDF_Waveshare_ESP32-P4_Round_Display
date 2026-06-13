@@ -40,6 +40,7 @@ struct SiderealPlantetsStruct {
     double sun_distance;
     double sun_ecliptic_lat;
     double sun_ecliptic_long;
+    TwilightStageEntry sun_twilight_stage;
     double luna_ra;
     double luna_dec;
     double luna_az;
