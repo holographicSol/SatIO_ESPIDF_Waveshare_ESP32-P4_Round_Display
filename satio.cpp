@@ -676,14 +676,14 @@ void storeLocalTime(void) {
   0.1 – 0.560°–84°High anomaly zone
   0.1<  84°Time undefined
 
-  The genuine breakdown isn't in the time offset formula — it's in the meaningfulness of
-  solar time as a concept.
+  The genuine breakdown of time at the poles isn't in the time offset formula — it's in the
+  meaningfulness of solar time as a concept.
 */
 
 // ----------------------------------------------------------------------------------------
 // hoursToHHMM
-// Converts a fractional hour value (e.g. 16.28) to a HH.MM display double (e.g. 16.17)
-// where the decimal part represents minutes, not hundredths of an hour.
+// Converts a fractional hour value where the decimal part represents minutes, not
+// hundredths of an hour.
 // ----------------------------------------------------------------------------------------
 static inline double hoursToHHMM(double frac_hours) {
     int    h   = (int)frac_hours;
@@ -774,22 +774,22 @@ void updateGeoPositionalTime(void) {
     satioData.geo_positional_sunrise     = hoursToHHMM(sunrise_h);
     satioData.geo_positional_sunset      = hoursToHHMM(sunset_h);
 
-    printf("Geo-positional Time : %02d:%02d:%02d %02d/%02d/%04d\n",
-           (int)satioData.geo_positional_hour,
-           (int)satioData.geo_positional_minute,
-           (int)satioData.geo_positional_second,
-           (int)satioData.geo_positional_day,
-           (int)satioData.geo_positional_month,
-           (int)satioData.geo_positional_year);
+    // printf("Geo-positional Time : %02d:%02d:%02d %02d/%02d/%04d\n",
+    //        (int)satioData.geo_positional_hour,
+    //        (int)satioData.geo_positional_minute,
+    //        (int)satioData.geo_positional_second,
+    //        (int)satioData.geo_positional_day,
+    //        (int)satioData.geo_positional_month,
+    //        (int)satioData.geo_positional_year);
 
-    printf("Photoperiod         : day=%05.2f  night=%05.2f  sunrise=%05.2f  sunset=%05.2f  anomaly=%.4f%s\n",
-           satioData.geo_positional_day_hours,
-           satioData.geo_positional_night_hours,
-           satioData.geo_positional_sunrise,
-           satioData.geo_positional_sunset,
-           anomaly,
-           cos_omega <= -1.0 ? "  [POLAR DAY]"  :
-           cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
+    // printf("Photoperiod         : day=%05.2f  night=%05.2f  sunrise=%05.2f  sunset=%05.2f  anomaly=%.4f%s\n",
+    //        satioData.geo_positional_day_hours,
+    //        satioData.geo_positional_night_hours,
+    //        satioData.geo_positional_sunrise,
+    //        satioData.geo_positional_sunset,
+    //        anomaly,
+    //        cos_omega <= -1.0 ? "  [POLAR DAY]"  :
+    //        cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
 
     // Format geo-positional time (HH:MM:SS)
     char hour_str[3], min_str[3], sec_str[3];
