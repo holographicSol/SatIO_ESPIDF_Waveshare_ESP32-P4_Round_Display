@@ -648,12 +648,11 @@ void storeLocalTime(void) {
 
 // ----------------------------------------------------------------------------------------
 // updateGeoPositionalTime.
-// Computes true solar (geo-positional) time by snapshotting the RTC (UTC) and
-// offsetting by longitude. Each degree of longitude = 240 seconds offset.
+// Assumes UTC accurately pertains to longitude 0.0, then offsets UTC by current longitude. 
 // Positive East (ahead of UTC), negative West (behind UTC).
-// Note that 'geo-positional time' is currently built on top of UTC, but there may be
-// more preferable alternatives.
 // DST is intentionally disregarded for geo-positional time, for 'true' 'geo-positional time'.
+// Assuming UTC is accurate (which it might not be) then 'geo-positional' time is true local time,
+// rather than geo-political time which is bs, as is DST.
 // ----------------------------------------------------------------------------------------
 void updateGeoPositionalTime(void) {
     // Build UTC time_t from stored RTC values (RTC always holds UTC).
