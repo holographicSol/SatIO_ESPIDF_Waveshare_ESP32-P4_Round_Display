@@ -667,9 +667,17 @@ void taskUniverse(void * pvParameters) {
                   satioData.rtc_hour,
                   satioData.rtc_minute,
                   satioData.rtc_second,
-                  satioData.local_hour,
-                  satioData.local_minute,
-                  satioData.local_second,
+
+                  // uncomment to use geo-political local time (UTC+-UTCOffset)
+                  // satioData.local_hour,
+                  // satioData.local_minute,
+                  // satioData.local_second,
+
+                  // uncomment to use geo-positional local time (UTC+-LatLongOffset)
+                  satioData.geo_positional_hour,
+                  satioData.geo_positional_minute,
+                  satioData.geo_positional_second,
+
                   satioData.system_altitude
                 );
     systemData.i_count_track_planets++;
