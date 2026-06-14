@@ -925,9 +925,17 @@ void astro_clock_update(void) {
     // }
 
     // -----------------------------------------------------------------
-    //                                                    PERIMETER CLOCK
+    //                                                   PERIMETER CLOCK
     // -----------------------------------------------------------------
     update_perimeter_clock();
+
+    // -----------------------------------------------------------------
+    //                                         REFRESH ACTIVE TARGET BOX
+    // Reposition data box and update content as the selected planet moves
+    // -----------------------------------------------------------------
+    if (current_target != ASTRO_TARGET_NONE) {
+        astro_clock_set_target(current_target);
+    }
 
     // Resume timer
     // lv_timer_resume(astro_timer);
