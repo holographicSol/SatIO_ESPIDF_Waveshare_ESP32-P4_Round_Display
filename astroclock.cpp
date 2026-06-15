@@ -1053,7 +1053,7 @@ static void update_target_data_content(int target) {
                 "Earth\n\n"
                 "Rise                      N/A\n"
                 "Set                       N/A\n"
-                "Distance                  %.2fm (to sea level)\n"
+                "Distance                  %.2fm\n"
                 "Right Ascension           N/A\n"
                 "Declination               N/A\n"
                 "Helio Ecliptic Latitude   N/A\n"
