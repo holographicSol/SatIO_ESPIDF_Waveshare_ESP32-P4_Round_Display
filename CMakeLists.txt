@@ -1,5 +1,6 @@
 idf_component_register(
     SRCS
+        unscii_12.c
         Mono_Bold_12.c
         Mono_Bold_14.c
         Mono_Bold_16.c

@@ -566,6 +566,13 @@ typedef struct {
     lv_obj_t * lbl_geo_positional_sunset;
     lv_obj_t * val_geo_positional_sunset;
 
+    // lv_obj_t * lbl_geo_positional_current_twilight_zone_name;
+    // lv_obj_t * val_geo_positional_current_twilight_zone_name;
+    // lv_obj_t * lbl_geo_positional_current_twilight_zone_start_time;
+    // lv_obj_t * val_geo_positional_current_twilight_zone_start_time;
+    // lv_obj_t * lbl_geo_positional_current_twilight_zone_end_time;
+    // lv_obj_t * val_geo_positional_current_twilight_zone_end_time;
+
 } satio_container_t;
 
 /** ---------------------------------------------------------------------------------------
