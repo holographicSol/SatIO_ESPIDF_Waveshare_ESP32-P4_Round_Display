@@ -967,17 +967,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_SUN:
             snprintf(buf, sizeof(buf),
                 "Sun\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Distance:                 %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Helio Ecliptic Latitude:  %.2f\n"
-                "Helio Ecliptic Longitude: %.2f\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Distance                  %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Helio Ecliptic Latitude   %.2f\n"
+                "Helio Ecliptic Longitude  %.2f\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.sun_r,
                 siderealPlanetData.sun_s,
                 siderealPlanetData.sun_distance,
@@ -995,17 +995,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_MERCURY:
             snprintf(buf, sizeof(buf),
                 "Mercury\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Distance:                 %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Helio Ecliptic Latitude:  %.2f\n"
-                "Helio Ecliptic Longitude: %.2f\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Distance                  %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Helio Ecliptic Latitude   %.2f\n"
+                "Helio Ecliptic Longitude  %.2f\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.mercury_r,
                 siderealPlanetData.mercury_s,
                 siderealPlanetData.mercury_distance,
@@ -1023,17 +1023,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_VENUS:
             snprintf(buf, sizeof(buf),
                 "Venus\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Distance:                 %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Helio Ecliptic Latitude:  %.2f\n"
-                "Helio Ecliptic Longitude: %.2f\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Distance                  %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Helio Ecliptic Latitude   %.2f\n"
+                "Helio Ecliptic Longitude  %.2f\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.venus_r,
                 siderealPlanetData.venus_s,
                 siderealPlanetData.venus_distance,
@@ -1051,17 +1051,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_EARTH:
             snprintf(buf, sizeof(buf),
                 "Earth\n\n"
-                "Rise:                     N/A\n"
-                "Set:                      N/A\n"
-                "Distance:                 %.2fm (to sea level)\n"
-                "Right Ascension:          N/A\n"
-                "Declination:              N/A\n"
-                "Helio Ecliptic Latitude:  N/A\n"
-                "Helio Ecliptic Longitude: N/A\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  N/A\n"
-                "Altitude:                 N/A",
+                "Rise                      N/A\n"
+                "Set                       N/A\n"
+                "Distance                  %.2fm (to sea level)\n"
+                "Right Ascension           N/A\n"
+                "Declination               N/A\n"
+                "Helio Ecliptic Latitude   N/A\n"
+                "Helio Ecliptic Longitude  N/A\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   N/A\n"
+                "Altitude                  N/A",
                 atof(gnggaData.altitude),
                 siderealPlanetData.earth_ecliptic_lat,
                 siderealPlanetData.earth_ecliptic_long
@@ -1071,14 +1071,14 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_LUNA:
             snprintf(buf, sizeof(buf),
                 "Luna\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Phase:                    %s\n"
-                "Luminance:                %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Phase                     %s\n"
+                "Luminance                 %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.luna_r,
                 siderealPlanetData.luna_s,
                 siderealPlanetData.luna_p_name[(int)siderealPlanetData.luna_p],
@@ -1093,17 +1093,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_MARS:
             snprintf(buf, sizeof(buf),
                 "Mars\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Distance:                 %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Helio Ecliptic Latitude:  %.2f\n"
-                "Helio Ecliptic Longitude: %.2f\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Distance                  %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Helio Ecliptic Latitude   %.2f\n"
+                "Helio Ecliptic Longitude  %.2f\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.mars_r,
                 siderealPlanetData.mars_s,
                 siderealPlanetData.mars_distance,
@@ -1121,17 +1121,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_JUPITER:
             snprintf(buf, sizeof(buf),
                 "Jupiter\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Distance:                 %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Helio Ecliptic Latitude:  %.2f\n"
-                "Helio Ecliptic Longitude: %.2f\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Distance                  %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Helio Ecliptic Latitude   %.2f\n"
+                "Helio Ecliptic Longitude  %.2f\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.jupiter_r,
                 siderealPlanetData.jupiter_s,
                 siderealPlanetData.jupiter_distance,
@@ -1149,17 +1149,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_SATURN:
             snprintf(buf, sizeof(buf),
                 "Saturn\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Distance:                 %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Helio Ecliptic Latitude:  %.2f\n"
-                "Helio Ecliptic Longitude: %.2f\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Distance                  %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Helio Ecliptic Latitude   %.2f\n"
+                "Helio Ecliptic Longitude  %.2f\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.saturn_r,
                 siderealPlanetData.saturn_s,
                 siderealPlanetData.saturn_distance,
@@ -1177,17 +1177,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_URANUS:
             snprintf(buf, sizeof(buf),
                 "Uranus\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Distance:                 %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Helio Ecliptic Latitude:  %.2f\n"
-                "Helio Ecliptic Longitude: %.2f\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Distance                  %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Helio Ecliptic Latitude   %.2f\n"
+                "Helio Ecliptic Longitude  %.2f\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.uranus_r,
                 siderealPlanetData.uranus_s,
                 siderealPlanetData.uranus_distance,
@@ -1205,17 +1205,17 @@ static void update_target_data_content(int target) {
         case ASTRO_TARGET_NEPTUNE:
             snprintf(buf, sizeof(buf),
                 "Neptune\n\n"
-                "Rise:                     %.2f\n"
-                "Set:                      %.2f\n"
-                "Distance:                 %.2f\n"
-                "Right Ascension:          %.2f\n"
-                "Declination:              %.2f\n"
-                "Helio Ecliptic Latitude:  %.2f\n"
-                "Helio Ecliptic Longitude: %.2f\n"
-                "Ecliptic Latitude:        %.2f\n"
-                "Ecliptic Longitude:       %.2f\n"
-                "Azimuth:                  %.2f\n"
-                "Altitude:                 %.2f",
+                "Rise                      %.2f\n"
+                "Set                       %.2f\n"
+                "Distance                  %.2f\n"
+                "Right Ascension           %.2f\n"
+                "Declination               %.2f\n"
+                "Helio Ecliptic Latitude   %.2f\n"
+                "Helio Ecliptic Longitude  %.2f\n"
+                "Ecliptic Latitude         %.2f\n"
+                "Ecliptic Longitude        %.2f\n"
+                "Azimuth                   %.2f\n"
+                "Altitude                  %.2f",
                 siderealPlanetData.neptune_r,
                 siderealPlanetData.neptune_s,
                 siderealPlanetData.neptune_distance,
@@ -1750,7 +1750,7 @@ void astro_clock_begin(
     lv_obj_set_style_border_color(target_data_box, COLOR_TARGET, 0);
     lv_obj_set_style_bg_color(target_data_box, lv_color_black(), 0);
     lv_obj_set_style_bg_opa(target_data_box, LV_OPA_80, 0);
-    lv_obj_set_style_pad_all(target_data_box, 4, 0);
+    lv_obj_set_style_pad_all(target_data_box, 12, 0);
     lv_obj_add_flag(target_data_box, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(target_data_box, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(target_data_box, LV_OBJ_FLAG_CLICKABLE);
