@@ -642,6 +642,9 @@ static lv_obj_t * pclk_tick_lines[PCLK_NUMERAL_LINES] = {};
 static lv_point_precise_t pclk_tick_pts[PCLK_NUMERAL_LINES][2] = {};
 static lv_obj_t * pclk_numeral_labels[PCLK_HR_COUNT] = {};
 
+static lv_obj_t * pclk_utc_hour_arc  = NULL;
+static lv_obj_t * pclk_loc_hour_arc  = NULL;
+
 // Colours
 #define COLOR_PCLK_UTC_ACTIVE    lv_color_make(  0, 128, 255)   // blue
 #define COLOR_PCLK_UTC_DIM       lv_color_make(  0,   0,  48)   // very dark blue
@@ -650,6 +653,11 @@ static lv_obj_t * pclk_numeral_labels[PCLK_HR_COUNT] = {};
 #define COLOR_PCLK_NUM           lv_color_make( 80,  80,  80)   // grey numerals
 #define COLOR_PCLK_TICK_MAJOR    lv_color_make( 64,  64,  64)   // hour ticks
 #define COLOR_PCLK_TICK_MINOR    lv_color_make( 24,  24,  24)   // minute ticks
+
+#define COLOR_PCLK_UTC_PM_ACTIVE  lv_color_make(255, 128,   0)   // orange = UTC PM
+#define COLOR_PCLK_UTC_PM_DIM     lv_color_make( 48,  24,   0)   // dim orange
+#define COLOR_PCLK_LOC_PM_ACTIVE  lv_color_make(255, 200,   0)   // yellow = local PM
+#define COLOR_PCLK_LOC_PM_DIM     lv_color_make( 48,  40,   0)   // dim yellow
 
 // ============================================================================
 // HELPERS
@@ -728,26 +736,26 @@ static void create_perimeter_clock(lv_obj_t * parent)
         lv_line_set_points(pclk_tick_lines[i], pclk_tick_pts[i], 2);
     }
 
-    // 12 numeral labels — created with LV_SIZE_CONTENT so LVGL measures them
-    for (int i = 0; i < PCLK_HR_COUNT; i++) {
-        float angle_rad = (float)(i + 1) * (2.0f * M_PI / (float)PCLK_HR_COUNT) - M_PI / 2.0f;
-        int32_t lx = pclk_cx + (int32_t)(cosf(angle_rad) * (float)r3_mid);
-        int32_t ly = pclk_cy + (int32_t)(sinf(angle_rad) * (float)r3_mid);
+    // // numeral labels — created with LV_SIZE_CONTENT so LVGL measures them
+    // for (int i = 0; i < PCLK_HR_COUNT; i++) {
+    //     float angle_rad = (float)(i + 1) * (2.0f * M_PI / (float)PCLK_HR_COUNT) - M_PI / 2.0f;
+    //     int32_t lx = pclk_cx + (int32_t)(cosf(angle_rad) * (float)r3_mid);
+    //     int32_t ly = pclk_cy + (int32_t)(sinf(angle_rad) * (float)r3_mid);
 
-        pclk_numeral_labels[i] = lv_label_create(parent);
-        lv_obj_set_style_text_font(pclk_numeral_labels[i], &unscii_12, 0);
-        lv_obj_set_style_text_color(pclk_numeral_labels[i], COLOR_PCLK_NUM, 0);
-        lv_obj_set_style_bg_opa(pclk_numeral_labels[i], LV_OPA_TRANSP, 0);
-        lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_SCROLLABLE);
+    //     pclk_numeral_labels[i] = lv_label_create(parent);
+    //     lv_obj_set_style_text_font(pclk_numeral_labels[i], &unscii_12, 0);
+    //     lv_obj_set_style_text_color(pclk_numeral_labels[i], COLOR_PCLK_NUM, 0);
+    //     lv_obj_set_style_bg_opa(pclk_numeral_labels[i], LV_OPA_TRANSP, 0);
+    //     lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_CLICKABLE);
+    //     lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_SCROLLABLE);
 
-        char buf[4];
-        snprintf(buf, sizeof(buf), "%d", i + 1);
-        lv_label_set_text(pclk_numeral_labels[i], buf);
+    //     char buf[4];
+    //     snprintf(buf, sizeof(buf), "%d", i + 1);
+    //     lv_label_set_text(pclk_numeral_labels[i], buf);
 
-        // Centre the label on (lx, ly) — approximate half-width/height
-        lv_obj_set_pos(pclk_numeral_labels[i], lx - 6, ly - 6);
-    }
+    //     // Centre the label on (lx, ly) — approximate half-width/height
+    //     lv_obj_set_pos(pclk_numeral_labels[i], lx - 6, ly - 6);
+    // }
 
     // ------------------------------------------------------------------
     // DATA AREAS — dot objects
@@ -765,13 +773,14 @@ static void create_perimeter_clock(lv_obj_t * parent)
     } areas[] = {
         { 0, PCLK_SEC_COUNT, COLOR_PCLK_UTC_DIM },   // UTC seconds
         { 1, PCLK_MIN_COUNT, COLOR_PCLK_UTC_DIM },   // UTC minutes
-        { 2, PCLK_HR_COUNT,  COLOR_PCLK_UTC_DIM },   // UTC hours
+        // { 2, PCLK_HR_COUNT,  COLOR_PCLK_UTC_DIM },   // UTC hours (dot hour)
         { 4, PCLK_SEC_COUNT, COLOR_PCLK_LOC_DIM },   // Local seconds
         { 5, PCLK_MIN_COUNT, COLOR_PCLK_LOC_DIM },   // Local minutes
-        { 6, PCLK_HR_COUNT,  COLOR_PCLK_LOC_DIM },   // Local hours
+        // { 6, PCLK_HR_COUNT,  COLOR_PCLK_LOC_DIM },   // Local hours (dot hour)
     };
 
-    for (int a = 0; a < 6; a++) {
+    // for (int a = 0; a < 6; a++) { // dot hour
+    for (int a = 0; a < 4; a++) { // arc hour
         int    area  = areas[a].area;
         int    count = areas[a].count;
         int32_t ar   = pclk_area_r(area);
@@ -796,6 +805,76 @@ static void create_perimeter_clock(lv_obj_t * parent)
             pclk_dots[area][i] = dot;
         }
     }
+    // UTC hour arc (area 2)
+    {
+        int32_t ar = pclk_area_r(2);
+        pclk_utc_hour_arc = lv_arc_create(parent);
+        lv_obj_remove_style_all(pclk_utc_hour_arc);
+        lv_obj_set_size(pclk_utc_hour_arc, ar * 2, ar * 2);
+        lv_obj_set_style_arc_color(pclk_utc_hour_arc, COLOR_PCLK_UTC_DIM, LV_PART_MAIN);
+        lv_obj_set_style_arc_width(pclk_utc_hour_arc, pclk_gap, LV_PART_MAIN);
+        lv_obj_set_style_arc_rounded(pclk_utc_hour_arc, false, LV_PART_MAIN);
+        lv_obj_set_style_arc_color(pclk_utc_hour_arc, COLOR_PCLK_UTC_ACTIVE, LV_PART_INDICATOR);
+        lv_obj_set_style_arc_width(pclk_utc_hour_arc, pclk_gap, LV_PART_INDICATOR);
+        lv_obj_set_style_arc_rounded(pclk_utc_hour_arc, false, LV_PART_INDICATOR);
+        lv_obj_set_style_arc_opa(pclk_utc_hour_arc, LV_OPA_TRANSP, LV_PART_KNOB);
+        lv_arc_set_rotation(pclk_utc_hour_arc, 270);   // start at 12 o'clock
+        lv_arc_set_bg_angles(pclk_utc_hour_arc, 0, 360);
+        lv_arc_set_value(pclk_utc_hour_arc, 0);
+        lv_arc_set_range(pclk_utc_hour_arc, 0, 1000);
+        lv_obj_remove_flag(pclk_utc_hour_arc, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_align(pclk_utc_hour_arc, LV_ALIGN_CENTER, 0, 0);
+    }
+
+    // Local hour arc (area 6)
+    {
+        int32_t ar = pclk_area_r(6);
+        pclk_loc_hour_arc = lv_arc_create(parent);
+        lv_obj_remove_style_all(pclk_loc_hour_arc);
+        lv_obj_set_size(pclk_loc_hour_arc, ar * 2, ar * 2);
+        lv_obj_set_style_arc_color(pclk_loc_hour_arc, COLOR_PCLK_LOC_DIM, LV_PART_MAIN);
+        lv_obj_set_style_arc_width(pclk_loc_hour_arc, pclk_gap, LV_PART_MAIN);
+        lv_obj_set_style_arc_rounded(pclk_loc_hour_arc, false, LV_PART_INDICATOR);
+        lv_obj_set_style_arc_color(pclk_loc_hour_arc, COLOR_PCLK_LOC_ACTIVE, LV_PART_INDICATOR);
+        lv_obj_set_style_arc_width(pclk_loc_hour_arc, pclk_gap, LV_PART_INDICATOR);
+        lv_obj_set_style_arc_rounded(pclk_loc_hour_arc, false, LV_PART_INDICATOR);
+        lv_obj_set_style_arc_opa(pclk_loc_hour_arc, LV_OPA_TRANSP, LV_PART_KNOB);
+        lv_arc_set_rotation(pclk_loc_hour_arc, 270);
+        lv_arc_set_bg_angles(pclk_loc_hour_arc, 0, 360);
+        lv_arc_set_value(pclk_loc_hour_arc, 0);
+        lv_arc_set_range(pclk_loc_hour_arc, 0, 1000);
+        lv_obj_remove_flag(pclk_loc_hour_arc, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_align(pclk_loc_hour_arc, LV_ALIGN_CENTER, 0, 0);
+    }
+
+    // ------------------------------------------------------------------
+    // NUMERALS — created LAST so they render on top of all arcs/dots
+    // ------------------------------------------------------------------
+    for (int i = 0; i < PCLK_HR_COUNT; i++) {
+        float angle_rad = (float)(i + 1) * (2.0f * M_PI / (float)PCLK_HR_COUNT) - M_PI / 2.0f;
+        int32_t lx = pclk_cx + (int32_t)(cosf(angle_rad) * (float)r3_mid);
+        int32_t ly = pclk_cy + (int32_t)(sinf(angle_rad) * (float)r3_mid);
+
+        pclk_numeral_labels[i] = lv_label_create(parent);
+        lv_obj_set_style_text_font(pclk_numeral_labels[i], &unscii_12, 0);
+        lv_obj_set_style_text_color(pclk_numeral_labels[i], COLOR_PCLK_NUM, 0);
+        lv_obj_set_style_bg_color(pclk_numeral_labels[i], lv_color_black(), 0);
+        lv_obj_set_style_bg_opa(pclk_numeral_labels[i], LV_OPA_COVER, 0);  // opaque black bg punches through arcs
+        lv_obj_set_style_pad_all(pclk_numeral_labels[i], 1, 0);            // tight padding around glyph
+        lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_SCROLLABLE);
+
+        char buf[4];
+        snprintf(buf, sizeof(buf), "%d", i + 1);
+        lv_label_set_text(pclk_numeral_labels[i], buf);
+
+        // Centre on (lx, ly) — use layout to measure after text set
+        lv_obj_set_size(pclk_numeral_labels[i], LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+        lv_obj_update_layout(pclk_numeral_labels[i]);
+        int32_t w = lv_obj_get_width(pclk_numeral_labels[i]);
+        int32_t h = lv_obj_get_height(pclk_numeral_labels[i]);
+        lv_obj_set_pos(pclk_numeral_labels[i], lx - w / 2, ly - h / 2);
+    }
 }
 
 // ============================================================================
@@ -807,6 +886,9 @@ static void update_perimeter_clock(void)
 {
     // Guard
     if (!pclk_dots[0][0]) return;
+
+    bool loc_pm = (satioData.local_hour >= 12);
+    bool utc_pm = (satioData.geo_positional_hour >= 12);
 
     // Current time values
     uint8_t loc_h = satioData.local_hour   % PCLK_HR_COUNT;
@@ -826,16 +908,17 @@ static void update_perimeter_clock(void)
     } cfg[] = {
         { 0, PCLK_SEC_COUNT, utc_s, COLOR_PCLK_UTC_ACTIVE, COLOR_PCLK_UTC_DIM },
         { 1, PCLK_MIN_COUNT, utc_m, COLOR_PCLK_UTC_ACTIVE, COLOR_PCLK_UTC_DIM },
-        { 2, PCLK_HR_COUNT,  utc_h, COLOR_PCLK_UTC_ACTIVE, COLOR_PCLK_UTC_DIM },
+        // { 2, PCLK_HR_COUNT,  utc_h, COLOR_PCLK_UTC_ACTIVE, COLOR_PCLK_UTC_DIM }, // dot hour
         { 4, PCLK_SEC_COUNT, loc_s, COLOR_PCLK_LOC_ACTIVE, COLOR_PCLK_LOC_DIM },
         { 5, PCLK_MIN_COUNT, loc_m, COLOR_PCLK_LOC_ACTIVE, COLOR_PCLK_LOC_DIM },
-        { 6, PCLK_HR_COUNT,  loc_h, COLOR_PCLK_LOC_ACTIVE, COLOR_PCLK_LOC_DIM },
+        // { 6, PCLK_HR_COUNT,  loc_h, COLOR_PCLK_LOC_ACTIVE, COLOR_PCLK_LOC_DIM }, // dot hour
     };
 
     int32_t dr_active = pclk_dot_r(true);
     int32_t dr_dim    = pclk_dot_r(false);
 
-    for (int a = 0; a < 6; a++) {
+    // for (int a = 0; a < 6; a++) { // dot hour
+    for (int a = 0; a < 4; a++) { // arc hour
         int area  = cfg[a].area;
         int count = cfg[a].count;
         int act   = cfg[a].active_idx;
@@ -851,6 +934,24 @@ static void update_perimeter_clock(void)
             lv_obj_set_style_bg_color(dot,
                 active ? cfg[a].active_color : cfg[a].dim_color, 0);
         }
+    }
+    // Hour arcs — fractional progress across the 12-hour cycle
+    // loc_h + loc_m/60.0 gives smooth sub-hour position
+    // Scaled to arc range 0-1000
+    if (pclk_utc_hour_arc) {
+        float utc_progress = ((float)utc_h + (float)utc_m / 60.0f) / (float)PCLK_HR_COUNT;
+        int32_t utc_val = (int32_t)(utc_progress * 1000.0f);
+        lv_arc_set_value(pclk_utc_hour_arc, utc_val);
+        lv_obj_set_style_arc_color(pclk_utc_hour_arc, 
+            utc_pm ? COLOR_PCLK_UTC_PM_ACTIVE : COLOR_PCLK_UTC_ACTIVE, LV_PART_INDICATOR);
+    }
+
+    if (pclk_loc_hour_arc) {
+        float loc_progress = ((float)loc_h + (float)loc_m / 60.0f) / (float)PCLK_HR_COUNT;
+        int32_t loc_val = (int32_t)(loc_progress * 1000.0f);
+        lv_arc_set_value(pclk_loc_hour_arc, loc_val);
+        lv_obj_set_style_arc_color(pclk_loc_hour_arc,
+            loc_pm ? COLOR_PCLK_LOC_PM_ACTIVE : COLOR_PCLK_LOC_ACTIVE, LV_PART_INDICATOR);
     }
 }
 
