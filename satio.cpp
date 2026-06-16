@@ -616,6 +616,7 @@ void storeLocalTime(void) {
     satioData.local_wday = timeinfo->tm_wday;
     satioData.local_mday = timeinfo->tm_mday;
     satioData.local_yday = timeinfo->tm_yday + 1; // Adjust from 0
+    // printf("local_yday: %d\n", satioData.local_yday);
 
     // Copy weekday name
     memset(satioData.local_wday_name, 0, sizeof(satioData.local_wday_name));

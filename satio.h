@@ -241,10 +241,10 @@ struct SATIOStruct {
     uint16_t local_year;                                // Local year
     uint8_t local_month;                                // Local month
     uint8_t local_mday;                                 // Local day of month
-    uint8_t local_yday;                                 // Local day of year
+    uint16_t local_yday;                                // Local day of year
     uint8_t local_wday;                                 // Local day of week
     char local_wday_name[MAX_GLOBAL_ELEMENT_SIZE];      // Local weekday name
-    char local_month_name[MAX_GLOBAL_ELEMENT_SIZE];      // Local month name
+    char local_month_name[MAX_GLOBAL_ELEMENT_SIZE];     // Local month name
     int64_t utc_second_offset;      // UTC offset in seconds
     bool utc_auto_offset_flag;      // Auto offset flag
     bool set_time_automatically;    // Auto time setting flag
