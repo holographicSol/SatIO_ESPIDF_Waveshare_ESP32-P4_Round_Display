@@ -497,11 +497,14 @@ static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle,
 #define COLOR_PCLK_NUM lv_color_make( 80,  80,  80)
 
 // Hour arc
-#define COLOR_PCLK_H  lv_color_make(0, 0, 255)
+#define COLOR_PCLK_H_BG        lv_color_make(0, 0, 48)
+#define COLOR_PCLK_H_INDICATOR lv_color_make(0, 0, 255)
 // Minute arc
-#define COLOR_PCLK_M  lv_color_make(0, 224, 0)
+#define COLOR_PCLK_M_BG         lv_color_make(0, 48, 0)
+#define COLOR_PCLK_M_INDICATOR  lv_color_make(0, 224, 0)
 // Second arc
-#define COLOR_PCLK_S  lv_color_make(0, 224, 255)
+#define COLOR_PCLK_S_BG         lv_color_make(0, 48, 48)
+#define COLOR_PCLK_S_INDICATOR  lv_color_make(0, 224, 225)
 
 // ============================================================================
 // STATE — geometry cache
@@ -549,9 +552,9 @@ static lv_obj_t * pclk_make_arc(
     lv_obj_set_size(arc, arc_r * 2, arc_r * 2);
 
     // Background track
-    // lv_obj_set_style_arc_color(arc, bg_color,      LV_PART_MAIN);
-    // lv_obj_set_style_arc_width(arc, arc_w,         LV_PART_MAIN);
-    // lv_obj_set_style_arc_rounded(arc, false,       LV_PART_MAIN);
+    lv_obj_set_style_arc_color(arc, bg_color,      LV_PART_MAIN);
+    lv_obj_set_style_arc_width(arc, arc_w,         LV_PART_MAIN);
+    lv_obj_set_style_arc_rounded(arc, false,       LV_PART_MAIN);
 
     // Active indicator
     lv_obj_set_style_arc_color(arc, indicator_color,   LV_PART_INDICATOR);
@@ -593,7 +596,7 @@ static void create_perimeter_clock(lv_obj_t * parent)
     if (pclk_gap < 4) pclk_gap = 4;
 
     // Arc stroke width = gap minus 2px margin (1px each side)
-    int32_t arc_w = pclk_gap - 4;
+    int32_t arc_w = pclk_gap - 6;
     if (arc_w < 2) arc_w = 2;
 
     // ------------------------------------------------------------------
@@ -605,20 +608,28 @@ static void create_perimeter_clock(lv_obj_t * parent)
     // TIME ARCS  (created before numerals so numerals render on top)
     // ------------------------------------------------------------------
 
+    vTaskDelay(5 / portTICK_PERIOD_MS);
+
     // Area — seconds (outermost data ring)
     pclk_arc_sec = pclk_make_arc(parent,
         pclk_area_r(0), arc_w,
-        COLOR_PCLK_S, COLOR_PCLK_S);
+        COLOR_PCLK_S_INDICATOR, COLOR_PCLK_S_BG);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // Area — minutes
     pclk_arc_min = pclk_make_arc(parent,
         pclk_area_r(3), arc_w,
-        COLOR_PCLK_M, COLOR_PCLK_M);
+        COLOR_PCLK_M_INDICATOR, COLOR_PCLK_M_BG);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // Area — hours (smooth, innermost data ring)
     pclk_arc_hr = pclk_make_arc(parent,
         pclk_area_r(4), arc_w,
-        COLOR_PCLK_H, COLOR_PCLK_H);
+        COLOR_PCLK_H_INDICATOR, COLOR_PCLK_H_BG);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // ------------------------------------------------------------------
     // AREA — numeral labels  (created last → render on top of arcs)
@@ -646,6 +657,8 @@ static void create_perimeter_clock(lv_obj_t * parent)
         int32_t w = lv_obj_get_width(pclk_numeral_labels[i]);
         int32_t h = lv_obj_get_height(pclk_numeral_labels[i]);
         lv_obj_set_pos(pclk_numeral_labels[i], lx - w / 2, ly - h / 2);
+
+        vTaskDelay(5 / portTICK_PERIOD_MS);
     }
 }
 
