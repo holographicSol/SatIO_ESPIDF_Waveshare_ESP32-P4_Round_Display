@@ -16356,8 +16356,8 @@ void display_home_screen()
         home_screen,
         720,             // outline width
         720,             // outline height
-        604,             // astro width
-        604,             // astro height
+        550,             // astro width
+        550,             // astro height
         LV_ALIGN_CENTER, // alignment
         0,               // pos x
         0,               // pos y

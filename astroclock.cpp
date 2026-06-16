@@ -621,7 +621,7 @@ static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle,
 // Dot counts per area
 #define PCLK_SEC_COUNT  60
 #define PCLK_MIN_COUNT  60
-#define PCLK_HR_COUNT   24 // global switch between 12 hour/24 hour.
+#define PCLK_HR_COUNT   12 // global switch between 12 hour/24 hour.
 
 // LVGL object arrays — one object per dot per area
 // (7 data areas; area 3 is drawn procedurally via lv_line, no dot objects needed)
