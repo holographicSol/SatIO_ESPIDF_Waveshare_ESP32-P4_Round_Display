@@ -500,86 +500,360 @@ static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle,
 // Place 60 dots around the outer ring (space between Neptune orbit and edge).
 // Every 5th dot is an hour marker (slightly larger).
 // ============================================================================
-static void create_perimeter_clock(lv_obj_t * parent) {
-    // Scale dot sizes with SIZE_UNIT like other astro elements
-    // Small dots (minutes/seconds): ~SIZE_UNIT, minimum 4px radius
-    // Large dots (hours, every 5th): ~SIZE_UNIT*2, minimum 6px radius
-    clock_dot_r_small = (SIZE_UNIT > 4) ? SIZE_UNIT     : 4;
-    clock_dot_r_large = (SIZE_UNIT > 3) ? SIZE_UNIT * 2 : 6;
+// static void create_perimeter_clock(lv_obj_t * parent) {
+//     // Scale dot sizes with SIZE_UNIT like other astro elements
+//     // Small dots (minutes/seconds): ~SIZE_UNIT, minimum 4px radius
+//     // Large dots (hours, every 5th): ~SIZE_UNIT*2, minimum 6px radius
+//     clock_dot_r_small = (SIZE_UNIT > 4) ? SIZE_UNIT     : 4;
+//     clock_dot_r_large = (SIZE_UNIT > 3) ? SIZE_UNIT * 2 : 6;
 
-    // Position ring in the gap between Neptune's orbit and the container edge
-    int32_t outer_r   = (OUTLINE_WIDTH < OUTLINE_HEIGHT ? OUTLINE_WIDTH : OUTLINE_HEIGHT) / 2;
-    clock_ring_radius = outer_r - clock_dot_r_large - 3;
+//     // Position ring in the gap between Neptune's orbit and the container edge
+//     int32_t outer_r   = (OUTLINE_WIDTH < OUTLINE_HEIGHT ? OUTLINE_WIDTH : OUTLINE_HEIGHT) / 2;
+//     clock_ring_radius = outer_r - clock_dot_r_large - 3;
 
-    for (int i = 0; i < CLOCK_DOT_COUNT; i++) {
-        bool    is_hour = (i % 5 == 0);
-        int32_t r       = is_hour ? clock_dot_r_large : clock_dot_r_small;
-        int32_t diam    = r * 2;
+//     for (int i = 0; i < CLOCK_DOT_COUNT; i++) {
+//         bool    is_hour = (i % 5 == 0);
+//         int32_t r       = is_hour ? clock_dot_r_large : clock_dot_r_small;
+//         int32_t diam    = r * 2;
 
-        // Clockwise from 12 o'clock: i=0 → top, i=15 → right, etc.
-        float   angle_rad = deg2rad((float)i * 6.0f);
-        int32_t cx = SOLAR_CENTER_X + (int32_t)((float)clock_ring_radius * sinf(angle_rad));
-        int32_t cy = SOLAR_CENTER_Y - (int32_t)((float)clock_ring_radius * cosf(angle_rad));
+//         // Clockwise from 12 o'clock: i=0 → top, i=15 → right, etc.
+//         float   angle_rad = deg2rad((float)i * 6.0f);
+//         int32_t cx = SOLAR_CENTER_X + (int32_t)((float)clock_ring_radius * sinf(angle_rad));
+//         int32_t cy = SOLAR_CENTER_Y - (int32_t)((float)clock_ring_radius * cosf(angle_rad));
 
-        lv_obj_t * dot = lv_obj_create(parent);
-        lv_obj_remove_style_all(dot);
-        lv_obj_set_size(dot, diam, diam);
-        lv_obj_set_style_radius(dot, LV_RADIUS_CIRCLE, 0);
-        lv_obj_set_style_bg_color(dot, COLOR_CLOCK_INACTIVE, 0);
-        lv_obj_set_style_bg_opa(dot, LV_OPA_COVER, 0);
-        lv_obj_remove_flag(dot, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_remove_flag(dot, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_set_pos(dot, cx - r, cy - r);
+//         lv_obj_t * dot = lv_obj_create(parent);
+//         lv_obj_remove_style_all(dot);
+//         lv_obj_set_size(dot, diam, diam);
+//         lv_obj_set_style_radius(dot, LV_RADIUS_CIRCLE, 0);
+//         lv_obj_set_style_bg_color(dot, COLOR_CLOCK_INACTIVE, 0);
+//         lv_obj_set_style_bg_opa(dot, LV_OPA_COVER, 0);
+//         lv_obj_remove_flag(dot, LV_OBJ_FLAG_SCROLLABLE);
+//         lv_obj_remove_flag(dot, LV_OBJ_FLAG_CLICKABLE);
+//         lv_obj_set_pos(dot, cx - r, cy - r);
 
-        clock_dots[i] = dot;
-    }
+//         clock_dots[i] = dot;
+//     }
+// }
+
+// // ============================================================================
+// // PERIMETER CLOCK: UPDATE
+// // Light up the dot for current hour (12h), minute, and second in green.
+// // ============================================================================
+// static void update_perimeter_clock(void) {
+//     if (!clock_dots[0]) return;
+
+//     uint8_t hour   = satioData.local_hour   % 12;
+//     uint8_t minute = satioData.local_minute % 60;
+//     uint8_t second = satioData.local_second % 60;
+
+//     int32_t hour_idx   = (int32_t)hour * 5;  // maps 0-11 → 0,5,10,...,55
+//     int32_t minute_idx = (int32_t)minute;
+//     int32_t second_idx = (int32_t)second;
+
+//     for (int i = 0; i < CLOCK_DOT_COUNT; i++) {
+//         if (!clock_dots[i]) continue;
+
+//         bool is_hour   = (i == hour_idx);
+//         bool is_minute = (i == minute_idx);
+//         bool is_second = (i == second_idx);
+
+//         if (is_hour || is_second) {
+//             // Solid filled — hour or second
+//             lv_obj_set_style_bg_color(clock_dots[i], COLOR_CLOCK_ACTIVE, 0);
+//             lv_obj_set_style_bg_opa(clock_dots[i], LV_OPA_COVER, 0);
+//             // When minute also lands on this dot, add a white border to distinguish
+//             if (is_minute) {
+//                 lv_obj_set_style_border_width(clock_dots[i], 2, 0);
+//             } else {
+//                 lv_obj_set_style_border_width(clock_dots[i], 0, 0);
+//             }
+//         } else if (is_minute) {
+//             // Minute only: outline, transparent fill
+//             lv_obj_set_style_bg_opa(clock_dots[i], LV_OPA_TRANSP, 0);
+//             lv_obj_set_style_border_color(clock_dots[i], COLOR_CLOCK_ACTIVE, 0);
+//             lv_obj_set_style_border_width(clock_dots[i], 2, 0);
+//         } else {
+//             // Inactive: dim solid fill, no border
+//             lv_obj_set_style_bg_color(clock_dots[i], COLOR_CLOCK_INACTIVE, 0);
+//             lv_obj_set_style_bg_opa(clock_dots[i], LV_OPA_COVER, 0);
+//             lv_obj_set_style_border_width(clock_dots[i], 0, 0);
+//         }
+//     }
+// }
+// ============================================================================
+// PERIMETER CLOCK — CONCENTRIC RING DESIGN
+// Replaces the original single-ring 60-dot clock.
+//
+// GEOMETRY (based on OUTLINE=720, ASTRO=556, Neptune orbit = ORBIT_STEP*8):
+//   The usable perimeter band runs from Neptune's orbit radius outward to
+//   just inside the outline edge.
+//
+//   outer_r  = min(OUTLINE_WIDTH, OUTLINE_HEIGHT) / 2        = 360
+//   inner_r  = MAX_ORBIT_RADIUS + SIZE_UNIT                  = Neptune orbit + small clearance
+//   band     = outer_r - inner_r                             ≈ 89px
+//   9 rings divide the band into 8 equal gaps (7 data areas + area 3 = numerals)
+//   gap      = band / 8
+//
+// RING INDEX (0 = outermost, 8 = innermost):
+//   ring[i] radius = outer_r - i * gap
+//
+// AREA N sits between ring[N] and ring[N+1], midpoint = areaR(N):
+//   Area 0 — UTC seconds  (60 dots, blue)
+//   Area 1 — UTC minutes  (60 dots, blue)
+//   Area 2 — UTC hours    (24 dots, blue)
+//   Area 3 — Hour numerals 1-12 + minute tick marks  (static reference)
+//   Area 4 — Local seconds (60 dots, green)
+//   Area 5 — Local minutes (60 dots, green)
+//   Area 6 — Local hours   (24 dots, green)
+//   Areas 7-8 are inside the neptune orbit — not used here.
+//
+// DOT APPEARANCE:
+//   Active dot  : full-brightness colour, larger radius
+//   Inactive dot: very dim version of the same colour, smaller radius
+//   Hour-5 tick positions in areas 0/1/4/5 get a slightly larger inactive dot
+//   so the 12-division structure remains legible.
+// ============================================================================
+
+// ============================================================================
+// DATA STRUCTURES  (replace the old #define / static block)
+// ============================================================================
+
+// Dot counts per area
+#define PCLK_SEC_COUNT  60
+#define PCLK_MIN_COUNT  60
+#define PCLK_HR_COUNT   24 // global switch between 12 hour/24 hour.
+
+// LVGL object arrays — one object per dot per area
+// (7 data areas; area 3 is drawn procedurally via lv_line, no dot objects needed)
+#define PCLK_AREAS      7
+#define PCLK_MAX_DOTS   60   // largest area
+
+static lv_obj_t * pclk_dots[PCLK_AREAS][PCLK_MAX_DOTS] = {};
+
+// Geometry cache (filled in create_perimeter_clock)
+static int32_t pclk_outer_r  = 0;   // outermost ring radius
+static int32_t pclk_gap      = 0;   // radial gap between consecutive rings
+static int32_t pclk_cx       = 0;   // centre x (= SOLAR_CENTER_X)
+static int32_t pclk_cy       = 0;   // centre y (= SOLAR_CENTER_Y)
+
+// Numeral / tick lines for area 3
+#define PCLK_NUMERAL_LINES 60
+static lv_obj_t * pclk_tick_lines[PCLK_NUMERAL_LINES] = {};
+static lv_point_precise_t pclk_tick_pts[PCLK_NUMERAL_LINES][2] = {};
+static lv_obj_t * pclk_numeral_labels[PCLK_HR_COUNT] = {};
+
+// Colours
+#define COLOR_PCLK_UTC_ACTIVE    lv_color_make(  0, 128, 255)   // blue
+#define COLOR_PCLK_UTC_DIM       lv_color_make(  0,   0,  48)   // very dark blue
+#define COLOR_PCLK_LOC_ACTIVE    lv_color_make(  0, 255,   0)   // green
+#define COLOR_PCLK_LOC_DIM       lv_color_make(  0,  48,   0)   // very dark green
+#define COLOR_PCLK_NUM           lv_color_make( 80,  80,  80)   // grey numerals
+#define COLOR_PCLK_TICK_MAJOR    lv_color_make( 64,  64,  64)   // hour ticks
+#define COLOR_PCLK_TICK_MINOR    lv_color_make( 24,  24,  24)   // minute ticks
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+// Radius of ring i (0=outermost)
+static inline int32_t pclk_ring_r(int i)
+{
+    return pclk_outer_r - i * pclk_gap;
+}
+
+// Mid-radius of area n (between ring n and ring n+1)
+static inline int32_t pclk_area_r(int n)
+{
+    return (pclk_ring_r(n) + pclk_ring_r(n + 1)) / 2;
+}
+
+// Dot pixel radius for a slot of given area width
+static inline int32_t pclk_dot_r(bool active)
+{
+    // Scale with gap; active dots are bigger
+    int32_t base = pclk_gap / 4;
+    if (base < 2) base = 2;
+    return active ? base + 1 : base;
 }
 
 // ============================================================================
-// PERIMETER CLOCK: UPDATE
-// Light up the dot for current hour (12h), minute, and second in green.
+// CREATE PERIMETER CLOCK
+// Call once from astro_clock_begin(), after OUTLINE/ASTRO/ORBIT geometry is set.
 // ============================================================================
-static void update_perimeter_clock(void) {
-    if (!clock_dots[0]) return;
+static void create_perimeter_clock(lv_obj_t * parent)
+{
+    pclk_cx = SOLAR_CENTER_X;
+    pclk_cy = SOLAR_CENTER_Y;
 
-    uint8_t hour   = satioData.local_hour   % 12;
-    uint8_t minute = satioData.local_minute % 60;
-    uint8_t second = satioData.local_second % 60;
+    // Outer boundary: just inside the outline edge
+    int32_t outline_half = (OUTLINE_WIDTH < OUTLINE_HEIGHT ? OUTLINE_WIDTH : OUTLINE_HEIGHT) / 2;
+    pclk_outer_r = outline_half - 4;   // 4px margin from outline edge
 
-    int32_t hour_idx   = (int32_t)hour * 5;  // maps 0-11 → 0,5,10,...,55
-    int32_t minute_idx = (int32_t)minute;
-    int32_t second_idx = (int32_t)second;
+    // Inner boundary: Neptune orbit + a small clearance so dots don't overlap orbits
+    int32_t inner_r = neptune.orbit_radius + SIZE_UNIT + 2;
 
-    for (int i = 0; i < CLOCK_DOT_COUNT; i++) {
-        if (!clock_dots[i]) continue;
+    // 8 equal gaps across the band (9 rings → 8 intervals = 7 data areas + area 3)
+    int32_t band = pclk_outer_r - inner_r;
+    pclk_gap = band / 8;
+    if (pclk_gap < 4) pclk_gap = 4;   // minimum legible gap
 
-        bool is_hour   = (i == hour_idx);
-        bool is_minute = (i == minute_idx);
-        bool is_second = (i == second_idx);
+    // ------------------------------------------------------------------
+    // AREA 3 — static hour numerals and tick marks
+    // ------------------------------------------------------------------
+    int32_t r3_outer = pclk_ring_r(3);
+    int32_t r3_inner = pclk_ring_r(4);
+    int32_t r3_mid   = pclk_area_r(3);
 
-        if (is_hour || is_second) {
-            // Solid filled — hour or second
-            lv_obj_set_style_bg_color(clock_dots[i], COLOR_CLOCK_ACTIVE, 0);
-            lv_obj_set_style_bg_opa(clock_dots[i], LV_OPA_COVER, 0);
-            // When minute also lands on this dot, add a white border to distinguish
-            if (is_minute) {
-                lv_obj_set_style_border_width(clock_dots[i], 2, 0);
-            } else {
-                lv_obj_set_style_border_width(clock_dots[i], 0, 0);
-            }
-        } else if (is_minute) {
-            // Minute only: outline, transparent fill
-            lv_obj_set_style_bg_opa(clock_dots[i], LV_OPA_TRANSP, 0);
-            lv_obj_set_style_border_color(clock_dots[i], COLOR_CLOCK_ACTIVE, 0);
-            lv_obj_set_style_border_width(clock_dots[i], 2, 0);
-        } else {
-            // Inactive: dim solid fill, no border
-            lv_obj_set_style_bg_color(clock_dots[i], COLOR_CLOCK_INACTIVE, 0);
-            lv_obj_set_style_bg_opa(clock_dots[i], LV_OPA_COVER, 0);
-            lv_obj_set_style_border_width(clock_dots[i], 0, 0);
+    // 60 tick lines
+    for (int i = 0; i < PCLK_NUMERAL_LINES; i++) {
+        bool is_hour = (i % (PCLK_NUMERAL_LINES / PCLK_HR_COUNT) == 0);
+        pclk_tick_lines[i] = lv_line_create(parent);
+        lv_obj_set_style_line_color(pclk_tick_lines[i],
+            is_hour ? COLOR_PCLK_TICK_MAJOR : COLOR_PCLK_TICK_MINOR, 0);
+        lv_obj_set_style_line_width(pclk_tick_lines[i], is_hour ? 2 : 1, 0);
+        lv_obj_remove_flag(pclk_tick_lines[i], LV_OBJ_FLAG_CLICKABLE);
+
+        float angle_rad = (float)i * (2.0f * M_PI / 60.0f) - M_PI / 2.0f;
+        float ca = cosf(angle_rad), sa = sinf(angle_rad);
+
+        // Major ticks span the full area; minor ticks are shorter
+        float tick_outer = (float)r3_outer;
+        float tick_inner = is_hour ? (float)r3_inner
+                                   : (float)r3_inner + (float)(r3_outer - r3_inner) * 0.45f;
+
+        pclk_tick_pts[i][0].x = (lv_value_precise_t)(pclk_cx + ca * tick_outer);
+        pclk_tick_pts[i][0].y = (lv_value_precise_t)(pclk_cy + sa * tick_outer);
+        pclk_tick_pts[i][1].x = (lv_value_precise_t)(pclk_cx + ca * tick_inner);
+        pclk_tick_pts[i][1].y = (lv_value_precise_t)(pclk_cy + sa * tick_inner);
+        lv_line_set_points(pclk_tick_lines[i], pclk_tick_pts[i], 2);
+    }
+
+    // 12 numeral labels — created with LV_SIZE_CONTENT so LVGL measures them
+    for (int i = 0; i < PCLK_HR_COUNT; i++) {
+        float angle_rad = (float)(i + 1) * (2.0f * M_PI / (float)PCLK_HR_COUNT) - M_PI / 2.0f;
+        int32_t lx = pclk_cx + (int32_t)(cosf(angle_rad) * (float)r3_mid);
+        int32_t ly = pclk_cy + (int32_t)(sinf(angle_rad) * (float)r3_mid);
+
+        pclk_numeral_labels[i] = lv_label_create(parent);
+        lv_obj_set_style_text_font(pclk_numeral_labels[i], &unscii_12, 0);
+        lv_obj_set_style_text_color(pclk_numeral_labels[i], COLOR_PCLK_NUM, 0);
+        lv_obj_set_style_bg_opa(pclk_numeral_labels[i], LV_OPA_TRANSP, 0);
+        lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_SCROLLABLE);
+
+        char buf[4];
+        snprintf(buf, sizeof(buf), "%d", i + 1);
+        lv_label_set_text(pclk_numeral_labels[i], buf);
+
+        // Centre the label on (lx, ly) — approximate half-width/height
+        lv_obj_set_pos(pclk_numeral_labels[i], lx - 6, ly - 6);
+    }
+
+    // ------------------------------------------------------------------
+    // DATA AREAS — dot objects
+    // Area 0: UTC seconds  (60 dots)
+    // Area 1: UTC minutes  (60 dots)
+    // Area 2: UTC hours    (24 dots)
+    // Area 4: Local seconds (60 dots)
+    // Area 5: Local minutes (60 dots)
+    // Area 6: Local hours   (24 dots)
+    // ------------------------------------------------------------------
+    const struct {
+        int    area;       // area index (skips 3)
+        int    count;      // number of dots
+        lv_color_t dim;   // inactive colour
+    } areas[] = {
+        { 0, PCLK_SEC_COUNT, COLOR_PCLK_UTC_DIM },   // UTC seconds
+        { 1, PCLK_MIN_COUNT, COLOR_PCLK_UTC_DIM },   // UTC minutes
+        { 2, PCLK_HR_COUNT,  COLOR_PCLK_UTC_DIM },   // UTC hours
+        { 4, PCLK_SEC_COUNT, COLOR_PCLK_LOC_DIM },   // Local seconds
+        { 5, PCLK_MIN_COUNT, COLOR_PCLK_LOC_DIM },   // Local minutes
+        { 6, PCLK_HR_COUNT,  COLOR_PCLK_LOC_DIM },   // Local hours
+    };
+
+    for (int a = 0; a < 6; a++) {
+        int    area  = areas[a].area;
+        int    count = areas[a].count;
+        int32_t ar   = pclk_area_r(area);
+        int32_t dr   = pclk_dot_r(false);   // inactive size for creation
+        int32_t diam = dr * 2;
+
+        for (int i = 0; i < count && i < PCLK_MAX_DOTS; i++) {
+            float angle_rad = (float)i * (2.0f * M_PI / (float)count) - M_PI / 2.0f;
+            int32_t dx = pclk_cx + (int32_t)(cosf(angle_rad) * (float)ar);
+            int32_t dy = pclk_cy + (int32_t)(sinf(angle_rad) * (float)ar);
+
+            lv_obj_t * dot = lv_obj_create(parent);
+            lv_obj_remove_style_all(dot);
+            lv_obj_set_size(dot, diam, diam);
+            lv_obj_set_style_radius(dot, LV_RADIUS_CIRCLE, 0);
+            lv_obj_set_style_bg_color(dot, areas[a].dim, 0);
+            lv_obj_set_style_bg_opa(dot, LV_OPA_COVER, 0);
+            lv_obj_remove_flag(dot, LV_OBJ_FLAG_SCROLLABLE);
+            lv_obj_remove_flag(dot, LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_set_pos(dot, dx - dr, dy - dr);
+
+            pclk_dots[area][i] = dot;
         }
     }
 }
+
+// ============================================================================
+// UPDATE PERIMETER CLOCK
+// Called every timer tick from astro_clock_update().
+// Lights the active dot in each area; dims all others.
+// ============================================================================
+static void update_perimeter_clock(void)
+{
+    // Guard
+    if (!pclk_dots[0][0]) return;
+
+    // Current time values
+    uint8_t loc_h = satioData.local_hour   % PCLK_HR_COUNT;
+    uint8_t loc_m = satioData.local_minute % 60;
+    uint8_t loc_s = satioData.local_second % 60;
+    uint8_t utc_h = satioData.geo_positional_hour     % PCLK_HR_COUNT;
+    uint8_t utc_m = satioData.geo_positional_minute   % 60;
+    uint8_t utc_s = satioData.geo_positional_second   % 60;
+
+    // Per-area config
+    struct {
+        int        area;
+        int        count;
+        int        active_idx;
+        lv_color_t active_color;
+        lv_color_t dim_color;
+    } cfg[] = {
+        { 0, PCLK_SEC_COUNT, utc_s, COLOR_PCLK_UTC_ACTIVE, COLOR_PCLK_UTC_DIM },
+        { 1, PCLK_MIN_COUNT, utc_m, COLOR_PCLK_UTC_ACTIVE, COLOR_PCLK_UTC_DIM },
+        { 2, PCLK_HR_COUNT,  utc_h, COLOR_PCLK_UTC_ACTIVE, COLOR_PCLK_UTC_DIM },
+        { 4, PCLK_SEC_COUNT, loc_s, COLOR_PCLK_LOC_ACTIVE, COLOR_PCLK_LOC_DIM },
+        { 5, PCLK_MIN_COUNT, loc_m, COLOR_PCLK_LOC_ACTIVE, COLOR_PCLK_LOC_DIM },
+        { 6, PCLK_HR_COUNT,  loc_h, COLOR_PCLK_LOC_ACTIVE, COLOR_PCLK_LOC_DIM },
+    };
+
+    int32_t dr_active = pclk_dot_r(true);
+    int32_t dr_dim    = pclk_dot_r(false);
+
+    for (int a = 0; a < 6; a++) {
+        int area  = cfg[a].area;
+        int count = cfg[a].count;
+        int act   = cfg[a].active_idx;
+
+        for (int i = 0; i < count; i++) {
+            lv_obj_t * dot = pclk_dots[area][i];
+            if (!dot) continue;
+
+            bool active = (i == act);
+            int32_t dr  = active ? dr_active : dr_dim;
+
+            lv_obj_set_size(dot, dr * 2, dr * 2);
+            lv_obj_set_style_bg_color(dot,
+                active ? cfg[a].active_color : cfg[a].dim_color, 0);
+        }
+    }
+}
+
 
 // ============================================================================
 // UPDATE ASTRO CLOCK
