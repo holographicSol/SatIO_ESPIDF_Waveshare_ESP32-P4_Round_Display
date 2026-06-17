@@ -2782,6 +2782,7 @@ lv_obj_t * create_menu_grid(
 
     // Add buttons to grid
     for(int i = 0; i < GRID_MENU_X_TOTAL_CELLS; i++) {
+        vTaskDelay(2 / portTICK_PERIOD_MS);
 
         /* ---- CELL BUTTON ----------------------------------------------------------------- */
 

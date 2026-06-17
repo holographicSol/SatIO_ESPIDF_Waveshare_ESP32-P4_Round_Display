@@ -494,17 +494,28 @@ static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle,
 #define PCLK_TICK_COUNT    60   // tick marks in area 3
 
 // Numeral / tick colours
-#define COLOR_PCLK_NUM lv_color_make( 80,  80,  80)
+#define COLOR_PCLK_NUM lv_color_make( 0,  255,  0)
 
-// Hour arc
-#define COLOR_PCLK_H_BG        lv_color_make(0, 0, 48)
-#define COLOR_PCLK_H_INDICATOR lv_color_make(0, 0, 255)
-// Minute arc
-#define COLOR_PCLK_M_BG         lv_color_make(0, 48, 0)
-#define COLOR_PCLK_M_INDICATOR  lv_color_make(0, 224, 0)
-// Second arc
-#define COLOR_PCLK_S_BG         lv_color_make(0, 48, 48)
-#define COLOR_PCLK_S_INDICATOR  lv_color_make(0, 224, 225)
+// Group 0: cool, more separated
+#define COLOR_PCLK_H_BG_0         lv_color_make(0, 0, 48)
+#define COLOR_PCLK_H_INDICATOR_0  lv_color_make(0, 72, 255)
+
+#define COLOR_PCLK_M_BG_0         lv_color_make(0, 32, 56)
+#define COLOR_PCLK_M_INDICATOR_0  lv_color_make(0, 200, 255)
+
+#define COLOR_PCLK_S_BG_0         lv_color_make(0, 56, 40)
+#define COLOR_PCLK_S_INDICATOR_0  lv_color_make(0, 255, 180)
+
+
+// Group 1: warm, more separated
+#define COLOR_PCLK_H_BG_1         lv_color_make(72, 0, 0)
+#define COLOR_PCLK_H_INDICATOR_1  lv_color_make(255, 48, 0)
+
+#define COLOR_PCLK_M_BG_1         lv_color_make(64, 16, 0)
+#define COLOR_PCLK_M_INDICATOR_1  lv_color_make(255, 140, 0)
+
+#define COLOR_PCLK_S_BG_1         lv_color_make(56, 0, 16)
+#define COLOR_PCLK_S_INDICATOR_1  lv_color_make(255, 0, 72)
 
 // ============================================================================
 // STATE — geometry cache
@@ -523,9 +534,13 @@ static lv_point_precise_t   pclk_tick_pts[PCLK_TICK_COUNT][2] = {};
 static lv_obj_t *           pclk_numeral_labels[PCLK_HR_COUNT] = {};
 
 // Time arcs (one per ring; LV_PART_MAIN = dim track, LV_PART_INDICATOR = active fill)
-static lv_obj_t * pclk_arc_sec = NULL;   // Area 0 — seconds
-static lv_obj_t * pclk_arc_min = NULL;   // Area 1 — minutes
-static lv_obj_t * pclk_arc_hr  = NULL;   // Area 5 — hours (smooth)
+static lv_obj_t * pclk_arc_sec_0 = NULL;   // Area 0 — seconds
+static lv_obj_t * pclk_arc_min_0 = NULL;   // Area 1 — minutes
+static lv_obj_t * pclk_arc_hr_0  = NULL;   // Area 5 — hours (smooth)
+
+static lv_obj_t * pclk_arc_sec_1 = NULL;   // Area 0 — seconds
+static lv_obj_t * pclk_arc_min_1 = NULL;   // Area 1 — minutes
+static lv_obj_t * pclk_arc_hr_1  = NULL;   // Area 5 — hours (smooth)
 
 // ============================================================================
 // GEOMETRY HELPERS
@@ -596,13 +611,13 @@ static void create_perimeter_clock(lv_obj_t * parent)
     if (pclk_gap < 4) pclk_gap = 4;
 
     // Arc stroke width = gap minus 2px margin (1px each side)
-    int32_t arc_w = pclk_gap - 6;
+    int32_t arc_w = pclk_gap - 8;
     if (arc_w < 2) arc_w = 2;
 
     // ------------------------------------------------------------------
     // AREA — numerals
     // ------------------------------------------------------------------
-    int32_t r_numerals   = pclk_area_r(2);
+    int32_t r_numerals   = pclk_area_r(3);
 
     // ------------------------------------------------------------------
     // TIME ARCS  (created before numerals so numerals render on top)
@@ -611,23 +626,44 @@ static void create_perimeter_clock(lv_obj_t * parent)
     vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // Area — seconds (outermost data ring)
-    pclk_arc_sec = pclk_make_arc(parent,
+    pclk_arc_sec_0 = pclk_make_arc(parent,
         pclk_area_r(0), arc_w,
-        COLOR_PCLK_S_INDICATOR, COLOR_PCLK_S_BG);
+        COLOR_PCLK_S_INDICATOR_0, COLOR_PCLK_S_BG_0);
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // Area — minutes
-    pclk_arc_min = pclk_make_arc(parent,
-        pclk_area_r(3), arc_w,
-        COLOR_PCLK_M_INDICATOR, COLOR_PCLK_M_BG);
+    pclk_arc_min_0 = pclk_make_arc(parent,
+        pclk_area_r(1), arc_w,
+        COLOR_PCLK_M_INDICATOR_0, COLOR_PCLK_M_BG_0);
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // Area — hours (smooth, innermost data ring)
-    pclk_arc_hr = pclk_make_arc(parent,
+    pclk_arc_hr_0 = pclk_make_arc(parent,
+        pclk_area_r(2), arc_w,
+        COLOR_PCLK_H_INDICATOR_0, COLOR_PCLK_H_BG_0);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
+
+    // Area — seconds (outermost data ring)
+    pclk_arc_sec_1 = pclk_make_arc(parent,
         pclk_area_r(4), arc_w,
-        COLOR_PCLK_H_INDICATOR, COLOR_PCLK_H_BG);
+        COLOR_PCLK_S_INDICATOR_1, COLOR_PCLK_S_BG_1);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
+
+    // Area — minutes
+    pclk_arc_min_1 = pclk_make_arc(parent,
+        pclk_area_r(5), arc_w,
+        COLOR_PCLK_M_INDICATOR_1, COLOR_PCLK_M_BG_1);
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
+
+    // Area — hours (smooth, innermost data ring)
+    pclk_arc_hr_1 = pclk_make_arc(parent,
+        pclk_area_r(6), arc_w,
+        COLOR_PCLK_H_INDICATOR_1, COLOR_PCLK_H_BG_1);
 
     vTaskDelay(5 / portTICK_PERIOD_MS);
 
@@ -640,7 +676,7 @@ static void create_perimeter_clock(lv_obj_t * parent)
         int32_t ly = pclk_cy + (int32_t)(sinf(a) * (float)r_numerals);
 
         pclk_numeral_labels[i] = lv_label_create(parent);
-        lv_obj_set_style_text_font(pclk_numeral_labels[i],  &unscii_12, 0);
+        lv_obj_set_style_text_font(pclk_numeral_labels[i],  &lv_font_unscii_8, 0);
         lv_obj_set_style_text_color(pclk_numeral_labels[i], COLOR_PCLK_NUM, 0);
         lv_obj_set_style_bg_color(pclk_numeral_labels[i],   lv_color_black(), 0);
         lv_obj_set_style_bg_opa(pclk_numeral_labels[i],     LV_OPA_COVER, 0);
@@ -674,8 +710,8 @@ static void update_perimeter_clock(void)
     //     lv_obj_set_style_text_color(pclk_numeral_labels[i], rainbow_clock_numerals_hue, 0);
     // }
 
-    if (!pclk_arc_sec || !pclk_arc_min || !pclk_arc_hr) return;
-
+    if (!pclk_arc_sec_0 || !pclk_arc_min_0 || !pclk_arc_hr_0) return;
+    
     uint8_t h24 = satioData.local_hour   % 24;
     uint8_t m   = satioData.local_minute % 60;
     uint8_t s   = satioData.local_second % 60;
@@ -685,19 +721,45 @@ static void update_perimeter_clock(void)
     // ------------------------------------------------------------------
     // Seconds arc  — 0-59 mapped to 0-1000
     // ------------------------------------------------------------------
-    lv_arc_set_value(pclk_arc_sec, (int32_t)s * 1000 / 60);
-
+    lv_arc_set_value(pclk_arc_sec_0, (int32_t)s * 1000 / 60);
+    
     // ------------------------------------------------------------------
     // Minutes arc  — 0-59 mapped to 0-1000
     // ------------------------------------------------------------------
-    lv_arc_set_value(pclk_arc_min, (int32_t)m * 1000 / 60);
-
+    lv_arc_set_value(pclk_arc_min_0, (int32_t)m * 1000 / 60);
+    
     // ------------------------------------------------------------------
     // Hours arc  — smooth: h12 + fractional minute progress, 0-1000
     // e.g. 6:30 = 6.5/12 = 541
     // ------------------------------------------------------------------
     float hr_frac = ((float)h12 + (float)m / 60.0f) / (float)PCLK_HR_COUNT;
-    lv_arc_set_value(pclk_arc_hr, (int32_t)(hr_frac * 1000.0f));
+    lv_arc_set_value(pclk_arc_hr_0, (int32_t)(hr_frac * 1000.0f));
+
+
+    if (!pclk_arc_sec_1 || !pclk_arc_min_1 || !pclk_arc_hr_1) return;
+
+    h24 = satioData.geo_positional_hour   % 24;
+    m   = satioData.geo_positional_minute % 60;
+    s   = satioData.geo_positional_second % 60;
+    pm  = (h24 >= 12);
+    h12 = h24 % PCLK_HR_COUNT;   // 0-11
+
+    // ------------------------------------------------------------------
+    // Seconds arc  — 0-59 mapped to 0-1000
+    // ------------------------------------------------------------------
+    lv_arc_set_value(pclk_arc_sec_1, (int32_t)s * 1000 / 60);
+
+    // ------------------------------------------------------------------
+    // Minutes arc  — 0-59 mapped to 0-1000
+    // ------------------------------------------------------------------
+    lv_arc_set_value(pclk_arc_min_1, (int32_t)m * 1000 / 60);
+
+    // ------------------------------------------------------------------
+    // Hours arc  — smooth: h12 + fractional minute progress, 0-1000
+    // e.g. 6:30 = 6.5/12 = 541
+    // ------------------------------------------------------------------
+    hr_frac = ((float)h12 + (float)m / 60.0f) / (float)PCLK_HR_COUNT;
+    lv_arc_set_value(pclk_arc_hr_1, (int32_t)(hr_frac * 1000.0f));
 }
 
 // ============================================================================
