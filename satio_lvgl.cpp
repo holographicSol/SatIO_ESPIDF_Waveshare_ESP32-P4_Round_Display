@@ -16249,7 +16249,8 @@ void create_default_screen_objects(
 
     // -------------------------------- Title Bar --------------------------------- //
 
-    if (current_screen_number != HOME_SCREEN) {
+    // uncomment if using a perimeter clock
+    // if (current_screen_number != HOME_SCREEN) {
         main_title_bar = create_title_bar(
             parent, // parent
             720, // width px
@@ -16262,9 +16263,9 @@ void create_default_screen_objects(
             &cobalt_alien_25,
             &cobalt_alien_17
         );
-    } else {
-        main_title_bar.panel = NULL;
-    }
+    // } else {
+    //     main_title_bar.panel = NULL;
+    // }
 
     // ------------------------------ System Tray --------------------------------- //
 
@@ -16355,10 +16356,10 @@ void display_home_screen()
     printf("[display_home_screen] starting astro clocks\n");
     astro_clock_begin(
         home_screen,
-        720,             // outline width
-        720,             // outline height
-        550,             // astro width
-        550,             // astro height
+        550,             // outline width (total available width)
+        550,             // outline height (total available height)
+        550,             // astro width (span X of total available width)
+        550,             // astro height (span Y of total available height)
         LV_ALIGN_CENTER, // alignment
         0,               // pos x
         0,               // pos y
