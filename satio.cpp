@@ -175,33 +175,33 @@ struct SATIOStruct satioData = {
     .padded_rtc_sync_time_HHMMSS = "000000",
     .padded_rtc_sync_date_DDMMYYYY = "00000000",
     // ------------------------------------------------------------------------------------
-    // Geo-Positional Time
+    // LMST Time
     // ------------------------------------------------------------------------------------
-    .geo_positional_lat_weight = 0.0,
+    .LMST_lat_weight = 0.0,
 
-    .geo_positional_hour = 0,
-    .geo_positional_minute = 0,
-    .geo_positional_second = 0,
-    .geo_positional_millisecond = 0,
-    .geo_positional_year = 0,
-    .geo_positional_month = 0,
-    .geo_positional_day = 0,
+    .LMST_hour = 0,
+    .LMST_minute = 0,
+    .LMST_second = 0,
+    .LMST_millisecond = 0,
+    .LMST_year = 0,
+    .LMST_month = 0,
+    .LMST_day = 0,
 
-    .formatted_geo_positional_time = "00:00:00",
-    .formatted_geo_positional_date_DDMMYYYY = "00/00/0000",
-    .formatted_geo_positional_short_date_DDMMYY = "00/00/00",
+    .formatted_LMST_time = "00:00:00",
+    .formatted_LMST_date_DDMMYYYY = "00/00/0000",
+    .formatted_LMST_short_date_DDMMYY = "00/00/00",
 
-    .padded_geo_positional_time_HHMMSS = "000000",
-    .padded_geo_positional_date_DDMMYYYY = "00000000",
+    .padded_LMST_time_HHMMSS = "000000",
+    .padded_LMST_date_DDMMYYYY = "00000000",
 
-    .geo_positional_day_hours = 0.0,
-    .geo_positional_night_hours = 0.0,
-    .geo_positional_anomaly = 0.0,
-    .geo_positional_sunrise = 0.0,
-    .geo_positional_sunset = 0.0,
+    .LMST_day_hours = 0.0,
+    .LMST_night_hours = 0.0,
+    .LMST_anomaly = 0.0,
+    .LMST_sunrise = 0.0,
+    .LMST_sunset = 0.0,
     
-    // current according to geo-positional time
-    .geo_positional_twilight_stage = {
+    // current according to LMST time
+    .LMST_twilight_stage = {
         TwilightZone::AstronomicalNight,
         "Astronomical Night",
         { -999.0f, -18.0f },
@@ -210,10 +210,10 @@ struct SATIOStruct satioData = {
     },
 
     /*
-      schedule according to geo-positional time.
+      schedule according to LMST time.
       { dusk_start, dusk_end, dawn_start, dawn_end } in HH.MM format; -1.0 if N/A.
     */
-    .geo_positional_twilight_schedule = {
+    .LMST_twilight_schedule = {
         {nullptr, -1.0, -1.0, -1.0, -1.0}, // FullDaylight
         {nullptr, -1.0, -1.0, -1.0, -1.0}, // GoldenHour
         {nullptr, -1.0, -1.0, -1.0, -1.0}, // Sunset
@@ -678,12 +678,12 @@ void storeLocalTime(void) {
     memset(satioData.padded_local_year, 0, sizeof(satioData.padded_local_year));
     snprintf(satioData.padded_local_year, MAX_GLOBAL_ELEMENT_SIZE, "%s", String(String(year_str[2]) + String(year_str[3])).c_str());
 
-    updateGeoPositionalTime();
+    updateLMST();
   }
 
 // ----------------------------------------------------------------------------------------
-// updateGeoPositionalTime - With latitude weighting for true break down of time (time anomaly at poles).
-// Computes true solar (geo-positional) time by snapshotting the RTC (UTC) and
+// updateLMST - With latitude weighting for true break down of time (time anomaly at poles).
+// Computes true solar (LMST) time by snapshotting the RTC (UTC) and
 // offsetting by longitude, weighted by latitude.
 //
 // Longitude offset: 1 degree = 240 seconds (15 deg/h).
@@ -764,9 +764,9 @@ TwilightStageScheduleEntry getTwilightScheduleEntry(int zone) {
 }
 
 // ----------------------------------------------------------------------------------------
-// updateGeoPositionalTime.
+// updateLMST.
 // ----------------------------------------------------------------------------------------
-void updateGeoPositionalTime(void) {
+void updateLMST(void) {
     // Build UTC time_t from stored RTC values (RTC always holds UTC).
     struct tm utc_tm = {0};
     utc_tm.tm_year  = satioData.rtc_year  - LAST_EPOCH;
@@ -782,25 +782,25 @@ void updateGeoPositionalTime(void) {
     double lon_offset_sec_f = satioData.system_degrees_longitude * 240.0;
     time_t lon_offset_sec   = (time_t)lon_offset_sec_f;
 
-    // Geo-positional unix time.
-    time_t geo_sec = utc_sec + lon_offset_sec;
+    // LMST unix time.
+    time_t lmst_sec = utc_sec + lon_offset_sec;
 
     // Decompose into calendar fields.
-    struct tm geo_tm;
-    gmtime_r(&geo_sec, &geo_tm);
+    struct tm lmst_tm;
+    gmtime_r(&lmst_sec, &lmst_tm);
 
-    satioData.geo_positional_hour        = (double)geo_tm.tm_hour;
-    satioData.geo_positional_minute      = (double)geo_tm.tm_min;
-    satioData.geo_positional_second      = (double)geo_tm.tm_sec;
-    satioData.geo_positional_year        = (double)(geo_tm.tm_year + LAST_EPOCH);
-    satioData.geo_positional_month       = (double)(geo_tm.tm_mon + 1);
-    satioData.geo_positional_day         = (double)geo_tm.tm_mday;
+    satioData.LMST_hour        = (double)lmst_tm.tm_hour;
+    satioData.LMST_minute      = (double)lmst_tm.tm_min;
+    satioData.LMST_second      = (double)lmst_tm.tm_sec;
+    satioData.LMST_year        = (double)(lmst_tm.tm_year + LAST_EPOCH);
+    satioData.LMST_month       = (double)(lmst_tm.tm_mon + 1);
+    satioData.LMST_day         = (double)lmst_tm.tm_mday;
 
     // ------------------------------------------------------------------------
     // Photoperiod calculation.
-    // Day of year (1-365) from the geo-positional date.
+    // Day of year (1-365) from the LMST date.
     // ------------------------------------------------------------------------
-    int day_of_year = geo_tm.tm_yday + 1;  // tm_yday is 0-based
+    int day_of_year = lmst_tm.tm_yday + 1;  // tm_yday is 0-based
 
     // Solar declination (degrees): where the sun sits relative to the equator.
     // +23.45° at summer solstice, -23.45° at winter solstice.
@@ -840,65 +840,65 @@ void updateGeoPositionalTime(void) {
     double sunrise_h = 12.0 - (day_hours / 2.0);
     double sunset_h  = 12.0 + (day_hours / 2.0);
 
-    satioData.geo_positional_day_hours   = hoursToHHMM(day_hours);
-    satioData.geo_positional_night_hours = hoursToHHMM(night_hours);
-    satioData.geo_positional_anomaly     = anomaly;
-    satioData.geo_positional_sunrise     = hoursToHHMM(sunrise_h);
-    satioData.geo_positional_sunset      = hoursToHHMM(sunset_h);
+    satioData.LMST_day_hours   = hoursToHHMM(day_hours);
+    satioData.LMST_night_hours = hoursToHHMM(night_hours);
+    satioData.LMST_anomaly     = anomaly;
+    satioData.LMST_sunrise     = hoursToHHMM(sunrise_h);
+    satioData.LMST_sunset      = hoursToHHMM(sunset_h);
 
-    printf("Geo-positional Time : %02d:%02d:%02d %02d/%02d/%04d\n",
-           (int)satioData.geo_positional_hour,
-           (int)satioData.geo_positional_minute,
-           (int)satioData.geo_positional_second,
-           (int)satioData.geo_positional_day,
-           (int)satioData.geo_positional_month,
-           (int)satioData.geo_positional_year);
+    printf("LMST Time : %02d:%02d:%02d %02d/%02d/%04d\n",
+           (int)satioData.LMST_hour,
+           (int)satioData.LMST_minute,
+           (int)satioData.LMST_second,
+           (int)satioData.LMST_day,
+           (int)satioData.LMST_month,
+           (int)satioData.LMST_year);
 
     printf("Photoperiod         : day=%05.2f  night=%05.2f  sunrise=%05.2f  sunset=%05.2f  anomaly=%.4f%s\n",
-           satioData.geo_positional_day_hours,
-           satioData.geo_positional_night_hours,
-           satioData.geo_positional_sunrise,
-           satioData.geo_positional_sunset,
+           satioData.LMST_day_hours,
+           satioData.LMST_night_hours,
+           satioData.LMST_sunrise,
+           satioData.LMST_sunset,
            anomaly,
            cos_omega <= -1.0 ? "  [POLAR DAY]"  :
            cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
 
-    // Format geo-positional time (HH:MM:SS)
+    // Format LMST time (HH:MM:SS)
     char hour_str[3], min_str[3], sec_str[3];
-    padDigitsZero(satioData.geo_positional_hour, hour_str, sizeof(hour_str));
-    padDigitsZero(satioData.geo_positional_minute, min_str, sizeof(min_str));
-    padDigitsZero(satioData.geo_positional_second, sec_str, sizeof(sec_str));
-    memset(satioData.formatted_geo_positional_time, 0, sizeof(satioData.formatted_geo_positional_time));
-    snprintf(satioData.formatted_geo_positional_time, sizeof(satioData.formatted_geo_positional_time), "%s:%s:%s", hour_str, min_str, sec_str);
+    padDigitsZero(satioData.LMST_hour, hour_str, sizeof(hour_str));
+    padDigitsZero(satioData.LMST_minute, min_str, sizeof(min_str));
+    padDigitsZero(satioData.LMST_second, sec_str, sizeof(sec_str));
+    memset(satioData.formatted_LMST_time, 0, sizeof(satioData.formatted_LMST_time));
+    snprintf(satioData.formatted_LMST_time, sizeof(satioData.formatted_LMST_time), "%s:%s:%s", hour_str, min_str, sec_str);
 
-    // Format geo-positional date (DD/MM/YYYY)
+    // Format LMST date (DD/MM/YYYY)
     char day_str[3], month_str[3], year_str[5];
-    padDigitsZero(satioData.geo_positional_day, day_str, sizeof(day_str));
-    padDigitsZero(satioData.geo_positional_month, month_str, sizeof(month_str));
-    padDigitsZero(satioData.geo_positional_year, year_str, sizeof(year_str));
-    memset(satioData.formatted_geo_positional_date_DDMMYYYY, 0, sizeof(satioData.formatted_geo_positional_date_DDMMYYYY));
-    snprintf(satioData.formatted_geo_positional_date_DDMMYYYY, sizeof(satioData.formatted_geo_positional_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
+    padDigitsZero(satioData.LMST_day, day_str, sizeof(day_str));
+    padDigitsZero(satioData.LMST_month, month_str, sizeof(month_str));
+    padDigitsZero(satioData.LMST_year, year_str, sizeof(year_str));
+    memset(satioData.formatted_LMST_date_DDMMYYYY, 0, sizeof(satioData.formatted_LMST_date_DDMMYYYY));
+    snprintf(satioData.formatted_LMST_date_DDMMYYYY, sizeof(satioData.formatted_LMST_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
 
-    // Format geo-positional short date (DD/MM/YY)
+    // Format LMST short date (DD/MM/YY)
     char short_year_str[3] = { year_str[2], year_str[3], '\0' };
-    memset(satioData.formatted_geo_positional_short_date_DDMMYY, 0, sizeof(satioData.formatted_geo_positional_short_date_DDMMYY));
-    snprintf(satioData.formatted_geo_positional_short_date_DDMMYY, sizeof(satioData.formatted_geo_positional_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
+    memset(satioData.formatted_LMST_short_date_DDMMYY, 0, sizeof(satioData.formatted_LMST_short_date_DDMMYY));
+    snprintf(satioData.formatted_LMST_short_date_DDMMYY, sizeof(satioData.formatted_LMST_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
 
-    // Format padded geo-positional time (HHMMSS)
-    memset(satioData.padded_geo_positional_time_HHMMSS, 0, sizeof(satioData.padded_geo_positional_time_HHMMSS));
-    snprintf(satioData.padded_geo_positional_time_HHMMSS, sizeof(satioData.padded_geo_positional_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
+    // Format padded LMST time (HHMMSS)
+    memset(satioData.padded_LMST_time_HHMMSS, 0, sizeof(satioData.padded_LMST_time_HHMMSS));
+    snprintf(satioData.padded_LMST_time_HHMMSS, sizeof(satioData.padded_LMST_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
 
-    // Format padded geo-positional date (DDMMYYYY)
-    memset(satioData.padded_geo_positional_date_DDMMYYYY, 0, sizeof(satioData.padded_geo_positional_date_DDMMYYYY));
-    snprintf(satioData.padded_geo_positional_date_DDMMYYYY, sizeof(satioData.padded_geo_positional_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
+    // Format padded LMST date (DDMMYYYY)
+    memset(satioData.padded_LMST_date_DDMMYYYY, 0, sizeof(satioData.padded_LMST_date_DDMMYYYY));
+    snprintf(satioData.padded_LMST_date_DDMMYYYY, sizeof(satioData.padded_LMST_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
 
     // ──────────────────────────────────────────────────────────────────────────
     // Twilight stage: classify current sun altitude
-    // Geo-positional time IS true solar time, so solar noon == 12:00 exactly.
+    // LMST time IS true solar time, so solar noon == 12:00 exactly.
     // ──────────────────────────────────────────────────────────────────────────
-    double solar_hour = (double)satioData.geo_positional_hour
-                      + (double)satioData.geo_positional_minute / 60.0
-                      + (double)satioData.geo_positional_second / 3600.0;
+    double solar_hour = (double)satioData.LMST_hour
+                      + (double)satioData.LMST_minute / 60.0
+                      + (double)satioData.LMST_second / 3600.0;
     double ha_now_rad = (solar_hour - 12.0) * 15.0 * M_PI / 180.0;
     double sin_alt_now = sin(lat_rad) * sin(decl_rad)
                        + cos(lat_rad) * cos(decl_rad) * cos(ha_now_rad);
@@ -906,9 +906,9 @@ void updateGeoPositionalTime(void) {
     if (sin_alt_now >  1.0) sin_alt_now =  1.0;
     if (sin_alt_now < -1.0) sin_alt_now = -1.0;
     float sun_alt_deg = (float)(asin(sin_alt_now) * 180.0 / M_PI);
-    satioData.geo_positional_twilight_stage = getTwilightStage(sun_alt_deg);
+    satioData.LMST_twilight_stage = getTwilightStage(sun_alt_deg);
     printf("Twilight Stage: %s (sun altitude = %.2f°)\n",
-           satioData.geo_positional_twilight_stage.zoneName,
+           satioData.LMST_twilight_stage.zoneName,
            sun_alt_deg);
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -930,20 +930,20 @@ void updateGeoPositionalTime(void) {
 
     const auto& S = TwilightStages::stages;
     //                                                                   dusk_start  dusk_end   dawn_start  dawn_end
-    satioData.geo_positional_twilight_schedule[0] = { S[0].zoneName,    -1.0,       t6_e,      t6_m,       -1.0    }; // FullDaylight
-    satioData.geo_positional_twilight_schedule[1] = { S[1].zoneName,    t6_e,       t0_e,      t0_m,       t6_m    }; // GoldenHour
-    satioData.geo_positional_twilight_schedule[2] = { S[2].zoneName,    t0_e,       t0_e,      t0_m,       t0_m    }; // Sunset/Sunrise
-    satioData.geo_positional_twilight_schedule[3] = { S[3].zoneName,    t0_e,       tm6_e,     tm6_m,      t0_m    }; // CivilTwilight
-    satioData.geo_positional_twilight_schedule[4] = { S[4].zoneName,    tm6_e,      tm6_e,     tm6_m,      tm6_m   }; // CivilDusk
-    satioData.geo_positional_twilight_schedule[5] = { S[5].zoneName,    tm6_e,      tm12_e,    tm12_m,     tm6_m   }; // NauticalTwilight
-    satioData.geo_positional_twilight_schedule[6] = { S[6].zoneName,    tm12_e,     tm12_e,    tm12_m,     tm12_m  }; // NauticalDusk
-    satioData.geo_positional_twilight_schedule[7] = { S[7].zoneName,    tm12_e,     tm18_e,    tm18_m,     tm12_m  }; // AstronomicalTwilight
-    satioData.geo_positional_twilight_schedule[8] = { S[8].zoneName,    tm18_e,     tm18_e,    tm18_m,     tm18_m  }; // AstronomicalDusk
-    satioData.geo_positional_twilight_schedule[9] = { S[9].zoneName,    tm18_e,     -1.0,      -1.0,       tm18_m  }; // AstronomicalNight
+    satioData.LMST_twilight_schedule[0] = { S[0].zoneName,    -1.0,       t6_e,      t6_m,       -1.0    }; // FullDaylight
+    satioData.LMST_twilight_schedule[1] = { S[1].zoneName,    t6_e,       t0_e,      t0_m,       t6_m    }; // GoldenHour
+    satioData.LMST_twilight_schedule[2] = { S[2].zoneName,    t0_e,       t0_e,      t0_m,       t0_m    }; // Sunset/Sunrise
+    satioData.LMST_twilight_schedule[3] = { S[3].zoneName,    t0_e,       tm6_e,     tm6_m,      t0_m    }; // CivilTwilight
+    satioData.LMST_twilight_schedule[4] = { S[4].zoneName,    tm6_e,      tm6_e,     tm6_m,      tm6_m   }; // CivilDusk
+    satioData.LMST_twilight_schedule[5] = { S[5].zoneName,    tm6_e,      tm12_e,    tm12_m,     tm6_m   }; // NauticalTwilight
+    satioData.LMST_twilight_schedule[6] = { S[6].zoneName,    tm12_e,     tm12_e,    tm12_m,     tm12_m  }; // NauticalDusk
+    satioData.LMST_twilight_schedule[7] = { S[7].zoneName,    tm12_e,     tm18_e,    tm18_m,     tm12_m  }; // AstronomicalTwilight
+    satioData.LMST_twilight_schedule[8] = { S[8].zoneName,    tm18_e,     tm18_e,    tm18_m,     tm18_m  }; // AstronomicalDusk
+    satioData.LMST_twilight_schedule[9] = { S[9].zoneName,    tm18_e,     -1.0,      -1.0,       tm18_m  }; // AstronomicalNight
 
     printf("Twilight Schedule:\n");
     for (int i = 0; i < 10; ++i) {
-        const auto& entry = satioData.geo_positional_twilight_schedule[i];
+        const auto& entry = satioData.LMST_twilight_schedule[i];
         printf("  Zone %d: %s | dusk_start=%.2f, dusk_end=%.2f, dawn_start=%.2f, dawn_end=%.2f\n",
                i, entry.zoneName, entry.dusk_start, entry.dusk_end, entry.dawn_start, entry.dawn_end);
     }

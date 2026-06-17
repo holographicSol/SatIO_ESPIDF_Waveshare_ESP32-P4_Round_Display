@@ -548,30 +548,30 @@ typedef struct {
     lv_obj_t * val_rtcsync_altitude;
 
     /* ---------------------------------------------------------- */
-    /* Title Geo-Positional Time                                  */
+    /* Title LMST                                                 */
     /* ---------------------------------------------------------- */
-    lv_obj_t * lbl_title_geo_positional_time;
-    lv_obj_t * lbl_geo_positional_time;
-    lv_obj_t * val_geo_positional_time;
-    lv_obj_t * lbl_geo_positional_date;
-    lv_obj_t * val_geo_positional_date;
-    lv_obj_t * lbl_geo_positional_day_hours;
-    lv_obj_t * val_geo_positional_day_hours;
-    lv_obj_t * lbl_geo_positional_night_hours;
-    lv_obj_t * val_geo_positional_night_hours;
-    lv_obj_t * lbl_geo_positional_anomaly;
-    lv_obj_t * val_geo_positional_anomaly;
-    lv_obj_t * lbl_geo_positional_sunrise;
-    lv_obj_t * val_geo_positional_sunrise;
-    lv_obj_t * lbl_geo_positional_sunset;
-    lv_obj_t * val_geo_positional_sunset;
+    lv_obj_t * lbl_title_LMST_time;
+    lv_obj_t * lbl_LMST_time;
+    lv_obj_t * val_LMST_time;
+    lv_obj_t * lbl_LMST_date;
+    lv_obj_t * val_LMST_date;
+    lv_obj_t * lbl_LMST_day_hours;
+    lv_obj_t * val_LMST_day_hours;
+    lv_obj_t * lbl_LMST_night_hours;
+    lv_obj_t * val_LMST_night_hours;
+    lv_obj_t * lbl_LMST_anomaly;
+    lv_obj_t * val_LMST_anomaly;
+    lv_obj_t * lbl_LMST_sunrise;
+    lv_obj_t * val_LMST_sunrise;
+    lv_obj_t * lbl_LMST_sunset;
+    lv_obj_t * val_LMST_sunset;
 
-    // lv_obj_t * lbl_geo_positional_current_twilight_zone_name;
-    // lv_obj_t * val_geo_positional_current_twilight_zone_name;
-    // lv_obj_t * lbl_geo_positional_current_twilight_zone_start_time;
-    // lv_obj_t * val_geo_positional_current_twilight_zone_start_time;
-    // lv_obj_t * lbl_geo_positional_current_twilight_zone_end_time;
-    // lv_obj_t * val_geo_positional_current_twilight_zone_end_time;
+    // lv_obj_t * lbl_LMST_current_twilight_zone_name;
+    // lv_obj_t * val_LMST_current_twilight_zone_name;
+    // lv_obj_t * lbl_LMST_current_twilight_zone_start_time;
+    // lv_obj_t * val_LMST_current_twilight_zone_start_time;
+    // lv_obj_t * lbl_LMST_current_twilight_zone_end_time;
+    // lv_obj_t * val_LMST_current_twilight_zone_end_time;
 
 } satio_container_t;
 

@@ -311,34 +311,34 @@ struct SATIOStruct {
     char padded_rtc_sync_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded RTC sync date
 
     // ------------------------------------------------------------------------------------
-    // Geo-Positional Time
+    // LMST (Local Mean Solar Time) - True Local Time (Not Geo-Political Time)
     // ------------------------------------------------------------------------------------
-    double geo_positional_lat_weight;
+    double LMST_lat_weight;
     
-    uint8_t geo_positional_hour; // Hour for geo-positional time
-    uint8_t geo_positional_minute; // Minute for geo-positional time
-    uint8_t geo_positional_second; // Second for geo-positional time
-    uint8_t geo_positional_millisecond; // Millisecond for geo-positional time
+    uint8_t LMST_hour; // Hour for LMST time
+    uint8_t LMST_minute; // Minute for LMST time
+    uint8_t LMST_second; // Second for LMST time
+    uint8_t LMST_millisecond; // Millisecond for LMST time
 
-    uint16_t geo_positional_year; // Year for geo-positional time
-    uint8_t geo_positional_month; // Month for geo-positional time
-    uint8_t geo_positional_day; // Day for geo-positional time
+    uint16_t LMST_year; // Year for LMST time
+    uint8_t LMST_month; // Month for LMST time
+    uint8_t LMST_day; // Day for LMST time
 
-    char formatted_geo_positional_time[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted geo_positional time
-    char formatted_geo_positional_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted geo_positional date
-    char formatted_geo_positional_short_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted geo_positional date
+    char formatted_LMST_time[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted LMST time
+    char formatted_LMST_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted LMST date
+    char formatted_LMST_short_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted LMST date
 
-    char padded_geo_positional_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE]; // Padded geo_positional time (HHMMSS)
-    char padded_geo_positional_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded geo_positional date
+    char padded_LMST_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE]; // Padded LMST time (HHMMSS)
+    char padded_LMST_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded LMST date
 
-    double geo_positional_day_hours; // Day hours for geo-positional time
-    double geo_positional_night_hours; // Night hours for geo-positional time
-    double geo_positional_anomaly; // Anomaly for geo-positional time
-    double geo_positional_sunrise; // Sunrise for geo-positional time
-    double geo_positional_sunset; // Sunset for geo-positional time
+    double LMST_day_hours; // Day hours for LMST time
+    double LMST_night_hours; // Night hours for LMST time
+    double LMST_anomaly; // Anomaly for LMST time
+    double LMST_sunrise; // Sunrise for LMST time
+    double LMST_sunset; // Sunset for LMST time
 
-    TwilightStageEntry geo_positional_twilight_stage; // current according to geo-positional time
-    TwilightStageScheduleEntry geo_positional_twilight_schedule[10]; // schedule according to geo-positional time
+    TwilightStageEntry LMST_twilight_stage; // current according to LMST time
+    TwilightStageScheduleEntry LMST_twilight_schedule[10]; // schedule according to LMST time
     
     // ------------------------------------------------------------------------------------
     // FLAGS
@@ -392,7 +392,7 @@ void padDigitsZero(int digits, char* output, size_t output_size);
 void printAllTimes(void);
 void storeRTCTime(void);
 void storeLocalTime(void);
-void updateGeoPositionalTime(void);
+void updateLMST(void);
 void storeRTCSYNCTime(void) ;
 void extractDateTimeFromGPSData(void);
 void setSystemTime(long usec);

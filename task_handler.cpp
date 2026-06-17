@@ -673,10 +673,10 @@ void taskUniverse(void * pvParameters) {
                   // satioData.local_minute,
                   // satioData.local_second,
 
-                  // uncomment to use geo-positional local time (UTC+-LatLongOffset)
-                  satioData.geo_positional_hour,
-                  satioData.geo_positional_minute,
-                  satioData.geo_positional_second,
+                  // uncomment to use LMST (Local Mean Solar Time) (UTC+-LongitudeOffset)
+                  satioData.LMST_hour,
+                  satioData.LMST_minute,
+                  satioData.LMST_second,
 
                   satioData.system_altitude
                 );
