@@ -16,6 +16,8 @@
 #include "./wt901.h"
 #include "./multiplexers.h"
 // #include "./esp32_helper.h"
+#include <SiderealPlanets.h>
+#include <SiderealObjects.h>
 #include "./sidereal_helper.h"
 #include "./hextodig.h"
 #include "./ins.h"
@@ -335,7 +337,10 @@ void system_timing() {
             "gps=%s "
             "rtc=%s "
             "lcl=%s "
+            "lmst=%s "
+            "lst=%f "
             "syn=%s "
+
             "t_loop=%ld "
             "t_gps=%ld "
             "t_ins=%ld "
@@ -354,6 +359,10 @@ void system_timing() {
             "usr_lon=%.7f "
             "sys_lat=%.7f "
             "sys_lon=%.7f "
+
+            "current_zenith_ra=%s "
+            "current_zenith_dec=%s "
+
             "alt=%.2f "
             "ghd=%.2f "
             "spd=%.2f "
@@ -375,7 +384,10 @@ void system_timing() {
             gnrmcData.utc_time,
             satioData.padded_rtc_time_HHMMSS,
             satioData.padded_local_time_HHMMSS,
+            satioData.padded_LMST_time_HHMMSS,
+            siderealPlanetData.local_sidereal_time,
             satioData.padded_rtc_sync_time_HHMMSS,
+
             systemData.total_loops_a_second,
             systemData.total_gps,
             systemData.total_ins,
@@ -394,6 +406,10 @@ void system_timing() {
             satioData.user_degrees_longitude,
             satioData.system_degrees_latitude,
             satioData.system_degrees_longitude,
+
+            satioData.currentZenithRADec.ra_str,
+            satioData.currentZenithRADec.dec_str,
+
             satioData.altitude,
             satioData.ground_heading,
             satioData.speed,

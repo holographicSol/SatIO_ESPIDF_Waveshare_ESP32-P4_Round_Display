@@ -15,6 +15,8 @@ extern SiderealPlanets myAstro;
 // Planet Data Structure.
 // ----------------------------------------------------------------------------------------
 struct SiderealPlantetsStruct {
+    double local_sidereal_time;
+    
     bool track_sun;
     bool track_mercury;
     bool track_venus;

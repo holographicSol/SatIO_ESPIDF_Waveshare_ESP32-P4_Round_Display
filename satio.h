@@ -148,6 +148,28 @@ struct TwilightStages {
     }
 };
 
+/**
+ * @brief Struct to hold RA/Dec data. Intened for use when RA/DEC is calculated for:
+ *        - Zenith (current location)
+ *        - Zenith Gyro (current location +- gyro offset)
+ * 
+ *        Relative RA/Dec can then be used with starnav.
+ */
+typedef struct {
+    // RA
+    int ra_h;
+    int ra_m;
+    double ra_s;
+    // Dec
+    int dec_d;
+    int dec_m;
+    double dec_s;
+    // HH:MM:SS.S format
+    char ra_str[MAX_GLOBAL_ELEMENT_SIZE];  // HH:MM:SS.S format
+    // DD:MM:SS.S format
+    char dec_str[MAX_GLOBAL_ELEMENT_SIZE]; // DD:MM:SS.S format
+} RaDecData;
+
 // ----------------------------------------------------------------------------------------
 // SATIO Struct.
 // ----------------------------------------------------------------------------------------
@@ -339,7 +361,8 @@ struct SATIOStruct {
 
     TwilightStageEntry LMST_twilight_stage; // current according to LMST time
     TwilightStageScheduleEntry LMST_twilight_schedule[10]; // schedule according to LMST time
-    
+
+    RaDecData currentZenithRADec; // current Zenith RA/Dec data
     // ------------------------------------------------------------------------------------
     // FLAGS
     // ------------------------------------------------------------------------------------

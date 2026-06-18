@@ -16,6 +16,8 @@ SiderealPlanets myAstro;    // for calculating azimuth and altitude
 SiderealObjects myAstroObj; // for getting right ascension and declination of objects from star table
 
 struct SiderealPlantetsStruct siderealPlanetData = {
+    .local_sidereal_time = 0.0,
+
     .track_sun = true,
     .track_mercury = true,
     .track_venus = true,
@@ -834,9 +836,14 @@ void trackPlanets(double latitude, double longitude,
     // ----------------------------------------------------------------------------------
     myAstro.setElevationM(altitude);
     myAstro.spData.DegreesAltitudeOffsetByElevationM = myAstro.inRange90(myAstro.getDegreesAltitudeOffsetByElevationM(altitude));
+
+    // -------------------------------------------------------
+    // Get Sidereal Time Data
+    // -------------------------------------------------------
+    siderealPlanetData.local_sidereal_time = myAstro.getLocalSiderealTime();
     
     // -------------------------------------------------------
-    // Do planet elements sun, once before doing other planets.
+    // Get Sun, Planets Data
     // -------------------------------------------------------
     myAstro.doPlanetElements();
     myAstro.doSun();

@@ -10,6 +10,9 @@
 #include "wtgps300p.h"
 #include "./task_handler.h"
 #include "freertos/semphr.h"
+#include <SiderealPlanets.h>
+#include <SiderealObjects.h>
+#include "./sidereal_helper.h"
 
 // ----------------------------------------------------------------------------------------
 // Globals
@@ -224,6 +227,15 @@ struct SATIOStruct satioData = {
         {nullptr, -1.0, -1.0, -1.0, -1.0}, // AstronomicalTwilight
         {nullptr, -1.0, -1.0, -1.0, -1.0}, // AstronomicalDusk
         {nullptr, -1.0, -1.0, -1.0, -1.0}  // AstronomicalNight
+    },
+
+    .currentZenithRADec = {
+        0,   // ra_h
+        0,   // ra_m
+        0.0, // ra_s
+        0,   // dec_d
+        0,   // dec_m
+        0.0  // dec_s
     },
 
     // ------------------------------------------------------------------------------------
@@ -949,6 +961,60 @@ void updateLMST(void) {
     // }
 }
 
+void calculateZenithRaDec(double lst, double latitude, double *ra_hours, double *dec_degrees) {
+    *ra_hours = lst;           // RA of zenith = current LST
+    *dec_degrees = latitude;   // Dec of zenith = observer latitude
+}
+
+// void LSTLatZenith2RADec(double lst, double lat) {
+RaDecData getRADecFromLSTLat(double lst, double lat) {
+
+
+    RaDecData radecData = {
+        0,   // ra_h
+        0,   // ra_m
+        0.0, // ra_s
+        0,   // dec_d
+        0,   // dec_m
+        0.0, // dec_s
+        "",  // ra_str
+        ""   // dec_str
+    };
+
+    double zenith_ra, zenith_dec;
+    
+    calculateZenithRaDec(lst, lat, &zenith_ra, &zenith_dec);
+    
+    // Output in HH:MM:SS.S format
+    int ra_h = (int)zenith_ra;
+    int ra_m = (int)((zenith_ra - ra_h) * 60.0);
+    double ra_s = ((zenith_ra - ra_h) * 60.0 - ra_m) * 60.0;
+    
+    // Output in DD:MM:SS.S format
+    int dec_d = (int)zenith_dec;
+    int dec_m = (int)((zenith_dec - dec_d) * 60.0);
+    double dec_s = ((zenith_dec - dec_d) * 60.0 - dec_m) * 60.0;
+    
+    // printf("Zenith RA:  %02d:%02d:%05.2f\n", ra_h, ra_m, ra_s);
+    // printf("Zenith Dec: %+03d:%02d:%05.2f\n", dec_d, dec_m, dec_s);
+
+    radecData.ra_h = ra_h;
+    radecData.ra_m = ra_m;
+    radecData.ra_s = ra_s;
+    radecData.dec_d = dec_d;
+    radecData.dec_m = dec_m;
+    radecData.dec_s = dec_s;
+
+    // Format RA
+    memset(radecData.ra_str, 0, sizeof(radecData.ra_str));
+    snprintf(radecData.ra_str, sizeof(radecData.ra_str), "%02d:%02d:%05.2f", ra_h, ra_m, ra_s);
+    // Format Dec
+    memset(radecData.dec_str, 0, sizeof(radecData.dec_str));
+    snprintf(radecData.dec_str, sizeof(radecData.dec_str), "%+03d:%02d:%05.2f", dec_d, dec_m, dec_s);
+
+    return radecData;
+}
+
 // ----------------------------------------------------------------------------------------
 // storeRTCSYNCTime.
 // ----------------------------------------------------------------------------------------
@@ -1196,6 +1262,8 @@ void setSatIOData(void) {
       setSatIOSspeed();
       setSatIOGroundHeading();
       setGroundHeadingName(atof(gnrmcData.ground_heading));
+
+      satioData.currentZenithRADec = getRADecFromLSTLat(siderealPlanetData.local_sidereal_time, satioData.system_degrees_latitude);
 }
 
 // ----------------------------------------------------------------------------------------
