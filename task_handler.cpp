@@ -669,14 +669,14 @@ void taskUniverse(void * pvParameters) {
                   satioData.rtc_second,
 
                   // uncomment to use geo-political local time (UTC+-UTCOffset)
-                  // satioData.local_hour,
-                  // satioData.local_minute,
-                  // satioData.local_second,
+                  satioData.local_hour,
+                  satioData.local_minute,
+                  satioData.local_second,
 
                   // uncomment to use LMST (Local Mean Solar Time) (UTC+-LongitudeOffset)
-                  satioData.LMST_hour,
-                  satioData.LMST_minute,
-                  satioData.LMST_second,
+                  // satioData.LMST_hour,
+                  // satioData.LMST_minute,
+                  // satioData.LMST_second,
 
                   satioData.system_altitude
                 );

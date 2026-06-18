@@ -341,6 +341,7 @@ double SiderealPlanets::getLT(void) {
 
 double SiderealPlanets::getLocalSiderealTime(void) {
   LocalSiderealTime = inRange24(getGMTsiderealTime() + (decLong / 15.04107));
+  // printf("Local Sidereal Time: %f\n", LocalSiderealTime);
   return LocalSiderealTime;
 }
 

@@ -1166,7 +1166,7 @@ void CmdProcess() {
     //   sdcardFlagData.list_dir_flag=true;
     // }
 
-    // else if (strcmp(pos[0], "starnav")==0) {star_nav();}
+    else if (strcmp(pos[0], "starnav")==0) {star_nav();}
     
     if (systemData.serial_command) {
 
