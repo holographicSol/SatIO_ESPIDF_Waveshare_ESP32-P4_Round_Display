@@ -9791,6 +9791,189 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.val_LMST_anomaly, obj_w_1, obj_height);
 
     /* ---------------------------------------------------------- */
+    /* Row LMST Astronomical Twilight Dawn                         */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_astronomical_twilight_dawn = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_astronomical_twilight_dawn = create_label(
+        row_LMST_astronomical_twilight_dawn,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Astro Twilight Dawn",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_astronomical_twilight_dawn = create_label(
+        row_LMST_astronomical_twilight_dawn,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_astronomical_twilight_dawn, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_astronomical_twilight_dawn, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row LMST Nautical Twilight Dawn                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_nautical_twilight_dawn = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_nautical_twilight_dawn = create_label(
+        row_LMST_nautical_twilight_dawn,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Nautical Twilight Dawn",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_nautical_twilight_dawn = create_label(
+        row_LMST_nautical_twilight_dawn,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_nautical_twilight_dawn, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_nautical_twilight_dawn, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row LMST Civil Twilight Dawn                                */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_civil_twilight_dawn = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_civil_twilight_dawn = create_label(
+        row_LMST_civil_twilight_dawn,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Civil Twilight Dawn",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_civil_twilight_dawn = create_label(
+        row_LMST_civil_twilight_dawn,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_civil_twilight_dawn, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_civil_twilight_dawn, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
     /* Row LMST Sunrise                                           */
     /* ---------------------------------------------------------- */
 
@@ -9853,6 +10036,190 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.val_LMST_sunrise, obj_w_1, obj_height);
 
     /* ---------------------------------------------------------- */
+    /* Row LMST Golden Hour Dawn                                   */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_golden_hour_dawn = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_golden_hour_dawn = create_label(
+        row_LMST_golden_hour_dawn,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Golden Hour Dawn",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_golden_hour_dawn = create_label(
+        row_LMST_golden_hour_dawn,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_golden_hour_dawn, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_golden_hour_dawn, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row LMST Full Day Light                                    */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_FullDayLight = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_FullDayLight = create_label(
+        row_LMST_FullDayLight,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Full Day Light",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_FullDayLight = create_label(
+        row_LMST_FullDayLight,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_FullDayLight, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_FullDayLight, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row LMST Golden Hour Dusk                                   */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_golden_hour_dusk = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_golden_hour_dusk = create_label(
+        row_LMST_golden_hour_dusk,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Golden Hour Dusk",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_golden_hour_dusk = create_label(
+        row_LMST_golden_hour_dusk,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_golden_hour_dusk, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_golden_hour_dusk, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
     /* Row LMST Sunset                                            */
     /* ---------------------------------------------------------- */
 
@@ -9913,6 +10280,253 @@ satio_container_t create_satio_panel(
 
     lv_obj_set_size(result.lbl_LMST_sunset, obj_w_0, obj_height);
     lv_obj_set_size(result.val_LMST_sunset, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Row LMST Civil Twilight Dusk                                */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_civil_twilight_dusk = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_civil_twilight_dusk = create_label(
+        row_LMST_civil_twilight_dusk,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Civil Twilight Dusk",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_civil_twilight_dusk = create_label(
+        row_LMST_civil_twilight_dusk,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_civil_twilight_dusk, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_civil_twilight_dusk, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Row LMST Nautical Twilight Dusk                             */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_nautical_twilight_dusk = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_nautical_twilight_dusk = create_label(
+        row_LMST_nautical_twilight_dusk,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Nautical Twilight Dusk",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_nautical_twilight_dusk = create_label(
+        row_LMST_nautical_twilight_dusk,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_nautical_twilight_dusk, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_nautical_twilight_dusk, obj_w_1, obj_height);
+
+
+    /* ---------------------------------------------------------- */
+    /* Row LMST Astronomical Twilight Dusk                         */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_astronomical_twilight_dusk = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_astronomical_twilight_dusk = create_label(
+        row_LMST_astronomical_twilight_dusk,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Astro Twilight Dusk",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_astronomical_twilight_dusk = create_label(
+        row_LMST_astronomical_twilight_dusk,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_astronomical_twilight_dusk, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_astronomical_twilight_dusk, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Row LMST Astronomical Night                                 */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_astronomical_night = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_LMST_astronomical_night = create_label(
+        row_LMST_astronomical_night,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Astronomical Night",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_LMST_astronomical_night = create_label(
+        row_LMST_astronomical_night,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_LMST_astronomical_night, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_LMST_astronomical_night, obj_w_1, obj_height);
 
     return result;
 }
@@ -17778,41 +18392,6 @@ void update_display()
                 lv_label_set_text(satio_c.val_rtcsync_altitude, String(satioData.rtcsync_altitude).c_str());
 
                 // ────────────────────────────────────────────────
-                // LMST Time
-                // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_time, String(satioData.formatted_LMST_time).c_str());
-
-                // ────────────────────────────────────────────────
-                // LMST Date
-                // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_date, String(satioData.formatted_LMST_date_DDMMYYYY).c_str());
-
-                // ────────────────────────────────────────────────
-                // LMST Daylight Hours
-                // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_day_hours, String(satioData.LMST_day_hours).c_str());
-
-                // ────────────────────────────────────────────────
-                // LMST Night Hours
-                // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_night_hours, String(satioData.LMST_night_hours).c_str());
-
-                // ────────────────────────────────────────────────
-                // LMST Anomaly
-                // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_anomaly, String(satioData.LMST_anomaly).c_str());
-
-                // ────────────────────────────────────────────────
-                // LMST Sunrise
-                // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_sunrise, String(satioData.LMST_sunrise).c_str());
-
-                // ────────────────────────────────────────────────
-                // LMST Sunset
-                // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_sunset, String(satioData.LMST_sunset).c_str());
-
-                // ────────────────────────────────────────────────
                 // Formatted RTC Time
                 // ────────────────────────────────────────────────
                 lv_label_set_text(satio_c.val_formatted_rtc_time, String(satioData.formatted_rtc_time).c_str());
@@ -17966,12 +18545,196 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
-                // vTaskDelay(5 / portTICK_PERIOD_MS);
+                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // ────────────────────────────────────────────────
                 // Mileage
                 // ────────────────────────────────────────────────
                 lv_label_set_text(satio_c.val_mileage, String(satioData.mileage).c_str());
+
+                // ────────────────────────────────────────────────
+                // LMST Time
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_LMST_time, String(satioData.formatted_LMST_time).c_str());
+
+                // ────────────────────────────────────────────────
+                // LMST Date
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_LMST_date, String(satioData.formatted_LMST_date_DDMMYYYY).c_str());
+
+                // ────────────────────────────────────────────────
+                // LMST Daylight Hours
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_LMST_day_hours, String(satioData.LMST_twilight_schedule.LMST_day_hours).c_str());
+
+                // ────────────────────────────────────────────────
+                // LMST Night Hours
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_LMST_night_hours, String(satioData.LMST_twilight_schedule.LMST_night_hours).c_str());
+
+                // ────────────────────────────────────────────────
+                // LMST Anomaly
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_LMST_anomaly, String(satioData.LMST_twilight_schedule.LMST_anomaly).c_str());
+
+                // ────────────────────────────────────────────────
+                // LMST Astronomical Twilight Dawn
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_astronomical_twilight_dawn,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dawn_start[AstronomicalTwilight]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dawn_end[AstronomicalTwilight])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Nautical Twilight Dawn
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_nautical_twilight_dawn,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dawn_start[NauticalTwilight]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dawn_end[NauticalTwilight])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Civil Twilight Dawn
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_civil_twilight_dawn,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dawn_start[CivilTwilight]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dawn_end[CivilTwilight])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Sunrise
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_sunrise,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dawn_start[SunriseSunset]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dawn_end[SunriseSunset])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Full Daylight
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_FullDayLight,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dawn_start[FullDaylight]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dusk_end[FullDaylight])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Golden Hour Dawn
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_golden_hour_dawn,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dawn_start[GoldenHour]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dawn_end[GoldenHour])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Golden Hour Dusk
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_golden_hour_dusk,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dusk_start[GoldenHour]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dusk_end[GoldenHour])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Sunset
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_sunset,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dusk_start[SunriseSunset]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dusk_end[SunriseSunset])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Civil Twilight Dusk
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_civil_twilight_dusk,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dusk_start[CivilTwilight]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dusk_end[CivilTwilight])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Nautical Twilight Dusk
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_nautical_twilight_dusk,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dusk_start[NauticalTwilight]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dusk_end[NauticalTwilight])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Astronomical Twilight Dusk
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_astronomical_twilight_dusk,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dusk_start[AstronomicalTwilight]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dusk_end[AstronomicalTwilight])
+                    ).c_str()
+                );
+
+                // ────────────────────────────────────────────────
+                // LMST Astronomical Night
+                // ────────────────────────────────────────────────
+                lv_label_set_text(
+                    satio_c.val_LMST_astronomical_night,
+                    String(
+                        String(satioData.LMST_twilight_schedule.dusk_start[AstronomicalNight]) +
+                        String(" - ") +
+                        String(satioData.LMST_twilight_schedule.dawn_end[AstronomicalNight])
+                    ).c_str()
+                );
+
+                // // ────────────────────────────────────────────────
+                // // LMST Sunrise
+                // // ────────────────────────────────────────────────
+                // lv_label_set_text(satio_c.val_LMST_sunrise, String(satioData.LMST_twilight_schedule.dawn_start[SunriseSunset]).c_str());
+
+                // // ────────────────────────────────────────────────
+                // // LMST Sunset
+                // // ────────────────────────────────────────────────
+                // lv_label_set_text(satio_c.val_LMST_sunset, String(satioData.LMST_twilight_schedule.dusk_start[SunriseSunset]).c_str());
+
+                // // ────────────────────────────────────────────────
+                // // LMST Golden Hour Dawn
+                // // ────────────────────────────────────────────────
+                // // lv_label_set_text(satio_c.val_LMST_golden_hour_dawn, String(satioData.LMST_twilight_schedule.golden_hour_dawn[SunriseSunset]).c_str());
             }
         }
 

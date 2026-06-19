@@ -561,10 +561,42 @@ typedef struct {
     lv_obj_t * val_LMST_night_hours;
     lv_obj_t * lbl_LMST_anomaly;
     lv_obj_t * val_LMST_anomaly;
+
+    lv_obj_t * lbl_LMST_astronomical_twilight_dawn;
+    lv_obj_t * val_LMST_astronomical_twilight_dawn;
+
+    lv_obj_t * lbl_LMST_nautical_twilight_dawn;
+    lv_obj_t * val_LMST_nautical_twilight_dawn;    
+
+    lv_obj_t * lbl_LMST_civil_twilight_dawn;
+    lv_obj_t * val_LMST_civil_twilight_dawn;
+
     lv_obj_t * lbl_LMST_sunrise;
     lv_obj_t * val_LMST_sunrise;
+
+    lv_obj_t * lbl_LMST_golden_hour_dawn;
+    lv_obj_t * val_LMST_golden_hour_dawn;
+
+    lv_obj_t * lbl_LMST_FullDayLight;
+    lv_obj_t * val_LMST_FullDayLight;
+
+    lv_obj_t * lbl_LMST_golden_hour_dusk;
+    lv_obj_t * val_LMST_golden_hour_dusk;
+
     lv_obj_t * lbl_LMST_sunset;
     lv_obj_t * val_LMST_sunset;
+
+    lv_obj_t * lbl_LMST_civil_twilight_dusk;
+    lv_obj_t * val_LMST_civil_twilight_dusk;
+
+    lv_obj_t * lbl_LMST_nautical_twilight_dusk;
+    lv_obj_t * val_LMST_nautical_twilight_dusk;
+
+    lv_obj_t * lbl_LMST_astronomical_twilight_dusk;
+    lv_obj_t * val_LMST_astronomical_twilight_dusk;
+    
+    lv_obj_t * lbl_LMST_astronomical_night;
+    lv_obj_t * val_LMST_astronomical_night;
 
     // lv_obj_t * lbl_LMST_current_twilight_zone_name;
     // lv_obj_t * val_LMST_current_twilight_zone_name;

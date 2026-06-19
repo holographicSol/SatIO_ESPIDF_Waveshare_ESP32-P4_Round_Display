@@ -21,132 +21,36 @@ extern bool sync_rtc_bool;
 extern RTC_DS3231 rtc;
 
 // ── Twilight stage types ─────────────────────────────────────────────────────
+#define MAX_TWILIGHT_ZONES 7
 
-enum class TwilightZone : int {
+enum {
     FullDaylight         = 0,
     GoldenHour           = 1,
-    Sunset               = 2,
+    SunriseSunset        = 2,
     CivilTwilight        = 3,
-    CivilDusk            = 4,
-    NauticalTwilight     = 5,
-    NauticalDusk         = 6,
-    AstronomicalTwilight = 7,
-    AstronomicalDusk     = 8,
-    AstronomicalNight    = 9
+    NauticalTwilight     = 4,
+    AstronomicalTwilight = 5,
+    AstronomicalNight    = 6
 };
 
-struct AltitudeRange {
-    float lower;   // degrees, inclusive; use -999.0f for "no lower bound"
-    float upper;   // degrees, inclusive; use +999.0f for "no upper bound"
+enum {
+    Dawn = 0,
+    Dusk = 1
 };
+
+extern float tzonesar[MAX_TWILIGHT_ZONES][2];
+extern char twilight_zone_names[MAX_TWILIGHT_ZONES][22];
 
 typedef struct {
-    TwilightZone    zone;
-    const char*     zoneName;
-    AltitudeRange   sunAltitude;   // geometric, sun centre, degrees
-    const char*     description;
-} TwilightStageEntry;
-
-typedef struct {
-	const char* zoneName;    // from TwilightStages::stages[z].zoneName
-	double dusk_start;       // evening: time zone begins (HH.MM); -1.0 if N/A
-	double dusk_end;         // evening: time zone ends   (HH.MM); -1.0 if N/A
-	double dawn_start;       // morning: time zone begins (HH.MM); -1.0 if N/A
-	double dawn_end;         // morning: time zone ends   (HH.MM); -1.0 if N/A
-} TwilightStageScheduleEntry;
-
-struct TwilightStages {
-    static constexpr int COUNT = 10;
-
-    static constexpr std::array<TwilightStageEntry, COUNT> stages = {{
-        {
-            TwilightZone::FullDaylight,
-            "Full Daylight",
-            { 6.0f, 999.0f },
-            "Sun clearly above horizon; full illumination; shadows well-defined."
-        },
-
-        {
-            TwilightZone::GoldenHour,
-            "Golden Hour",
-            { 0.0f, 6.0f },
-            "Low-angle warm light; long soft shadows; beloved by photographers."
-        },
-        {
-            TwilightZone::Sunset,
-            "Sunset / Sunrise",
-            { 0.0f, 0.0f },
-            "Upper limb of sun at geometric horizon; atmospheric refraction lifts "
-            "apparent disc ~0.5 degrees above true horizon."
-        },
-        {
-            TwilightZone::CivilTwilight,
-            "Civil Twilight",
-            { -6.0f, 0.0f },
-            "Sky still bright; outdoor work possible without artificial light; "
-            "horizon clearly defined; brightest stars and Venus visible near end."
-        },
-
-        {
-            TwilightZone::CivilDusk,
-            "Civil Dusk / Dawn",
-            { -6.0f, -6.0f },
-            "Legal definition of 'lights required' in most countries; "
-            "end of civil twilight."
-        },
-        {
-            TwilightZone::NauticalTwilight,
-            "Nautical Twilight",
-            { -12.0f, -6.0f },
-            "Horizon still visible at sea; enough sky glow to use a sextant; "
-            "many stars visible; sky appears deep blue then indigo."
-        },
-        {
-            TwilightZone::NauticalDusk,
-            "Nautical Dusk / Dawn",
-            { -12.0f, -12.0f },
-            "Horizon at sea becomes indistinct; end of nautical twilight."
-        },
-        {
-            TwilightZone::AstronomicalTwilight,
-            "Astronomical Twilight",
-            { -18.0f, -12.0f },
-            "Sky glow fades toward true dark; faint objects still partially washed out; "
-            "Milky Way begins to emerge; airglow and faint aurora may appear."
-        },
-        {
-            TwilightZone::AstronomicalDusk,
-            "Astronomical Dusk / Dawn",
-            { -18.0f, -18.0f },
-            "Last trace of solar illumination in the atmosphere; "
-            "end of astronomical twilight."
-        },
-        {
-            TwilightZone::AstronomicalNight,
-            "Astronomical Night",
-            { -999.0f, -18.0f },
-            "True darkness; no solar contribution to sky brightness; "
-            "best conditions for deep-sky observing (light pollution permitting)."
-        }
-    }};
-
-    // Key lookup — returns nullptr if zone is out of range
-    static constexpr const TwilightStageEntry* get(TwilightZone zone) {
-        const int idx = static_cast<int>(zone);
-        if (idx < 0 || idx >= COUNT) return nullptr;
-        return &stages[idx];
-    }
-
-    // Classify a measured sun altitude (degrees) into the appropriate phase
-    static constexpr TwilightZone classify(float altitudeDeg) {
-        if (altitudeDeg >   6.0f) return TwilightZone::FullDaylight;
-        if (altitudeDeg >   0.0f) return TwilightZone::GoldenHour;
-        if (altitudeDeg >  -6.0f) return TwilightZone::CivilTwilight;
-        if (altitudeDeg > -12.0f) return TwilightZone::NauticalTwilight;
-        if (altitudeDeg > -18.0f) return TwilightZone::AstronomicalTwilight;
-        return TwilightZone::AstronomicalNight;
-    }
-};
+    int current_zone; // Current twilight zone index
+	double dawn_start[MAX_TWILIGHT_ZONES];
+    double dawn_end[MAX_TWILIGHT_ZONES];
+    double dusk_start[MAX_TWILIGHT_ZONES];
+    double dusk_end[MAX_TWILIGHT_ZONES];
+    double LMST_day_hours;
+    double LMST_night_hours;
+    double LMST_anomaly;
+} TwilightStageSchedule;
 
 /**
  * @brief Struct to hold RA/Dec data. Intened for use when RA/DEC is calculated for:
@@ -353,14 +257,8 @@ struct SATIOStruct {
     char padded_LMST_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE]; // Padded LMST time (HHMMSS)
     char padded_LMST_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded LMST date
 
-    double LMST_day_hours; // Day hours for LMST time
-    double LMST_night_hours; // Night hours for LMST time
-    double LMST_anomaly; // Anomaly for LMST time
-    double LMST_sunrise; // Sunrise for LMST time
-    double LMST_sunset; // Sunset for LMST time
-
-    TwilightStageEntry LMST_twilight_stage; // current according to LMST time
-    TwilightStageScheduleEntry LMST_twilight_schedule[10]; // schedule according to LMST time
+    // TwilightStageEntry LMST_twilight_stage; // current according to LMST time
+    TwilightStageSchedule LMST_twilight_schedule; // schedule according to LMST time
 
     RaDecData currentZenithRADec; // current Zenith RA/Dec data
     // ------------------------------------------------------------------------------------
@@ -424,8 +322,7 @@ void syncRTC(void);
 void setSatIOData(void);
 void initSystemTime(void);
 
-TwilightStageEntry getTwilightStage(float sunAltDeg);
-TwilightStageScheduleEntry getTwilightScheduleEntry(int zone);
+TwilightStageSchedule getTwilightSchedule(int zone);
 
 /**
    * @brief Calculates the speed between two GPS points in any direction.

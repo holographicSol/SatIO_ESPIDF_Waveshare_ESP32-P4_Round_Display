@@ -19,6 +19,27 @@
 // ----------------------------------------------------------------------------------------
 RTC_DS3231 rtc;
 
+// Twilight zone solar altitude ranges (degrees)
+float tzonesar[MAX_TWILIGHT_ZONES][2]={
+    {  6.0f,  999.0f }, // 0 Full Daylight
+    {  0.0f,    6.0f }, // 1 Golden Hour
+    {  0.0f,    0.0f }, // 2 Sunrise/Sunset
+    { -6.0f,    0.0f }, // 3 Civil Twilight
+    {-12.0f,   -6.0f }, // 4 Nautical Twilight
+    {-18.0f,  -12.0f }, // 5 Astronomical Twilight
+    {-999.0f, -18.0f }  // 6 Astronomical Night
+};
+
+char twilight_zone_names[MAX_TWILIGHT_ZONES][22]={
+    "Full Daylight",
+    "Golden Hour",
+    "Sunrise/Sunset",
+    "Civil Twilight",
+    "Nautical Twilight",
+    "Astronomical Twilight",
+    "Astronomical Night"
+};
+
 struct SATIOStruct satioData = {
     // ------------------------------------------------------------------------------------
     // INTERNAL
@@ -197,37 +218,11 @@ struct SATIOStruct satioData = {
     .padded_LMST_time_HHMMSS = "000000",
     .padded_LMST_date_DDMMYYYY = "00000000",
 
-    .LMST_day_hours = 0.0,
-    .LMST_night_hours = 0.0,
-    .LMST_anomaly = 0.0,
-    .LMST_sunrise = 0.0,
-    .LMST_sunset = 0.0,
-    
-    // current according to LMST time
-    .LMST_twilight_stage = {
-        TwilightZone::AstronomicalNight,
-        "Astronomical Night",
-        { -999.0f, -18.0f },
-        "True darkness; no solar contribution to sky brightness; "
-        "best conditions for deep-sky observing (light pollution permitting)."
-    },
-
     /*
       schedule according to LMST time.
-      { dusk_start, dusk_end, dawn_start, dawn_end } in HH.MM format; -1.0 if N/A.
+      { zoneName, dusk_start, dusk_end, dawn_start, dawn_end } in HH.MM format; -1.0 if N/A.
     */
-    .LMST_twilight_schedule = {
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // FullDaylight
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // GoldenHour
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // Sunset
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // CivilTwilight
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // CivilDusk
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // NauticalTwilight
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // NauticalDusk
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // AstronomicalTwilight
-        {nullptr, -1.0, -1.0, -1.0, -1.0}, // AstronomicalDusk
-        {nullptr, -1.0, -1.0, -1.0, -1.0}  // AstronomicalNight
-    },
+    .LMST_twilight_schedule = {0},
 
     .currentZenithRADec = {
         0,   // ra_h
@@ -749,30 +744,30 @@ static inline double hoursToHHMM(double frac_hours) {
 // ──────────────────────────────────────────────────────────────────────────────
 static inline double sunCrossingMorning(float alt_deg, double lat_rad, double decl_rad) {
     double denom = cos(lat_rad) * cos(decl_rad);
-    if (fabs(denom) < 1e-9) return -1.0;
+    if (fabs(denom) < 1e-9) return NAN;
     double cos_ha = (sin((double)alt_deg * M_PI / 180.0) - sin(lat_rad) * sin(decl_rad)) / denom;
-    if (cos_ha < -1.0 || cos_ha > 1.0) return -1.0;
+    if (cos_ha < -1.0 || cos_ha > 1.0) return NAN;
     return hoursToHHMM(12.0 - (acos(cos_ha) * 180.0 / M_PI) / 15.0);
 }
 
 static inline double sunCrossingEvening(float alt_deg, double lat_rad, double decl_rad) {
     double denom = cos(lat_rad) * cos(decl_rad);
-    if (fabs(denom) < 1e-9) return -1.0;
+    if (fabs(denom) < 1e-9) return NAN;
     double cos_ha = (sin((double)alt_deg * M_PI / 180.0) - sin(lat_rad) * sin(decl_rad)) / denom;
-    if (cos_ha < -1.0 || cos_ha > 1.0) return -1.0;
+    if (cos_ha < -1.0 || cos_ha > 1.0) return NAN;
     return hoursToHHMM(12.0 + (acos(cos_ha) * 180.0 / M_PI) / 15.0);
 }
 
-TwilightStageEntry getTwilightStage(float sunAltDeg) {
-    TwilightZone zone       = TwilightStages::classify(sunAltDeg);
-    const TwilightStageEntry* entry = TwilightStages::get(zone);
-    return *entry;  // classify() always yields a valid index (0-9)
-}
-
-TwilightStageScheduleEntry getTwilightScheduleEntry(int zone) {
-    TwilightStageScheduleEntry result = {nullptr, -1.0, -1.0, -1.0, -1.0};
-
-    return result;
+/**
+ * @brief Get the current twilight zone index based on the sun's altitude in degrees.
+*/
+int getCurrentTwilightZoneIndex(float sunAltDeg) {
+  for (int i=0; i<MAX_TWILIGHT_ZONES; i++) {
+    if (sunAltDeg >= tzonesar[i][0] && sunAltDeg <= tzonesar[i][1]) {
+      return i;
+    }
+  }
+  return -1; // Return -1 if no matching twilight zone is found
 }
 
 // ----------------------------------------------------------------------------------------
@@ -807,6 +802,35 @@ void updateLMST(void) {
     satioData.LMST_year        = (double)(lmst_tm.tm_year + LAST_EPOCH);
     satioData.LMST_month       = (double)(lmst_tm.tm_mon + 1);
     satioData.LMST_day         = (double)lmst_tm.tm_mday;
+
+    // Format LMST time (HH:MM:SS)
+    char hour_str[3], min_str[3], sec_str[3];
+    padDigitsZero(satioData.LMST_hour, hour_str, sizeof(hour_str));
+    padDigitsZero(satioData.LMST_minute, min_str, sizeof(min_str));
+    padDigitsZero(satioData.LMST_second, sec_str, sizeof(sec_str));
+    memset(satioData.formatted_LMST_time, 0, sizeof(satioData.formatted_LMST_time));
+    snprintf(satioData.formatted_LMST_time, sizeof(satioData.formatted_LMST_time), "%s:%s:%s", hour_str, min_str, sec_str);
+
+    // Format LMST date (DD/MM/YYYY)
+    char day_str[3], month_str[3], year_str[5];
+    padDigitsZero(satioData.LMST_day, day_str, sizeof(day_str));
+    padDigitsZero(satioData.LMST_month, month_str, sizeof(month_str));
+    padDigitsZero(satioData.LMST_year, year_str, sizeof(year_str));
+    memset(satioData.formatted_LMST_date_DDMMYYYY, 0, sizeof(satioData.formatted_LMST_date_DDMMYYYY));
+    snprintf(satioData.formatted_LMST_date_DDMMYYYY, sizeof(satioData.formatted_LMST_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
+
+    // Format LMST short date (DD/MM/YY)
+    char short_year_str[3] = { year_str[2], year_str[3], '\0' };
+    memset(satioData.formatted_LMST_short_date_DDMMYY, 0, sizeof(satioData.formatted_LMST_short_date_DDMMYY));
+    snprintf(satioData.formatted_LMST_short_date_DDMMYY, sizeof(satioData.formatted_LMST_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
+
+    // Format padded LMST time (HHMMSS)
+    memset(satioData.padded_LMST_time_HHMMSS, 0, sizeof(satioData.padded_LMST_time_HHMMSS));
+    snprintf(satioData.padded_LMST_time_HHMMSS, sizeof(satioData.padded_LMST_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
+
+    // Format padded LMST date (DDMMYYYY)
+    memset(satioData.padded_LMST_date_DDMMYYYY, 0, sizeof(satioData.padded_LMST_date_DDMMYYYY));
+    snprintf(satioData.padded_LMST_date_DDMMYYYY, sizeof(satioData.padded_LMST_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
 
     // ------------------------------------------------------------------------
     // Photoperiod calculation.
@@ -847,66 +871,29 @@ void updateLMST(void) {
         anomaly = (abs_lat - 66.5) / (90.0 - 66.5);
     }
 
-    // Sunrise and sunset as fractional hours from midnight (solar noon = 12.0).
-    // Only meaningful when 0 < day_hours < 24.
-    double sunrise_h = 12.0 - (day_hours / 2.0);
-    double sunset_h  = 12.0 + (day_hours / 2.0);
+    // Store photoperiod data in satioData structure.
+    satioData.LMST_twilight_schedule.LMST_day_hours   = hoursToHHMM(day_hours);
+    satioData.LMST_twilight_schedule.LMST_night_hours = hoursToHHMM(night_hours);
+    satioData.LMST_twilight_schedule.LMST_anomaly     = anomaly;
 
-    satioData.LMST_day_hours   = hoursToHHMM(day_hours);
-    satioData.LMST_night_hours = hoursToHHMM(night_hours);
-    satioData.LMST_anomaly     = anomaly;
-    satioData.LMST_sunrise     = hoursToHHMM(sunrise_h);
-    satioData.LMST_sunset      = hoursToHHMM(sunset_h);
+    printf("LMST Time : %02d:%02d:%02d %02d/%02d/%04d\n",
+           (int)satioData.LMST_hour,
+           (int)satioData.LMST_minute,
+           (int)satioData.LMST_second,
+           (int)satioData.LMST_day,
+           (int)satioData.LMST_month,
+           (int)satioData.LMST_year);
 
-    // printf("LMST Time : %02d:%02d:%02d %02d/%02d/%04d\n",
-    //        (int)satioData.LMST_hour,
-    //        (int)satioData.LMST_minute,
-    //        (int)satioData.LMST_second,
-    //        (int)satioData.LMST_day,
-    //        (int)satioData.LMST_month,
-    //        (int)satioData.LMST_year);
-
-    // printf("Photoperiod         : day=%05.2f  night=%05.2f  sunrise=%05.2f  sunset=%05.2f  anomaly=%.4f%s\n",
-    //        satioData.LMST_day_hours,
-    //        satioData.LMST_night_hours,
-    //        satioData.LMST_sunrise,
-    //        satioData.LMST_sunset,
-    //        anomaly,
-    //        cos_omega <= -1.0 ? "  [POLAR DAY]"  :
-    //        cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
-
-    // Format LMST time (HH:MM:SS)
-    char hour_str[3], min_str[3], sec_str[3];
-    padDigitsZero(satioData.LMST_hour, hour_str, sizeof(hour_str));
-    padDigitsZero(satioData.LMST_minute, min_str, sizeof(min_str));
-    padDigitsZero(satioData.LMST_second, sec_str, sizeof(sec_str));
-    memset(satioData.formatted_LMST_time, 0, sizeof(satioData.formatted_LMST_time));
-    snprintf(satioData.formatted_LMST_time, sizeof(satioData.formatted_LMST_time), "%s:%s:%s", hour_str, min_str, sec_str);
-
-    // Format LMST date (DD/MM/YYYY)
-    char day_str[3], month_str[3], year_str[5];
-    padDigitsZero(satioData.LMST_day, day_str, sizeof(day_str));
-    padDigitsZero(satioData.LMST_month, month_str, sizeof(month_str));
-    padDigitsZero(satioData.LMST_year, year_str, sizeof(year_str));
-    memset(satioData.formatted_LMST_date_DDMMYYYY, 0, sizeof(satioData.formatted_LMST_date_DDMMYYYY));
-    snprintf(satioData.formatted_LMST_date_DDMMYYYY, sizeof(satioData.formatted_LMST_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
-
-    // Format LMST short date (DD/MM/YY)
-    char short_year_str[3] = { year_str[2], year_str[3], '\0' };
-    memset(satioData.formatted_LMST_short_date_DDMMYY, 0, sizeof(satioData.formatted_LMST_short_date_DDMMYY));
-    snprintf(satioData.formatted_LMST_short_date_DDMMYY, sizeof(satioData.formatted_LMST_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
-
-    // Format padded LMST time (HHMMSS)
-    memset(satioData.padded_LMST_time_HHMMSS, 0, sizeof(satioData.padded_LMST_time_HHMMSS));
-    snprintf(satioData.padded_LMST_time_HHMMSS, sizeof(satioData.padded_LMST_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
-
-    // Format padded LMST date (DDMMYYYY)
-    memset(satioData.padded_LMST_date_DDMMYYYY, 0, sizeof(satioData.padded_LMST_date_DDMMYYYY));
-    snprintf(satioData.padded_LMST_date_DDMMYYYY, sizeof(satioData.padded_LMST_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
+    printf("Photoperiod         : daylight_hours=%05.2f  night_hours=%05.2f anomaly=%.4f%s\n",
+           satioData.LMST_twilight_schedule.LMST_day_hours,
+           satioData.LMST_twilight_schedule.LMST_night_hours,
+           satioData.LMST_twilight_schedule.LMST_anomaly,
+           cos_omega <= -1.0 ? "  [POLAR DAY]"  :
+           cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
 
     // ──────────────────────────────────────────────────────────────────────────
     // Twilight stage: classify current sun altitude
-    // LMST time IS true solar time, so solar noon == 12:00 exactly.
+    // LMST means solar noon == 12:00
     // ──────────────────────────────────────────────────────────────────────────
     double solar_hour = (double)satioData.LMST_hour
                       + (double)satioData.LMST_minute / 60.0
@@ -918,10 +905,9 @@ void updateLMST(void) {
     if (sin_alt_now >  1.0) sin_alt_now =  1.0;
     if (sin_alt_now < -1.0) sin_alt_now = -1.0;
     float sun_alt_deg = (float)(asin(sin_alt_now) * 180.0 / M_PI);
-    satioData.LMST_twilight_stage = getTwilightStage(sun_alt_deg);
-    // printf("Twilight Stage: %s (sun altitude = %.2f°)\n",
-    //        satioData.LMST_twilight_stage.zoneName,
-    //        sun_alt_deg);
+
+    // Current twilight zone index based on sun altitude
+    satioData.LMST_twilight_schedule.current_zone = getCurrentTwilightZoneIndex(sun_alt_deg);
 
     // ──────────────────────────────────────────────────────────────────────────
     // Twilight schedule: crossing times (HH.MM) for each of the 10 zones.
@@ -929,36 +915,57 @@ void updateLMST(void) {
     // dawn_start / dawn_end : morning entry / exit of zone (sun ascending).
     // -1.0 = N/A (sun never crosses that altitude, or no finite bound).
     // ──────────────────────────────────────────────────────────────────────────
-    double t6_m   = sunCrossingMorning( 6.0f, lat_rad, decl_rad);
-    double t6_e   = sunCrossingEvening( 6.0f, lat_rad, decl_rad);
-    double t0_m   = sunCrossingMorning( 0.0f, lat_rad, decl_rad);
-    double t0_e   = sunCrossingEvening( 0.0f, lat_rad, decl_rad);
-    double tm6_m  = sunCrossingMorning(-6.0f, lat_rad, decl_rad);
-    double tm6_e  = sunCrossingEvening(-6.0f, lat_rad, decl_rad);
-    double tm12_m = sunCrossingMorning(-12.0f, lat_rad, decl_rad);
-    double tm12_e = sunCrossingEvening(-12.0f, lat_rad, decl_rad);
-    double tm18_m = sunCrossingMorning(-18.0f, lat_rad, decl_rad);
-    double tm18_e = sunCrossingEvening(-18.0f, lat_rad, decl_rad);
+    // FullDaylight
+    // Note reuse of Dawn is intentional (6 degrees to 6 degrees, while retaining 999 degrees for bounds).
+    satioData.LMST_twilight_schedule.dawn_start[FullDaylight] = sunCrossingMorning(tzonesar[FullDaylight][Dawn], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dawn_end[FullDaylight]   = NAN;
+    satioData.LMST_twilight_schedule.dusk_start[FullDaylight] = NAN;
+    satioData.LMST_twilight_schedule.dusk_end[FullDaylight]   = sunCrossingEvening(tzonesar[FullDaylight][Dawn], lat_rad, decl_rad);
 
-    const auto& S = TwilightStages::stages;
-    //                                                                   dusk_start  dusk_end   dawn_start  dawn_end
-    satioData.LMST_twilight_schedule[0] = { S[0].zoneName,    -1.0,       t6_e,      t6_m,       -1.0    }; // FullDaylight
-    satioData.LMST_twilight_schedule[1] = { S[1].zoneName,    t6_e,       t0_e,      t0_m,       t6_m    }; // GoldenHour
-    satioData.LMST_twilight_schedule[2] = { S[2].zoneName,    t0_e,       t0_e,      t0_m,       t0_m    }; // Sunset/Sunrise
-    satioData.LMST_twilight_schedule[3] = { S[3].zoneName,    t0_e,       tm6_e,     tm6_m,      t0_m    }; // CivilTwilight
-    satioData.LMST_twilight_schedule[4] = { S[4].zoneName,    tm6_e,      tm6_e,     tm6_m,      tm6_m   }; // CivilDusk
-    satioData.LMST_twilight_schedule[5] = { S[5].zoneName,    tm6_e,      tm12_e,    tm12_m,     tm6_m   }; // NauticalTwilight
-    satioData.LMST_twilight_schedule[6] = { S[6].zoneName,    tm12_e,     tm12_e,    tm12_m,     tm12_m  }; // NauticalDusk
-    satioData.LMST_twilight_schedule[7] = { S[7].zoneName,    tm12_e,     tm18_e,    tm18_m,     tm12_m  }; // AstronomicalTwilight
-    satioData.LMST_twilight_schedule[8] = { S[8].zoneName,    tm18_e,     tm18_e,    tm18_m,     tm18_m  }; // AstronomicalDusk
-    satioData.LMST_twilight_schedule[9] = { S[9].zoneName,    tm18_e,     -1.0,      -1.0,       tm18_m  }; // AstronomicalNight
+    // GoldenHour
+    satioData.LMST_twilight_schedule.dawn_start[GoldenHour] = sunCrossingMorning(tzonesar[GoldenHour][Dawn], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dawn_end[GoldenHour]   = sunCrossingMorning(tzonesar[GoldenHour][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_start[GoldenHour] = sunCrossingEvening(tzonesar[GoldenHour][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_end[GoldenHour]   = sunCrossingEvening(tzonesar[GoldenHour][Dawn], lat_rad, decl_rad);
 
-    // printf("Twilight Schedule:\n");
-    // for (int i = 0; i < 10; ++i) {
-    //     const auto& entry = satioData.LMST_twilight_schedule[i];
-    //     printf("  Zone %d: %s | dusk_start=%.2f, dusk_end=%.2f, dawn_start=%.2f, dawn_end=%.2f\n",
-    //            i, entry.zoneName, entry.dusk_start, entry.dusk_end, entry.dawn_start, entry.dawn_end);
-    // }
+    // Sunset/Sunrise
+    satioData.LMST_twilight_schedule.dawn_start[SunriseSunset] = sunCrossingMorning(tzonesar[SunriseSunset][Dawn], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dawn_end[SunriseSunset]   = sunCrossingMorning(tzonesar[SunriseSunset][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_start[SunriseSunset] = sunCrossingEvening(tzonesar[SunriseSunset][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_end[SunriseSunset]   = sunCrossingEvening(tzonesar[SunriseSunset][Dawn], lat_rad, decl_rad);
+
+    // Civil Twilight
+    satioData.LMST_twilight_schedule.dawn_start[CivilTwilight] = sunCrossingMorning(tzonesar[CivilTwilight][Dawn], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dawn_end[CivilTwilight]   = sunCrossingMorning(tzonesar[CivilTwilight][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_start[CivilTwilight] = sunCrossingEvening(tzonesar[CivilTwilight][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_end[CivilTwilight]   = sunCrossingEvening(tzonesar[CivilTwilight][Dawn], lat_rad, decl_rad);
+
+    // Nautical Twilight
+    satioData.LMST_twilight_schedule.dawn_start[NauticalTwilight] = sunCrossingMorning(tzonesar[NauticalTwilight][Dawn], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dawn_end[NauticalTwilight]   = sunCrossingMorning(tzonesar[NauticalTwilight][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_start[NauticalTwilight] = sunCrossingEvening(tzonesar[NauticalTwilight][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_end[NauticalTwilight]   = sunCrossingEvening(tzonesar[NauticalTwilight][Dawn], lat_rad, decl_rad);
+
+    // Astronomical Twilight
+    satioData.LMST_twilight_schedule.dawn_start[AstronomicalTwilight] = sunCrossingMorning(tzonesar[AstronomicalTwilight][Dawn], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dawn_end[AstronomicalTwilight]   = sunCrossingMorning(tzonesar[AstronomicalTwilight][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_start[AstronomicalTwilight] = sunCrossingEvening(tzonesar[AstronomicalTwilight][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_end[AstronomicalTwilight]   = sunCrossingEvening(tzonesar[AstronomicalTwilight][Dawn], lat_rad, decl_rad);
+
+    // Astronomical Night
+    // Note reuse of Dusk is intentional (-18 degrees to -18 degrees, while retaining 999 degrees for bounds).
+    satioData.LMST_twilight_schedule.dawn_start[AstronomicalNight] = NAN;
+    satioData.LMST_twilight_schedule.dawn_end[AstronomicalNight]   = sunCrossingMorning(tzonesar[AstronomicalNight][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_start[AstronomicalNight] = sunCrossingEvening(tzonesar[AstronomicalNight][Dusk], lat_rad, decl_rad);
+    satioData.LMST_twilight_schedule.dusk_end[AstronomicalNight]   = NAN;
+
+
+    printf("Twilight Schedule:\n");
+    for (int i = 0; i < MAX_TWILIGHT_ZONES; ++i) {
+        const auto& entry = satioData.LMST_twilight_schedule;
+        printf("  Zone %d: %s | dusk_start=%.2f, dusk_end=%.2f, dawn_start=%.2f, dawn_end=%.2f\n",
+               i, twilight_zone_names[i], entry.dusk_start[i], entry.dusk_end[i], entry.dawn_start[i], entry.dawn_end[i]);
+    }
 }
 
 void calculateZenithRaDec(double lst, double latitude, double *ra_hours, double *dec_degrees) {
@@ -968,7 +975,6 @@ void calculateZenithRaDec(double lst, double latitude, double *ra_hours, double 
 
 // void LSTLatZenith2RADec(double lst, double lat) {
 RaDecData getRADecFromLSTLat(double lst, double lat) {
-
 
     RaDecData radecData = {
         0,   // ra_h
