@@ -876,20 +876,20 @@ void updateLMST(void) {
     satioData.LMST_twilight_schedule.LMST_night_hours = hoursToHHMM(night_hours);
     satioData.LMST_twilight_schedule.LMST_anomaly     = anomaly;
 
-    printf("LMST Time : %02d:%02d:%02d %02d/%02d/%04d\n",
-           (int)satioData.LMST_hour,
-           (int)satioData.LMST_minute,
-           (int)satioData.LMST_second,
-           (int)satioData.LMST_day,
-           (int)satioData.LMST_month,
-           (int)satioData.LMST_year);
+    // printf("LMST Time : %02d:%02d:%02d %02d/%02d/%04d\n",
+    //        (int)satioData.LMST_hour,
+    //        (int)satioData.LMST_minute,
+    //        (int)satioData.LMST_second,
+    //        (int)satioData.LMST_day,
+    //        (int)satioData.LMST_month,
+    //        (int)satioData.LMST_year);
 
-    printf("Photoperiod         : daylight_hours=%05.2f  night_hours=%05.2f anomaly=%.4f%s\n",
-           satioData.LMST_twilight_schedule.LMST_day_hours,
-           satioData.LMST_twilight_schedule.LMST_night_hours,
-           satioData.LMST_twilight_schedule.LMST_anomaly,
-           cos_omega <= -1.0 ? "  [POLAR DAY]"  :
-           cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
+    // printf("Photoperiod         : daylight_hours=%05.2f  night_hours=%05.2f anomaly=%.4f%s\n",
+    //        satioData.LMST_twilight_schedule.LMST_day_hours,
+    //        satioData.LMST_twilight_schedule.LMST_night_hours,
+    //        satioData.LMST_twilight_schedule.LMST_anomaly,
+    //        cos_omega <= -1.0 ? "  [POLAR DAY]"  :
+    //        cos_omega >=  1.0 ? "  [POLAR NIGHT]" : "");
 
     // ──────────────────────────────────────────────────────────────────────────
     // Twilight stage: classify current sun altitude
@@ -905,9 +905,6 @@ void updateLMST(void) {
     if (sin_alt_now >  1.0) sin_alt_now =  1.0;
     if (sin_alt_now < -1.0) sin_alt_now = -1.0;
     float sun_alt_deg = (float)(asin(sin_alt_now) * 180.0 / M_PI);
-
-    // Current twilight zone index based on sun altitude
-    satioData.LMST_twilight_schedule.current_zone = getCurrentTwilightZoneIndex(sun_alt_deg);
 
     // ──────────────────────────────────────────────────────────────────────────
     // Twilight schedule: crossing times (HH.MM) for each of the 10 zones.
@@ -959,13 +956,24 @@ void updateLMST(void) {
     satioData.LMST_twilight_schedule.dusk_start[AstronomicalNight] = sunCrossingEvening(tzonesar[AstronomicalNight][Dusk], lat_rad, decl_rad);
     satioData.LMST_twilight_schedule.dusk_end[AstronomicalNight]   = NAN;
 
+    // printf("Twilight Schedule:\n");
+    // for (int i = 0; i < MAX_TWILIGHT_ZONES; ++i) {
+    //     const auto& entry = satioData.LMST_twilight_schedule;
+    //     printf("  Zone %d: %s | dusk_start=%.2f, dusk_end=%.2f, dawn_start=%.2f, dawn_end=%.2f\n",
+    //            i, twilight_zone_names[i], entry.dusk_start[i], entry.dusk_end[i], entry.dawn_start[i], entry.dawn_end[i]);
+    // }
 
-    printf("Twilight Schedule:\n");
-    for (int i = 0; i < MAX_TWILIGHT_ZONES; ++i) {
-        const auto& entry = satioData.LMST_twilight_schedule;
-        printf("  Zone %d: %s | dusk_start=%.2f, dusk_end=%.2f, dawn_start=%.2f, dawn_end=%.2f\n",
-               i, twilight_zone_names[i], entry.dusk_start[i], entry.dusk_end[i], entry.dawn_start[i], entry.dawn_end[i]);
-    }
+    // Set current twilight zone index number
+    satioData.LMST_twilight_schedule.current_zone = getCurrentTwilightZoneIndex(sun_alt_deg);
+    // printf(
+    //   "  Current Zone %d: %s | dusk_start=%.2f, dusk_end=%.2f, dawn_start=%.2f, dawn_end=%.2f\n",
+    //   satioData.LMST_twilight_schedule.current_zone,
+    //   twilight_zone_names[satioData.LMST_twilight_schedule.current_zone],
+    //   satioData.LMST_twilight_schedule.dusk_start[satioData.LMST_twilight_schedule.current_zone],
+    //   satioData.LMST_twilight_schedule.dusk_end[satioData.LMST_twilight_schedule.current_zone],
+    //   satioData.LMST_twilight_schedule.dawn_start[satioData.LMST_twilight_schedule.current_zone],
+    //   satioData.LMST_twilight_schedule.dawn_end[satioData.LMST_twilight_schedule.current_zone]
+    // );
 }
 
 void calculateZenithRaDec(double lst, double latitude, double *ra_hours, double *dec_degrees) {

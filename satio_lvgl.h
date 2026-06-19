@@ -562,6 +562,9 @@ typedef struct {
     lv_obj_t * lbl_LMST_anomaly;
     lv_obj_t * val_LMST_anomaly;
 
+    lv_obj_t * lbl_current_twilight_zone_name;
+    lv_obj_t * val_current_twilight_zone_name;
+
     lv_obj_t * lbl_LMST_astronomical_twilight_dawn;
     lv_obj_t * val_LMST_astronomical_twilight_dawn;
 

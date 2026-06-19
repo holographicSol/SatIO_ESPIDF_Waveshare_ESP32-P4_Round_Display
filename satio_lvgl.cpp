@@ -9791,6 +9791,68 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.val_LMST_anomaly, obj_w_1, obj_height);
 
     /* ---------------------------------------------------------- */
+    /* Row LMST Current Twilight Zone Name                        */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_LMST_current_twilight_zone_name = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    // Set row object widths
+    obj_w_0 = 250;
+    obj_w_1 = sub_row_width - obj_w_0 - (sub_column_padding * 2);
+
+    result.lbl_current_twilight_zone_name = create_label(
+        row_LMST_current_twilight_zone_name,
+        obj_w_0,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "LMST Current TZ",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_subtitle_hue
+    );
+
+    result.val_current_twilight_zone_name = create_label(
+        row_LMST_current_twilight_zone_name,
+        obj_w_1,
+        obj_height,
+        LV_ALIGN_CENTER,
+        0,
+        0,
+        "",
+        LV_TEXT_ALIGN_CENTER,
+        &cobalt_alien_17,
+        false,
+        false,
+        false,
+        2,
+        general_radius,
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    lv_obj_set_size(result.lbl_current_twilight_zone_name, obj_w_0, obj_height);
+    lv_obj_set_size(result.val_current_twilight_zone_name, obj_w_1, obj_height);
+
+    /* ---------------------------------------------------------- */
     /* Row LMST Astronomical Twilight Dawn                         */
     /* ---------------------------------------------------------- */
 
@@ -18576,6 +18638,11 @@ void update_display()
                 // LMST Anomaly
                 // ────────────────────────────────────────────────
                 lv_label_set_text(satio_c.val_LMST_anomaly, String(satioData.LMST_twilight_schedule.LMST_anomaly).c_str());
+
+                // ────────────────────────────────────────────────
+                // LMST Current Twilight Zone Name
+                // ────────────────────────────────────────────────
+                lv_label_set_text(satio_c.val_current_twilight_zone_name, String(twilight_zone_names[satioData.LMST_twilight_schedule.current_zone]).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Astronomical Twilight Dawn
