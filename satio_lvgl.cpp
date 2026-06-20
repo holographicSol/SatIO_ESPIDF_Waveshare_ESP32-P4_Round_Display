@@ -18627,22 +18627,22 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // LMST Daylight Hours
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_day_hours, String(satioData.LMST_twilight_schedule.LMST_day_hours).c_str());
+                lv_label_set_text(satio_c.val_LMST_day_hours, String(satioData.LMST_photo_period_schedule.LMST_day_hours).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Night Hours
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_night_hours, String(satioData.LMST_twilight_schedule.LMST_night_hours).c_str());
+                lv_label_set_text(satio_c.val_LMST_night_hours, String(satioData.LMST_photo_period_schedule.LMST_night_hours).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Anomaly
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_anomaly, String(satioData.LMST_twilight_schedule.LMST_anomaly).c_str());
+                lv_label_set_text(satio_c.val_LMST_anomaly, String(satioData.LMST_photo_period_schedule.LMST_anomaly).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Current Twilight Zone Name
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_current_twilight_zone_name, String(twilight_zone_names[satioData.LMST_twilight_schedule.current_zone]).c_str());
+                lv_label_set_text(satio_c.val_current_twilight_zone_name, String(twilight_zone_names[satioData.LMST_photo_period_schedule.current_zone]).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Astronomical Twilight Dawn
@@ -18650,9 +18650,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_astronomical_twilight_dawn,
                     String(
-                        String(satioData.LMST_twilight_schedule.dawn_start[AstronomicalTwilight]) +
+                        String(satioData.LMST_photo_period_schedule.dawn_start[AstronomicalTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dawn_end[AstronomicalTwilight])
+                        String(satioData.LMST_photo_period_schedule.dawn_end[AstronomicalTwilight])
                     ).c_str()
                 );
 
@@ -18662,9 +18662,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_nautical_twilight_dawn,
                     String(
-                        String(satioData.LMST_twilight_schedule.dawn_start[NauticalTwilight]) +
+                        String(satioData.LMST_photo_period_schedule.dawn_start[NauticalTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dawn_end[NauticalTwilight])
+                        String(satioData.LMST_photo_period_schedule.dawn_end[NauticalTwilight])
                     ).c_str()
                 );
 
@@ -18674,9 +18674,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_civil_twilight_dawn,
                     String(
-                        String(satioData.LMST_twilight_schedule.dawn_start[CivilTwilight]) +
+                        String(satioData.LMST_photo_period_schedule.dawn_start[CivilTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dawn_end[CivilTwilight])
+                        String(satioData.LMST_photo_period_schedule.dawn_end[CivilTwilight])
                     ).c_str()
                 );
 
@@ -18686,9 +18686,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_sunrise,
                     String(
-                        String(satioData.LMST_twilight_schedule.dawn_start[SunriseSunset]) +
+                        String(satioData.LMST_photo_period_schedule.dawn_start[SunriseSunset]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dawn_end[SunriseSunset])
+                        String(satioData.LMST_photo_period_schedule.dawn_end[SunriseSunset])
                     ).c_str()
                 );
 
@@ -18698,9 +18698,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_FullDayLight,
                     String(
-                        String(satioData.LMST_twilight_schedule.dawn_start[FullDaylight]) +
+                        String(satioData.LMST_photo_period_schedule.dawn_start[FullDaylight]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dusk_end[FullDaylight])
+                        String(satioData.LMST_photo_period_schedule.dusk_end[FullDaylight])
                     ).c_str()
                 );
 
@@ -18710,9 +18710,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_golden_hour_dawn,
                     String(
-                        String(satioData.LMST_twilight_schedule.dawn_start[GoldenHour]) +
+                        String(satioData.LMST_photo_period_schedule.dawn_start[GoldenHour]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dawn_end[GoldenHour])
+                        String(satioData.LMST_photo_period_schedule.dawn_end[GoldenHour])
                     ).c_str()
                 );
 
@@ -18722,9 +18722,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_golden_hour_dusk,
                     String(
-                        String(satioData.LMST_twilight_schedule.dusk_start[GoldenHour]) +
+                        String(satioData.LMST_photo_period_schedule.dusk_start[GoldenHour]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dusk_end[GoldenHour])
+                        String(satioData.LMST_photo_period_schedule.dusk_end[GoldenHour])
                     ).c_str()
                 );
 
@@ -18734,9 +18734,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_sunset,
                     String(
-                        String(satioData.LMST_twilight_schedule.dusk_start[SunriseSunset]) +
+                        String(satioData.LMST_photo_period_schedule.dusk_start[SunriseSunset]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dusk_end[SunriseSunset])
+                        String(satioData.LMST_photo_period_schedule.dusk_end[SunriseSunset])
                     ).c_str()
                 );
 
@@ -18746,9 +18746,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_civil_twilight_dusk,
                     String(
-                        String(satioData.LMST_twilight_schedule.dusk_start[CivilTwilight]) +
+                        String(satioData.LMST_photo_period_schedule.dusk_start[CivilTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dusk_end[CivilTwilight])
+                        String(satioData.LMST_photo_period_schedule.dusk_end[CivilTwilight])
                     ).c_str()
                 );
 
@@ -18758,9 +18758,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_nautical_twilight_dusk,
                     String(
-                        String(satioData.LMST_twilight_schedule.dusk_start[NauticalTwilight]) +
+                        String(satioData.LMST_photo_period_schedule.dusk_start[NauticalTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dusk_end[NauticalTwilight])
+                        String(satioData.LMST_photo_period_schedule.dusk_end[NauticalTwilight])
                     ).c_str()
                 );
 
@@ -18770,9 +18770,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_astronomical_twilight_dusk,
                     String(
-                        String(satioData.LMST_twilight_schedule.dusk_start[AstronomicalTwilight]) +
+                        String(satioData.LMST_photo_period_schedule.dusk_start[AstronomicalTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dusk_end[AstronomicalTwilight])
+                        String(satioData.LMST_photo_period_schedule.dusk_end[AstronomicalTwilight])
                     ).c_str()
                 );
 
@@ -18782,26 +18782,26 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_astronomical_night,
                     String(
-                        String(satioData.LMST_twilight_schedule.dusk_start[AstronomicalNight]) +
+                        String(satioData.LMST_photo_period_schedule.dusk_start[AstronomicalNight]) +
                         String(" - ") +
-                        String(satioData.LMST_twilight_schedule.dawn_end[AstronomicalNight])
+                        String(satioData.LMST_photo_period_schedule.dawn_end[AstronomicalNight])
                     ).c_str()
                 );
 
                 // // ────────────────────────────────────────────────
                 // // LMST Sunrise
                 // // ────────────────────────────────────────────────
-                // lv_label_set_text(satio_c.val_LMST_sunrise, String(satioData.LMST_twilight_schedule.dawn_start[SunriseSunset]).c_str());
+                // lv_label_set_text(satio_c.val_LMST_sunrise, String(satioData.LMST_photo_period_schedule.dawn_start[SunriseSunset]).c_str());
 
                 // // ────────────────────────────────────────────────
                 // // LMST Sunset
                 // // ────────────────────────────────────────────────
-                // lv_label_set_text(satio_c.val_LMST_sunset, String(satioData.LMST_twilight_schedule.dusk_start[SunriseSunset]).c_str());
+                // lv_label_set_text(satio_c.val_LMST_sunset, String(satioData.LMST_photo_period_schedule.dusk_start[SunriseSunset]).c_str());
 
                 // // ────────────────────────────────────────────────
                 // // LMST Golden Hour Dawn
                 // // ────────────────────────────────────────────────
-                // // lv_label_set_text(satio_c.val_LMST_golden_hour_dawn, String(satioData.LMST_twilight_schedule.golden_hour_dawn[SunriseSunset]).c_str());
+                // // lv_label_set_text(satio_c.val_LMST_golden_hour_dawn, String(satioData.LMST_photo_period_schedule.golden_hour_dawn[SunriseSunset]).c_str());
             }
         }
 

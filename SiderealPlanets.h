@@ -42,6 +42,28 @@ TODO:
 
 #define EARTH_OBLIQ  23.439281f  // obliquity of ecliptic (degrees)
 
+/**
+ * @brief Struct to hold RA/Dec data. Intened for use when RA/DEC is calculated for:
+ *        - Zenith (current location)
+ *        - Zenith Gyro (current location +- gyro offset)
+ * 
+ *        Relative RA/Dec can then be used with starnav.
+ */
+typedef struct {
+    // RA
+    int ra_h;
+    int ra_m;
+    double ra_s;
+    // Dec
+    int dec_d;
+    int dec_m;
+    double dec_s;
+    // HH:MM:SS.S format
+    char ra_str[16];  // HH:MM:SS.S format
+    // DD:MM:SS.S format
+    char dec_str[16]; // DD:MM:SS.S format
+} RaDecData;
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Structure to hold data
@@ -148,6 +170,7 @@ class SiderealPlanets {
 	double getEarthEclipticLongitude(void);
 	double getDegreesAltitudeOffsetByElevationM(double meters);
 	double inRange90(double degrees);
+	RaDecData getRADecFromLSTLat(double lst, double lat);
 
   // library-accessible "private" interface
   private:

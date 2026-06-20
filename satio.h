@@ -14,65 +14,15 @@
 #include <math.h>
 #include <RTClib.h>  // https://github.com/adafruit/RTClib
 #include "config.h"
+#include "./LMST.h"
+#include <SiderealPlanets.h>
+#include <SiderealObjects.h>
+#include "./sidereal_helper.h"
 
 extern struct tm *timeinfo;
 extern struct timeval tv_now;
 extern bool sync_rtc_bool;
 extern RTC_DS3231 rtc;
-
-// ── Twilight stage types ─────────────────────────────────────────────────────
-#define MAX_TWILIGHT_ZONES 7
-
-enum {
-    FullDaylight         = 0,
-    GoldenHour           = 1,
-    SunriseSunset        = 2,
-    CivilTwilight        = 3,
-    NauticalTwilight     = 4,
-    AstronomicalTwilight = 5,
-    AstronomicalNight    = 6
-};
-
-enum {
-    Dawn = 0,
-    Dusk = 1
-};
-
-extern float tzonesar[MAX_TWILIGHT_ZONES][2];
-extern char twilight_zone_names[MAX_TWILIGHT_ZONES][22];
-
-typedef struct {
-    int current_zone; // Current twilight zone index
-	double dawn_start[MAX_TWILIGHT_ZONES];
-    double dawn_end[MAX_TWILIGHT_ZONES];
-    double dusk_start[MAX_TWILIGHT_ZONES];
-    double dusk_end[MAX_TWILIGHT_ZONES];
-    double LMST_day_hours;
-    double LMST_night_hours;
-    double LMST_anomaly;
-} TwilightStageSchedule;
-
-/**
- * @brief Struct to hold RA/Dec data. Intened for use when RA/DEC is calculated for:
- *        - Zenith (current location)
- *        - Zenith Gyro (current location +- gyro offset)
- * 
- *        Relative RA/Dec can then be used with starnav.
- */
-typedef struct {
-    // RA
-    int ra_h;
-    int ra_m;
-    double ra_s;
-    // Dec
-    int dec_d;
-    int dec_m;
-    double dec_s;
-    // HH:MM:SS.S format
-    char ra_str[MAX_GLOBAL_ELEMENT_SIZE];  // HH:MM:SS.S format
-    // DD:MM:SS.S format
-    char dec_str[MAX_GLOBAL_ELEMENT_SIZE]; // DD:MM:SS.S format
-} RaDecData;
 
 // ----------------------------------------------------------------------------------------
 // SATIO Struct.
@@ -239,7 +189,7 @@ struct SATIOStruct {
     // ------------------------------------------------------------------------------------
     // LMST (Local Mean Solar Time) - True Local Time (Not Geo-Political Time)
     // ------------------------------------------------------------------------------------
-    double LMST_lat_weight;
+    tm LMST_tm; // LMST time structure
     
     uint8_t LMST_hour; // Hour for LMST time
     uint8_t LMST_minute; // Minute for LMST time
@@ -258,7 +208,7 @@ struct SATIOStruct {
     char padded_LMST_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded LMST date
 
     // TwilightStageEntry LMST_twilight_stage; // current according to LMST time
-    TwilightStageSchedule LMST_twilight_schedule; // schedule according to LMST time
+    PhotoPeriodSchedulele LMST_photo_period_schedule; // schedule according to LMST time
 
     RaDecData currentZenithRADec; // current Zenith RA/Dec data
     // ------------------------------------------------------------------------------------
@@ -313,7 +263,8 @@ void padDigitsZero(int digits, char* output, size_t output_size);
 void printAllTimes(void);
 void storeRTCTime(void);
 void storeLocalTime(void);
-void updateLMST(void);
+void storeLMST(void);
+// void updateLMST(void);
 void storeRTCSYNCTime(void) ;
 void extractDateTimeFromGPSData(void);
 void setSystemTime(long usec);
@@ -322,7 +273,7 @@ void syncRTC(void);
 void setSatIOData(void);
 void initSystemTime(void);
 
-TwilightStageSchedule getTwilightSchedule(int zone);
+// TwilightStageSchedule getTwilightSchedule(int zone);
 
 /**
    * @brief Calculates the speed between two GPS points in any direction.

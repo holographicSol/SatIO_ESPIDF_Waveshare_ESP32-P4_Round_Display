@@ -277,6 +277,8 @@ void intervalBreach1Second(void) {
     storeLocalTime();
     // store rtc time
     storeRTCTime();
+    // store lmst
+    storeLMST();
     // set loop counter
     systemData.total_loops_a_second = systemData.loops_a_second;
     systemData.loops_a_second = 0;

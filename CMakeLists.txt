@@ -38,6 +38,7 @@ idf_component_register(
         astroclock.cpp
         satio_lvgl.cpp
         # srtm_reader.cpp
+        LMST.cpp
     INCLUDE_DIRS
         .
 )
