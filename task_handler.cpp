@@ -741,6 +741,9 @@ void taskUniverse(void * pvParameters) {
 
     // ------------------------------------------------
     // Star Navigation Every Interval (see config.h)
+    // Cureently tracks a single object at zenith, while
+    // performance is being monitored with the intention
+    // of tracking multiple objects in the future.
     // ------------------------------------------------
     // if (systemData.interval_breach_star_navigation==true) {
     //   systemData.interval_breach_star_navigation=false;
