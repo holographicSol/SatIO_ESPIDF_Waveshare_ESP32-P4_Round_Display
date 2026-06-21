@@ -14,7 +14,8 @@
 
   Like say a WT901 9 axis gyro has two trigger pins that can be set for several elemental reasons,
   SatIO curently utilizes an ATMEGA2560 for 50+ trigger pins that can each be triggered by a compound
-  of reasons.
+  of reasons, according to how the matrix is configured either before and or after flashing the
+  chip with SatIO.
 
   A huge matrix switch (compund event triggers) in a small package, supporting stacks
   of logic accross 70 output pins and 100 mapping slots.
