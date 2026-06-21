@@ -238,60 +238,107 @@ void trackObject(double latitude, double longitude,
 // Set Object Name.
 // ----------------------------------------------------------------------------------------
 void setObjectStarName() {
-    if (myAstroObj.getIdentifiedObjectNumber() <= SObjectsstars_names_num) {
-    memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_name, myAstroObj.printStarName(myAstroObj.getIdentifiedObjectNumber()));
+    int num = myAstroObj.getIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsstars_names_num) {
+        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_name, myAstroObj.printStarName(num));
+    }
+    else {
+        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_name, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectMessierName() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectsmessier_names_num) {
-    memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_name, myAstroObj.printMessierName(myAstroObj.getAltIdentifiedObjectNumber()));
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsmessier_names_num) {
+        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_name, myAstroObj.printMessierName(num));
+    }
+    else {
+        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_name, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectCaldwellName() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectcaldwell_names_num) {
-    memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_name, myAstroObj.printCaldwellName(myAstroObj.getAltIdentifiedObjectNumber()));
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectcaldwell_names_num) {
+        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_name, myAstroObj.printCaldwellName(num));
+    }
+    else {
+        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_name, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 // ----------------------------------------------------------------------------------------
 // Set Object Type.
 // ----------------------------------------------------------------------------------------
 void setObjectStarType() {
-    if (myAstroObj.getIdentifiedObjectNumber() <= SObjectsstars_names_num) {
-    memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_type, myAstroObj.printStarType(myAstroObj.getIdentifiedObjectNumber()));
+    int num = myAstroObj.getIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsstars_names_num) {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_type, myAstroObj.printStarType(num));
+    }
+    else {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectNGCType() {
-    if (myAstroObj.getIdentifiedObjectNumber() <= SObjectsNGC_names_num) {
-    memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_type, myAstroObj.printNGCType(myAstroObj.getIdentifiedObjectNumber()));
+    int num = myAstroObj.getIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsNGC_names_num) {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_type, myAstroObj.printNGCType(num));
+    }
+    else {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
+
 void setObjectICType() {
-    if (myAstroObj.getIdentifiedObjectNumber() <= SObjectsIC_names_num) {
-    memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_type, myAstroObj.printICType(myAstroObj.getIdentifiedObjectNumber()));
+    int num = myAstroObj.getIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsIC_names_num) {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_type, myAstroObj.printICType(num));
+    }
+    else {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
+
 void setObjectMessierType() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectsmessier_names_num) {
-    memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_type, myAstroObj.printMessierType(myAstroObj.getAltIdentifiedObjectNumber()));
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsmessier_names_num) {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_type, myAstroObj.printMessierType(num));
+    }
+    else {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectCaldwelllType() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectcaldwell_names_num) {
-    memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_type, myAstroObj.printCaldwellType(myAstroObj.getAltIdentifiedObjectNumber()));
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectcaldwell_names_num) {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_type, myAstroObj.printCaldwellType(num));
+    }
+    else {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectHerschelType() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectHerschel400_names_num) {
-    memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_type, myAstroObj.printHerschel400Type(myAstroObj.getAltIdentifiedObjectNumber()));
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectHerschel400_names_num) {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_type, myAstroObj.printHerschel400Type(num));
+    }
+    else {
+        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 // ----------------------------------------------------------------------------------------
@@ -304,51 +351,79 @@ void setObjectHerschelType() {
 //     }
 // }
 void setObjectNGCConstellation() {
-    if (myAstroObj.getIdentifiedObjectNumber() <= SObjectsNGC_names_num) {
-    memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_con, myAstroObj.printNGCCon(myAstroObj.getIdentifiedObjectNumber()));
+    int num = myAstroObj.getIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsNGC_names_num) {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_con, myAstroObj.printNGCCon(num));
+    }
+    else {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectICConstellation() {
-    if (myAstroObj.getIdentifiedObjectNumber() <= SObjectsIC_names_num) {
-    memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_con, myAstroObj.printICCon(myAstroObj.getIdentifiedObjectNumber()));
+    int num = myAstroObj.getIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsIC_names_num) {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_con, myAstroObj.printICCon(num));
+    }
+    else {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectMessierConstellation() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectsmessier_names_num) {
-    memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_con, myAstroObj.printMessierCon(myAstroObj.getAltIdentifiedObjectNumber()));
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsmessier_names_num) {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_con, myAstroObj.printMessierCon(num));
+    }
+    else {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectCaldwellConstellation() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectcaldwell_names_num) {
-    memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_con, myAstroObj.printCaldwellCon(myAstroObj.getAltIdentifiedObjectNumber()));
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectcaldwell_names_num) {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_con, myAstroObj.printCaldwellCon(num));
+    }
+    else {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 void setObjectHerschelConstellation() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectHerschel400_names_num) {
-    memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_con, myAstroObj.printHerschel400Con(myAstroObj.getAltIdentifiedObjectNumber()));
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectHerschel400_names_num) {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strcpy(siderealObjectData.object_con, myAstroObj.printHerschel400Con(num));
+    }
+    else {
+        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
+        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
     }
 }
 // ----------------------------------------------------------------------------------------
 // Set Object Distance.
 // ----------------------------------------------------------------------------------------
 void setObjectStarDist() {
-    if (myAstroObj.getIdentifiedObjectNumber() <= SObjectsstars_names_num) {
-    siderealObjectData.object_dist = myAstroObj.printStarDist(myAstroObj.getIdentifiedObjectNumber());
+    int num = myAstroObj.getIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsstars_names_num) {
+        siderealObjectData.object_dist = myAstroObj.printStarDist(num);
     }
 }
 void setObjectMessierDist() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectsmessier_names_num) {
-    siderealObjectData.object_dist = myAstroObj.printMessierDist(myAstroObj.getAltIdentifiedObjectNumber());
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectsmessier_names_num) {
+        siderealObjectData.object_dist = myAstroObj.printMessierDist(num);
     }
 }
 void setObjectCaldwellDist() {
-    if (myAstroObj.getAltIdentifiedObjectNumber() <= SObjectcaldwell_names_num) {
-    siderealObjectData.object_dist = myAstroObj.printCaldwellDist(myAstroObj.getAltIdentifiedObjectNumber());
+    int num = myAstroObj.getAltIdentifiedObjectNumber();
+    if (num >= 0 && num <= SObjectcaldwell_names_num) {
+        siderealObjectData.object_dist = myAstroObj.printCaldwellDist(num);
     }
 }
 // ----------------------------------------------------------------------------------------
