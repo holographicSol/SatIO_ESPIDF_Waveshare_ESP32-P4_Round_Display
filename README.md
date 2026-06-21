@@ -5,9 +5,14 @@
 -----
 
   A general purpose programmable I/O platform for automation, throughput and LLM's.
+  
+  SatIO is a compound event trigger, intended to be matured over time, to be used as
+  a foundation for a given application, without starting a project from scratch, where
+  new bugs can be introduced and the same bugs and problems can be stumbled upon
+  again.
 
-  A huge matrix switch in a small package, supporting stacks of logic across
-  70 output pins and 100 mapping slots.
+  A huge matrix switch (compund event triggers) in a small package, supporting stacks
+  of logic accross 70 output pins and 100 mapping slots.
 
   For ESP32-P4
 
