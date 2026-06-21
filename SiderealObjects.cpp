@@ -119,8 +119,7 @@ char* SiderealObjects::printStarName(int n) {
 	  return starName[index].name;
     }
   }
-  strcpy(tempStarName, "");
-  return tempStarName;
+  return "";
 }
 
 char* SiderealObjects::printStarType(int n) {
@@ -137,8 +136,7 @@ char* SiderealObjects::printStarType(int n) {
       }
     }
   }
-  strcpy(tempStarName, "");
-  return tempStarName;
+  return "";
 }
 
 double SiderealObjects::printStarDist(int n) {
@@ -158,8 +156,7 @@ char* SiderealObjects::printMessierName(int n) {
 	  return messierData[index].name;
     }
   }
-  strcpy(tempMessierName, "");
-  return tempMessierName;
+  return "";
 }
 
 char* SiderealObjects::printMessierType(int n) {
@@ -174,8 +171,7 @@ char* SiderealObjects::printMessierType(int n) {
       }
     }
   }
-  strcpy(tempMessierName, "");
-  return tempMessierName;
+  return "";
 }
 
 char* SiderealObjects::printMessierCon(int n) {
@@ -190,8 +186,7 @@ char* SiderealObjects::printMessierCon(int n) {
       }
     }
   }
-  strcpy(tempMessierName, "");
-  return tempMessierName;
+  return "";
 }
 
 double SiderealObjects::printMessierDist(int n) {
@@ -211,8 +206,7 @@ char* SiderealObjects::printCaldwellName(int n) {
 	  return caldwellData[index].name;
     }
   }
-  strcpy(tempCaldwellName, "");
-  return tempCaldwellName;
+  return "";
 }
 
 char* SiderealObjects::printCaldwellType(int n) {
@@ -227,8 +221,7 @@ char* SiderealObjects::printCaldwellType(int n) {
       }
     }
   }
-  strcpy(tempCaldwellName, "");
-  return tempCaldwellName;
+  return "";
 }
 
 char* SiderealObjects::printCaldwellCon(int n) {
@@ -243,8 +236,7 @@ char* SiderealObjects::printCaldwellCon(int n) {
       }
     }
   }
-  strcpy(tempCaldwellName, "");
-  return tempCaldwellName;
+  return "";
 }
 
 double SiderealObjects::printCaldwellDist(int n) {
@@ -269,8 +261,7 @@ char* SiderealObjects::printNGCType(int n) {
       }
     }
   }
-  strcpy(tempNGCName, "");
-  return tempNGCName;
+  return "";
 }
 
 char* SiderealObjects::printNGCCon(int n) {
@@ -285,8 +276,7 @@ char* SiderealObjects::printNGCCon(int n) {
       }
     }
   }
-  strcpy(tempNGCName, "");
-  return tempNGCName;
+  return "";
 }
 
 char* SiderealObjects::printICType(int n) {
@@ -301,8 +291,7 @@ char* SiderealObjects::printICType(int n) {
       }
     }
   }
-  strcpy(tempICName, "");
-  return tempICName;
+  return "";
 }
 
 char* SiderealObjects::printICCon(int n) {
@@ -317,8 +306,7 @@ char* SiderealObjects::printICCon(int n) {
       }
     }
   }
-  strcpy(tempICName, "");
-  return tempICName;
+  return "";
 }
 
 char* SiderealObjects::printHerschel400Type(int n) {
@@ -341,8 +329,7 @@ char* SiderealObjects::printHerschel400Type(int n) {
       }
     }
   }
-  strcpy(tempHerschelName, "");
-  return tempHerschelName;
+  return "";
 }
 
 char* SiderealObjects::printHerschel400Con(int n) {
@@ -365,8 +352,7 @@ char* SiderealObjects::printHerschel400Con(int n) {
       }
     }
   }
-  strcpy(tempHerschelName, "");
-  return tempHerschelName;
+  return "";
 }
 
 boolean SiderealObjects::selectNGCTable(int n) {

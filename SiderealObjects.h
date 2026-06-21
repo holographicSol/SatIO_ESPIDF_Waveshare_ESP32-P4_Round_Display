@@ -126,12 +126,5 @@ class SiderealObjects {
       unsigned int bit16[2];
       unsigned char bit8[4];
     };
-	
-	char* tempStarName;
-	char* tempMessierName;
-	char* tempCaldwellName;
-	char* tempNGCName;
-	char* tempICName;
-	char* tempHerschelName;
 };
 #endif
