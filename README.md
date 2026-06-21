@@ -17,7 +17,8 @@
   of reasons, according to how the matrix is configured either before and or after flashing the
   chip with SatIO.
 
-  This build is for ESP32-P4.
+  This build is for ESP32-P4. Ignore the display on any SatIO build(s), the display(s) are just for visualizing some of the data,
+  and or are helping to provide some interactability, while showing some things SatIO is aware of for triggering events.
 
 -----
 
