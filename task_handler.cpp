@@ -744,6 +744,7 @@ void taskUniverse(void * pvParameters) {
     // Cureently tracks a single object at zenith, while
     // performance is being monitored with the intention
     // of tracking multiple objects in the future.
+    // Object near zeiith is used because RA/DEC at zenith is dynamic.
     // ------------------------------------------------
     // if (systemData.interval_breach_star_navigation==true) {
     //   systemData.interval_breach_star_navigation=false;
