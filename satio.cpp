@@ -670,8 +670,8 @@ void setZenithRADec_LST(void) {
 }
 
 /**
- * @brief A prototype function that initially identifies objects directly overhead for a
- *        given time, location on earth.
+ * @brief A prototype function that initially identifies closest object to
+ *        altitude 90 degrees (zenith for a given time, location on earth).
  */
 void setStarNav() {
     // this is identify (so first identify object)
