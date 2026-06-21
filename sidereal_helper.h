@@ -15,6 +15,8 @@ extern SiderealPlanets myAstro;
 // Planet Data Structure.
 // ----------------------------------------------------------------------------------------
 struct SiderealPlantetsStruct {
+    RaDecData currentZenithRADec; // current Zenith RA/Dec data
+
     double local_sidereal_time;
     
     bool track_sun;
@@ -174,6 +176,12 @@ void trackObject(double latitude, double longitude,
     double local_hour, double local_minute, double local_second,
     double altitude, int object_table_i, int object_i);
 void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m, float dec_s);
+void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s,
+    double degrees_latitude, double degrees_longitude,
+    double rtc_year, double rtc_month, double rtc_mday,
+    double rtc_hour, double rtc_minute, double rtc_second,
+    double local_hour, double local_minute, double local_second,
+    double system_altitude);
 void trackSun(void);
 void trackLuna(void);
 void trackMercury(void);

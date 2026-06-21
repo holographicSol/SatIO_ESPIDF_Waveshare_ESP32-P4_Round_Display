@@ -203,15 +203,6 @@ struct SATIOStruct satioData = {
     */
     .LMST_photo_period_schedule = {0},
 
-    .currentZenithRADec = {
-        0,   // ra_h
-        0,   // ra_m
-        0.0, // ra_s
-        0,   // dec_d
-        0,   // dec_m
-        0.0  // dec_s
-    },
-
     // ------------------------------------------------------------------------------------
     // FLAGS
     // ------------------------------------------------------------------------------------
@@ -665,51 +656,6 @@ void storeLocalTime(void) {
     snprintf(satioData.padded_local_year, MAX_GLOBAL_ELEMENT_SIZE, "%s", String(String(year_str[2]) + String(year_str[3])).c_str());
 }
 
-void setZenithRADec_LST(void) {
-  satioData.currentZenithRADec = myAstro.getRADecFromLSTLat(siderealPlanetData.local_sidereal_time, satioData.system_degrees_latitude);
-}
-
-/**
- * @brief A prototype function that initially identifies closest object to
- *        altitude 90 degrees (zenith for a given time, location on earth).
- */
-void setStarNav() {
-    // this is identify (so first identify object)
-    IdentifyObject(
-      satioData.currentZenithRADec.ra_h,
-      satioData.currentZenithRADec.ra_m,
-      (float)satioData.currentZenithRADec.ra_s,
-      satioData.currentZenithRADec.dec_d,
-      satioData.currentZenithRADec.dec_m,
-      (float)satioData.currentZenithRADec.dec_s
-    );
-    /*
-      Once identified we can track object (requires modified SiderealObjects lib).
-    */
-    trackObject(
-      satioData.degrees_latitude, satioData.degrees_longitude,
-      satioData.rtc_year, satioData.rtc_month, satioData.rtc_mday,
-      satioData.rtc_hour, satioData.rtc_minute, satioData.rtc_second,
-      satioData.local_hour, satioData.local_minute, satioData.local_second,
-      satioData.system_altitude, siderealObjectData.object_table_i, siderealObjectData.object_number
-    );
-    // printf("---------------------------------------------\n");
-    // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-    // printf("Table:         %s\n", siderealObjectData.object_table_name);
-    // printf("Number:        %d\n", siderealObjectData.object_number);
-    // printf("Name:          %s\n", siderealObjectData.object_name);
-    // printf("Type:          %s\n", siderealObjectData.object_type);
-    // printf("Constellation: %s\n", siderealObjectData.object_con);
-    // printf("Distance:      %f\n", siderealObjectData.object_dist);
-    // printf("Azimuth:       %f\n", siderealObjectData.object_az);
-    // printf("Altitude:      %f\n", siderealObjectData.object_alt);
-    // printf("Rise:          %f\n", siderealObjectData.object_r);
-    // printf("Set:           %f\n", siderealObjectData.object_s);
-    // printf("---------------------------------------------\n");
-
-    // go on to build celestial sphere from identified object (centered on zenith)...
-}
-
 void setPhotoPeriodSchedule_LMST() {
   satioData.LMST_photo_period_schedule = getPhotoPeriodData(
     satioData.system_degrees_latitude,
@@ -1034,8 +980,6 @@ void setSatIOData(void) {
     // Position
     setSatioCoordinates();
     setSatIOAltitude();
-    setZenithRADec_LST();
-    setStarNav();
 
     setSatIOSspeed();
     setSatIOGroundHeading();

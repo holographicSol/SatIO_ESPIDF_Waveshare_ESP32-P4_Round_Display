@@ -13,14 +13,17 @@
  * @warning This struct is bitpacked.
  */
 struct systemStruct systemData = {
-  .interval_breach_gps = false,
-  .interval_breach_ins = false,
-  .interval_breach_gyro_0 = false,
-  .interval_breach_mplex_0 = false,
-  .interval_breach_matrix = false,
-  .interval_breach_track_planets = false,
+  .interval_breach_gps_output = false,
+  .interval_breach_ins_output = false,
+  .interval_breach_gyro_0_output = false,
+  .interval_breach_mplex_0_output = false,
+  .interval_breach_matrix_output = false,
+  .interval_breach_track_planets_output = false,
   .interval_breach_logging = false,
   .interval_breach_1_second_output = false,
+
+  .interval_breach_track_planets = false,
+  .interval_breach_star_navigation = false,
 
   .debug = false,
   .output_stat = false,

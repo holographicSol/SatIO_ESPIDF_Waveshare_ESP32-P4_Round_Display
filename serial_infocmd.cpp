@@ -1394,9 +1394,9 @@ void outputSentences(void) {
     systemData.interval_breach_1_second_output=false;
     outputStat();
   }
-  // printf("outputSentences: interval_breach_gps: %d\n", systemData.interval_breach_gps);
-  if (systemData.interval_breach_gps) {
-    systemData.interval_breach_gps=false;
+  // printf("outputSentences: interval_breach_gps_output: %d\n", systemData.interval_breach_gps_output);
+  if (systemData.interval_breach_gps_output) {
+    systemData.interval_breach_gps_output=false;
     if (systemData.output_gngga_enabled) {printf("%s\n", gnggaData.outsentence);}
     if (systemData.output_gnrmc_enabled) {printf("%s\n", gnrmcData.outsentence);}
     if (systemData.output_gpatt_enabled) {printf("%s\n", gpattData.outsentence);}
@@ -1457,8 +1457,8 @@ void outputSentences(void) {
       printf("%s\n", serial0Data.BUFFER);
     }
   }
-  if (systemData.interval_breach_gyro_0) {
-    systemData.interval_breach_gyro_0=false;
+  if (systemData.interval_breach_gyro_0_output) {
+    systemData.interval_breach_gyro_0_output=false;
     if (systemData.output_gyro_0_enabled) {
       memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
       strcat(serial0Data.BUFFER, "$GYRO0,");
@@ -1492,8 +1492,8 @@ void outputSentences(void) {
       printf("%s\n", serial0Data.BUFFER);
     }
   }
-  if (systemData.interval_breach_track_planets) {
-    systemData.interval_breach_track_planets=false;
+  if (systemData.interval_breach_track_planets_output) {
+    systemData.interval_breach_track_planets_output=false;
     if (systemData.output_sun_enabled) {
       memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
       strcat(serial0Data.BUFFER, "$SUN,");
@@ -1689,8 +1689,8 @@ void outputSentences(void) {
     }
   }
 
-  // if (systemData.interval_breach_matrix) {
-  // systemData.interval_breach_matrix=false;
+  // if (systemData.interval_breach_matrix_output) {
+  // systemData.interval_breach_matrix_output=false;
   if (systemData.output_matrix_enabled) {
     memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
     strcpy(serial0Data.BUFFER, "$MATRIX,");
@@ -1784,8 +1784,8 @@ void outputSentences(void) {
     }
   }
 
-  if (systemData.interval_breach_mplex_0) {
-    systemData.interval_breach_mplex_0=false;
+  if (systemData.interval_breach_mplex_0_output) {
+    systemData.interval_breach_mplex_0_output=false;
     if (systemData.output_admplex0_enabled) {
       memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
       strcat(serial0Data.BUFFER, "$MPLEX0,");

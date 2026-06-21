@@ -14,14 +14,17 @@
  * @struct System data containing flags, counters, and statistics for system monitoring and control.
  */
 struct systemStruct {
-  bool interval_breach_gps;
-  bool interval_breach_ins;
-  bool interval_breach_gyro_0;
-  bool interval_breach_mplex_0;
-  bool interval_breach_matrix;
-  bool interval_breach_track_planets;
+  bool interval_breach_gps_output;
+  bool interval_breach_ins_output;
+  bool interval_breach_gyro_0_output;
+  bool interval_breach_mplex_0_output;
+  bool interval_breach_matrix_output;
+  bool interval_breach_track_planets_output;
   bool interval_breach_logging;
   bool interval_breach_1_second_output;
+
+  bool interval_breach_track_planets;
+  bool interval_breach_star_navigation;
 
   bool debug;
   bool output_stat;

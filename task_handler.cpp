@@ -270,6 +270,9 @@ void createTaskSerialInfoCMD() {
  * @brief Interval breach (System counters).
  */
 int64_t prev_tv_sec;
+int64_t prev_tv_uS;
+int64_t prev_tv_uS_track_planets;
+int64_t prev_tv_uS_star_navigation;
 
 void intervalBreach1Second(void) {
   // if (systemData.interval_breach_1_second) {
@@ -313,7 +316,7 @@ void intervalBreach1Second(void) {
     systemData.total_display = systemData.i_count_display;
     systemData.i_count_display = 0;
     // set second flags
-    systemData.interval_breach_track_planets = 1;
+    systemData.interval_breach_track_planets_output = 1;
     // set uptime
     systemData.uptime_seconds++;
     if (systemData.uptime_seconds >= LONG_MAX - 2)
@@ -330,6 +333,21 @@ void system_timing() {
     satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
     // printf("[LOOP] localtime: %lld\n", satioData.local_unixtime_uS);
 
+    // Check for Track Planets interval breach
+    if (satioData.local_unixtime_uS >= prev_tv_uS_track_planets + POWER_CONFIG_TRACK_PLANTETS_TIMING_uS ||
+        satioData.local_unixtime_uS <= prev_tv_uS_track_planets - POWER_CONFIG_TRACK_PLANTETS_TIMING_uS) {
+        prev_tv_uS_track_planets = satioData.local_unixtime_uS;
+        systemData.interval_breach_track_planets = true;
+    }
+
+    // Check for StarNavigation interval breach
+    if (satioData.local_unixtime_uS >= prev_tv_uS_star_navigation + POWER_CONFIG_STAR_NAVIGATION_TIMING_uS ||
+        satioData.local_unixtime_uS <= prev_tv_uS_star_navigation - POWER_CONFIG_STAR_NAVIGATION_TIMING_uS) {
+        prev_tv_uS_star_navigation = satioData.local_unixtime_uS;
+        systemData.interval_breach_star_navigation = true;
+    }
+
+    // Check for 1-second interval breach
     if (tv_now.tv_sec != prev_tv_sec) {
         prev_tv_sec = tv_now.tv_sec;
         systemData.interval_breach_1_second_output=true;
@@ -409,8 +427,8 @@ void system_timing() {
             satioData.system_degrees_latitude,
             satioData.system_degrees_longitude,
 
-            satioData.currentZenithRADec.ra_str,
-            satioData.currentZenithRADec.dec_str,
+            siderealPlanetData.currentZenithRADec.ra_str,
+            siderealPlanetData.currentZenithRADec.dec_str,
 
             satioData.altitude,
             satioData.ground_heading,
@@ -482,7 +500,7 @@ void taskGPS(void * pvParameters) {
         // Counters.
         // --------------------------------------------
         systemData.i_count_read_gps++;
-        systemData.interval_breach_gps = true;
+        systemData.interval_breach_gps_output = true;
         if (systemData.i_count_read_gps>=UINT32_MAX-2)
           {systemData.i_count_read_gps=0;}
         esp_task_wdt_reset();
@@ -520,7 +538,7 @@ void taskGyro(void * pvParameters) {
     if (readGyro()==true) {
       esp_task_wdt_reset();
       systemData.i_count_read_gyro_0++;
-      systemData.interval_breach_gyro_0 = true;
+      systemData.interval_breach_gyro_0_output = true;
       if (systemData.i_count_read_gyro_0>=UINT32_MAX-2)
         {systemData.i_count_read_gyro_0=0;}
       esp_task_wdt_reset();
@@ -528,14 +546,14 @@ void taskGyro(void * pvParameters) {
       // Estimate INS data. (Can be used without GPS)
       // INS data is fed bsck into INS.
       // ----------------------------------------------
-      if (systemData.interval_breach_gyro_0==true) {
+      if (systemData.interval_breach_gyro_0_output==true) {
       if (ins_estimate_position(gyroData.gyro_0_ang_y,
                           gyroData.gyro_0_ang_z,
                           satioData.system_ground_heading,
                           satioData.system_speed,
                           satioData.local_unixtime_uS)==true) {
                           systemData.i_count_read_ins++;
-                          systemData.interval_breach_ins=true;
+                          systemData.interval_breach_ins_output=true;
                           if (systemData.i_count_read_ins>=UINT32_MAX-2)
                             {systemData.i_count_read_ins=0;}}
       esp_task_wdt_reset();
@@ -584,7 +602,7 @@ void taskMultiplexers(void * pvParameters) {
     // Counters
     // ------------------------------------------------
     systemData.i_count_read_mplex_0++;
-    systemData.interval_breach_mplex_0 = true;
+    systemData.interval_breach_mplex_0_output = true;
     if (systemData.i_count_read_mplex_0 >= UINT32_MAX - 2)
     systemData.i_count_read_mplex_0 = 0;
     esp_task_wdt_reset();
@@ -627,7 +645,7 @@ void taskSwitches(void * pvParameters) {
     if (matrixSwitch()) {
       esp_task_wdt_reset();
       systemData.i_count_matrix++;
-      systemData.interval_breach_matrix=true;
+      systemData.interval_breach_matrix_output=true;
       if (systemData.i_count_matrix>=UINT64_MAX-2)
         {systemData.i_count_matrix=0;}
     }
@@ -677,6 +695,11 @@ void taskUniverse(void * pvParameters) {
     // ---------------------------------------------------------
     // Track Home Sun, Moon & Planets. (Can be used without GPS)
     // ---------------------------------------------------------
+
+    // Track Planets Every Interval (see config.h)
+    if (systemData.interval_breach_track_planets==true) {
+      systemData.interval_breach_track_planets=false;
+      
       trackPlanets(satioData.system_degrees_latitude,
                   satioData.system_degrees_longitude,
                   satioData.rtc_year,
@@ -698,7 +721,47 @@ void taskUniverse(void * pvParameters) {
 
                   satioData.system_altitude
                 );
-    systemData.i_count_track_planets++;
+    }
+    esp_task_wdt_reset();
+
+    // Set RA & Dec for system zenith.
+    siderealPlanetData.currentZenithRADec = myAstro.getRADecFromLSTLat(
+      siderealPlanetData.local_sidereal_time,
+      satioData.system_degrees_latitude);
+
+    // Star Navigation Every Interval (see config.h)
+    if (systemData.interval_breach_star_navigation==true) {
+      systemData.interval_breach_star_navigation=false;
+      setStarNav(
+        (int)siderealPlanetData.currentZenithRADec.ra_h,
+        (int)siderealPlanetData.currentZenithRADec.ra_m,
+        (float)siderealPlanetData.currentZenithRADec.ra_s,
+        (int)siderealPlanetData.currentZenithRADec.dec_d,
+        (int)siderealPlanetData.currentZenithRADec.dec_m,
+        (float)siderealPlanetData.currentZenithRADec.dec_s,
+        (double)satioData.system_degrees_latitude,
+        (double)satioData.system_degrees_longitude,
+        (double)satioData.rtc_year,
+        (double)satioData.rtc_month,
+        (double)satioData.rtc_mday,
+        (double)satioData.rtc_hour,
+        (double)satioData.rtc_minute,
+        (double)satioData.rtc_second,
+
+        // uncomment to use geo-political local time (UTC+-UTCOffset)
+        (double)satioData.local_hour,
+        (double)satioData.local_minute,
+        (double)satioData.local_second,
+
+        // uncomment to use LMST (Local Mean Solar Time) (UTC+-LongitudeOffset)
+        // satioData.LMST_hour,
+        // satioData.LMST_minute,
+        // satioData.LMST_second,
+
+        (double)satioData.system_altitude
+      );
+    }
+
     esp_task_wdt_reset();
     // ------------------------------------------------
     // Track Meteors.
@@ -706,7 +769,9 @@ void taskUniverse(void * pvParameters) {
     setMeteorShowerWarning(satioData.local_month,
                            satioData.local_mday);
     esp_task_wdt_reset();
-    systemData.interval_breach_track_planets = true;
+
+    systemData.i_count_track_planets++;
+    systemData.interval_breach_track_planets_output = true;
     if (systemData.i_count_track_planets>=UINT32_MAX-2)
       {systemData.i_count_track_planets=0;}
     esp_task_wdt_reset();

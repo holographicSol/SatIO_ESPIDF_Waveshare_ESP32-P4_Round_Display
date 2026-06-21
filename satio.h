@@ -209,8 +209,7 @@ struct SATIOStruct {
 
     // TwilightStageEntry LMST_twilight_stage; // current according to LMST time
     PhotoPeriodSchedulele LMST_photo_period_schedule; // schedule according to LMST time
-
-    RaDecData currentZenithRADec; // current Zenith RA/Dec data
+    
     // ------------------------------------------------------------------------------------
     // FLAGS
     // ------------------------------------------------------------------------------------

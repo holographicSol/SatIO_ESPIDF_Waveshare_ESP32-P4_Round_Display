@@ -16,6 +16,14 @@ SiderealPlanets myAstro;    // for calculating azimuth and altitude
 SiderealObjects myAstroObj; // for getting right ascension and declination of objects from star table
 
 struct SiderealPlantetsStruct siderealPlanetData = {
+    .currentZenithRADec = {
+        0,   // ra_h
+        0,   // ra_m
+        0.0, // ra_s
+        0,   // dec_d
+        0,   // dec_m
+        0.0  // dec_s
+    },
     .local_sidereal_time = 0.0,
 
     .track_sun = true,
@@ -174,65 +182,6 @@ struct SiderealObjectStruct siderealObjectData = {
     .object_desc = {0},
     .object_dist = NAN,
 };
-
-// ----------------------------------------------------------------------------------------
-// Estimate Planet/Object Distance
-// ----------------------------------------------------------------------------------------
-// a placeholder for a special function that deducts altitude(also considering location) from object distance
-
-// ----------------------------------------------------------------------------------------
-// Track Celestial Object.
-// ----------------------------------------------------------------------------------------
-// Useful for an object that is known and or has been identified.
-// ----------------------------------------------------------------------------------------
-void trackObject(double latitude, double longitude,
-    double utc_year, double utc_month, double utc_mday,
-    double utc_hour, double utc_minute, double utc_second,
-    double local_hour, double local_minute, double local_second,
-    double altitude, int object_table_i, int object_i) {
-    // ----------------------------------------------------------------------------------
-    // Use degrees latitude & longitude converted from GNGGA/GNRMC data.
-    // ----------------------------------------------------------------------------------
-    myAstro.setLatLong(latitude, longitude);
-    // ----------------------------------------------------------------------------------
-    // RTC should be UTC (GMT).
-    // ----------------------------------------------------------------------------------
-    myAstro.setGMTdate((int)utc_year, (int)utc_month, (int)utc_mday);
-    myAstro.setGMTtime((int)utc_hour, (int)utc_minute, (float)utc_second);
-    // ----------------------------------------------------------------------------------
-    // Set/reject DST.
-    // ----------------------------------------------------------------------------------
-    // myAstro.rejectDST();
-    // myAstro.setDST();
-    myAstro.useAutoDST(); // make optional and or use user defined UTC offset time.
-    // ----------------------------------------------------------------------------------
-    // Local time (RTC+-).
-    // ----------------------------------------------------------------------------------
-    myAstro.setLocalTime((int)local_hour, (int)local_minute, (float)local_second);
-    // ----------------------------------------------------------------------------------
-    // Elevation (experimental).
-    // ----------------------------------------------------------------------------------
-    myAstro.setElevationM(altitude);
-    myAstro.spData.DegreesAltitudeOffsetByElevationM = myAstro.inRange90(myAstro.getDegreesAltitudeOffsetByElevationM(altitude));
-
-    if      (object_table_i == INDEX_SIDEREAL_STAR_TABLE) { myAstroObj.selectStarTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_NGC_TABLE) { myAstroObj.selectNGCTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_IC_TABLE) { myAstroObj.selectICTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_MESSIER_TABLE) { myAstroObj.selectMessierTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_CALDWELL_TABLE) { myAstroObj.selectCaldwellTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_HERSHEL400_TABLE) { myAstroObj.selectHershel400Table(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_OTHER_OBJECTS_TABLE) { myAstroObj.selectOtherObjectsTable(object_i); }
-
-    myAstro.setRAdec(myAstroObj.getRAdec(), myAstroObj.getDeclinationDec());
-    myAstro.doRAdec2AltAz();
-    siderealObjectData.object_ra = myAstro.getRAdec();
-    siderealObjectData.object_dec = myAstro.getDeclinationDec();
-    siderealObjectData.object_az = myAstro.getAzimuth();
-    siderealObjectData.object_alt = myAstro.getAltitude();
-    myAstro.doXRiseSetTimes(0.0); // set 0 for stars. consider non zero values for planets, galaxies, etc.
-    siderealObjectData.object_r = myAstro.getRiseTime();
-    siderealObjectData.object_s = myAstro.getSetTime();
-}
 
 // ----------------------------------------------------------------------------------------
 // Set Object Name.
@@ -548,35 +497,6 @@ void setHerschel400() {
 }
 
 // ----------------------------------------------------------------------------------------
-// Identify Object.
-// ----------------------------------------------------------------------------------------
-// Useful for arbitray identification predicated upon manual input and or attitude input.
-// ----------------------------------------------------------------------------------------
-void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m, float dec_s) {
-    siderealObjectData.object_table_i= -1;
-    siderealObjectData.object_number= -1;
-    myAstroObj.setRAdec(myAstro.decimalDegrees(ra_hour, ra_min, ra_sec), myAstro.decimalDegrees(dec_d, dec_m, dec_s));
-    myAstro.doRAdec2AltAz();
-    myAstroObj.identifyObject();
-    clearAllObjects();
-    switch (myAstroObj.getIdentifiedObjectTable()) {
-        case 1: siderealObjectData.object_table_i = INDEX_SIDEREAL_STAR_TABLE; setStars(); break; // Star
-        case 2: siderealObjectData.object_table_i = INDEX_SIDEREAL_NGC_TABLE; setNGC(); break; // NGC
-        case 3: siderealObjectData.object_table_i = INDEX_SIDEREAL_IC_TABLE; setIC(); break; // IC
-        case 7: siderealObjectData.object_table_i = INDEX_SIDEREAL_OTHER_OBJECTS_TABLE; setOther(); break; // Other
-        default: clearAllObjects();
-    }
-    if (myAstroObj.getAltIdentifiedObjectTable()) {
-        switch (myAstroObj.getAltIdentifiedObjectTable()) {
-            case 4: siderealObjectData.object_table_i = INDEX_SIDEREAL_MESSIER_TABLE; setMessier(); break; // Messier
-            case 5: siderealObjectData.object_table_i = INDEX_SIDEREAL_CALDWELL_TABLE; setCaldwell(); break; // Caldwell
-            case 6: siderealObjectData.object_table_i = INDEX_SIDEREAL_HERSHEL400_TABLE; setHerschel400(); break; // Herschel 400
-            default: clearAllObjects();
-        }
-    }
-}
-
-// ----------------------------------------------------------------------------------------
 // Track Planets.
 // ----------------------------------------------------------------------------------------
 void trackSun(void) {
@@ -877,6 +797,143 @@ void clearTrackPlanets(void) {
     clearSaturn();
     clearUranus();
     clearNeptune();
+}
+
+// ----------------------------------------------------------------------------------------
+// Identify Object.
+// ----------------------------------------------------------------------------------------
+// Useful for arbitray identification predicated upon manual input and or attitude input.
+// ----------------------------------------------------------------------------------------
+void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m, float dec_s) {
+    siderealObjectData.object_table_i= -1;
+    siderealObjectData.object_number= -1;
+    myAstroObj.setRAdec(myAstro.decimalDegrees(ra_hour, ra_min, ra_sec), myAstro.decimalDegrees(dec_d, dec_m, dec_s));
+    myAstro.doRAdec2AltAz();
+    myAstroObj.identifyObject();
+    clearAllObjects();
+    switch (myAstroObj.getIdentifiedObjectTable()) {
+        case 1: siderealObjectData.object_table_i = INDEX_SIDEREAL_STAR_TABLE; setStars(); break; // Star
+        case 2: siderealObjectData.object_table_i = INDEX_SIDEREAL_NGC_TABLE; setNGC(); break; // NGC
+        case 3: siderealObjectData.object_table_i = INDEX_SIDEREAL_IC_TABLE; setIC(); break; // IC
+        case 7: siderealObjectData.object_table_i = INDEX_SIDEREAL_OTHER_OBJECTS_TABLE; setOther(); break; // Other
+        default: clearAllObjects();
+    }
+    if (myAstroObj.getAltIdentifiedObjectTable()) {
+        switch (myAstroObj.getAltIdentifiedObjectTable()) {
+            case 4: siderealObjectData.object_table_i = INDEX_SIDEREAL_MESSIER_TABLE; setMessier(); break; // Messier
+            case 5: siderealObjectData.object_table_i = INDEX_SIDEREAL_CALDWELL_TABLE; setCaldwell(); break; // Caldwell
+            case 6: siderealObjectData.object_table_i = INDEX_SIDEREAL_HERSHEL400_TABLE; setHerschel400(); break; // Herschel 400
+            default: clearAllObjects();
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------------------
+// Track Celestial Object.
+// ----------------------------------------------------------------------------------------
+// Useful for an object that is known and or has been identified.
+// ----------------------------------------------------------------------------------------
+void trackObject(double latitude, double longitude,
+    double utc_year, double utc_month, double utc_mday,
+    double utc_hour, double utc_minute, double utc_second,
+    double local_hour, double local_minute, double local_second,
+    double altitude, int object_table_i, int object_i) {
+    // ----------------------------------------------------------------------------------
+    // Use degrees latitude & longitude converted from GNGGA/GNRMC data.
+    // ----------------------------------------------------------------------------------
+    myAstro.setLatLong(latitude, longitude);
+    // ----------------------------------------------------------------------------------
+    // RTC should be UTC (GMT).
+    // ----------------------------------------------------------------------------------
+    myAstro.setGMTdate((int)utc_year, (int)utc_month, (int)utc_mday);
+    myAstro.setGMTtime((int)utc_hour, (int)utc_minute, (float)utc_second);
+    // ----------------------------------------------------------------------------------
+    // Set/reject DST.
+    // ----------------------------------------------------------------------------------
+    // myAstro.rejectDST();
+    // myAstro.setDST();
+    // myAstro.useAutoDST(); // make optional and or use user defined UTC offset time.
+    // ----------------------------------------------------------------------------------
+    // Local time (RTC+-).
+    // ----------------------------------------------------------------------------------
+    myAstro.setLocalTime((int)local_hour, (int)local_minute, (float)local_second);
+    // ----------------------------------------------------------------------------------
+    // Elevation (experimental).
+    // ----------------------------------------------------------------------------------
+    myAstro.setElevationM(altitude);
+    myAstro.spData.DegreesAltitudeOffsetByElevationM = myAstro.inRange90(myAstro.getDegreesAltitudeOffsetByElevationM(altitude));
+
+    if      (object_table_i == INDEX_SIDEREAL_STAR_TABLE) { myAstroObj.selectStarTable(object_i); }
+    else if (object_table_i == INDEX_SIDEREAL_NGC_TABLE) { myAstroObj.selectNGCTable(object_i); }
+    else if (object_table_i == INDEX_SIDEREAL_IC_TABLE) { myAstroObj.selectICTable(object_i); }
+    else if (object_table_i == INDEX_SIDEREAL_MESSIER_TABLE) { myAstroObj.selectMessierTable(object_i); }
+    else if (object_table_i == INDEX_SIDEREAL_CALDWELL_TABLE) { myAstroObj.selectCaldwellTable(object_i); }
+    else if (object_table_i == INDEX_SIDEREAL_HERSHEL400_TABLE) { myAstroObj.selectHershel400Table(object_i); }
+    else if (object_table_i == INDEX_SIDEREAL_OTHER_OBJECTS_TABLE) { myAstroObj.selectOtherObjectsTable(object_i); }
+
+    myAstro.setRAdec(myAstroObj.getRAdec(), myAstroObj.getDeclinationDec());
+    myAstro.doRAdec2AltAz();
+    siderealObjectData.object_ra = myAstro.getRAdec();
+    siderealObjectData.object_dec = myAstro.getDeclinationDec();
+    siderealObjectData.object_az = myAstro.getAzimuth();
+    siderealObjectData.object_alt = myAstro.getAltitude();
+
+    if (siderealObjectData.object_table_i == INDEX_SIDEREAL_STAR_TABLE) {
+        myAstro.doXRiseSetTimes(0.0); // set 0 for stars. consider non zero values for planets, galaxies, etc.
+    }
+    else {
+        myAstro.doXRiseSetTimes(0.0); // set 0 for stars. consider non zero values for planets, galaxies, etc.
+    }
+    siderealObjectData.object_r = myAstro.getRiseTime();
+    siderealObjectData.object_s = myAstro.getSetTime();
+}
+
+/**
+ * @brief A prototype function that initially identifies closest object to
+ *        altitude 90 degrees (zenith for a given time, location on earth).
+ * 
+ * @note This function may be renamed to something like buildCelestialSphere.
+ */
+void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s,
+    double degrees_latitude, double degrees_longitude,
+    double rtc_year, double rtc_month, double rtc_mday,
+    double rtc_hour, double rtc_minute, double rtc_second,
+    double local_hour, double local_minute, double local_second,
+    double system_altitude) {
+    // this is identify (so first identify object)
+    IdentifyObject(
+      ra_h,
+      ra_m,
+      ra_s,
+      dec_d,
+      dec_m,
+      dec_s
+    );
+    /*
+      Once identified we can track object (requires modified SiderealObjects lib).
+    */
+    trackObject(
+      degrees_latitude, degrees_longitude,
+      rtc_year, rtc_month, rtc_mday,
+      rtc_hour, rtc_minute, rtc_second,
+      local_hour, local_minute, local_second,
+      system_altitude, siderealObjectData.object_table_i, siderealObjectData.object_number
+    );
+    printf("---------------------------------------------\n");
+    printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+    printf("Table:         %s\n", siderealObjectData.object_table_name);
+    printf("Number:        %d\n", siderealObjectData.object_number);
+    printf("Name:          %s\n", siderealObjectData.object_name);
+    printf("Type:          %s\n", siderealObjectData.object_type);
+    printf("Constellation: %s\n", siderealObjectData.object_con);
+    printf("Distance:      %f\n", siderealObjectData.object_dist);
+    printf("Azimuth:       %f\n", siderealObjectData.object_az);
+    printf("Altitude:      %f\n", siderealObjectData.object_alt);
+    printf("Rise:          %f\n", siderealObjectData.object_r);
+    printf("Set:           %f\n", siderealObjectData.object_s);
+    printf("---------------------------------------------\n");
+
+    // go on to build celestial sphere from identified object (centered on zenith)...
 }
 
 // ----------------------------------------------------------------------------------------

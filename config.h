@@ -99,7 +99,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GYRO                        1
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GYRO                   false
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_UNIVERSE                    1000
+#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_UNIVERSE                    1
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_UNIVERSE               false
 
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SWITCHES                    1
@@ -113,6 +113,10 @@ extern bool ISR_Bool_MultiDisplayController_0;
 
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_LOGGING                     1000
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_LOGGING                false
+
+
+#define POWER_CONFIG_TRACK_PLANTETS_TIMING_uS  500000L
+#define POWER_CONFIG_STAR_NAVIGATION_TIMING_uS 5000L
 
 // ----------------------------------------------------------------------------------------
 // Buffers.

@@ -173,61 +173,6 @@ void setup() {
 
 }
 
-// /** ----------------------------------------------------------------------------------------
-//  * @brief Interval breach (System counters).
-//  */
-// int64_t prev_tv_sec;
-
-// void intervalBreach1Second(void) {
-//   // if (systemData.interval_breach_1_second) {
-//     // store system time
-//     storeLocalTime();
-//     // store rtc time
-//     storeRTCTime();
-//     // set loop counter
-//     systemData.total_loops_a_second = systemData.loops_a_second;
-//     systemData.loops_a_second = 0;
-//     // set gps counters
-//     systemData.total_gps = systemData.i_count_read_gps;
-//     systemData.i_count_read_gps = 0;
-//     // set ins counters
-//     systemData.total_ins = systemData.i_count_read_ins;
-//     systemData.i_count_read_ins = 0;
-//     // set gyro counters
-//     systemData.total_gyro_0 = systemData.i_count_read_gyro_0;
-//     systemData.i_count_read_gyro_0 = 0;
-//     // set mplex counters
-//     systemData.total_mplex_0 = systemData.i_count_read_mplex_0;
-//     systemData.i_count_read_mplex_0 = 0;
-//     // set mplex counters
-//     systemData.total_matrix = systemData.i_count_matrix;
-//     systemData.i_count_matrix = 0;
-//     // set mplex counters
-//     systemData.total_portcontroller_output = systemData.i_count_port_controller_output;
-//     systemData.i_count_port_controller_output = 0;
-//     // set mplex counters
-//     systemData.total_universe = systemData.i_count_track_planets;
-//     systemData.i_count_track_planets = 0;
-//     // set mplex counters
-//     systemData.total_infocmd = systemData.i_count_read_serial_commands;
-//     systemData.i_count_read_serial_commands = 0;
-//     // set portcontroller input counters
-//     systemData.total_portcontroller_input = systemData.i_count_portcontroller_input;
-//     systemData.i_count_portcontroller_input = 0;
-//     // set display counters
-//     systemData.total_display = systemData.i_count_display;
-//     systemData.i_count_display = 0;
-//     // set second flags
-//     systemData.interval_breach_track_planets = 1;
-//     // set uptime
-//     systemData.uptime_seconds++;
-//     if (systemData.uptime_seconds >= LONG_MAX - 2)
-//       {systemData.uptime_seconds = 0;
-//         printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
-//       }
-//   // }
-// }
-
 /** -----------------------------------------------------------------------------------------------
  * @brief Main application entry point.
  */
