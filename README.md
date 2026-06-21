@@ -9,7 +9,7 @@
   SatIO is a value hive and compound event trigger, intended to be matured over time, to be used as
   a foundation for a given application, without starting a project from scratch, where
   new bugs can be introduced and the same bugs and problems can be stumbled upon
-  again. SatIO intends to do something once and mature it, as a foundation of elemental
+  again. SatIO intends to do something once and mature it, as a foundation of value creation, elemental
   and or compound logic, for building devices on top of.
 
   Like say a WT901 9 axis gyro has two trigger pins that can be set for several elemental reasons,
