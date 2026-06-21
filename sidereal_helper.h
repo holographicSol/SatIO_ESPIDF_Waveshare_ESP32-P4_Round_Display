@@ -182,6 +182,7 @@ void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m,
 
 void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s);
 
+void trackSun(void);
 void trackPlanets();
 
 void trackSun(void);

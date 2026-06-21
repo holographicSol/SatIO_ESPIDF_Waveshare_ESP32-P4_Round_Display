@@ -688,13 +688,13 @@ void storeLMST(void) {
   satioData.LMST_second      = (double)satioData.LMST_tm.tm_sec;
 
 
-  printf("LMST Time : %02d:%02d:%02d %02d/%02d/%04d\n",
-          (int)satioData.LMST_hour,
-          (int)satioData.LMST_minute,
-          (int)satioData.LMST_second,
-          (int)satioData.LMST_day,
-          (int)satioData.LMST_month,
-          (int)satioData.LMST_year);
+  // printf("LMST Time : %02d:%02d:%02d %02d/%02d/%04d\n",
+  //         (int)satioData.LMST_hour,
+  //         (int)satioData.LMST_minute,
+  //         (int)satioData.LMST_second,
+  //         (int)satioData.LMST_day,
+  //         (int)satioData.LMST_month,
+  //         (int)satioData.LMST_year);
 
   // Format LMST time (HH:MM:SS)
   char hour_str[3], min_str[3], sec_str[3];

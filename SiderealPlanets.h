@@ -51,17 +51,17 @@ TODO:
  */
 typedef struct {
     // RA
-    int ra_h;
-    int ra_m;
-    double ra_s;
+    signed int ra_h;
+    signed int ra_m;
+    float ra_s;
     // Dec
-    int dec_d;
-    int dec_m;
-    double dec_s;
+    signed int dec_d;
+    signed int dec_m;
+    float dec_s;
     // HH:MM:SS.S format
-    char ra_str[16];  // HH:MM:SS.S format
+    char ra_str[56];  // HH:MM:SS.S format
     // DD:MM:SS.S format
-    char dec_str[16]; // DD:MM:SS.S format
+    char dec_str[56]; // DD:MM:SS.S format
 } RaDecData;
 
 // ─────────────────────────────────────────────────────────────────────────────

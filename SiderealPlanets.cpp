@@ -427,25 +427,25 @@ RaDecData SiderealPlanets::getRADecFromLSTLat(double lst, double latitude_degree
         0,   // dec_d
         0,   // dec_m
         0.0, // dec_s
-        "",  // ra_str
-        ""   // dec_str
+        {0},  // ra_str
+        {0}   // dec_str
     };
 
     double zenith_ra = lst;               // RA of zenith = current LST
     double zenith_dec = latitude_degrees; // Dec of zenith = observer latitude
 
     // Output in HH:MM:SS.S format
-    int ra_h = (int)zenith_ra;
-    int ra_m = (int)((zenith_ra - ra_h) * 60.0);
-    double ra_s = ((zenith_ra - ra_h) * 60.0 - ra_m) * 60.0;
+    signed int ra_h = (int)zenith_ra;
+    signed int ra_m = (int)((zenith_ra - ra_h) * 60.0);
+    float ra_s = (float)(((zenith_ra - ra_h) * 60.0 - ra_m) * 60.0);
 
     // Output in DD:MM:SS.S format
-    int dec_d = (int)zenith_dec;
-    int dec_m = (int)((zenith_dec - dec_d) * 60.0);
-    double dec_s = ((zenith_dec - dec_d) * 60.0 - dec_m) * 60.0;
+    signed int dec_d = (int)zenith_dec;
+    signed int dec_m = (int)((zenith_dec - dec_d) * 60.0);
+    float dec_s = (float)(((zenith_dec - dec_d) * 60.0 - dec_m) * 60.0);
 
-    // printf("Zenith RA:  %02d:%02d:%05.2f\n", ra_h, ra_m, ra_s);
-    // printf("Zenith Dec: %+03d:%02d:%05.2f\n", dec_d, dec_m, dec_s);
+    // printf("[getRADecFromLSTLat] Zenith RA:  %02d:%02d:%05.2f\n", ra_h, ra_m, ra_s);
+    // printf("[getRADecFromLSTLat] Zenith Dec: %+03d:%02d:%05.2f\n", dec_d, dec_m, dec_s);
 
     radecData.ra_h = ra_h;
     radecData.ra_m = ra_m;
@@ -455,8 +455,10 @@ RaDecData SiderealPlanets::getRADecFromLSTLat(double lst, double latitude_degree
     radecData.dec_s = dec_s;
 
     // Format RA
+    memset(radecData.ra_str, 0, sizeof(radecData.ra_str));
     snprintf(radecData.ra_str, sizeof(radecData.ra_str), "%02d:%02d:%05.2f", ra_h, ra_m, ra_s);
     // Format Dec
+    memset(radecData.dec_str, 0, sizeof(radecData.dec_str));
     snprintf(radecData.dec_str, sizeof(radecData.dec_str), "%+03d:%02d:%05.2f", dec_d, dec_m, dec_s);
 
     return radecData;

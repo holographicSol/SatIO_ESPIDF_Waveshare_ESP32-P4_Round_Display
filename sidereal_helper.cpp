@@ -7,6 +7,7 @@
 #include <math.h>
 #include <SiderealPlanets.h>  // https://github.com/DavidArmstrong/SiderealPlanets
 #include <SiderealObjects.h>  // https://github.com/DavidArmstrong/SiderealObjects
+#include "satio.h"
 
 // ------------------------------------------------------------------------------------------------------------------------------
 //                                                                                                               SIDEREAL PLANETS
@@ -808,7 +809,7 @@ void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m,
     siderealObjectData.object_table_i= -1;
     siderealObjectData.object_number= -1;
     myAstroObj.setRAdec(myAstro.decimalDegrees(ra_hour, ra_min, ra_sec), myAstro.decimalDegrees(dec_d, dec_m, dec_s));
-    myAstro.doRAdec2AltAz();
+    // myAstro.doRAdec2AltAz();
     myAstroObj.identifyObject();
     clearAllObjects();
     switch (myAstroObj.getIdentifiedObjectTable()) {
@@ -843,20 +844,22 @@ void trackObject(int object_table_i, int object_i) {
     else if (object_table_i == INDEX_SIDEREAL_CALDWELL_TABLE) { myAstroObj.selectCaldwellTable(object_i); }
     else if (object_table_i == INDEX_SIDEREAL_HERSHEL400_TABLE) { myAstroObj.selectHershel400Table(object_i); }
     else if (object_table_i == INDEX_SIDEREAL_OTHER_OBJECTS_TABLE) { myAstroObj.selectOtherObjectsTable(object_i); }
+    else {return;} // invalid table index
 
-    myAstro.setRAdec(myAstroObj.getRAdec(), myAstroObj.getDeclinationDec());
+    // Pull RA/Dec from myAstroObj
+    siderealObjectData.object_ra = myAstroObj.getRAdec();
+    siderealObjectData.object_dec = myAstroObj.getDeclinationDec();
+
+    // Feed Ra/Dec into myAstro because myAstro has RA/Dec to Alt/Az conversion functions
+    myAstro.setRAdec(siderealObjectData.object_ra, siderealObjectData.object_dec);
+
+    // Convert RA/Dec to Alt/Az
     myAstro.doRAdec2AltAz();
-    siderealObjectData.object_ra = myAstro.getRAdec();
-    siderealObjectData.object_dec = myAstro.getDeclinationDec();
     siderealObjectData.object_az = myAstro.getAzimuth();
     siderealObjectData.object_alt = myAstro.getAltitude();
 
-    if (siderealObjectData.object_table_i == INDEX_SIDEREAL_STAR_TABLE) {
-        myAstro.doXRiseSetTimes(0.0); // set 0 for stars. consider non zero values for planets, galaxies, etc.
-    }
-    else {
-        myAstro.doXRiseSetTimes(0.0); // set 0 for stars. consider non zero values for planets, galaxies, etc.
-    }
+    // Rise/set times
+    myAstro.doXRiseSetTimes(0.0); // set 0 for stars. consider non zero values for planets, galaxies, etc.
     siderealObjectData.object_r = myAstro.getRiseTime();
     siderealObjectData.object_s = myAstro.getSetTime();
 }
@@ -867,8 +870,9 @@ void trackObject(int object_table_i, int object_i) {
  * 
  * @note This function may be renamed to something like buildCelestialSphere.
  */
-void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s) {
-    // this is identify (so first identify object)
+void setStarNav(signed int ra_h, signed int ra_m, float ra_s, signed int dec_d, signed int dec_m, float dec_s) {
+
+    // Identify nearest object to RA/Dec coordinates
     IdentifyObject(
       ra_h,
       ra_m,
@@ -877,23 +881,28 @@ void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_
       dec_m,
       dec_s
     );
-    /*
-      Once identified we can track object (requires modified SiderealObjects lib).
-    */
-    trackObject(siderealObjectData.object_table_i, siderealObjectData.object_number);
-    // printf("---------------------------------------------\n");
-    // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-    // printf("Table:         %s\n", siderealObjectData.object_table_name);
-    // printf("Number:        %d\n", siderealObjectData.object_number);
-    // printf("Name:          %s\n", siderealObjectData.object_name);
-    // printf("Type:          %s\n", siderealObjectData.object_type);
-    // printf("Constellation: %s\n", siderealObjectData.object_con);
-    // printf("Distance:      %f\n", siderealObjectData.object_dist);
-    // printf("Azimuth:       %f\n", siderealObjectData.object_az);
-    // printf("Altitude:      %f\n", siderealObjectData.object_alt);
-    // printf("Rise:          %f\n", siderealObjectData.object_r);
-    // printf("Set:           %f\n", siderealObjectData.object_s);
-    // printf("---------------------------------------------\n");
+
+    // Track Object (Gets Alt/Az and Rise/Set times)
+    if (siderealObjectData.object_table_i >= 0 && siderealObjectData.object_number >= 0) {
+        trackObject(siderealObjectData.object_table_i, siderealObjectData.object_number);
+    //     printf("---------------------------------------------\n");
+    //     printf("Input Dec:     %02d:%02d:%06.3f\n", dec_d, dec_m, dec_s);
+    //     printf("Input RA:      %02d:%02d:%06.3f\n", ra_h, ra_m, ra_s);
+    //     printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+    //     printf("Table:         %s\n", siderealObjectData.object_table_name);
+    //     printf("Number:        %d\n", siderealObjectData.object_number);
+    //     printf("Name:          %s\n", siderealObjectData.object_name);
+    //     printf("Type:          %s\n", siderealObjectData.object_type);
+    //     printf("Constellation: %s\n", siderealObjectData.object_con);
+    //     printf("Distance:      %f\n", siderealObjectData.object_dist);
+    //     printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
+    //     printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
+    //     printf("Azimuth:       %f\n", siderealObjectData.object_az);
+    //     printf("Altitude:      %f\n", siderealObjectData.object_alt);
+    //     printf("Rise:          %f\n", siderealObjectData.object_r);
+    //     printf("Set:           %f\n", siderealObjectData.object_s);
+    //     printf("---------------------------------------------\n");
+    }
 
     // go on to build celestial sphere from identified object (centered on zenith)...
 }
@@ -901,9 +910,10 @@ void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_
 // ----------------------------------------------------------------------------------------
 // Track All Planets.
 // ----------------------------------------------------------------------------------------
-void trackPlanets(void) {    
+void trackPlanets(void) {
+    // printf("Tracking Planets...\n");
     // -------------------------------------------------------
-    // Get Sun, Planets Data
+    // Get Sun First
     // -------------------------------------------------------
     myAstro.doPlanetElements();
     myAstro.doSun();
@@ -931,6 +941,15 @@ void setSiderealData(double latitude, double longitude,
     double utc_hour, double utc_minute, double utc_second,
     double local_hour, double local_minute, double local_second,
     double altitude) {
+
+    // printf("Setting Sidereal Data...\n");
+    // printf("Latitude:  %f\n", latitude);
+    // printf("Longitude: %f\n", longitude);
+    // printf("UTC Date:  %04d-%02d-%02d\n", (int)utc_year, (int)utc_month, (int)utc_mday);
+    // printf("UTC Time:  %02d:%02d:%06.3f\n", (int)utc_hour, (int)utc_minute, (float)utc_second);
+    // printf("Local Time:  %02d:%02d:%06.3f\n", (int)local_hour, (int)local_minute, (float)local_second);
+    // printf("Altitude:  %f\n", altitude);
+
     // ----------------------------------------------------------------------------------
     // Use degrees latitude & longitude converted from GNGGA/GNRMC data.
     // ----------------------------------------------------------------------------------
@@ -960,6 +979,7 @@ void setSiderealData(double latitude, double longitude,
     // Get Sidereal Time Data
     // -------------------------------------------------------
     siderealPlanetData.local_sidereal_time = myAstro.getLocalSiderealTime();
+    // printf("Local Sidereal Time: %f\n", siderealPlanetData.local_sidereal_time);
 }
 
 void myAstroBegin(void) {

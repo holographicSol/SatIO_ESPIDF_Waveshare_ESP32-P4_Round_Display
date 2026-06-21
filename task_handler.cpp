@@ -692,40 +692,35 @@ void taskUniverse(void * pvParameters) {
   while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
   for (;;) {
     esp_task_wdt_reset();
-    // ---------------------------------------------------------
-    // Track Home Sun, Moon & Planets. (Can be used without GPS)
-    // ---------------------------------------------------------
 
+    // ------------------------------------------------
+    // Set Sidereal Data for Planet/Object Tracking.
+    // ------------------------------------------------
+    setSiderealData(
+                satioData.system_degrees_latitude,
+                satioData.system_degrees_longitude,
+                satioData.rtc_year,
+                satioData.rtc_month,
+                satioData.rtc_mday,
+                satioData.rtc_hour,
+                satioData.rtc_minute,
+                satioData.rtc_second,
+                // uncomment to use geo-political local time (UTC+-UTCOffset)
+                satioData.local_hour,
+                satioData.local_minute,
+                satioData.local_second,
+                // uncomment to use LMST (Local Mean Solar Time) (UTC+-LongitudeOffset)
+                // satioData.LMST_hour,
+                // satioData.LMST_minute,
+                // satioData.LMST_second,
+                satioData.system_altitude);
+
+    // ------------------------------------------------
     // Track Planets/Meteors Every Interval (see config.h)
+    // ------------------------------------------------
     if (systemData.interval_breach_track_planets==true) {
       systemData.interval_breach_track_planets=false;
-      // ------------------------------------------------
-      // Set Sidereal Data for Planet/Object Tracking
-      // ------------------------------------------------
-      setSiderealData(satioData.system_degrees_latitude,
-                  satioData.system_degrees_longitude,
-                  satioData.rtc_year,
-                  satioData.rtc_month,
-                  satioData.rtc_mday,
-                  satioData.rtc_hour,
-                  satioData.rtc_minute,
-                  satioData.rtc_second,
-                  // uncomment to use geo-political local time (UTC+-UTCOffset)
-                  satioData.local_hour,
-                  satioData.local_minute,
-                  satioData.local_second,
-                  // uncomment to use LMST (Local Mean Solar Time) (UTC+-LongitudeOffset)
-                  // satioData.LMST_hour,
-                  // satioData.LMST_minute,
-                  // satioData.LMST_second,
-                  satioData.system_altitude);
-      esp_task_wdt_reset();
-      // ------------------------------------------------
-      // Set RA & Dec for system zenith.
-      // ------------------------------------------------
-      siderealPlanetData.currentZenithRADec = myAstro.getRADecFromLSTLat(
-        siderealPlanetData.local_sidereal_time,
-        satioData.system_degrees_latitude);
+
       esp_task_wdt_reset();
       // ------------------------------------------------
       // Track Planets.
@@ -740,30 +735,78 @@ void taskUniverse(void * pvParameters) {
     }
 
     // ------------------------------------------------
+    // Set RA & Dec for system zenith.
+    // ------------------------------------------------
+    siderealPlanetData.currentZenithRADec = myAstro.getRADecFromLSTLat(
+      siderealPlanetData.local_sidereal_time,
+      satioData.system_degrees_latitude);
+
+    // printf("[taskUniverse] zenith ra: %s dec: %s\n",
+    //   siderealPlanetData.currentZenithRADec.ra_str,
+    //   siderealPlanetData.currentZenithRADec.dec_str);
+
+    // ------------------------------------------------
     // Star Navigation Every Interval (see config.h)
-    // Cureently tracks a single object at zenith, while
+    // Cureently tracks a single object nearest to zenith, while
     // performance is being monitored with the intention
     // of tracking multiple objects in the future.
-    // Object near zeiith is used because RA/DEC at zenith is dynamic.
+    // Object nearest to zenith is used because RA/DEC at zenith is dynamic.
     // ------------------------------------------------
     // if (systemData.interval_breach_star_navigation==true) {
     //   systemData.interval_breach_star_navigation=false;
+      // test dynamic (should always be nearest star to zenith)
       setStarNav(
-        (int)siderealPlanetData.currentZenithRADec.ra_h,
-        (int)siderealPlanetData.currentZenithRADec.ra_m,
-        (float)siderealPlanetData.currentZenithRADec.ra_s,
-        (int)siderealPlanetData.currentZenithRADec.dec_d,
-        (int)siderealPlanetData.currentZenithRADec.dec_m,
-        (float)siderealPlanetData.currentZenithRADec.dec_s
+        siderealPlanetData.currentZenithRADec.ra_h,
+        siderealPlanetData.currentZenithRADec.ra_m,
+        siderealPlanetData.currentZenithRADec.ra_s,
+        siderealPlanetData.currentZenithRADec.dec_d,
+        siderealPlanetData.currentZenithRADec.dec_m,
+        siderealPlanetData.currentZenithRADec.dec_s
       );
+      // check if test yields objects in range of 80-90 degrees alt
+      if (siderealObjectData.object_alt < 80) {
+        // printf("---------------------------------------------\n");
+        // printf("Warning: Object Altitude < 80 degrees. There may be a bug!\n");
+        // printf("---------------------------------------------\n");
+      //   printf("---------------------------------------------\n");
+      //   printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+      //   printf("Table:         %s\n", siderealObjectData.object_table_name);
+      //   printf("Number:        %d\n", siderealObjectData.object_number);
+      //   printf("Name:          %s\n", siderealObjectData.object_name);
+      //   printf("Type:          %s\n", siderealObjectData.object_type);
+      //   printf("Constellation: %s\n", siderealObjectData.object_con);
+      //   printf("Distance:      %f\n", siderealObjectData.object_dist);
+      //   printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
+      //   printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
+      //   printf("Azimuth:       %f\n", siderealObjectData.object_az);
+      //   printf("Altitude:      %f\n", siderealObjectData.object_alt);
+      //   printf("Rise:          %f\n", siderealObjectData.object_r);
+      //   printf("Set:           %f\n", siderealObjectData.object_s);
+      //   printf("---------------------------------------------\n");
+      }
+
+      
+      // static test (should always be sirius)
+      // setStarNav(
+      //   6,
+      //   45,
+      //   8.9,
+      //   -16,
+      //   42,
+      //   58.0
+      // );
       esp_task_wdt_reset();
     // }
 
+    // ------------------------------------------------
+    // Set counters and flags
+    // ------------------------------------------------
     systemData.i_count_track_planets++;
     systemData.interval_breach_track_planets_output = true;
     if (systemData.i_count_track_planets>=UINT32_MAX-2)
       {systemData.i_count_track_planets=0;}
     esp_task_wdt_reset();
+
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
