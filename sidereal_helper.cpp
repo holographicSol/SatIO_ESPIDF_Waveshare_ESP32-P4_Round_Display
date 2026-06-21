@@ -206,55 +206,21 @@ static inline double radec_to_dec_deg(const RaDecData *r) {
     return sign * deg;
 }
 
-// Fills ra_h/m/s, ra_str from decimal degrees [0,360)
-static void fill_ra(RaDecData *out, double deg_ra) {
-    deg_ra = fmod(deg_ra, 360.0);
-    if (deg_ra < 0.0) deg_ra += 360.0;
-
-    double ra_hours = deg_ra / 15.0;
-    int h = (int)ra_hours;
-    double rem_min = (ra_hours - h) * 60.0;
-    int m = (int)rem_min;
-    double s = (rem_min - m) * 60.0;
-
-    if (s >= 59.9995) {
-        s = 0.0;
-        m++;
-        if (m >= 60) { m = 0; h++; if (h >= 24) h = 0; }
-    }
-
-    out->ra_h = h;
-    out->ra_m = m;
-    out->ra_s = (float)s;
-    // snprintf(out->ra_str, sizeof(out->ra_str), "%02d:%02d:%05.2f", h, m, s);
-}
-
-// Fills dec_d/m/s, dec_str from decimal degrees [-90,90]
-static void fill_dec(RaDecData *out, double deg_dec) {
-    char sign = (deg_dec < 0.0) ? '-' : '+';
-    double adeg = fabs(deg_dec);
-
-    int d = (int)adeg;
-    double rem_min = (adeg - d) * 60.0;
-    int m = (int)rem_min;
-    double s = (rem_min - m) * 60.0;
-
-    if (s >= 59.995) {
-        s = 0.0;
-        m++;
-        if (m >= 60) { m = 0; d++; }
-    }
-
-    out->dec_d = (sign == '-') ? -d : d;
-    out->dec_m = m;
-    out->dec_s = (float)s;
-    // snprintf(out->dec_str, sizeof(out->dec_str), "%c%02d:%02d:%05.2f", sign, d, m, s);
-}
-
 // gyro_yaw_deg    -> applied to RA  (ang_z)
 // gyro_pitch_deg  -> applied to Dec (ang_y)
-void gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
+RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
 
+    RaDecData radecData = {
+        0,   // ra_h
+        0,   // ra_m
+        0.0, // ra_s
+        0,   // dec_d
+        0,   // dec_m
+        0.0, // dec_s
+        {0},  // ra_str
+        {0}   // dec_str
+    };
+    
     double ra_deg  = radec_to_ra_deg(&siderealPlanetData.currentZenithRADec);
     double dec_deg = radec_to_dec_deg(&siderealPlanetData.currentZenithRADec);
 
@@ -277,8 +243,45 @@ void gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
         new_ra += 180.0;
     }
 
-    fill_ra(&siderealObjectData.gyroRADec, new_ra);
-    fill_dec(&siderealObjectData.gyroRADec, new_dec);
+    // RA
+    new_ra = fmod(new_ra, 360.0);
+    if (new_ra < 0.0) new_ra += 360.0;
+
+    double ra_hours = new_ra / 15.0;
+    int ra_h = (int)ra_hours;
+    double ra_rem_min = (ra_hours - ra_h) * 60.0;
+    int ra_m = (int)ra_rem_min;
+    double ra_s = (ra_rem_min - ra_m) * 60.0;
+
+    if (ra_s >= 59.9995) {
+        ra_s = 0.0;
+        ra_m++;
+        if (ra_m >= 60) { ra_m = 0; ra_h++; if (ra_h >= 24) ra_h = 0; }
+    }
+
+    // Dec
+    char sign = (new_dec < 0.0) ? '-' : '+';
+    double adeg = fabs(new_dec);
+
+    int dec_d = (int)adeg;
+    double dec_rem_min = (adeg - dec_d) * 60.0;
+    int dec_m = (int)dec_rem_min;
+    double dec_s = (dec_rem_min - dec_m) * 60.0;
+
+    if (dec_s >= 59.995) {
+        dec_s = 0.0;
+        dec_m++;
+        if (dec_m >= 60) { dec_m = 0; dec_d++; }
+    }
+
+    radecData.ra_h = ra_h;
+    radecData.ra_m = ra_m;
+    radecData.ra_s = ra_s;
+    radecData.dec_d = dec_d;
+    radecData.dec_m = dec_m;
+    radecData.dec_s = dec_s;
+
+    return radecData;
 }
 
 // ----------------------------------------------------------------------------------------

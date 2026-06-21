@@ -188,7 +188,7 @@ void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_
 void trackSun(void);
 void trackPlanets();
 
-void gyroOffsetZenithRADec(double deg_ra, double deg_dec);
+RaDecData gyroOffsetZenithRADec(double deg_ra, double deg_dec);
 
 void trackSun(void);
 void trackLuna(void);
