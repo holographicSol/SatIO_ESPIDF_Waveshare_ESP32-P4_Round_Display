@@ -115,7 +115,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_LOGGING                false
 
 
-#define POWER_CONFIG_TRACK_PLANTETS_TIMING_uS  500000L
+#define POWER_CONFIG_TRACK_PLANTETS_TIMING_uS  1000000L
 #define POWER_CONFIG_STAR_NAVIGATION_TIMING_uS 5000L
 
 // ----------------------------------------------------------------------------------------

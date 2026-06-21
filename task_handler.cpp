@@ -696,11 +696,13 @@ void taskUniverse(void * pvParameters) {
     // Track Home Sun, Moon & Planets. (Can be used without GPS)
     // ---------------------------------------------------------
 
-    // Track Planets Every Interval (see config.h)
+    // Track Planets/Meteors Every Interval (see config.h)
     if (systemData.interval_breach_track_planets==true) {
       systemData.interval_breach_track_planets=false;
-      
-      trackPlanets(satioData.system_degrees_latitude,
+      // ------------------------------------------------
+      // Set Sidereal Data for Planet/Object Tracking
+      // ------------------------------------------------
+      setSiderealData(satioData.system_degrees_latitude,
                   satioData.system_degrees_longitude,
                   satioData.rtc_year,
                   satioData.rtc_month,
@@ -708,67 +710,50 @@ void taskUniverse(void * pvParameters) {
                   satioData.rtc_hour,
                   satioData.rtc_minute,
                   satioData.rtc_second,
-
                   // uncomment to use geo-political local time (UTC+-UTCOffset)
                   satioData.local_hour,
                   satioData.local_minute,
                   satioData.local_second,
-
                   // uncomment to use LMST (Local Mean Solar Time) (UTC+-LongitudeOffset)
                   // satioData.LMST_hour,
                   // satioData.LMST_minute,
                   // satioData.LMST_second,
-
-                  satioData.system_altitude
-                );
+                  satioData.system_altitude);
+      esp_task_wdt_reset();
+      // ------------------------------------------------
+      // Set RA & Dec for system zenith.
+      // ------------------------------------------------
+      siderealPlanetData.currentZenithRADec = myAstro.getRADecFromLSTLat(
+        siderealPlanetData.local_sidereal_time,
+        satioData.system_degrees_latitude);
+      esp_task_wdt_reset();
+      // ------------------------------------------------
+      // Track Planets.
+      // ------------------------------------------------
+      trackPlanets();
+      esp_task_wdt_reset();
+      // ------------------------------------------------
+      // Track Meteors.
+      // ------------------------------------------------
+      setMeteorShowerWarning(satioData.local_month, satioData.local_mday);
+      esp_task_wdt_reset();
     }
-    esp_task_wdt_reset();
 
-    // Set RA & Dec for system zenith.
-    siderealPlanetData.currentZenithRADec = myAstro.getRADecFromLSTLat(
-      siderealPlanetData.local_sidereal_time,
-      satioData.system_degrees_latitude);
-
+    // ------------------------------------------------
     // Star Navigation Every Interval (see config.h)
-    if (systemData.interval_breach_star_navigation==true) {
-      systemData.interval_breach_star_navigation=false;
+    // ------------------------------------------------
+    // if (systemData.interval_breach_star_navigation==true) {
+    //   systemData.interval_breach_star_navigation=false;
       setStarNav(
         (int)siderealPlanetData.currentZenithRADec.ra_h,
         (int)siderealPlanetData.currentZenithRADec.ra_m,
         (float)siderealPlanetData.currentZenithRADec.ra_s,
         (int)siderealPlanetData.currentZenithRADec.dec_d,
         (int)siderealPlanetData.currentZenithRADec.dec_m,
-        (float)siderealPlanetData.currentZenithRADec.dec_s,
-        (double)satioData.system_degrees_latitude,
-        (double)satioData.system_degrees_longitude,
-        (double)satioData.rtc_year,
-        (double)satioData.rtc_month,
-        (double)satioData.rtc_mday,
-        (double)satioData.rtc_hour,
-        (double)satioData.rtc_minute,
-        (double)satioData.rtc_second,
-
-        // uncomment to use geo-political local time (UTC+-UTCOffset)
-        (double)satioData.local_hour,
-        (double)satioData.local_minute,
-        (double)satioData.local_second,
-
-        // uncomment to use LMST (Local Mean Solar Time) (UTC+-LongitudeOffset)
-        // satioData.LMST_hour,
-        // satioData.LMST_minute,
-        // satioData.LMST_second,
-
-        (double)satioData.system_altitude
+        (float)siderealPlanetData.currentZenithRADec.dec_s
       );
-    }
-
-    esp_task_wdt_reset();
-    // ------------------------------------------------
-    // Track Meteors.
-    // ------------------------------------------------
-    setMeteorShowerWarning(satioData.local_month,
-                           satioData.local_mday);
-    esp_task_wdt_reset();
+      esp_task_wdt_reset();
+    // }
 
     systemData.i_count_track_planets++;
     systemData.interval_breach_track_planets_output = true;
@@ -793,7 +778,6 @@ void createTaskUniverse() {
     &TaskUniverse,          /* Task handle. */
     TASK_UNIVERSE_CORE);    /* Core where the task should run */
 }
-
 
 /** ----------------------------------------------------------------------------
  * PowerCfg: Ultimate Performance.

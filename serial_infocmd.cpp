@@ -965,11 +965,8 @@ void star_nav() {
     /*
       Once identified we can track object (requires modified SiderealObjects lib).
     */
-    trackObject(satioData.degrees_latitude, satioData.degrees_longitude,
-      satioData.rtc_year, satioData.rtc_month, satioData.rtc_mday,
-      satioData.rtc_hour, satioData.rtc_minute, satioData.rtc_second,
-      satioData.local_hour, satioData.local_minute, satioData.local_second,
-      atof(gnggaData.altitude), siderealObjectData.object_table_i, siderealObjectData.object_number);
+    
+    trackObject(siderealObjectData.object_table_i, siderealObjectData.object_number);
     printf("---------------------------------------------\n");
     printf("Table Index:   %d\n", siderealObjectData.object_table_i);
     printf("Table:         %s\n", siderealObjectData.object_table_name);
@@ -1166,7 +1163,12 @@ void CmdProcess() {
     //   sdcardFlagData.list_dir_flag=true;
     // }
 
-    else if (strcmp(pos[0], "starnav")==0) {star_nav();}
+    /*
+       Temporarily disabled for user so that system has exclusive r/w access for associated values.
+       Possible update: create seperate functions & values for identification and tracking of objects
+       so that this command line feature can be safely re-enabled.
+    */
+    // else if (strcmp(pos[0], "starnav")==0) {star_nav();}
     
     if (systemData.serial_command) {
 

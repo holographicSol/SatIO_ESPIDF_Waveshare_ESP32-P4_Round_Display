@@ -832,36 +832,9 @@ void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m,
 // Track Celestial Object.
 // ----------------------------------------------------------------------------------------
 // Useful for an object that is known and or has been identified.
+// setSiderealData() must be called before calling this function.
 // ----------------------------------------------------------------------------------------
-void trackObject(double latitude, double longitude,
-    double utc_year, double utc_month, double utc_mday,
-    double utc_hour, double utc_minute, double utc_second,
-    double local_hour, double local_minute, double local_second,
-    double altitude, int object_table_i, int object_i) {
-    // ----------------------------------------------------------------------------------
-    // Use degrees latitude & longitude converted from GNGGA/GNRMC data.
-    // ----------------------------------------------------------------------------------
-    myAstro.setLatLong(latitude, longitude);
-    // ----------------------------------------------------------------------------------
-    // RTC should be UTC (GMT).
-    // ----------------------------------------------------------------------------------
-    myAstro.setGMTdate((int)utc_year, (int)utc_month, (int)utc_mday);
-    myAstro.setGMTtime((int)utc_hour, (int)utc_minute, (float)utc_second);
-    // ----------------------------------------------------------------------------------
-    // Set/reject DST.
-    // ----------------------------------------------------------------------------------
-    // myAstro.rejectDST();
-    // myAstro.setDST();
-    // myAstro.useAutoDST(); // make optional and or use user defined UTC offset time.
-    // ----------------------------------------------------------------------------------
-    // Local time (RTC+-).
-    // ----------------------------------------------------------------------------------
-    myAstro.setLocalTime((int)local_hour, (int)local_minute, (float)local_second);
-    // ----------------------------------------------------------------------------------
-    // Elevation (experimental).
-    // ----------------------------------------------------------------------------------
-    myAstro.setElevationM(altitude);
-    myAstro.spData.DegreesAltitudeOffsetByElevationM = myAstro.inRange90(myAstro.getDegreesAltitudeOffsetByElevationM(altitude));
+void trackObject(int object_table_i, int object_i) {
 
     if      (object_table_i == INDEX_SIDEREAL_STAR_TABLE) { myAstroObj.selectStarTable(object_i); }
     else if (object_table_i == INDEX_SIDEREAL_NGC_TABLE) { myAstroObj.selectNGCTable(object_i); }
@@ -894,12 +867,7 @@ void trackObject(double latitude, double longitude,
  * 
  * @note This function may be renamed to something like buildCelestialSphere.
  */
-void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s,
-    double degrees_latitude, double degrees_longitude,
-    double rtc_year, double rtc_month, double rtc_mday,
-    double rtc_hour, double rtc_minute, double rtc_second,
-    double local_hour, double local_minute, double local_second,
-    double system_altitude) {
+void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s) {
     // this is identify (so first identify object)
     IdentifyObject(
       ra_h,
@@ -912,13 +880,7 @@ void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_
     /*
       Once identified we can track object (requires modified SiderealObjects lib).
     */
-    trackObject(
-      degrees_latitude, degrees_longitude,
-      rtc_year, rtc_month, rtc_mday,
-      rtc_hour, rtc_minute, rtc_second,
-      local_hour, local_minute, local_second,
-      system_altitude, siderealObjectData.object_table_i, siderealObjectData.object_number
-    );
+    trackObject(siderealObjectData.object_table_i, siderealObjectData.object_number);
     // printf("---------------------------------------------\n");
     // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
     // printf("Table:         %s\n", siderealObjectData.object_table_name);
@@ -939,7 +901,32 @@ void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_
 // ----------------------------------------------------------------------------------------
 // Track All Planets.
 // ----------------------------------------------------------------------------------------
-void trackPlanets(double latitude, double longitude,
+void trackPlanets(void) {    
+    // -------------------------------------------------------
+    // Get Sun, Planets Data
+    // -------------------------------------------------------
+    myAstro.doPlanetElements();
+    myAstro.doSun();
+    trackSun();
+    // -------------------------------------------------------
+    // Now do other plans.
+    // -------------------------------------------------------
+    trackLuna();
+    trackMercury();
+    trackVenus();
+    trackMars();
+    trackJupiter();
+    trackSaturn();
+    trackUranus();
+    trackNeptune();
+}
+
+/**
+ * @brief Set Sidereal Data for a given location and time.
+ * 
+ * @note Must be called before calling trackPlanets() or trackObject() functions.
+ */
+void setSiderealData(double latitude, double longitude,
     double utc_year, double utc_month, double utc_mday,
     double utc_hour, double utc_minute, double utc_second,
     double local_hour, double local_minute, double local_second,
@@ -973,25 +960,6 @@ void trackPlanets(double latitude, double longitude,
     // Get Sidereal Time Data
     // -------------------------------------------------------
     siderealPlanetData.local_sidereal_time = myAstro.getLocalSiderealTime();
-    
-    // -------------------------------------------------------
-    // Get Sun, Planets Data
-    // -------------------------------------------------------
-    myAstro.doPlanetElements();
-    myAstro.doSun();
-    trackSun();
-
-    // -------------------------------------------------------
-    // Now do other plans.
-    // -------------------------------------------------------
-    trackLuna();
-    trackMercury();
-    trackVenus();
-    trackMars();
-    trackJupiter();
-    trackSaturn();
-    trackUranus();
-    trackNeptune();
 }
 
 void myAstroBegin(void) {

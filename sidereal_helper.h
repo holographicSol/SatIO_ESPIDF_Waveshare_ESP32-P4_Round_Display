@@ -170,18 +170,20 @@ extern struct SiderealObjectStruct siderealObjectData;
 // ----------------------------------------------------------------------------------------
 // Function Prototypes.
 // ----------------------------------------------------------------------------------------
-void trackObject(double latitude, double longitude,
+void setSiderealData(double latitude, double longitude,
     double utc_year, double utc_month, double utc_mday,
     double utc_hour, double utc_minute, double utc_second,
     double local_hour, double local_minute, double local_second,
-    double altitude, int object_table_i, int object_i);
+    double altitude);
+
+void trackObject(int object_table_i, int object_i);
+
 void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m, float dec_s);
-void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s,
-    double degrees_latitude, double degrees_longitude,
-    double rtc_year, double rtc_month, double rtc_mday,
-    double rtc_hour, double rtc_minute, double rtc_second,
-    double local_hour, double local_minute, double local_second,
-    double system_altitude);
+
+void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s);
+
+void trackPlanets();
+
 void trackSun(void);
 void trackLuna(void);
 void trackMercury(void);
@@ -191,6 +193,7 @@ void trackJupiter(void);
 void trackSaturn(void);
 void trackUranus(void);
 void trackNeptune(void);
+
 void clearSun(void);
 void clearLuna(void);
 void clearMercury(void);
@@ -201,11 +204,7 @@ void clearSaturn(void);
 void clearUranus(void);
 void clearNeptune(void);
 void clearTrackPlanets(void);
-void trackPlanets(double latitude, double longitude,
-    double utc_year, double utc_month, double utc_mday,
-    double utc_hour, double utc_minute, double utc_second,
-    double local_hour, double local_minute, double local_second,
-    double altitude);
+
 void myAstroBegin(void);
 
 #endif
