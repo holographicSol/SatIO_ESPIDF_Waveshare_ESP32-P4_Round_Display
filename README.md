@@ -17,10 +17,7 @@
   of reasons, according to how the matrix is configured either before and or after flashing the
   chip with SatIO.
 
-  A huge matrix switch (compund event triggers) in a small package, supporting stacks
-  of logic accross 70 output pins and 100 mapping slots.
-
-  For ESP32-P4
+  This build is for ESP32-P4.
 
 -----
 
