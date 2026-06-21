@@ -982,23 +982,23 @@ void setStarNav(signed int ra_h, signed int ra_m, float ra_s, signed int dec_d, 
     // Track Object (Gets Alt/Az and Rise/Set times)
     if (siderealObjectData.object_table_i >= 0 && siderealObjectData.object_number >= 0) {
         trackObject(siderealObjectData.object_table_i, siderealObjectData.object_number);
-        printf("---------------------------------------------\n");
-        printf("Input RA:      %02d:%02d:%06.3f\n", ra_h, ra_m, ra_s);
-        printf("Input Dec:     %02d:%02d:%06.3f\n", dec_d, dec_m, dec_s);
-        printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-        printf("Table:         %s\n", siderealObjectData.object_table_name);
-        printf("Number:        %d\n", siderealObjectData.object_number);
-        printf("Name:          %s\n", siderealObjectData.object_name);
-        printf("Type:          %s\n", siderealObjectData.object_type);
-        printf("Constellation: %s\n", siderealObjectData.object_con);
-        printf("Distance:      %f\n", siderealObjectData.object_dist);
-        printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
-        printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
-        printf("Azimuth:       %f\n", siderealObjectData.object_az);
-        printf("Altitude:      %f\n", siderealObjectData.object_alt);
-        printf("Rise:          %f\n", siderealObjectData.object_r);
-        printf("Set:           %f\n", siderealObjectData.object_s);
-        printf("---------------------------------------------\n");
+        // printf("---------------------------------------------\n");
+        // printf("Input RA:      %02d:%02d:%06.3f\n", ra_h, ra_m, ra_s);
+        // printf("Input Dec:     %02d:%02d:%06.3f\n", dec_d, dec_m, dec_s);
+        // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+        // printf("Table:         %s\n", siderealObjectData.object_table_name);
+        // printf("Number:        %d\n", siderealObjectData.object_number);
+        // printf("Name:          %s\n", siderealObjectData.object_name);
+        // printf("Type:          %s\n", siderealObjectData.object_type);
+        // printf("Constellation: %s\n", siderealObjectData.object_con);
+        // printf("Distance:      %f\n", siderealObjectData.object_dist);
+        // printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
+        // printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
+        // printf("Azimuth:       %f\n", siderealObjectData.object_az);
+        // printf("Altitude:      %f\n", siderealObjectData.object_alt);
+        // printf("Rise:          %f\n", siderealObjectData.object_r);
+        // printf("Set:           %f\n", siderealObjectData.object_s);
+        // printf("---------------------------------------------\n");
     }
 
     // go on to build celestial sphere from identified object (centered on zenith)...
