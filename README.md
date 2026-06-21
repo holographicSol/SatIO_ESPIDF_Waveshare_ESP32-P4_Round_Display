@@ -12,6 +12,10 @@
   again. SatIO intends to do something once and mature it, as a foundation of elemental
   and or compound logic, for building devices on top of.
 
+  Like say a WT901 9 axis gyro has two trigger pins that can be set for several elemental reasons,
+  SatIO cureently utilizes an ATMEGA2560 for 50+ trigger pins that can each be triggered by a compound
+  of reasons.
+
   A huge matrix switch (compund event triggers) in a small package, supporting stacks
   of logic accross 70 output pins and 100 mapping slots.
 
