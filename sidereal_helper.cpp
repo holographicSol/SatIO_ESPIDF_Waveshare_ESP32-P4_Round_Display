@@ -221,15 +221,14 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
         {0}   // dec_str
     };
     
+    // convert ra and dec to degrees to make the following conversions easier
     double ra_deg  = radec_to_ra_deg(&siderealPlanetData.currentZenithRADec);
     double dec_deg = radec_to_dec_deg(&siderealPlanetData.currentZenithRADec);
 
     // Dec offset is a direct angular offset
     double new_dec = dec_deg + gyro_pitch_deg;
 
-    // RA offset: yaw is a local-frame angle; convert to true RA delta
-    // by dividing by cos(Dec) -- skip this scaling if your gyro frame
-    // is already defined in equatorial (RA) terms rather than local az/alt-style.
+    // RA offset: yaw
     double cos_dec = cos(dec_deg * M_PI / 180.0);
     double ra_scale = (fabs(cos_dec) > 1e-6) ? (1.0 / cos_dec) : 1.0; // guard near pole
     double new_ra = ra_deg + gyro_yaw_deg * ra_scale;
@@ -274,6 +273,7 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
         if (dec_m >= 60) { dec_m = 0; dec_d++; }
     }
 
+    // Populate the RaDecData structure
     radecData.ra_h = ra_h;
     radecData.ra_m = ra_m;
     radecData.ra_s = ra_s;
@@ -1062,7 +1062,7 @@ void setSiderealData(double latitude, double longitude,
     // ----------------------------------------------------------------------------------
     // Set/reject DST.
     // ----------------------------------------------------------------------------------
-    myAstro.rejectDST();
+    // myAstro.rejectDST();
     // myAstro.setDST();
     // myAstro.useAutoDST(); // make optional and or use user defined UTC offset time.
     // ----------------------------------------------------------------------------------
