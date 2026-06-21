@@ -9,7 +9,8 @@
   SatIO is a compound event trigger, intended to be matured over time, to be used as
   a foundation for a given application, without starting a project from scratch, where
   new bugs can be introduced and the same bugs and problems can be stumbled upon
-  again.
+  again. SatIO intends to do something once and mature it, as a foundation of elemental
+  and or compoud logic, for building devices on top of.
 
   A huge matrix switch (compund event triggers) in a small package, supporting stacks
   of logic accross 70 output pins and 100 mapping slots.
