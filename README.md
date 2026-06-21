@@ -6,7 +6,7 @@
 
   A general purpose programmable I/O platform for automation, throughput and LLM's.
   
-  SatIO is a compound event trigger, intended to be matured over time, to be used as
+  SatIO is a value hive and compound event trigger, intended to be matured over time, to be used as
   a foundation for a given application, without starting a project from scratch, where
   new bugs can be introduced and the same bugs and problems can be stumbled upon
   again. SatIO intends to do something once and mature it, as a foundation of elemental
