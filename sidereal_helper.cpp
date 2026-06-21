@@ -919,19 +919,19 @@ void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_
       local_hour, local_minute, local_second,
       system_altitude, siderealObjectData.object_table_i, siderealObjectData.object_number
     );
-    printf("---------------------------------------------\n");
-    printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-    printf("Table:         %s\n", siderealObjectData.object_table_name);
-    printf("Number:        %d\n", siderealObjectData.object_number);
-    printf("Name:          %s\n", siderealObjectData.object_name);
-    printf("Type:          %s\n", siderealObjectData.object_type);
-    printf("Constellation: %s\n", siderealObjectData.object_con);
-    printf("Distance:      %f\n", siderealObjectData.object_dist);
-    printf("Azimuth:       %f\n", siderealObjectData.object_az);
-    printf("Altitude:      %f\n", siderealObjectData.object_alt);
-    printf("Rise:          %f\n", siderealObjectData.object_r);
-    printf("Set:           %f\n", siderealObjectData.object_s);
-    printf("---------------------------------------------\n");
+    // printf("---------------------------------------------\n");
+    // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+    // printf("Table:         %s\n", siderealObjectData.object_table_name);
+    // printf("Number:        %d\n", siderealObjectData.object_number);
+    // printf("Name:          %s\n", siderealObjectData.object_name);
+    // printf("Type:          %s\n", siderealObjectData.object_type);
+    // printf("Constellation: %s\n", siderealObjectData.object_con);
+    // printf("Distance:      %f\n", siderealObjectData.object_dist);
+    // printf("Azimuth:       %f\n", siderealObjectData.object_az);
+    // printf("Altitude:      %f\n", siderealObjectData.object_alt);
+    // printf("Rise:          %f\n", siderealObjectData.object_r);
+    // printf("Set:           %f\n", siderealObjectData.object_s);
+    // printf("---------------------------------------------\n");
 
     // go on to build celestial sphere from identified object (centered on zenith)...
 }
