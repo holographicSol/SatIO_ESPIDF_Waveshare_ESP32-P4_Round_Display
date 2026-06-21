@@ -15,6 +15,7 @@ extern SiderealPlanets myAstro;
 // Planet Data Structure.
 // ----------------------------------------------------------------------------------------
 struct SiderealPlantetsStruct {
+
     RaDecData currentZenithRADec; // current Zenith RA/Dec data
 
     double local_sidereal_time;
@@ -163,6 +164,8 @@ struct SiderealObjectStruct {
     char object_con[MAX_GLOBAL_ELEMENT_SIZE];
     char object_desc[MAX_GLOBAL_ELEMENT_SIZE];
     double object_dist;
+
+    RaDecData gyroRADec; // current Zenith RA/Dec offset by gyro
 };
 
 extern struct SiderealObjectStruct siderealObjectData;
@@ -184,6 +187,8 @@ void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_
 
 void trackSun(void);
 void trackPlanets();
+
+void gyroOffsetZenithRADec(double deg_ra, double deg_dec);
 
 void trackSun(void);
 void trackLuna(void);

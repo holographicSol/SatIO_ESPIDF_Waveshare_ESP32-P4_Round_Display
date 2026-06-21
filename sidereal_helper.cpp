@@ -17,6 +17,7 @@ SiderealPlanets myAstro;    // for calculating azimuth and altitude
 SiderealObjects myAstroObj; // for getting right ascension and declination of objects from star table
 
 struct SiderealPlantetsStruct siderealPlanetData = {
+
     .currentZenithRADec = {
         0,   // ra_h
         0,   // ra_m
@@ -182,7 +183,103 @@ struct SiderealObjectStruct siderealObjectData = {
     .object_con = {0},
     .object_desc = {0},
     .object_dist = NAN,
+
+    .gyroRADec = {
+        0,   // ra_h
+        0,   // ra_m
+        0.0, // ra_s
+        0,   // dec_d
+        0,   // dec_m
+        0.0  // dec_s
+    },
 };
+
+static inline double radec_to_ra_deg(const RaDecData *r) {
+    double sign = (r->ra_h < 0) ? -1.0 : 1.0; // RA hours shouldn't be negative, but guard anyway
+    double hours = fabs((double)r->ra_h) + (double)r->ra_m / 60.0 + (double)r->ra_s / 3600.0;
+    return sign * hours * 15.0; // 15 deg per hour
+}
+
+static inline double radec_to_dec_deg(const RaDecData *r) {
+    double sign = (r->dec_d < 0) ? -1.0 : 1.0;
+    double deg = fabs((double)r->dec_d) + (double)r->dec_m / 60.0 + (double)r->dec_s / 3600.0;
+    return sign * deg;
+}
+
+// Fills ra_h/m/s, ra_str from decimal degrees [0,360)
+static void fill_ra(RaDecData *out, double deg_ra) {
+    deg_ra = fmod(deg_ra, 360.0);
+    if (deg_ra < 0.0) deg_ra += 360.0;
+
+    double ra_hours = deg_ra / 15.0;
+    int h = (int)ra_hours;
+    double rem_min = (ra_hours - h) * 60.0;
+    int m = (int)rem_min;
+    double s = (rem_min - m) * 60.0;
+
+    if (s >= 59.9995) {
+        s = 0.0;
+        m++;
+        if (m >= 60) { m = 0; h++; if (h >= 24) h = 0; }
+    }
+
+    out->ra_h = h;
+    out->ra_m = m;
+    out->ra_s = (float)s;
+    // snprintf(out->ra_str, sizeof(out->ra_str), "%02d:%02d:%05.2f", h, m, s);
+}
+
+// Fills dec_d/m/s, dec_str from decimal degrees [-90,90]
+static void fill_dec(RaDecData *out, double deg_dec) {
+    char sign = (deg_dec < 0.0) ? '-' : '+';
+    double adeg = fabs(deg_dec);
+
+    int d = (int)adeg;
+    double rem_min = (adeg - d) * 60.0;
+    int m = (int)rem_min;
+    double s = (rem_min - m) * 60.0;
+
+    if (s >= 59.995) {
+        s = 0.0;
+        m++;
+        if (m >= 60) { m = 0; d++; }
+    }
+
+    out->dec_d = (sign == '-') ? -d : d;
+    out->dec_m = m;
+    out->dec_s = (float)s;
+    // snprintf(out->dec_str, sizeof(out->dec_str), "%c%02d:%02d:%05.2f", sign, d, m, s);
+}
+
+// gyro_yaw_deg    -> applied to RA  (ang_z)
+// gyro_pitch_deg  -> applied to Dec (ang_y)
+void gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
+
+    double ra_deg  = radec_to_ra_deg(&siderealPlanetData.currentZenithRADec);
+    double dec_deg = radec_to_dec_deg(&siderealPlanetData.currentZenithRADec);
+
+    // Dec offset is a direct angular offset
+    double new_dec = dec_deg + gyro_pitch_deg;
+
+    // RA offset: yaw is a local-frame angle; convert to true RA delta
+    // by dividing by cos(Dec) -- skip this scaling if your gyro frame
+    // is already defined in equatorial (RA) terms rather than local az/alt-style.
+    double cos_dec = cos(dec_deg * M_PI / 180.0);
+    double ra_scale = (fabs(cos_dec) > 1e-6) ? (1.0 / cos_dec) : 1.0; // guard near pole
+    double new_ra = ra_deg + gyro_yaw_deg * ra_scale;
+
+    // Handle Dec pole-crossing: reflect back into [-90,90] and flip RA 180°
+    if (new_dec > 90.0) {
+        new_dec = 180.0 - new_dec;
+        new_ra += 180.0;
+    } else if (new_dec < -90.0) {
+        new_dec = -180.0 - new_dec;
+        new_ra += 180.0;
+    }
+
+    fill_ra(&siderealObjectData.gyroRADec, new_ra);
+    fill_dec(&siderealObjectData.gyroRADec, new_dec);
+}
 
 // ----------------------------------------------------------------------------------------
 // Set Object Name.
@@ -885,23 +982,23 @@ void setStarNav(signed int ra_h, signed int ra_m, float ra_s, signed int dec_d, 
     // Track Object (Gets Alt/Az and Rise/Set times)
     if (siderealObjectData.object_table_i >= 0 && siderealObjectData.object_number >= 0) {
         trackObject(siderealObjectData.object_table_i, siderealObjectData.object_number);
-    //     printf("---------------------------------------------\n");
-    //     printf("Input Dec:     %02d:%02d:%06.3f\n", dec_d, dec_m, dec_s);
-    //     printf("Input RA:      %02d:%02d:%06.3f\n", ra_h, ra_m, ra_s);
-    //     printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-    //     printf("Table:         %s\n", siderealObjectData.object_table_name);
-    //     printf("Number:        %d\n", siderealObjectData.object_number);
-    //     printf("Name:          %s\n", siderealObjectData.object_name);
-    //     printf("Type:          %s\n", siderealObjectData.object_type);
-    //     printf("Constellation: %s\n", siderealObjectData.object_con);
-    //     printf("Distance:      %f\n", siderealObjectData.object_dist);
-    //     printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
-    //     printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
-    //     printf("Azimuth:       %f\n", siderealObjectData.object_az);
-    //     printf("Altitude:      %f\n", siderealObjectData.object_alt);
-    //     printf("Rise:          %f\n", siderealObjectData.object_r);
-    //     printf("Set:           %f\n", siderealObjectData.object_s);
-    //     printf("---------------------------------------------\n");
+        printf("---------------------------------------------\n");
+        printf("Input RA:      %02d:%02d:%06.3f\n", ra_h, ra_m, ra_s);
+        printf("Input Dec:     %02d:%02d:%06.3f\n", dec_d, dec_m, dec_s);
+        printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+        printf("Table:         %s\n", siderealObjectData.object_table_name);
+        printf("Number:        %d\n", siderealObjectData.object_number);
+        printf("Name:          %s\n", siderealObjectData.object_name);
+        printf("Type:          %s\n", siderealObjectData.object_type);
+        printf("Constellation: %s\n", siderealObjectData.object_con);
+        printf("Distance:      %f\n", siderealObjectData.object_dist);
+        printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
+        printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
+        printf("Azimuth:       %f\n", siderealObjectData.object_az);
+        printf("Altitude:      %f\n", siderealObjectData.object_alt);
+        printf("Rise:          %f\n", siderealObjectData.object_r);
+        printf("Set:           %f\n", siderealObjectData.object_s);
+        printf("---------------------------------------------\n");
     }
 
     // go on to build celestial sphere from identified object (centered on zenith)...
@@ -962,7 +1059,7 @@ void setSiderealData(double latitude, double longitude,
     // ----------------------------------------------------------------------------------
     // Set/reject DST.
     // ----------------------------------------------------------------------------------
-    // myAstro.rejectDST();
+    myAstro.rejectDST();
     // myAstro.setDST();
     // myAstro.useAutoDST(); // make optional and or use user defined UTC offset time.
     // ----------------------------------------------------------------------------------
@@ -972,8 +1069,8 @@ void setSiderealData(double latitude, double longitude,
     // ----------------------------------------------------------------------------------
     // Elevation (experimental).
     // ----------------------------------------------------------------------------------
-    myAstro.setElevationM(altitude);
-    myAstro.spData.DegreesAltitudeOffsetByElevationM = myAstro.inRange90(myAstro.getDegreesAltitudeOffsetByElevationM(altitude));
+    // myAstro.setElevationM(altitude);
+    // myAstro.spData.DegreesAltitudeOffsetByElevationM = myAstro.inRange90(myAstro.getDegreesAltitudeOffsetByElevationM(altitude));
 
     // -------------------------------------------------------
     // Get Sidereal Time Data

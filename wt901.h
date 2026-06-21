@@ -22,12 +22,12 @@ struct GyroData {
   float gyro_0_fAcc[3];         // Acceleration (x, y, z)
   float gyro_0_fGyro[3];        // Gyroscope (x, y, z)
   float gyro_0_fAngle[3];       // Angles (roll, pitch, yaw)
-  float gyro_0_ang_x;
-  float gyro_0_ang_y;
-  float gyro_0_ang_z;
-  float gyro_0_acc_x;           // Processed acceleration x
-  float gyro_0_acc_y;           // Processed acceleration y
-  float gyro_0_acc_z;           // Processed acceleration z
+  float gyro_0_ang_x;           // Roll
+  float gyro_0_ang_y;           // Pitch
+  float gyro_0_ang_z;           // Yaw
+  float gyro_0_acc_x;           // Processed acceleration x (acc Roll)
+  float gyro_0_acc_y;           // Processed acceleration y (acc Pitch)
+  float gyro_0_acc_z;           // Processed acceleration z (acc Yaw)
   float gyro_0_gyr_x;           // Processed gyroscope x
   float gyro_0_gyr_y;           // Processed gyroscope y
   float gyro_0_gyr_z;           // Processed gyroscope z

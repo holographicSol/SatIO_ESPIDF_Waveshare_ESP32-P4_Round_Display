@@ -716,6 +716,21 @@ void taskUniverse(void * pvParameters) {
                 satioData.system_altitude);
 
     // ------------------------------------------------
+    // Setup gyro data for sidereal calculations (add to matrix)
+    // first arg = yaw  -> RA
+    // second arg = pitch -> Dec
+    // ------------------------------------------------
+    gyroOffsetZenithRADec(gyroData.gyro_0_ang_z, gyroData.gyro_0_ang_y);
+    printf("Gyro Yaw->RA: %d:%d:%f\n",
+      siderealObjectData.gyroRADec.ra_h,
+      siderealObjectData.gyroRADec.ra_m,
+      siderealObjectData.gyroRADec.ra_s);
+    printf("Gyro Pitch->Dec: %d:%d:%f\n",
+      siderealObjectData.gyroRADec.dec_d,
+      siderealObjectData.gyroRADec.dec_m,
+      siderealObjectData.gyroRADec.dec_s);
+
+    // ------------------------------------------------
     // Track Planets/Meteors Every Interval (see config.h)
     // ------------------------------------------------
     if (systemData.interval_breach_track_planets==true) {
@@ -735,7 +750,7 @@ void taskUniverse(void * pvParameters) {
     }
 
     // ------------------------------------------------
-    // Set RA & Dec for system zenith.
+    // Set RA & Dec for system zenith. (add to matrix)
     // ------------------------------------------------
     siderealPlanetData.currentZenithRADec = myAstro.getRADecFromLSTLat(
       siderealPlanetData.local_sidereal_time,
@@ -746,15 +761,8 @@ void taskUniverse(void * pvParameters) {
     //   siderealPlanetData.currentZenithRADec.dec_str);
 
     // ------------------------------------------------
-    // Star Navigation Every Interval (see config.h)
-    // Cureently tracks a single object nearest to zenith, while
-    // performance is being monitored with the intention
-    // of tracking multiple objects in the future.
-    // Object nearest to zenith is used because RA/DEC at zenith is dynamic.
+    // StarNav Dynamic Test Zenith Every Interval
     // ------------------------------------------------
-    // if (systemData.interval_breach_star_navigation==true) {
-    //   systemData.interval_breach_star_navigation=false;
-      // test dynamic (should always be nearest star to zenith)
       setStarNav(
         siderealPlanetData.currentZenithRADec.ra_h,
         siderealPlanetData.currentZenithRADec.ra_m,
@@ -763,27 +771,49 @@ void taskUniverse(void * pvParameters) {
         siderealPlanetData.currentZenithRADec.dec_m,
         siderealPlanetData.currentZenithRADec.dec_s
       );
-      // check if test yields objects in range of 80-90 degrees alt
-      if (siderealObjectData.object_alt < 80) {
-        // printf("---------------------------------------------\n");
-        // printf("Warning: Object Altitude < 80 degrees. There may be a bug!\n");
-        // printf("---------------------------------------------\n");
-      //   printf("---------------------------------------------\n");
-      //   printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-      //   printf("Table:         %s\n", siderealObjectData.object_table_name);
-      //   printf("Number:        %d\n", siderealObjectData.object_number);
-      //   printf("Name:          %s\n", siderealObjectData.object_name);
-      //   printf("Type:          %s\n", siderealObjectData.object_type);
-      //   printf("Constellation: %s\n", siderealObjectData.object_con);
-      //   printf("Distance:      %f\n", siderealObjectData.object_dist);
-      //   printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
-      //   printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
-      //   printf("Azimuth:       %f\n", siderealObjectData.object_az);
-      //   printf("Altitude:      %f\n", siderealObjectData.object_alt);
-      //   printf("Rise:          %f\n", siderealObjectData.object_r);
-      //   printf("Set:           %f\n", siderealObjectData.object_s);
-      //   printf("---------------------------------------------\n");
-      }
+        printf("---------------------------------------------\n");
+        printf("Nearest Object to Zenith:\n");
+        printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+        printf("Table:         %s\n", siderealObjectData.object_table_name);
+        printf("Number:        %d\n", siderealObjectData.object_number);
+        printf("Name:          %s\n", siderealObjectData.object_name);
+        printf("Type:          %s\n", siderealObjectData.object_type);
+        printf("Constellation: %s\n", siderealObjectData.object_con);
+        printf("Distance:      %f\n", siderealObjectData.object_dist);
+        printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
+        printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
+        printf("Azimuth:       %f\n", siderealObjectData.object_az);
+        printf("Altitude:      %f\n", siderealObjectData.object_alt);
+        printf("Rise:          %f\n", siderealObjectData.object_r);
+        printf("Set:           %f\n", siderealObjectData.object_s);
+        printf("---------------------------------------------\n");
+    // ------------------------------------------------
+    // StarNav Dynamic Test Zenith+-Gyro Offset
+    // ------------------------------------------------
+      setStarNav(
+        siderealObjectData.gyroRADec.ra_h,
+        siderealObjectData.gyroRADec.ra_m,
+        siderealObjectData.gyroRADec.ra_s,
+        siderealObjectData.gyroRADec.dec_d,
+        siderealObjectData.gyroRADec.dec_m,
+        siderealObjectData.gyroRADec.dec_s
+      );
+        printf("---------------------------------------------\n");
+        printf("Nearest Object to Gyro Attitude Data:\n");
+        printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+        printf("Table:         %s\n", siderealObjectData.object_table_name);
+        printf("Number:        %d\n", siderealObjectData.object_number);
+        printf("Name:          %s\n", siderealObjectData.object_name);
+        printf("Type:          %s\n", siderealObjectData.object_type);
+        printf("Constellation: %s\n", siderealObjectData.object_con);
+        printf("Distance:      %f\n", siderealObjectData.object_dist);
+        printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
+        printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
+        printf("Azimuth:       %f\n", siderealObjectData.object_az);
+        printf("Altitude:      %f\n", siderealObjectData.object_alt);
+        printf("Rise:          %f\n", siderealObjectData.object_r);
+        printf("Set:           %f\n", siderealObjectData.object_s);
+        printf("---------------------------------------------\n");
 
       
       // static test (should always be sirius)
