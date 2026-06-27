@@ -17,17 +17,6 @@ SiderealPlanets myAstro;    // for calculating azimuth and altitude
 SiderealObjects myAstroObj; // for getting right ascension and declination of objects from star table
 
 struct SiderealPlantetsStruct siderealPlanetData = {
-
-    .currentZenithRADec = {
-        0,   // ra_h
-        0,   // ra_m
-        0.0, // ra_s
-        0,   // dec_d
-        0,   // dec_m
-        0.0  // dec_s
-    },
-    .local_sidereal_time = 0.0,
-
     .track_sun = true,
     .track_mercury = true,
     .track_venus = true,
@@ -183,8 +172,19 @@ struct SiderealObjectStruct siderealObjectData = {
     .object_con = {0},
     .object_desc = {0},
     .object_dist = NAN,
+};
 
-    .gyroRADec = {
+struct SiderealExtraData siderealExtraData = {
+    .local_sidereal_time = 0.0,
+    .local_zenith_ra_dec = {
+        0,   // ra_h
+        0,   // ra_m
+        0.0, // ra_s
+        0,   // dec_d
+        0,   // dec_m
+        0.0  // dec_s
+    },
+    .gyro_0_ra_dec = {
         0,   // ra_h
         0,   // ra_m
         0.0, // ra_s
@@ -217,13 +217,13 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
         0,   // dec_d
         0,   // dec_m
         0.0, // dec_s
-        {0},  // ra_str
-        {0}   // dec_str
+        {0},  // formatted_ra_str
+        {0}   // formatted_dec_str
     };
     
     // convert ra and dec to degrees to make the following conversions easier
-    double ra_deg  = radec_to_ra_deg(&siderealPlanetData.currentZenithRADec);
-    double dec_deg = radec_to_dec_deg(&siderealPlanetData.currentZenithRADec);
+    double ra_deg  = radec_to_ra_deg(&siderealExtraData.local_zenith_ra_dec);
+    double dec_deg = radec_to_dec_deg(&siderealExtraData.local_zenith_ra_dec);
 
     // Dec offset is a direct angular offset
     double new_dec = dec_deg + gyro_pitch_deg;
@@ -280,6 +280,24 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
     radecData.dec_d = dec_d;
     radecData.dec_m = dec_m;
     radecData.dec_s = dec_s;
+
+    // Format RA
+    memset(radecData.formatted_ra_str, 0, sizeof(radecData.formatted_ra_str));
+    snprintf(radecData.formatted_ra_str, sizeof(radecData.formatted_ra_str), "%02d:%02d:%02.2f", ra_h, ra_m, ra_s);
+    // printf("[gyroOffsetZenithRADec] formatted ra:  %s\n", radecData.formatted_ra_str);
+    // Format Dec
+    memset(radecData.formatted_dec_str, 0, sizeof(radecData.formatted_dec_str));
+    snprintf(radecData.formatted_dec_str, sizeof(radecData.formatted_dec_str), "%+02d:%02d:%02.2f", dec_d, dec_m, dec_s);
+    // printf("[gyroOffsetZenithRADec] formatted dec: %s\n", radecData.formatted_dec_str);
+
+    // Format padded RA
+    memset(radecData.padded_ra_str, 0, sizeof(radecData.padded_ra_str));
+    snprintf(radecData.padded_ra_str, sizeof(radecData.padded_ra_str), "%02d%02d%02.2f", ra_h, ra_m, ra_s);
+    // printf("[gyroOffsetZenithRADec] padded ra:  %s\n", radecData.padded_ra_str);
+    // Format padded Dec
+    memset(radecData.padded_dec_str, 0, sizeof(radecData.padded_dec_str));
+    snprintf(radecData.padded_dec_str, sizeof(radecData.padded_dec_str), "%+02d%02d%02.2f", dec_d, dec_m, dec_s);
+    // printf("[gyroOffsetZenithRADec] padded dec: %s\n", radecData.padded_dec_str);
 
     return radecData;
 }
@@ -970,7 +988,7 @@ void trackObject(int object_table_i, int object_i) {
  * 
  * @note This function may be renamed to something like buildCelestialSphere.
  */
-void setStarNav(signed int ra_h, signed int ra_m, float ra_s, signed int dec_d, signed int dec_m, float dec_s) {
+void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s) {
 
     // Identify nearest object to RA/Dec coordinates
     IdentifyObject(
@@ -1078,8 +1096,8 @@ void setSiderealData(double latitude, double longitude,
     // -------------------------------------------------------
     // Get Sidereal Time Data
     // -------------------------------------------------------
-    siderealPlanetData.local_sidereal_time = myAstro.getLocalSiderealTime();
-    // printf("Local Sidereal Time: %f\n", siderealPlanetData.local_sidereal_time);
+    siderealExtraData.local_sidereal_time = myAstro.getLocalSiderealTime();
+    // printf("Local Sidereal Time: %f\n", siderealExtraData.local_sidereal_time);
 }
 
 void myAstroBegin(void) {

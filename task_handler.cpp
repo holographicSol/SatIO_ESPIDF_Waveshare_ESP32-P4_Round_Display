@@ -382,6 +382,8 @@ void system_timing() {
 
             "current_zenith_ra=%s "
             "current_zenith_dec=%s "
+            "gyro_0_ra=%s "
+            "gyro_0_dec=%s "
 
             "alt=%.2f "
             "ghd=%.2f "
@@ -405,7 +407,7 @@ void system_timing() {
             satioData.padded_rtc_time_HHMMSS,
             satioData.padded_local_time_HHMMSS,
             satioData.padded_LMST_time_HHMMSS,
-            siderealPlanetData.local_sidereal_time,
+            siderealExtraData.local_sidereal_time,
             satioData.padded_rtc_sync_time_HHMMSS,
 
             systemData.total_loops_a_second,
@@ -427,8 +429,11 @@ void system_timing() {
             satioData.system_degrees_latitude,
             satioData.system_degrees_longitude,
 
-            siderealPlanetData.currentZenithRADec.ra_str,
-            siderealPlanetData.currentZenithRADec.dec_str,
+            siderealExtraData.local_zenith_ra_dec.formatted_ra_str,
+            siderealExtraData.local_zenith_ra_dec.formatted_dec_str,
+
+            siderealExtraData.gyro_0_ra_dec.formatted_ra_str,
+            siderealExtraData.gyro_0_ra_dec.formatted_dec_str,
 
             satioData.altitude,
             satioData.ground_heading,
@@ -737,37 +742,37 @@ void taskUniverse(void * pvParameters) {
     // ------------------------------------------------
     // Set RA & Dec for system zenith. (add to matrix)
     // ------------------------------------------------
-    siderealPlanetData.currentZenithRADec = myAstro.getRADecFromLSTLat(
-      siderealPlanetData.local_sidereal_time,
+    siderealExtraData.local_zenith_ra_dec = myAstro.getRADecFromLSTLat(
+      siderealExtraData.local_sidereal_time,
       satioData.system_degrees_latitude);
 
     // ------------------------------------------------
     // Set RA & Dec for system zenith +- Gyro. (add to matrix)
     // ------------------------------------------------
-    siderealObjectData.gyroRADec = gyroOffsetZenithRADec(gyroData.gyro_0_ang_z, gyroData.gyro_0_ang_y);
+    siderealExtraData.gyro_0_ra_dec = gyroOffsetZenithRADec(gyroData.gyro_0_ang_z, gyroData.gyro_0_ang_y);
     // printf("Gyro Yaw->RA: %d:%d:%f\n",
-    //   siderealObjectData.gyroRADec.ra_h,
-    //   siderealObjectData.gyroRADec.ra_m,
-    //   siderealObjectData.gyroRADec.ra_s);
+    //   siderealExtraData.gyro_0_ra_dec.ra_h,
+    //   siderealExtraData.gyro_0_ra_dec.ra_m,
+    //   siderealExtraData.gyro_0_ra_dec.ra_s);
     // printf("Gyro Pitch->Dec: %d:%d:%f\n",
-    //   siderealObjectData.gyroRADec.dec_d,
-    //   siderealObjectData.gyroRADec.dec_m,
-    //   siderealObjectData.gyroRADec.dec_s);
+    //   siderealExtraData.gyro_0_ra_dec.dec_d,
+    //   siderealExtraData.gyro_0_ra_dec.dec_m,
+    //   siderealExtraData.gyro_0_ra_dec.dec_s);
 
     // printf("[taskUniverse] zenith ra: %s dec: %s\n",
-    //   siderealPlanetData.currentZenithRADec.ra_str,
-    //   siderealPlanetData.currentZenithRADec.dec_str);
+    //   siderealPlanetData.local_zenith_ra_dec.formatted_ra_str,
+    //   siderealPlanetData.local_zenith_ra_dec.formatted_dec_str);
 
     // ------------------------------------------------
     // StarNav Dynamic Test Zenith Every Interval
     // ------------------------------------------------
       setStarNav(
-        siderealPlanetData.currentZenithRADec.ra_h,
-        siderealPlanetData.currentZenithRADec.ra_m,
-        siderealPlanetData.currentZenithRADec.ra_s,
-        siderealPlanetData.currentZenithRADec.dec_d,
-        siderealPlanetData.currentZenithRADec.dec_m,
-        siderealPlanetData.currentZenithRADec.dec_s
+        siderealExtraData.local_zenith_ra_dec.ra_h,
+        siderealExtraData.local_zenith_ra_dec.ra_m,
+        siderealExtraData.local_zenith_ra_dec.ra_s,
+        siderealExtraData.local_zenith_ra_dec.dec_d,
+        siderealExtraData.local_zenith_ra_dec.dec_m,
+        siderealExtraData.local_zenith_ra_dec.dec_s
       );
         // printf("---------------------------------------------\n");
         // printf("Nearest Object to Zenith:\n");
@@ -789,12 +794,12 @@ void taskUniverse(void * pvParameters) {
     // StarNav Dynamic Test Zenith+-Gyro Offset
     // ------------------------------------------------
       setStarNav(
-        siderealObjectData.gyroRADec.ra_h,
-        siderealObjectData.gyroRADec.ra_m,
-        siderealObjectData.gyroRADec.ra_s,
-        siderealObjectData.gyroRADec.dec_d,
-        siderealObjectData.gyroRADec.dec_m,
-        siderealObjectData.gyroRADec.dec_s
+        siderealExtraData.gyro_0_ra_dec.ra_h,
+        siderealExtraData.gyro_0_ra_dec.ra_m,
+        siderealExtraData.gyro_0_ra_dec.ra_s,
+        siderealExtraData.gyro_0_ra_dec.dec_d,
+        siderealExtraData.gyro_0_ra_dec.dec_m,
+        siderealExtraData.gyro_0_ra_dec.dec_s
       );
         // printf("---------------------------------------------\n");
         // printf("Nearest Object to Gyro Attitude Data:\n");

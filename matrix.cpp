@@ -785,6 +785,13 @@ struct MatrixStruct matrixData = {
     "SD Card Inserted", //110
     "SD Card Mounted", //111
     "Port Con 0", //112
+    "Local Mean Solar Time", // 113
+    "Local Mean Solar Date", // 114
+    "Local Sidereal time", // 115
+    "Local Zenith RA", // 116
+    "Local Zenith Dec", // 117
+    "Gyro 0 RA", // 118
+    "Gyro 0 Dec", // 119
   },
   .input_value = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
@@ -1613,6 +1620,7 @@ bool matrixSwitch(void) {
         handle_digit=true;
       }
 
+      // Analog/Digital Multiplexer 0
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_AD_MULTIPLEXER_0)) {
         tmp_x = ad_mux_0.data
                 [(int)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z]];
@@ -1627,6 +1635,8 @@ bool matrixSwitch(void) {
         tmp_z = 0;
         handle_digit=true;
       }
+
+      // SD Card
       // else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_SD_CARD_INSERTED)) {
       //   tmp_x = sdcardData.sdcard_inserted;
       //   tmp_y = 0;
@@ -1639,8 +1649,66 @@ bool matrixSwitch(void) {
         tmp_z = 0;
         handle_digit=true;
       }
+
+      // Port Controller 0
       else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_SWITCH_FUNCTION_PORT_CON_0)) {
         tmp_x = matrixData.input_value[0][(int)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z]];
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Local Mean Solar Time
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_LMST_TIME)) {
+        tmp_x = atol(satioData.padded_LMST_time_HHMMSS);
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Local Mean Solar Date
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_LMST_DATE)) {
+        tmp_x = atol(satioData.padded_LMST_date_DDMMYYYY);
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Local Sidereal Time
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_LST)) {
+        tmp_x = siderealExtraData.local_sidereal_time;
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Local Zenith RA
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_LOCAL_ZENITH_RA)) {
+        tmp_x = atol(siderealExtraData.local_zenith_ra_dec.padded_ra_str);
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Local Zenith Dec
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_LOCAL_ZENITH_DEC)) {
+        tmp_x = atol(siderealExtraData.local_zenith_ra_dec.padded_dec_str);
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Gyro 0 RA
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_GYRO_0_RA)) {
+        tmp_x = atol(siderealExtraData.gyro_0_ra_dec.padded_ra_str);
+        tmp_y = 0;
+        tmp_z = 0;
+        handle_digit=true;
+      }
+
+      // Gyro 0 Dec
+      else if ((matrixData.matrix_function[0][Mi][Fi]==INDEX_MATRIX_GYRO_0_DEC)) {
+        tmp_x = atol(siderealExtraData.gyro_0_ra_dec.padded_dec_str);
         tmp_y = 0;
         tmp_z = 0;
         handle_digit=true;

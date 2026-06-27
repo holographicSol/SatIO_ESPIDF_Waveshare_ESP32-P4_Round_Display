@@ -58,10 +58,12 @@ typedef struct {
     signed int dec_d;
     signed int dec_m;
     float dec_s;
-    // HH:MM:SS.S format
-    char ra_str[56];  // HH:MM:SS.S format
-    // DD:MM:SS.S format
-    char dec_str[56]; // DD:MM:SS.S format
+
+    char formatted_ra_str[56];  // format HH:MM:SS.S
+    char formatted_dec_str[56]; // format DD:MM:SS.S
+
+    char padded_ra_str[56];  // padded HHMMSS.S
+    char padded_dec_str[56]; // padded DDMMSS.S
 } RaDecData;
 
 // ─────────────────────────────────────────────────────────────────────────────

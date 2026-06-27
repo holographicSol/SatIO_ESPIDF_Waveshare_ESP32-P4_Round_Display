@@ -15,11 +15,6 @@ extern SiderealPlanets myAstro;
 // Planet Data Structure.
 // ----------------------------------------------------------------------------------------
 struct SiderealPlantetsStruct {
-
-    RaDecData currentZenithRADec; // current Zenith RA/Dec data
-
-    double local_sidereal_time;
-    
     bool track_sun;
     bool track_mercury;
     bool track_venus;
@@ -140,7 +135,6 @@ struct SiderealPlantetsStruct {
     double neptune_ecliptic_long;
     char sentence[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
 };
-
 extern struct SiderealPlantetsStruct siderealPlanetData;
 
 // ----------------------------------------------------------------------------------------
@@ -164,11 +158,15 @@ struct SiderealObjectStruct {
     char object_con[MAX_GLOBAL_ELEMENT_SIZE];
     char object_desc[MAX_GLOBAL_ELEMENT_SIZE];
     double object_dist;
-
-    RaDecData gyroRADec; // current Zenith RA/Dec offset by gyro
 };
-
 extern struct SiderealObjectStruct siderealObjectData;
+
+struct SiderealExtraData {
+    double local_sidereal_time;    // LST
+    RaDecData local_zenith_ra_dec; // local zenith RA Dec
+    RaDecData gyro_0_ra_dec;       // gyro 0 zenith RA Dec
+};
+extern struct SiderealExtraData siderealExtraData;
 
 // ----------------------------------------------------------------------------------------
 // Function Prototypes.

@@ -427,8 +427,10 @@ RaDecData SiderealPlanets::getRADecFromLSTLat(double lst, double latitude_degree
         0,   // dec_d
         0,   // dec_m
         0.0, // dec_s
-        {0},  // ra_str
-        {0}   // dec_str
+        {0},  // formatted_ra_str
+        {0},  // formatted_dec_str
+        {0},  // padded_ra_str
+        {0}   // padded_dec_str
     };
 
     double zenith_ra = lst;               // RA of zenith = current LST
@@ -455,11 +457,22 @@ RaDecData SiderealPlanets::getRADecFromLSTLat(double lst, double latitude_degree
     radecData.dec_s = dec_s;
 
     // Format RA
-    memset(radecData.ra_str, 0, sizeof(radecData.ra_str));
-    snprintf(radecData.ra_str, sizeof(radecData.ra_str), "%02d:%02d:%05.2f", ra_h, ra_m, ra_s);
+    memset(radecData.formatted_ra_str, 0, sizeof(radecData.formatted_ra_str));
+    snprintf(radecData.formatted_ra_str, sizeof(radecData.formatted_ra_str), "%02d:%02d:%02.2f", ra_h, ra_m, ra_s);
+    // printf("[getRADecFromLSTLat] formatted ra:  %s\n", radecData.formatted_ra_str);
     // Format Dec
-    memset(radecData.dec_str, 0, sizeof(radecData.dec_str));
-    snprintf(radecData.dec_str, sizeof(radecData.dec_str), "%+03d:%02d:%05.2f", dec_d, dec_m, dec_s);
+    memset(radecData.formatted_dec_str, 0, sizeof(radecData.formatted_dec_str));
+    snprintf(radecData.formatted_dec_str, sizeof(radecData.formatted_dec_str), "%+02d:%02d:%02.2f", dec_d, dec_m, dec_s);
+    // printf("[getRADecFromLSTLat] formatted dec: %s\n", radecData.formatted_dec_str);
+
+    // Format padded RA
+    memset(radecData.padded_ra_str, 0, sizeof(radecData.padded_ra_str));
+    snprintf(radecData.padded_ra_str, sizeof(radecData.padded_ra_str), "%02d%02d%02.2f", ra_h, ra_m, ra_s);
+    // printf("[getRADecFromLSTLat] padded ra:  %s\n", radecData.padded_ra_str);
+    // Format padded Dec
+    memset(radecData.padded_dec_str, 0, sizeof(radecData.padded_dec_str));
+    snprintf(radecData.padded_dec_str, sizeof(radecData.padded_dec_str), "%+02d%02d%02.2f", dec_d, dec_m, dec_s);
+    // printf("[getRADecFromLSTLat] padded dec: %s\n", radecData.padded_dec_str);
 
     return radecData;
 }

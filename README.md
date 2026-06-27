@@ -5,29 +5,18 @@
 -----
 
   A general purpose programmable I/O platform for automation, throughput and LLM's.
-  
-  SatIO is a value hive and compound event trigger, intended to be matured over time, to be used as
-  a foundation for a given application, without starting a project from scratch, where
-  new bugs can be introduced and the same bugs and problems can be stumbled upon
-  again. SatIO intends to do something once and mature it, as a foundation of value creation, elemental
-  and or compound logic, for building devices on top of.
 
-  Like say a WT901 9 axis gyro has two trigger pins that can be set for several elemental reasons,
-  SatIO curently utilizes an ATMEGA2560 for 50+ trigger pins that can each be triggered by a compound
-  of reasons, according to how the matrix is configured either before and or after flashing the
-  chip with SatIO.
+  A huge matrix switch in a small package, supporting stacks of logic across
+  70 output pins and 100 mapping slots.
 
-  This build is for ESP32-P4. Ignore the display on any SatIO build(s), the display(s) are just for visualizing some of the data,
-  and or are helping to provide some interactability, while showing some things SatIO is aware of for triggering events.
+  For ESP32-P4
 
 -----
 
   Inference in Bayesian Reasoning? Moon tracking for example can be used to track the moon, it can also be used for one example; to 
   track the tides, if the system is aware of moon/planetary positioning and datetime then marine life values may also be inferred
   relative to the inferred tide values and known datetime. There is a lot of data that can be used in many ways, with a kind of network
-  effect.
-  
-  Or more simply 'SatIO is one hell of a switch'.
+  effect. Or more simply 'SatIO is one hell of a switch'.
 
 -----
 
@@ -152,6 +141,13 @@ Primary Comparitors:
     [110] SD Card Inserted
     [111] SD Card Mounted
     [112] Port Con 0
+    [113] Local Mean Solar Time
+    [114] Local Mean Solar Date
+    [115] Local Sidereal Time
+    [116] Local Zenith RA
+    [117] Local Zenith Dec
+    [118] Gyro 0 RA
+    [119] Gyro 0 Dec
 
 -----
 

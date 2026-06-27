@@ -287,6 +287,13 @@ static void PrintHelp(void) {
                                   [110] SD Card Inserted
                                   [111] SD Card Mounted
                                   [112] Port Con 0
+                                  [113] Local Mean Solar Time
+                                  [114] Local Mean Solar Date
+                                  [115] Local Sidereal Time
+                                  [116] Local Zenith RA
+                                  [117] Local Zenith Dec
+                                  [118] Gyro 0 RA
+                                  [119] Gyro 0 Dec
       matrix --xyz-mode-x         Specify function comparitor mode. Used with -s and -f.
       matrix --xyz-mode-y         Specify function comparitor mode. Used with -s and -f.
       matrix --xyz-mode-z         Specify function comparitor mode. Used with -s and -f.
@@ -1420,6 +1427,22 @@ void outputSentences(void) {
       strcat(serial0Data.BUFFER, String(satioData.padded_local_time_HHMMSS).c_str());
       strcat(serial0Data.BUFFER, ",");
       strcat(serial0Data.BUFFER, String(satioData.padded_local_date_DDMMYYYY).c_str());
+      strcat(serial0Data.BUFFER, ",");
+
+      strcat(serial0Data.BUFFER, String(satioData.padded_LMST_time_HHMMSS).c_str());
+      strcat(serial0Data.BUFFER, ",");
+      strcat(serial0Data.BUFFER, String(satioData.padded_LMST_date_DDMMYYYY).c_str());
+      strcat(serial0Data.BUFFER, ",");
+      strcat(serial0Data.BUFFER, String(siderealExtraData.local_sidereal_time).c_str());
+      strcat(serial0Data.BUFFER, ",");
+
+      strcat(serial0Data.BUFFER, String(siderealExtraData.local_zenith_ra_dec.padded_ra_str).c_str());
+      strcat(serial0Data.BUFFER, ",");
+      strcat(serial0Data.BUFFER, String(siderealExtraData.local_zenith_ra_dec.padded_dec_str).c_str());
+      strcat(serial0Data.BUFFER, ",");
+      strcat(serial0Data.BUFFER, String(siderealExtraData.gyro_0_ra_dec.padded_ra_str).c_str());
+      strcat(serial0Data.BUFFER, ",");
+      strcat(serial0Data.BUFFER, String(siderealExtraData.gyro_0_ra_dec.padded_dec_str).c_str());
       strcat(serial0Data.BUFFER, ",");
 
       strcat(serial0Data.BUFFER, String(systemData.uptime_seconds).c_str());

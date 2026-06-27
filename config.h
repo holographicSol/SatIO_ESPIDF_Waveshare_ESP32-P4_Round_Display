@@ -231,7 +231,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define MAX_MATRIX_OVERRIDE_TIME 1000000
 #define MAX_MATRIX_SWITCHES 45         // logical max is current subjective max<=sytem memory capacity (actual max is subjective max<=sytem memory capacity and or limited by portcontroller max I/O range if using port controller for output)
 #define MAX_MATRIX_SWITCH_FUNCTIONS 10 // logical max is current subjective max<=sytem memory capacity (actual max is subjective max<=sytem memory capacity and or limited by portcontroller max I/O range if using port controller for output)
-#define MAX_MATRIX_FUNCTION_NAMES 113 // should match length matrixData.matrix_function_names[]
+#define MAX_MATRIX_FUNCTION_NAMES 120 // should match length matrixData.matrix_function_names[]
 #define MAX_MATRIX_OPERATORS 5
 #define MAX_MATRIX_FUNCTION_XYZ_MODES 2
 #define MAX_MATRIX_FUNCTION_INVERTED_LOGIC_MODES 2
@@ -361,6 +361,14 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define INDEX_MATRIX_SWITCH_FUNCTION_SD_CARD_INSERTED 110
 #define INDEX_MATRIX_SWITCH_FUNCTION_SD_CARD_MOUNTED 111
 #define INDEX_MATRIX_SWITCH_FUNCTION_PORT_CON_0 112
+
+#define INDEX_MATRIX_LMST_TIME 113
+#define INDEX_MATRIX_LMST_DATE 114
+#define INDEX_MATRIX_LST 115
+#define INDEX_MATRIX_LOCAL_ZENITH_RA 116
+#define INDEX_MATRIX_LOCAL_ZENITH_DEC 117
+#define INDEX_MATRIX_GYRO_0_RA 118
+#define INDEX_MATRIX_GYRO_0_DEC 119
 
 #define INDEX_MATRIX_MOD_0 0
 #define INDEX_MATRIX_MOD_1 1
