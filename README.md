@@ -4,19 +4,50 @@
 
 -----
 
-  A general purpose programmable I/O platform for automation, throughput and LLM's.
+  SatIO is a value Hive & programmable calculator, for building devices with and or on top of SatIO.
 
-  A huge matrix switch in a small package, supporting stacks of logic across
-  70 output pins and 100 mapping slots.
+  [ Philosophy & Architecture ]
 
-  For ESP32-P4
+    The Hive: SatIO creates and stores a lot of different values from sensors and extrapolated from
+              combinations of sensor data, that can be used by SatIO to switch I/O via programmable compounds
+              of logic, and or can be simply passed out over serial for another device to read.
 
------
+    The Matrix: This is a scalable, programmable switch that utilizes values from across the Hive,
+                to perform calculations that result in either true or false. High/Low output is
+                determined by the result. Devices built on top of SatIO can be distinguished by their
+                matrix configurations, being different devices for different applications, and similar in
+                that each of them are running on and or with SatIO.
 
-  Inference in Bayesian Reasoning? Moon tracking for example can be used to track the moon, it can also be used for one example; to 
-  track the tides, if the system is aware of moon/planetary positioning and datetime then marine life values may also be inferred
-  relative to the inferred tide values and known datetime. There is a lot of data that can be used in many ways, with a kind of network
-  effect. Or more simply 'SatIO is one hell of a switch'.
+    Philosophy:
+
+        (1) Value Creation
+        Safety, Stability, Accuracy. As SatIO develops, so should value creation, leading to
+        safer, more accurate values in the hive, over time. This can create a desirable improvement curve
+        where in contrast, building a system from scratch every new project, has the potential to reintroduce
+        bugs and 're-solve' the same problems. As SatIO develops, so does any system built on top of SatIO.
+        Value creation should ideally be both read and write to and from the Hive.
+
+        (2) Value Utilization
+        The Matrix utilizes the values to switch output high/low.
+        Serial output also utilizes the values by potentially handing the values out to other devices.
+        Value utilization should ideally only ever read from the Hive.
+    
+    Matrix Philosophy:
+
+        (1) Elemental: Allow comparing any value from the Hive to any other value from the Hive and or to a user defined value.
+        (2) Compound: Allow stacking compounds of (1), so that multiple things can be calculated to result in a single true/false.
+        (3) I/O: Each available/required output pin can have it's own (2) Compound logic.
+
+        Why:
+        This means that many 'special functions' do not need to be created in order to calculate something, because the answer
+        may already exist, in some combination of available logic in the Matrix.
+
+        Further More:
+        Inference via Bayesian Reasoning? Moon tracking for example can be used to track the moon, it can also be used for one example; to 
+        track the tide, if the system is aware of moon/planetary positioning and datetime then marine life values may also be inferred
+        relative to the inferred tide values and known datetime. There are lot of values in the Hive, that can be used with different
+        reasoning, in many different combinations, with a network effect in mind for inference, if required.
+        Or more simply 'SatIO is one hell of a switch'.
 
 -----
 
