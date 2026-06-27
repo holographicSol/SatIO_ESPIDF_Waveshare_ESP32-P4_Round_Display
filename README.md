@@ -4,6 +4,7 @@
 
 -----
 
+
   SatIO is a value Hive & programmable calculator, for building devices with and or on top of SatIO.
 
   [ Philosophy & Architecture ]
@@ -48,6 +49,7 @@
         relative to the inferred tide values and known datetime. There are lot of values in the Hive, that can be used with different
         reasoning, in many different combinations, with a network effect in mind for inference, if required.
         Or more simply 'SatIO is one hell of a switch'.
+
 
 -----
 
