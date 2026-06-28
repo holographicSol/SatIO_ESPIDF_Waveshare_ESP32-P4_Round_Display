@@ -5,7 +5,7 @@
 -----
 
 
-  SatIO is a value Hive & programmable calculator, for building devices with and or on top of SatIO.
+  SatIO is a value Hive & programmable switch, for building devices with and or on top of SatIO.
 
   [ Philosophy & Architecture ]
 
