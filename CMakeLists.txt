@@ -13,7 +13,6 @@ idf_component_register(
         SiderealObjects.cpp
         strval.cpp
         main.cpp
-        volcanos.c
         arg_parser.cpp
         config.cpp
         custommapping.cpp
@@ -23,8 +22,6 @@ idf_component_register(
         matrix.cpp
         meteors.cpp
         multiplexers.cpp
-        multi_display_controller.cpp
-        rss_server.cpp
         satio.cpp
         satio_file.cpp
         sdcard_helper.cpp
@@ -37,7 +34,6 @@ idf_component_register(
         wtgps300p.cpp
         astroclock.cpp
         satio_lvgl.cpp
-        # srtm_reader.cpp
         LMST.cpp
     INCLUDE_DIRS
         .

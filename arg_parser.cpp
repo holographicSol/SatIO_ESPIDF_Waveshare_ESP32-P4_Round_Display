@@ -1,381 +1,1001 @@
-// argparser.c
+/*
+    ArgParser Library. Written by Benjamin Jack Cullen.
+
+    (1) Initialize variable of type ArgParser:
+    ArgParser parser;
+
+    (2) Init:
+    argparser_init_from_buffer(&parser, SOME_BUFFER);
+
+    (3) Get Positionals:
+    size_t pos_count;
+    const char** pos = argparser_get_positionals(&parser, &pos_count);
+
+    (4) Check command:
+    strcmp(pos[0], "foobar")==0
+
+    (5) Check flag/bool etc:
+    argparser_get_bool(&parser, "flagname")
+    argparser_has_flag(&parser, "flagname")
+    etc.
+
+    Intended to be MISRA C complient.
+*/
+
 #include "arg_parser.h"
-#include <Arduino.h>
-#include <stdlib.h> // strtol
-#include <string.h> // strlen, strcpy, strncpy, etc.
-#include <stdio.h>  // for error handling if needed
-#include <ctype.h>  // for isalnum
+#include <stdlib.h> // strtol, strtoll, strtoull, strtof, strtod
+#include <string.h> // strlen, strcmp, strncmp, strncpy, strchr, memcpy, memset
+#include <ctype.h>  // isalnum
+#include <errno.h>  // errno
 #include "strval.h"
 
-
-void plain_argparser_reset(PlainArgParser* p) {
-    if (!p) return;
-    memset(p, 0, sizeof(*p));
+/* Rule 21.13: manual ASCII comparison instead of isspace(), which is
+   locale-dependent and only well-defined for unsigned char or EOF. */
+static bool is_whitespace(char c)
+{
+    return (c == ' ') || (c == '\t') || (c == '\n') || (c == '\r');
 }
 
-void printCommandArgs(PlainArgParser* p) {
-    if (!p) return;
-    for (int i=0; i < p->i_iter_token; i++) {Serial.print("[arg " + String(i) + "]" + String(p->tokens[i]));}
+/* Rule 8.7: internal linkage; only used within this translation unit. */
+static void plain_argparser_reset(PlainArgParser* p)
+{
+    if (p != NULL)
+    {
+        (void)memset(p, 0, sizeof(*p)); /* (void): Rule 17.7, return value not needed */
+    }
 }
 
-char *tmp_token;
+bool simple_argparser_init_from_buffer(PlainArgParser* p, char* buffer, int index)
+{
+    bool result;
+    bool valid_input = true;
+    size_t buf_len = 0U; /* 0U: unsigned literal matches size_t (Rule 10.4) */
 
-void skipTokens(int index) {for (int i=0; i<index; i++) {tmp_token=strtok(NULL, " ");}}
+    /* Rule 14.4: explicit comparisons against NULL/0, no implicit pointer-to-bool. */
+    if ((p == NULL) || (buffer == NULL) || (index < 0) ||
+        (index >= (int)MAX_PLAIN_TOKENS))
+    {
+        valid_input = false; /* parser, buffer, or skip count out of range */
+    }
+    else
+    {
+        buf_len = strlen(buffer);
 
-bool simple_argparser_init_from_buffer(PlainArgParser* p, char* buffer, int index) {
-    if (!p || !buffer) return false;
-    plain_argparser_reset(p);
-    strcpy(p->input_buffer, buffer);
-    buffer[strlen(buffer)-1] = '\0'; // corrects last token length
-    tmp_token=strtok(buffer, " ");
-    skipTokens(index);
-    p->i_iter_token=0;
-    while (tmp_token!=NULL) {
-        strcpy(p->tokens[p->i_iter_token], tmp_token);
-        tmp_token=strtok(NULL, " ");
-        p->i_iter_token++;
-  }
-  return true;
-  // uncomment to debug
-  // printCommandArgs();
+        if ((buf_len == 0U) || (buf_len >= sizeof(p->input_buffer)))
+        {
+            valid_input = false; /* empty avoids underflow below, bounded avoids overflow */
+        }
+    }
+
+    /* Dir 4.1: no mutation of *p or buffer until every precondition holds. */
+    if (valid_input == true)
+    {
+        size_t idx;
+        size_t skipped = 0U;
+
+        /* The caller's line carries a trailing terminator (e.g. from a
+           serial read); overwrite it here so it is not stored as a token. */
+        buffer[buf_len - 1U] = '\0';
+        buf_len = strlen(buffer);
+
+        plain_argparser_reset(p);
+        (void)memcpy(p->input_buffer, buffer, buf_len); /* bounded by buf_len, proven above (Rule 21.x) */
+        p->input_buffer[buf_len] = '\0';
+
+        idx = 0U;
+        p->token_count = 0U;
+
+        /* Manual whitespace-delimited tokenizer: idx is the sole loop
+           control variable, advanced only within this loop (Rule 14.2). */
+        while ((idx < buf_len) && (p->token_count < (size_t)MAX_PLAIN_TOKENS))
+        {
+            while ((idx < buf_len) && is_whitespace(p->input_buffer[idx]))
+            {
+                idx++;
+            }
+
+            if (idx < buf_len)
+            {
+                size_t start = idx;
+
+                while ((idx < buf_len) && (is_whitespace(p->input_buffer[idx]) == false))
+                {
+                    idx++;
+                }
+
+                if (skipped < (size_t)index)
+                {
+                    skipped++; /* discard leading tokens up to the requested count */
+                }
+                else
+                {
+                    size_t tok_len = idx - start;
+
+                    if (tok_len >= (size_t)MAX_GLOBAL_ELEMENT_SIZE)
+                    {
+                        tok_len = (size_t)MAX_GLOBAL_ELEMENT_SIZE - 1U; /* truncate rather than overflow */
+                    }
+
+                    /* Array indexing into input_buffer, not pointer arithmetic (Rule 18.4). */
+                    (void)memcpy(p->tokens[p->token_count], &p->input_buffer[start], tok_len);
+                    p->tokens[p->token_count][tok_len] = '\0';
+                    p->token_count++;
+                }
+            }
+        }
+
+        result = true;
+    }
+    else
+    {
+        result = false;
+    }
+
+    return result; /* Rule 15.5: single point of exit */
 }
 
+/* Rule 14.4: explicit comparisons throughout; Rule 8.13: arg is read-only. */
+static bool is_long_flag(const char* arg)
+{
+    bool result = false;
 
-static bool is_long_flag(const char* arg) {
-    return strlen(arg) > 2 && strncmp(arg, "--", 2) == 0;
+    if (arg != NULL)
+    {
+        if ((strlen(arg) > 2U) && (strncmp(arg, "--", 2U) == 0))
+        {
+            result = true;
+        }
+    }
+
+    return result;
 }
 
-static bool is_short_flag(const char* arg) {
-    return strlen(arg) > 1 && arg[0] == '-' && arg[1] != '-';
+static bool is_short_flag(const char* arg)
+{
+    bool result = false;
+
+    if (arg != NULL)
+    {
+        if ((strlen(arg) > 1U) && (arg[0] == '-') && (arg[1] != '-'))
+        {
+            result = true;
+        }
+    }
+
+    return result;
 }
 
-static void clear_buffer(char* buf, size_t max_len) {
-    if (max_len > 0) {
+static void clear_buffer(char* buf, size_t max_len)
+{
+    if ((buf != NULL) && (max_len > 0U))
+    {
         buf[0] = '\0';
     }
 }
 
-static bool parse_args(ArgParser* p, int token_count, char** tokens) {
-    p->flag_count = 0;
-    p->pos_count = 0;
+/*
+ * Splits token_count tokens into flags, flag values, and positionals,
+ * storing the result in *p. Recognises "--flag", "--flag=value",
+ * "--flag value", "-f", and "-f value"; anything else is a positional.
+ *
+ * Single point of exit (Rule 15.5): validation failures and in-loop
+ * rejections set `rejected`/`valid_input` rather than returning early.
+ * The token array is indexed, never offset by pointer arithmetic (Rule 18.4).
+ */
+static bool parse_args(ArgParser* p, int32_t token_count, const char* const * tokens)
+{
+    bool rejected = false;   /* set on any malformed token; parse still completes */
+    bool valid_input = true; /* set on bad parameters; skips the scan entirely */
+    int32_t idx = 0;          /* sole loop-control variable (Rule 14.2); Rule 9.1: initialised before use */
 
-    for (int i = 0; i < token_count; ++i) {
-        const char* arg = tokens[i];
-        if (!arg || !*arg) continue;
+    if ((p == NULL) || (tokens == NULL))
+    {
+        valid_input = false; /* parser or token array absent */
+    }
+    else if ((token_count < 0) || (token_count >= MAX_PLAIN_TOKENS))
+    {
+        valid_input = false; /* count negative or exceeds max */
+    }
+    else
+    {
+        /* parameters are valid; fall through to the scan below */
+    }
 
-        if (is_long_flag(arg)) {
-            if (p->flag_count >= MAX_FLAGS) continue;
+    if (valid_input == true)
+    {
+        bool scanning = true; /* false once a fatal in-loop condition is hit */
 
-            // --flag or --flag=value
-            const char* eq = strchr(arg + 2, '=');
-            size_t key_len = eq ? (size_t)(eq - (arg + 2)) : strlen(arg + 2);
-            if (key_len >= MAX_FLAG_LEN) continue;
+        p->flag_count = 0U; /* 0U: unsigned literal matches size_t member (Rule 10.4) */
+        p->pos_count = 0U;
 
-            strncpy(p->flags[p->flag_count], arg + 2, key_len);
-            p->flags[p->flag_count][key_len] = '\0';
+        while ((idx < token_count) && (scanning == true))
+        {
+            const char* const arg = tokens[idx]; /* array indexing (Rule 18.4) */
+            size_t arg_len;
 
-            clear_buffer(p->values[p->flag_count], MAX_VALUE_LEN);
-            const char* value_start = NULL;
-            size_t val_len = 0;
-            if (eq) {
-                value_start = eq + 1;
-                val_len = strlen(value_start);
-            } else if (i + 1 < token_count) {
-                const char* next = tokens[i + 1];
-                if (!is_long_flag(next) && !is_short_flag(next)) {
-                    value_start = next;
-                    val_len = strlen(next);
-                    ++i;  // Consume next
-                }
+            if (arg == NULL)
+            {
+                rejected = true; /* a NULL token is fatal to the whole parse */
+                scanning = false;
             }
-            if (value_start) {
-                if (val_len < MAX_VALUE_LEN) {
-                    strcpy(p->values[p->flag_count], value_start);
-                } else {
-                    strncpy(p->values[p->flag_count], value_start, MAX_VALUE_LEN - 1);
-                    p->values[p->flag_count][MAX_VALUE_LEN - 1] = '\0';
+            else
+            {
+                arg_len = strlen(arg);
+
+                if (arg_len == 0U)
+                {
+                    rejected = true; /* empty token is fatal, same as NULL */
+                    scanning = false;
                 }
-            }
-            ++p->flag_count;
-        } else if (is_short_flag(arg)) {
-            size_t len = strlen(arg);
-            if (len < 2 || len > 4) continue;  // 1-3 chars after '-', total 2-4
-
-            // Check if all chars after '-' are alphanumeric
-            bool valid_short = true;
-            for (size_t j = 1; j < len; ++j) {
-                if (!isalnum((unsigned char)arg[j])) {
-                    valid_short = false;
-                    break;
-                }
-            }
-            if (!valid_short) continue;
-
-            if (p->flag_count >= MAX_FLAGS) continue;
-
-            // Flag key: chars after '-'
-            size_t key_len = len - 1;
-            strncpy(p->flags[p->flag_count], arg + 1, key_len);
-            p->flags[p->flag_count][key_len] = '\0';
-
-            clear_buffer(p->values[p->flag_count], MAX_VALUE_LEN);
-
-            // No attached values for shorts; only space-separated
-            if (i + 1 < token_count) {
-                const char* next = tokens[i + 1];
-                if (!is_long_flag(next) && !is_short_flag(next)) {
-                    size_t val_len = strlen(next);
-                    if (val_len < MAX_VALUE_LEN) {
-                        strcpy(p->values[p->flag_count], next);
-                    } else {
-                        strncpy(p->values[p->flag_count], next, MAX_VALUE_LEN - 1);
-                        p->values[p->flag_count][MAX_VALUE_LEN - 1] = '\0';
+                else if (is_long_flag(arg) == true)
+                {
+                    /* Long flags: "--flag", "--flag=value", "--flag value". */
+                    if (p->flag_count >= (size_t)MAX_FLAGS)
+                    {
+                        rejected = true; /* flag table full */
                     }
-                    ++i;
+                    else
+                    {
+                        const char* eq;
+                        size_t key_len;
+                        size_t name_offset = 2U; /* length of the "--" prefix */
+
+                        eq = strchr(&arg[name_offset], (int)'='); /* (int): matches strchr's parameter type (Rule 10.3) */
+
+                        if (eq != NULL)
+                        {
+                            /* Flag name length: total length after "--" minus the
+                               length from '=' onward, computed via size_t
+                               subtraction rather than pointer subtraction (Rule 18.2). */
+                            key_len = (size_t)strlen(&arg[name_offset]) - (size_t)strlen(eq);
+                        }
+                        else
+                        {
+                            key_len = strlen(&arg[name_offset]);
+                        }
+
+                        if ((key_len == 0U) || (key_len >= (size_t)MAX_FLAG_LEN))
+                        {
+                            rejected = true; /* flag name empty or too long: reject whole flag */
+                        }
+                        else
+                        {
+                            const char* value_start = NULL;
+                            size_t val_len = 0U;
+
+                            (void)strncpy(p->flags[p->flag_count], &arg[name_offset], key_len); /* (void): Rule 17.7 */
+                            p->flags[p->flag_count][key_len] = '\0';
+
+                            clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
+
+                            if (eq != NULL)
+                            {
+                                value_start = &eq[1]; /* array indexing, not pointer arithmetic (Rule 18.4) */
+                                val_len = strlen(value_start);
+                            }
+                            else if ((idx + 1) < token_count)
+                            {
+                                const char* const next = tokens[idx + 1];
+
+                                if ((next != NULL) &&
+                                    (is_long_flag(next) == false) &&
+                                    (is_short_flag(next) == false))
+                                {
+                                    value_start = next; /* next token is this flag's value */
+                                    val_len = strlen(next);
+                                }
+                            }
+                            else
+                            {
+                                /* no value available for this flag */
+                            }
+
+                            if (value_start != NULL)
+                            {
+                                if (val_len < (size_t)MAX_VALUE_LEN)
+                                {
+                                    (void)strncpy(p->values[p->flag_count], value_start, val_len);
+                                    p->values[p->flag_count][val_len] = '\0';
+
+                                    if (eq == NULL)
+                                    {
+                                        idx = idx + 1; /* consumed the next token as this flag's value */
+                                    }
+                                }
+                                else
+                                {
+                                    clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
+                                    rejected = true; /* value too long: reject value, keep the flag */
+                                }
+                            }
+
+                            p->flag_count++;
+                        }
+                    }
+                }
+                else if (is_short_flag(arg) == true)
+                {
+                    /* Short flags: "-f", "-f value". */
+                    if ((arg_len < 2U) || (arg_len > 4U))
+                    {
+                        rejected = true; /* length outside 1-3 chars after '-' */
+                    }
+                    else
+                    {
+                        bool valid_short = true;
+                        size_t j;
+
+                        for (j = 1U; j < arg_len; j++)
+                        {
+                            /* Cast to unsigned char before widening to int: avoids
+                               sign-extension on negative plain-char values (Rule 10.1/10.3). */
+                            if (isalnum((int)(unsigned char)arg[j]) == 0)
+                            {
+                                valid_short = false;
+                                break; /* single break in this loop (Rule 15.4) */
+                            }
+                        }
+
+                        if (valid_short == false)
+                        {
+                            rejected = true; /* non-alphanumeric short flag character */
+                        }
+                        else if (p->flag_count >= (size_t)MAX_FLAGS)
+                        {
+                            rejected = true; /* flag table full */
+                        }
+                        else
+                        {
+                            size_t key_len = arg_len - 1U;
+
+                            (void)strncpy(p->flags[p->flag_count], &arg[1], key_len);
+                            p->flags[p->flag_count][key_len] = '\0';
+
+                            clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
+
+                            if ((idx + 1) < token_count)
+                            {
+                                const char* const next = tokens[idx + 1];
+
+                                if ((next != NULL) &&
+                                    (is_long_flag(next) == false) &&
+                                    (is_short_flag(next) == false))
+                                {
+                                    size_t val_len = strlen(next);
+
+                                    if (val_len < (size_t)MAX_VALUE_LEN)
+                                    {
+                                        (void)strncpy(p->values[p->flag_count], next, val_len);
+                                        p->values[p->flag_count][val_len] = '\0';
+                                    }
+                                    else
+                                    {
+                                        clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
+                                        rejected = true; /* value too long: reject value, keep the flag */
+                                    }
+
+                                    idx = idx + 1; /* consumed the value token */
+                                }
+                            }
+
+                            p->flag_count++;
+                        }
+                    }
+                }
+                else
+                {
+                    /* Positional argument. */
+                    if (p->pos_count >= (size_t)MAX_POSITIONALS)
+                    {
+                        rejected = true; /* positional table full */
+                    }
+                    else if (arg_len >= (size_t)MAX_POS_LEN)
+                    {
+                        rejected = true; /* too long: reject, do not store a truncated value */
+                    }
+                    else
+                    {
+                        (void)strncpy(p->positionals[p->pos_count], arg, arg_len);
+                        p->positionals[p->pos_count][arg_len] = '\0';
+                        p->pos_ptrs[p->pos_count] = p->positionals[p->pos_count];
+                        p->pos_count++;
+                    }
                 }
             }
-            ++p->flag_count;
-        } else {
-            // Positional
-            if (p->pos_count >= MAX_POSITIONALS) continue;
 
-            size_t arg_len = strlen(arg);
-            if (arg_len < MAX_POS_LEN) {
-                strcpy(p->positionals[p->pos_count], arg);
-            } else {
-                strncpy(p->positionals[p->pos_count], arg, MAX_POS_LEN - 1);
-                p->positionals[p->pos_count][MAX_POS_LEN - 1] = '\0';
+            if (scanning == true)
+            {
+                idx = idx + 1; /* advance to next token */
             }
-            p->pos_ptrs[p->pos_count] = p->positionals[p->pos_count];
-            ++p->pos_count;
+        }
+    }
+    else
+    {
+        /* valid_input == false: rejected stays false; failure is still
+           reported via the final return below. */
+    }
+
+    return ((valid_input == true) && (rejected == false)); /* Rule 15.5: single point of exit */
+}
+
+bool argparser_init(ArgParser* p, int argc, char** argv)
+{
+    bool result;
+    int  token_count;
+
+    /* Rule 14.4: explicit comparisons. argv is checked for NULL even though
+       only argc >= 1 is otherwise implied, since argv[1] is read below
+       (Dir 4.1: do not assume a non-NULL argv from argc alone). */
+    if ((p == NULL) || (argv == NULL) || (argc < 1))
+    {
+        result = false;
+    }
+    else
+    {
+        /* Rule 21.x: memset's size argument is sizeof(*p), the size of the
+           pointee, and ArgParser is a plain aggregate with no members
+           requiring non-zero initialisation. */
+        (void)memset(p, 0, sizeof(*p));
+
+        /* token_count = argc - 1 cannot underflow: the guard above already
+           ensures argc >= 1 (Rule 1.3/Dir 4.1). */
+        token_count = argc - 1;
+
+        /* &argv[1] is array indexing followed by address-of: the
+           MISRA-preferred idiom for "a pointer to this element",
+           equivalent in value to argv + 1 without pointer arithmetic (Rule 18.4). */
+        result = parse_args(p, token_count, &argv[1]);
+    }
+
+    return result; /* Rule 15.5: single point of exit */
+}
+
+bool argparser_init_from_buffer(ArgParser* p, const char* buffer)
+{
+    bool result;
+    bool valid_input = true;
+    size_t buf_len = 0U; /* 0U: unsigned literal matches size_t (Rule 10.4) */
+
+    /* Rule 14.4 + Rule 15.5: failures recorded in valid_input and checked
+       once below; no mutation of *p occurs until validation passes (Dir 4.1). */
+    if ((p == NULL) || (buffer == NULL))
+    {
+        valid_input = false;
+    }
+    else
+    {
+        buf_len = strlen(buffer);
+
+        if (buf_len >= (size_t)MAX_INPUT_LEN) /* explicit cast (Rule 10.3) */
+        {
+            valid_input = false; /* too long: buffer rejected, p untouched */
         }
     }
 
-    return true;
+    if (valid_input == true)
+    {
+        size_t idx;
+        int32_t token_count; /* matches parse_args's int32_t parameter (Rule 10.3/10.4) */
+
+        (void)memset(p, 0, sizeof(*p));
+
+        /* Rule 21.x: memcpy with the already-validated buf_len, followed by
+           an explicit, separate null terminator — bound and termination
+           are two independent, auditable steps rather than one opaque call. */
+        (void)memcpy(p->input_buffer, buffer, buf_len); /* (void): Rule 17.7 */
+        p->input_buffer[buf_len] = '\0';
+
+        /* idx and token_count are the only loop control variables; tokens
+           are recorded by indexing into p->input_buffer, never by pointer
+           arithmetic (Rule 18.4). */
+        idx = 0U;
+        token_count = 0;
+
+        while ((idx < buf_len) && (token_count < (int32_t)MAX_TOKENS))
+        {
+            while ((idx < buf_len) && is_whitespace(p->input_buffer[idx]))
+            {
+                idx++;
+            }
+
+            if (idx < buf_len)
+            {
+                p->tokens[token_count] = &p->input_buffer[idx]; /* indexing + address-of (Rule 18.4) */
+                token_count++;
+
+                while ((idx < buf_len) && (is_whitespace(p->input_buffer[idx]) == false))
+                {
+                    idx++;
+                }
+
+                if (idx < buf_len)
+                {
+                    p->input_buffer[idx] = '\0';
+                    idx++;
+                }
+                else
+                {
+                    /* token ran to the end of the buffer; already terminated
+                       by the '\0' written after the memcpy above */
+                }
+            }
+            else
+            {
+                /* ran out of input while skipping trailing whitespace */
+            }
+        }
+
+        result = parse_args(p, token_count, p->tokens);
+    }
+    else
+    {
+        result = false;
+    }
+
+    return result; /* Rule 15.5: single point of exit */
 }
 
-bool argparser_init(ArgParser* p, int argc, char** argv) {
-    if (!p || argc < 1) return false;
+/*
+ * Rule 22.8/22.9: errno is reset before each strtoXX call and checked
+ * afterwards, since strtol/strtoll/strtoull clamp to their type's min/max
+ * on overflow instead of failing outright; without the errno check an
+ * out-of-range input would silently produce a clamped, wrong value.
+ * Rule 10.3: the narrowing cast to the caller's actual width happens only
+ * after the parsed value is checked against explicit min/max bounds.
+ * Rule 9.1: endptr is always initialised before use.
+ */
+static bool parse_signed_in_range(const char* val_str, int64_t min_val,
+                                   int64_t max_val, int64_t* out_value)
+{
+    bool ok = false;
 
-    memset(p, 0, sizeof(*p));
+    if ((val_str != NULL) && (out_value != NULL) && (*val_str != '\0'))
+    {
+        char* endptr = NULL;
+        long long parsed;
 
-    // Simulate tokens from argv[1..]
-    int token_count = argc - 1;
-    char** tokens = argv + 1;
-    if (token_count < 0) token_count = 0;
+        errno = 0;
+        parsed = strtoll(val_str, &endptr, 10);
 
-    return parse_args(p, token_count, tokens);
-}
-
-bool argparser_init_from_buffer(ArgParser* p, const char* buffer) {
-    if (!p || !buffer) return false;
-
-    memset(p, 0, sizeof(*p));
-
-    size_t buf_len = strlen(buffer);
-    if (buf_len >= MAX_INPUT_LEN) return false;  // Too long
-
-    strcpy(p->input_buffer, buffer);
-
-    // Manual tokenization: split on whitespace, null-terminate in place
-    size_t idx = 0;
-    int token_count = 0;
-    while (idx < buf_len && token_count < MAX_TOKENS) {
-        // Skip whitespace
-        while (idx < buf_len && (p->input_buffer[idx] == ' ' || p->input_buffer[idx] == '\t' ||
-                                 p->input_buffer[idx] == '\n' || p->input_buffer[idx] == '\r')) {
-            ++idx;
-        }
-        if (idx >= buf_len) break;
-
-        // Start of token
-        p->tokens[token_count] = &p->input_buffer[idx];
-        ++token_count;
-
-        // Find end of token
-        while (idx < buf_len && p->input_buffer[idx] != ' ' && p->input_buffer[idx] != '\t' &&
-               p->input_buffer[idx] != '\n' && p->input_buffer[idx] != '\r') {
-            ++idx;
-        }
-
-        // Null-terminate
-        if (idx < buf_len) {
-            p->input_buffer[idx] = '\0';
-            ++idx;
+        if ((endptr != NULL) && (*endptr == '\0') && (endptr != val_str) &&
+            (errno == 0))
+        {
+            if ((parsed >= min_val) && (parsed <= max_val))
+            {
+                *out_value = (int64_t)parsed; /* range-proven narrowing (Rule 10.3) */
+                ok = true;
+            }
         }
     }
 
-    return parse_args(p, token_count, p->tokens);
+    return ok;
 }
 
-void argparser_reset(ArgParser* p) {
-    if (!p) return;
-    memset(p, 0, sizeof(*p));
-}
+static bool parse_unsigned_in_range(const char* val_str, uint64_t max_val,
+                                     uint64_t* out_value)
+{
+    bool ok = false;
 
-bool argparser_has_flag(const ArgParser* p, const char* flag) {
-    if (!p || !flag) return false;
-    for (size_t i = 0; i < p->flag_count; ++i) {
-        if (strcmp(p->flags[i], flag) == 0) {
-            return true;
+    /* A leading '-' is rejected explicitly: strtoull() does not reject
+       negative input per the C standard, it instead wraps the value modulo
+       (ULLONG_MAX+1), which would otherwise accept "-1" as a huge value. */
+    if ((val_str != NULL) && (out_value != NULL) && (*val_str != '\0') &&
+        (val_str[0] != '-'))
+    {
+        char* endptr = NULL;
+        unsigned long long parsed;
+
+        errno = 0;
+        parsed = strtoull(val_str, &endptr, 10);
+
+        if ((endptr != NULL) && (*endptr == '\0') && (endptr != val_str) &&
+            (errno == 0))
+        {
+            if (parsed <= max_val)
+            {
+                *out_value = (uint64_t)parsed;
+                ok = true;
+            }
         }
     }
-    return false;
+
+    return ok;
 }
 
-const char* argparser_get_string(const ArgParser* p, const char* flag, const char* default_val) {
-    if (!p || !flag) return default_val;
-    for (size_t i = 0; i < p->flag_count; ++i) {
-        if (strcmp(p->flags[i], flag) == 0) {
-            return p->values[i][0] ? p->values[i] : "";
+void argparser_reset(ArgParser* p)
+{
+    if (p != NULL)
+    {
+        (void)memset(p, 0, sizeof(*p)); /* (void): Rule 17.7 */
+    }
+}
+
+bool argparser_has_flag(const ArgParser* p, const char* flag)
+{
+    bool found = false;
+
+    if ((p != NULL) && (flag != NULL))
+    {
+        size_t i = 0U;
+
+        while ((i < p->flag_count) && (found == false))
+        {
+            if (strcmp(p->flags[i], flag) == 0)
+            {
+                found = true;
+            }
+            else
+            {
+                i++;
+            }
         }
     }
-    return default_val;
+
+    return found;
 }
 
-int argparser_get_int(const ArgParser* p, const char* flag, int default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_int8(val_str)) {return default_val;}
-    char* endptr = NULL;
-    int result = (int)strtol(val_str, &endptr, 10);
-    if (endptr == NULL || *endptr != '\0') {return default_val;}
+const char* argparser_get_string(const ArgParser* p, const char* flag,
+                                  const char* default_val)
+{
+    const char* result = default_val;
+
+    if ((p != NULL) && (flag != NULL))
+    {
+        size_t i = 0U;
+        bool searching = true;
+
+        while ((i < p->flag_count) && (searching == true))
+        {
+            if (strcmp(p->flags[i], flag) == 0)
+            {
+                /* explicit comparison instead of a char-to-bool ternary (Rule 14.4) */
+                result = (p->values[i][0] != '\0') ? p->values[i] : "";
+                searching = false;
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+
     return result;
 }
 
-int8_t argparser_get_int8(const ArgParser* p, const char* flag, int8_t default_val) {
+int argparser_get_int(const ArgParser* p, const char* flag, int default_val)
+{
+    int result = default_val;
     const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_int8(val_str)) {return default_val;}
-    char* endptr;
-    int8_t result = strtol(val_str, &endptr, 10);
-    if (*endptr != '\0') {return default_val;}
-    return (int)result;
-}
 
-int16_t argparser_get_int16(const ArgParser* p, const char* flag, int16_t default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_int16(val_str)) {return default_val;}
-    char* endptr;
-    int16_t result = strtol(val_str, &endptr, 10);
-    if (*endptr != '\0') {return default_val;}
-    return (int)result;
-}
+    if (val_str != NULL)
+    {
+        if (str_is_int8(val_str) == true)
+        {
+            int64_t parsed = 0;
 
-int32_t argparser_get_int32(const ArgParser* p, const char* flag, int32_t default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_int32(val_str)) {return default_val;}
-    char* endptr;
-    int32_t result = strtol(val_str, &endptr, 10);
-    if (*endptr != '\0') {return default_val;}
-    return (int)result;
-}
-
-int64_t argparser_get_int64(const ArgParser* p, const char* flag, int64_t default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_int64(val_str)) {return default_val;}
-    char* endptr;
-    int64_t result = strtoll(val_str, &endptr, 10);
-    if (*endptr != '\0') {return default_val;}
-    return (int)result;
-}
-
-uint8_t argparser_get_uint8(const ArgParser* p, const char* flag, uint8_t default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_uint8(val_str)) {return default_val;}
-    char* endptr;
-    uint8_t result = strtol(val_str, &endptr, 10);
-    if (*endptr != '\0') {return default_val;}
-    return (int)result;
-}
-
-uint16_t argparser_get_uint16(const ArgParser* p, const char* flag, uint16_t default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_uint16(val_str)) {return default_val;}
-    char* endptr;
-    uint16_t result = strtol(val_str, &endptr, 10);
-    if (*endptr != '\0') {return default_val;}
-    return (int)result;
-}
-
-uint32_t argparser_get_uint32(const ArgParser* p, const char* flag, uint32_t default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_uint32(val_str)) {return default_val;}
-    char* endptr;
-    uint32_t result = strtol(val_str, &endptr, 10);
-    if (*endptr != '\0') {return default_val;}
-    return (int)result;
-}
-
-uint64_t argparser_get_uint64(const ArgParser* p, const char* flag, uint64_t default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    if(!str_is_uint64(val_str)) {return default_val;}
-    char* endptr;
-    uint64_t result = strtoll(val_str, &endptr, 10);
-    if (*endptr != '\0') {return default_val;}
-    return (int)result;
-}
-
-float argparser_get_float(const ArgParser* p, const char* flag, float default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    char* endptr;
-    float result = strtof(val_str, &endptr);
-    if (*endptr != '\0') {return default_val;}
-    return result;
-}
-
-double argparser_get_double(const ArgParser* p, const char* flag, double default_val) {
-    const char* val_str = argparser_get_string(p, flag, NULL);
-    if (!val_str || !*val_str) return default_val;
-    char* endptr;
-    double result = strtod(val_str, &endptr);
-    if (*endptr != '\0') {return default_val;}
-    return result;
-}
-
-bool argparser_get_bool(const ArgParser* p, const char* flag) {
-    return argparser_has_flag(p, flag);
-}
-
-const char* argparser_get_path(const ArgParser* p, const char* default_val) {
-    if (!p) return default_val;
-
-    // Prefer value from short "p" flag
-    const char* path_val = argparser_get_string(p, "p", NULL);
-    if (path_val && *path_val) return path_val;
-
-    // Or value from long "path" flag
-    path_val = argparser_get_string(p, "path", NULL);
-    if (path_val && *path_val) return path_val;
-
-    // If either flag present (without value), use pos[1] as path (pos[0] is command)
-    if (argparser_has_flag(p, "p") || argparser_has_flag(p, "path")) {
-        size_t count;
-        const char** pos = argparser_get_positionals(p, &count);
-        if (count > 1) return pos[1];
+            /* int is bound explicitly against INT32 range rather than
+               assumed to be a particular width. */
+            if (parse_signed_in_range(val_str, INT32_MIN, INT32_MAX, &parsed)
+                == true)
+            {
+                result = (int)parsed; /* safe: range already proven above */
+            }
+        }
     }
-    // Fallback: if no flag, use pos[1] as path
-    size_t count;
-    const char** pos = argparser_get_positionals(p, &count);
-    if (count > 1) return pos[1];
 
-    return default_val;
+    return result;
 }
 
-const char** argparser_get_positionals(const ArgParser* p, size_t* count) {
-    if (count) *count = p ? p->pos_count : 0;
-    if (!p) return NULL;
-    return (const char**)p->pos_ptrs;
+int8_t argparser_get_int8(const ArgParser* p, const char* flag,
+                           int8_t default_val)
+{
+    int8_t result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        if (str_is_int8(val_str) == true)
+        {
+            int64_t parsed = 0;
+
+            if (parse_signed_in_range(val_str, INT8_MIN, INT8_MAX, &parsed)
+                == true)
+            {
+                result = (int8_t)parsed; /* narrowing only after the explicit range check above (Rule 10.3) */
+            }
+        }
+    }
+
+    return result;
 }
 
-size_t argparser_positional_count(const ArgParser* p) {
-    return p ? p->pos_count : 0;
+int16_t argparser_get_int16(const ArgParser* p, const char* flag,
+                             int16_t default_val)
+{
+    int16_t result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        if (str_is_int16(val_str) == true)
+        {
+            int64_t parsed = 0;
+
+            if (parse_signed_in_range(val_str, INT16_MIN, INT16_MAX, &parsed)
+                == true)
+            {
+                result = (int16_t)parsed;
+            }
+        }
+    }
+
+    return result;
+}
+
+int32_t argparser_get_int32(const ArgParser* p, const char* flag,
+                             int32_t default_val)
+{
+    int32_t result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        if (str_is_int32(val_str) == true)
+        {
+            int64_t parsed = 0;
+
+            if (parse_signed_in_range(val_str, INT32_MIN, INT32_MAX, &parsed)
+                == true)
+            {
+                result = (int32_t)parsed;
+            }
+        }
+    }
+
+    return result;
+}
+
+int64_t argparser_get_int64(const ArgParser* p, const char* flag,
+                             int64_t default_val)
+{
+    int64_t result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        if (str_is_int64(val_str) == true)
+        {
+            int64_t parsed = 0;
+
+            /* parsed is already int64_t; assigned directly with no
+               intermediate narrowing cast (Rule 10.3). */
+            if (parse_signed_in_range(val_str, INT64_MIN, INT64_MAX, &parsed)
+                == true)
+            {
+                result = parsed;
+            }
+        }
+    }
+
+    return result;
+}
+
+uint8_t argparser_get_uint8(const ArgParser* p, const char* flag,
+                             uint8_t default_val)
+{
+    uint8_t result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        if (str_is_uint8(val_str) == true)
+        {
+            uint64_t parsed = 0U;
+
+            if (parse_unsigned_in_range(val_str, UINT8_MAX, &parsed) == true)
+            {
+                result = (uint8_t)parsed;
+            }
+        }
+    }
+
+    return result;
+}
+
+uint16_t argparser_get_uint16(const ArgParser* p, const char* flag,
+                               uint16_t default_val)
+{
+    uint16_t result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        if (str_is_uint16(val_str) == true)
+        {
+            uint64_t parsed = 0U;
+
+            if (parse_unsigned_in_range(val_str, UINT16_MAX, &parsed) == true)
+            {
+                result = (uint16_t)parsed;
+            }
+        }
+    }
+
+    return result;
+}
+
+uint32_t argparser_get_uint32(const ArgParser* p, const char* flag,
+                               uint32_t default_val)
+{
+    uint32_t result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        if (str_is_uint32(val_str) == true)
+        {
+            uint64_t parsed = 0U;
+
+            if (parse_unsigned_in_range(val_str, UINT32_MAX, &parsed) == true)
+            {
+                result = (uint32_t)parsed;
+            }
+        }
+    }
+
+    return result;
+}
+
+uint64_t argparser_get_uint64(const ArgParser* p, const char* flag,
+                               uint64_t default_val)
+{
+    uint64_t result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        if (str_is_uint64(val_str) == true)
+        {
+            uint64_t parsed = 0U;
+
+            /* parsed is already uint64_t; assigned directly with no
+               intermediate narrowing cast (Rule 10.3). */
+            if (parse_unsigned_in_range(val_str, UINT64_MAX, &parsed) == true)
+            {
+                result = parsed;
+            }
+        }
+    }
+
+    return result;
+}
+
+float argparser_get_float(const ArgParser* p, const char* flag,
+                           float default_val)
+{
+    float result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if ((val_str != NULL) && (*val_str != '\0'))
+    {
+        char* endptr = NULL; /* Rule 9.1: initialised before use */
+        float parsed;
+
+        errno = 0; /* Rule 22.9: reset before the call */
+        parsed = strtof(val_str, &endptr);
+
+        if ((endptr != NULL) && (*endptr == '\0') && (endptr != val_str) &&
+            (errno == 0)) /* Rule 22.8: reject overflow (HUGE_VALF + ERANGE) */
+        {
+            result = parsed;
+        }
+    }
+
+    return result;
+}
+
+double argparser_get_double(const ArgParser* p, const char* flag,
+                             double default_val)
+{
+    double result = default_val;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if ((val_str != NULL) && (*val_str != '\0'))
+    {
+        char* endptr = NULL;
+        double parsed;
+
+        errno = 0;
+        parsed = strtod(val_str, &endptr);
+
+        if ((endptr != NULL) && (*endptr == '\0') && (endptr != val_str) &&
+            (errno == 0))
+        {
+            result = parsed;
+        }
+    }
+
+    return result;
+}
+
+bool argparser_get_bool(const ArgParser* p, const char* flag)
+{
+    return argparser_has_flag(p, flag); /* presence of the flag implies true */
+}
+
+const char* argparser_get_path(const ArgParser* p, const char* default_val)
+{
+    const char* result = default_val;
+
+    if (p != NULL)
+    {
+        const char* path_val;
+        bool resolved = false;
+
+        /* Prefer the short "-p" flag's value. */
+        path_val = argparser_get_string(p, "p", NULL);
+        if ((path_val != NULL) && (*path_val != '\0'))
+        {
+            result = path_val;
+            resolved = true;
+        }
+
+        /* Otherwise the long "--path" flag's value. */
+        if (resolved == false)
+        {
+            path_val = argparser_get_string(p, "path", NULL);
+            if ((path_val != NULL) && (*path_val != '\0'))
+            {
+                result = path_val;
+                resolved = true;
+            }
+        }
+
+        /* Otherwise fall back to the second positional argument
+           (the first positional is the command itself). */
+        if (resolved == false)
+        {
+            size_t count = 0U;
+            const char* const* pos = argparser_get_positionals(p, &count);
+
+            if (count > 1U)
+            {
+                result = pos[1];
+            }
+        }
+    }
+
+    return result;
+}
+
+const char** argparser_get_positionals(const ArgParser* p, size_t* count)
+{
+    const char** result = NULL;
+
+    if (count != NULL)
+    {
+        *count = (p != NULL) ? p->pos_count : 0U; /* explicit comparison (Rule 14.4) */
+    }
+
+    if (p != NULL)
+    {
+        /* pos_ptrs's pointees are read-only through the returned view, so
+           adding const here via an explicit cast does not weaken any
+           guarantee (Rule 11.8 concerns removing const, not adding it). */
+        result = (const char**)p->pos_ptrs;
+    }
+
+    return result;
+}
+
+size_t argparser_positional_count(const ArgParser* p)
+{
+    size_t result = 0U;
+
+    if (p != NULL) /* explicit comparison instead of a pointer-to-bool ternary (Rule 14.4) */
+    {
+        result = p->pos_count;
+    }
+
+    return result;
 }

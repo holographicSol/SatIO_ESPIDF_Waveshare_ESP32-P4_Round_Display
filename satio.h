@@ -1,9 +1,7 @@
 /*
     SATIO Library. Written by Benjamin Jack Cullen.
 
-    1 : From main call initSystemTime().
-    2 : From main call setSatIOData() when required to sync RTC with GPS data and set all other data.
-    3 : All satio data will be available in satioData.
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef SATIO_H
@@ -258,12 +256,10 @@ extern struct SpeedStruct speedData;
 // Function Prototypes.
 // ----------------------------------------------------------------------------------------
 void setGroundHeadingName(float num);
-void padDigitsZero(int digits, char* output, size_t output_size);
 void printAllTimes(void);
 void storeRTCTime(void);
 void storeLocalTime(void);
 void storeLMST(void);
-// void updateLMST(void);
 void storeRTCSYNCTime(void) ;
 void extractDateTimeFromGPSData(void);
 void setSystemTime(long usec);
@@ -271,9 +267,6 @@ void getSystemTime(void);
 void syncRTC(void);
 void setSatIOData(void);
 void initSystemTime(void);
-
-// TwilightStageSchedule getTwilightSchedule(int zone);
-
 /**
    * @brief Calculates the speed between two GPS points in any direction.
    *

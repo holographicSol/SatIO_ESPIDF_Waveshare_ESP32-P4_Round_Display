@@ -1,5 +1,7 @@
 /*
   SatioFile - Written By Benjamin Jack Cullen.
+
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef SATIO_FILE_HELPER_H
@@ -110,27 +112,11 @@ bool deleteSystemFile(const char *filepath);
 /**
  * Write Log.
  */
-bool writeLog();
+void writeLog(void);
 
 /**
- * @brief Print SD some information.
+ * Flag Handler.
  */
-void statSDCard();
-
-/**
- * @brief Get free disk space.
- * @return Free space in bytes.
- */
-uint64_t getFreeBytes();
-
-/**
- * @brief Check if bytes available on disk.
- * @return Bool true if space available.
- */
-bool isAvailableBytes(uint64_t num_bytes);
-
 void sdcardFlagHandler();
-
-void getLogFiles();
 
 #endif

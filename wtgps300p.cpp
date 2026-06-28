@@ -7,6 +7,8 @@
         - gnggaData
         - gnrmcData
         - gpattData
+    
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include "wtgps300p.h"
@@ -14,23 +16,16 @@
 #include "hextodig.h"
 #include <rtc_wdt.h>
 #include <esp_task_wdt.h>
+#include <string.h>  // strcmp, strncmp, strncpy, strlen, strtok, memset
+#include <ctype.h>   // isdigit
+#include <limits.h>  // ULONG_MAX
 
 struct Serial1DataStruct serial1Data = {
-    .nbytes = 0,
-    .iter_token = 0,
+    .nbytes = 0UL,
     .BUFFER = {0},
-    .token = NULL,
-    .collected = 0,
     .gngga_bool = false,
     .gnrmc_bool = false,
-    .gpatt_bool = false,
-    .checksum = {0},
-    .checksum_of_buffer = 0,
-    .checksum_in_buffer = 0,
-    .gotSum = {0},
-    .i_XOR = 0,
-    .XOR = 0,
-    .c_XOR = 0
+    .gpatt_bool = false
 };
 
 struct GNGGAStruct gnggaData = {
@@ -65,8 +60,6 @@ struct GNGGAStruct gnggaData = {
     .total_bad_elements = 0
 };
 
-int gngga_total_bad_elements = 0;
-
 struct GNRMCStruct gnrmcData = {
     .sentence = {0},
     .outsentence = {0},
@@ -96,8 +89,6 @@ struct GNRMCStruct gnrmcData = {
     .valid_checksum = false,
     .total_bad_elements = 0
 };
-
-int gnrmc_total_bad_elements = 0;
 
 struct GPATTStruct gpattData = {
     .sentence = {0},
@@ -162,1176 +153,782 @@ struct GPATTStruct gpattData = {
     .total_bad_elements = 0
 };
 
-int gpatt_total_bad_elements = 0;
-
-bool val_utc_time(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 9) return false;
-    if (!isdigit(data[0]) || !isdigit(data[1]) || !isdigit(data[2]) || !isdigit(data[3]) ||
-        !isdigit(data[4]) || !isdigit(data[5]) || data[6] != '.' ||
-        !isdigit(data[7]) || !isdigit(data[8])) return false;
-    return true;
+bool val_element_size(const char *data)
+{
+    /* Rule 15.5: single return; also guards every other val_* function
+       against a NULL or over-length field before it inspects data. */
+    return (data != NULL) && (strlen(data) < (size_t)MAX_GLOBAL_ELEMENT_SIZE);
 }
 
-bool val_utc_date(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 6) return false;
-    if (!isdigit(data[0]) || !isdigit(data[1]) || !isdigit(data[2]) ||
-        !isdigit(data[3]) || !isdigit(data[4]) || !isdigit(data[5])) return false;
-    return true;
-}
+bool val_utc_time(const char *data)
+{
+    bool result = false;
 
-bool val_latitude(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_longitude(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_latitude_H(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'N' || data[0] == 'S');
-}
-
-bool val_longitude_H(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'E' || data[0] == 'W');
-}
-
-bool val_positioning_status_gngga(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == '0' || data[0] == '1' || data[0] == '2' || data[0] == '6');
-}
-
-bool val_satellite_count(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_long(data);
-}
-
-bool val_gps_precision_factor(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_altitude(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_altitude_units(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return true;
-}
-
-bool val_geoidal(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_geoidal_units(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return true;
-}
-
-bool val_differential_delay(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_basestation_id(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_long(data);
-}
-
-bool val_positioning_status_gnrmc(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'A' || data[0] == 'V');
-}
-
-bool val_ground_speed(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_ground_heading(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_installation_angle(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_installation_angle_direction(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'E' || data[0] == 'W');
-}
-
-bool val_mode_indication(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'A' || data[0] == 'D' || data[0] == 'E' || data[0] == 'N');
-}
-
-bool val_pitch_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_roll_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_yaw_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_angle_channle_p_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'p');
-}
-
-bool val_angle_channle_r_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'r');
-}
-
-bool val_angle_channle_y_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'y');
-}
-
-bool val_software_version_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_long(data);
-}
-
-bool val_version_channel_s_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == 'S');
-}
-
-bool val_product_id_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return is_alnum(data);
-}
-
-bool val_id_channel_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 2) return false;
-    return (strcmp(data, "ID") == 0);
-}
-
-bool val_ins_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == '0' || data[0] == '1');
-}
-
-bool val_ins_channel_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 3) return false;
-    return (strcmp(data, "INS") == 0);
-}
-
-bool val_hardware_version_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return true;
-}
-
-bool val_run_state_flag_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 2) return false;
-    return (strcmp(data, "00") == 0 || strcmp(data, "01") == 0 ||
-            strcmp(data, "02") == 0 || strcmp(data, "03") == 0 ||
-            strcmp(data, "04") == 0);
-}
-
-bool val_mis_angle_num_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_long(data);
-}
-
-bool val_static_flag_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 2) return false;
-    return (strcmp(data, "00") == 0 || strcmp(data, "01") == 0);
-}
-
-bool val_user_code_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_gst_data_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_long(data);
-}
-
-bool val_line_flag_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == '0' || data[0] == '1');
-}
-
-bool val_mis_att_flag_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 2) return false;
-    return (strcmp(data, "00") == 0 || strcmp(data, "01") == 0);
-}
-
-bool val_imu_kind_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == '0' || data[0] == '1' || data[0] == '2' ||
-            data[0] == '7' || data[0] == '8');
-}
-
-bool val_ubi_car_kind_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == '1' || data[0] == '2' || data[0] == '4');
-}
-
-bool val_mileage_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_double(data);
-}
-
-bool val_run_inetial_flag_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 2) return false;
-    return (strcmp(data, "00") == 0 || strcmp(data, "01") == 0 ||
-            strcmp(data, "02") == 0 || strcmp(data, "03") == 0 ||
-            strcmp(data, "04") == 0);
-}
-
-bool val_speed_enable_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    if (strlen(data) != 1) return false;
-    return (data[0] == '0' || data[0] == '1');
-}
-
-bool val_speed_num_gpatt(const char *data) {
-    if (!val_element_size(data)) return false;
-    return str_is_long(data);
-}
-
-bool val_custom_flag(const char *data) {
-    if (!val_element_size(data)) return false;
-    return true;
-}
-
-bool val_checksum(const char *data) {
-    if (!val_element_size(data)) return false;
-    return true;
-}
-
-bool val_element_size(const char *data) {
-    if (data == NULL || strlen(data) >= MAX_GLOBAL_ELEMENT_SIZE) return false;
-    return true;
-}
-
-void GNGGA(void) {
-    serial1Data.iter_token = 0;
-    serial1Data.token = strtok(gnggaData.sentence, ",");
-    while (serial1Data.token != NULL) {
-        switch (serial1Data.iter_token) {
-            case 0:
-                if (strcmp(serial1Data.token, "$GNGGA") == 0) {
-                    memset(gnggaData.tag, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.tag, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 1:
-                if (val_utc_time(serial1Data.token)) {
-                    memset(gnggaData.utc_time, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.utc_time, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 2:
-                if (val_latitude(serial1Data.token)) {
-                    memset(gnggaData.latitude, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.latitude, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 3:
-                if (val_latitude_H(serial1Data.token)) {
-                    memset(gnggaData.latitude_hemisphere, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.latitude_hemisphere, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 4:
-                if (val_longitude(serial1Data.token)) {
-                    memset(gnggaData.longitude, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.longitude, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 5:
-                if (val_longitude_H(serial1Data.token)) {
-                    memset(gnggaData.longitude_hemisphere, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.longitude_hemisphere, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 6:
-                if (val_positioning_status_gngga(serial1Data.token)) {
-                    memset(gnggaData.solution_status, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.solution_status, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 7:
-                if (val_satellite_count(serial1Data.token)) {
-                    memset(gnggaData.satellite_count, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.satellite_count, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 8:
-                if (val_gps_precision_factor(serial1Data.token)) {
-                    memset(gnggaData.gps_precision_factor, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.gps_precision_factor, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 9:
-                if (val_altitude(serial1Data.token)) {
-                    memset(gnggaData.altitude, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.altitude, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 10:
-                if (val_altitude_units(serial1Data.token)) {
-                    memset(gnggaData.altitude_units, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.altitude_units, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 11:
-                if (val_geoidal(serial1Data.token)) {
-                    memset(gnggaData.geoidal, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.geoidal, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 12:
-                if (val_geoidal_units(serial1Data.token)) {
-                    memset(gnggaData.geoidal_units, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.geoidal_units, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 13:
-                if (val_differential_delay(serial1Data.token)) {
-                    memset(gnggaData.differential_delay, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.differential_delay, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 14:
-                serial1Data.token = strtok(serial1Data.token, "*");
-                if (val_basestation_id(serial1Data.token)) {
-                    memset(gnggaData.base_station_id, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnggaData.base_station_id, serial1Data.token);
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnggaData.bad_element_count[serial1Data.iter_token]++;
-                    gnggaData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 15:
-                // checksum validated before sentence tokenized
-                break;
-            default:
-                break;
-        }
-        serial1Data.token = strtok(NULL, ",");
-        serial1Data.iter_token++;
+    /* Format: hhmmss.sss */
+    if ((val_element_size(data) == true) && (strlen(data) == 9U))
+    {
+        /* Cast to unsigned char before widening to int: avoids sign-extension
+           on negative plain-char values passed to isdigit (Rule 10.1/10.3). */
+        result = (isdigit((int)(unsigned char)data[0]) != 0) &&
+                 (isdigit((int)(unsigned char)data[1]) != 0) &&
+                 (isdigit((int)(unsigned char)data[2]) != 0) &&
+                 (isdigit((int)(unsigned char)data[3]) != 0) &&
+                 (isdigit((int)(unsigned char)data[4]) != 0) &&
+                 (isdigit((int)(unsigned char)data[5]) != 0) &&
+                 (data[6] == '.') &&
+                 (isdigit((int)(unsigned char)data[7]) != 0) &&
+                 (isdigit((int)(unsigned char)data[8]) != 0);
     }
 
-    gngga_total_bad_elements = 0;
-    for (int i = 0; i < MAX_GNGGA_ELEMENTS; i++) {
-        if (gnggaData.bad_element_bool[i]) gngga_total_bad_elements++;
-        if (gnggaData.bad_element_count[i] >= gnggaData.max_bad) {
-            gnggaData.bad_element_count[i] = 0;
-        }
-    }
-    gnggaData.total_bad_elements = gngga_total_bad_elements;
+    return result;
 }
 
-void GNRMC(void) {
-    serial1Data.iter_token = 0;
-    serial1Data.token = strtok(gnrmcData.sentence, ",");
-    while (serial1Data.token != NULL) {
-        switch (serial1Data.iter_token) {
-            case 0:
-                if (strcmp(serial1Data.token, "$GNRMC") == 0) {
-                    memset(gnrmcData.tag, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.tag, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 1:
-                if (val_utc_time(serial1Data.token)) {
-                    memset(gnrmcData.utc_time, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.utc_time, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 2:
-                if (val_positioning_status_gnrmc(serial1Data.token)) {
-                    memset(gnrmcData.positioning_status, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.positioning_status, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 3:
-                if (val_latitude(serial1Data.token)) {
-                    memset(gnrmcData.latitude, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.latitude, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 4:
-                if (val_latitude_H(serial1Data.token)) {
-                    memset(gnrmcData.latitude_hemisphere, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.latitude_hemisphere, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 5:
-                if (val_longitude(serial1Data.token)) {
-                    memset(gnrmcData.longitude, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.longitude, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 6:
-                if (val_longitude_H(serial1Data.token)) {
-                    memset(gnrmcData.longitude_hemisphere, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.longitude_hemisphere, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 7:
-                if (val_ground_speed(serial1Data.token)) {
-                    memset(gnrmcData.ground_speed, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.ground_speed, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 8:
-                if (val_ground_heading(serial1Data.token)) {
-                    memset(gnrmcData.ground_heading, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.ground_heading, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 9:
-                if (val_utc_date(serial1Data.token)) {
-                    memset(gnrmcData.utc_date, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.utc_date, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 10:
-                if (val_installation_angle(serial1Data.token)) {
-                    memset(gnrmcData.installation_angle, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.installation_angle, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 11:
-                if (val_installation_angle_direction(serial1Data.token)) {
-                    memset(gnrmcData.installation_angle_direction, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.installation_angle_direction, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 12:
-                serial1Data.token = strtok(serial1Data.token, "*");
-                if (val_mode_indication(serial1Data.token)) {
-                    memset(gnrmcData.mode_indication, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gnrmcData.mode_indication, serial1Data.token);
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gnrmcData.bad_element_count[serial1Data.iter_token]++;
-                    gnrmcData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 13:
-                // checksum validated before sentence tokenized
-                break;
-            default:
-                break;
-        }
-        serial1Data.token = strtok(NULL, ",");
-        serial1Data.iter_token++;
+bool val_utc_date(const char *data)
+{
+    bool result = false;
+
+    /* Format: ddmmyy */
+    if ((val_element_size(data) == true) && (strlen(data) == 6U))
+    {
+        result = (isdigit((int)(unsigned char)data[0]) != 0) &&
+                 (isdigit((int)(unsigned char)data[1]) != 0) &&
+                 (isdigit((int)(unsigned char)data[2]) != 0) &&
+                 (isdigit((int)(unsigned char)data[3]) != 0) &&
+                 (isdigit((int)(unsigned char)data[4]) != 0) &&
+                 (isdigit((int)(unsigned char)data[5]) != 0);
     }
 
-    gnrmc_total_bad_elements = 0;
-    for (int i = 0; i < MAX_GNRMC_ELEMENTS; i++) {
-        if (gnrmcData.bad_element_bool[i]) gnrmc_total_bad_elements++;
-        if (gnrmcData.bad_element_count[i] >= gnrmcData.max_bad) {
-            gnrmcData.bad_element_count[i] = 0;
-        }
-    }
-    gnrmcData.total_bad_elements = gnrmc_total_bad_elements;
+    return result;
 }
 
-void GPATT(void) {
-    serial1Data.iter_token = 0;
-    serial1Data.token = strtok(gpattData.sentence, ",");
-    while (serial1Data.token != NULL) {
-        switch (serial1Data.iter_token) {
-            case 0:
-                if (strcmp(serial1Data.token, "$GPATT") == 0) {
-                    memset(gpattData.tag, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.tag, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 1:
-                if (val_pitch_gpatt(serial1Data.token)) {
-                    memset(gpattData.pitch, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.pitch, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 2:
-                if (val_angle_channle_p_gpatt(serial1Data.token)) {
-                    memset(gpattData.angle_channel_0, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.angle_channel_0, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 3:
-                if (val_roll_gpatt(serial1Data.token)) {
-                    memset(gpattData.roll, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.roll, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 4:
-                if (val_angle_channle_r_gpatt(serial1Data.token)) {
-                    memset(gpattData.angle_channel_1, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.angle_channel_1, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 5:
-                if (val_yaw_gpatt(serial1Data.token)) {
-                    memset(gpattData.yaw, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.yaw, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 6:
-                if (val_angle_channle_y_gpatt(serial1Data.token)) {
-                    memset(gpattData.angle_channel_2, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.angle_channel_2, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 7:
-                if (val_software_version_gpatt(serial1Data.token)) {
-                    memset(gpattData.software_version, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.software_version, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 8:
-                if (val_version_channel_s_gpatt(serial1Data.token)) {
-                    memset(gpattData.version_channel, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.version_channel, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 9:
-                if (val_product_id_gpatt(serial1Data.token)) {
-                    memset(gpattData.product_id, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.product_id, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 10:
-                if (val_id_channel_gpatt(serial1Data.token)) {
-                    memset(gpattData.id_channel, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.id_channel, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 11:
-                if (val_ins_gpatt(serial1Data.token)) {
-                    memset(gpattData.ins, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.ins, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 12:
-                if (val_ins_channel_gpatt(serial1Data.token)) {
-                    memset(gpattData.ins_channel, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.ins_channel, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 13:
-                if (val_hardware_version_gpatt(serial1Data.token)) {
-                    memset(gpattData.hardware_version, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.hardware_version, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 14:
-                if (val_run_state_flag_gpatt(serial1Data.token)) {
-                    memset(gpattData.run_state_flag, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.run_state_flag, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 15:
-                if (val_mis_angle_num_gpatt(serial1Data.token)) {
-                    memset(gpattData.mis_angle_num, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.mis_angle_num, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 16:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_0, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_0, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 17:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_1, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_1, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 18:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_2, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_2, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 19:
-                if (val_static_flag_gpatt(serial1Data.token)) {
-                    memset(gpattData.static_flag, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.static_flag, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 20:
-                if (val_user_code_gpatt(serial1Data.token)) {
-                    memset(gpattData.user_code, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.user_code, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 21:
-                if (val_gst_data_gpatt(serial1Data.token)) {
-                    memset(gpattData.gst_data, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.gst_data, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 22:
-                if (val_line_flag_gpatt(serial1Data.token)) {
-                    memset(gpattData.line_flag, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.line_flag, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 23:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_3, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_3, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 24:
-                if (val_mis_att_flag_gpatt(serial1Data.token)) {
-                    memset(gpattData.mis_att_flag, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.mis_att_flag, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 25:
-                if (val_imu_kind_gpatt(serial1Data.token)) {
-                    memset(gpattData.imu_kind, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.imu_kind, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 26:
-                if (val_ubi_car_kind_gpatt(serial1Data.token)) {
-                    memset(gpattData.ubi_car_kind, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.ubi_car_kind, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 27:
-                if (val_mileage_gpatt(serial1Data.token)) {
-                    memset(gpattData.mileage, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.mileage, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 28:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_4, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_4, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 29:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_5, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_5, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 30:
-                if (val_run_inetial_flag_gpatt(serial1Data.token)) {
-                    memset(gpattData.run_inetial_flag, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.run_inetial_flag, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 31:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_6, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_6, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 32:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_7, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_7, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 33:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_8, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_8, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 34:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_9, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_9, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 35:
-                if (val_speed_enable_gpatt(serial1Data.token)) {
-                    memset(gpattData.speed_enable, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.speed_enable, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 36:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_10, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_10, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 37:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.custom_logo_11, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.custom_logo_11, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 38:
-                if (val_speed_num_gpatt(serial1Data.token)) {
-                    memset(gpattData.speed_num, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.speed_num, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 39:
-                if (val_custom_flag(serial1Data.token)) {
-                    memset(gpattData.scalable, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.scalable, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            case 40:
-                serial1Data.token = strtok(serial1Data.token, "*");
-                if (val_checksum(serial1Data.token)) {
-                    memset(gpattData.check_sum, 0, MAX_GLOBAL_ELEMENT_SIZE);
-                    strcpy(gpattData.check_sum, serial1Data.token);
-                    gpattData.bad_element_bool[serial1Data.iter_token] = false;
-                } else {
-                    gpattData.bad_element_count[serial1Data.iter_token]++;
-                    gpattData.bad_element_bool[serial1Data.iter_token] = true;
-                }
-                break;
-            default:
-                break;
-        }
-        serial1Data.token = strtok(NULL, ",");
-        serial1Data.iter_token++;
-    }
-
-    gpatt_total_bad_elements = 0;
-    for (int i = 0; i < MAX_GPATT_ELEMENTS; i++) {
-        if (gpattData.bad_element_bool[i]) gpatt_total_bad_elements++;
-        if (gpattData.bad_element_count[i] >= gpattData.max_bad) {
-            gpattData.bad_element_count[i] = 0;
-        }
-    }
-    gpattData.total_bad_elements = gpatt_total_bad_elements;
+bool val_latitude(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
 }
 
-void readGPS(void) {
-    serial1Data.gngga_bool=false;
-    serial1Data.gnrmc_bool=false;
-    serial1Data.gpatt_bool=false;
-    while (1) {
-      esp_task_wdt_reset();
-      // --------------------------------------------------------------------------
-      // Read sentences coming from the WTGPS300P. (WTGPS300P outputs every 100ms).
-      // --------------------------------------------------------------------------
-    //   Serial.println("[searching for gps data]");
-      if (Serial1.available()) {
-        // Serial.println("[gps data found]");
-        // ----------------------------------------------------------------------
-        // Break immediately if everything of interest has been collected.
-        // ----------------------------------------------------------------------
-        if (serial1Data.gngga_bool==true && serial1Data.gnrmc_bool==true && serial1Data.gpatt_bool==true) {break;}
-        // ----------------------------------------------------------------------
-        // Read serial into buffer until buffer max or special char.
-        // ----------------------------------------------------------------------
-        memset(serial1Data.BUFFER, 0, sizeof(serial1Data.BUFFER));
-        serial1Data.nbytes=Serial1.readBytesUntil('\n', serial1Data.BUFFER, sizeof(serial1Data.BUFFER));
-        // Serial.println(serial1Data.BUFFER);
-        // ----------------------------------------------------------------------
-        // Exclude partial reads.
-        // ----------------------------------------------------------------------
-        if (serial1Data.nbytes>10) {
-          // -------------------------------------------------
-          // Read GNGGA.
-          // -------------------------------------------------   
-          if (serial1Data.gngga_bool==false) {
-            if (strncmp(serial1Data.BUFFER, "$GNGGA", 6)==0) {
-                memset(gnggaData.sentence, 0, sizeof(gnggaData.sentence));
-                strcpy(gnggaData.sentence, serial1Data.BUFFER);
-                serial1Data.gngga_bool=true;
-                if (serial1Data.gngga_bool==true && serial1Data.gnrmc_bool==true && serial1Data.gpatt_bool==true) {break;}
+bool val_longitude(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_latitude_H(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == 'N') || (data[0] == 'S'));
+}
+
+bool val_longitude_H(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == 'E') || (data[0] == 'W'));
+}
+
+bool val_positioning_status_gngga(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == '0') || (data[0] == '1') || (data[0] == '2') || (data[0] == '6'));
+}
+
+bool val_satellite_count(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_long(data) == true);
+}
+
+bool val_gps_precision_factor(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_altitude(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_altitude_units(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U);
+}
+
+bool val_geoidal(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_geoidal_units(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U);
+}
+
+bool val_differential_delay(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_basestation_id(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_long(data) == true);
+}
+
+bool val_positioning_status_gnrmc(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == 'A') || (data[0] == 'V'));
+}
+
+bool val_ground_speed(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_ground_heading(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_installation_angle(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_installation_angle_direction(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == 'E') || (data[0] == 'W'));
+}
+
+bool val_mode_indication(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == 'A') || (data[0] == 'D') || (data[0] == 'E') || (data[0] == 'N'));
+}
+
+bool val_pitch_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_roll_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_yaw_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_angle_channle_p_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) && (data[0] == 'p');
+}
+
+bool val_angle_channle_r_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) && (data[0] == 'r');
+}
+
+bool val_angle_channle_y_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) && (data[0] == 'y');
+}
+
+bool val_software_version_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_long(data) == true);
+}
+
+bool val_version_channel_s_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) && (data[0] == 'S');
+}
+
+bool val_product_id_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (is_alnum(data) == true);
+}
+
+bool val_id_channel_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 2U) && (strcmp(data, "ID") == 0);
+}
+
+bool val_ins_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == '0') || (data[0] == '1'));
+}
+
+bool val_ins_channel_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 3U) && (strcmp(data, "INS") == 0);
+}
+
+bool val_hardware_version_gpatt(const char *data)
+{
+    return val_element_size(data);
+}
+
+bool val_run_state_flag_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 2U) &&
+           ((strcmp(data, "00") == 0) || (strcmp(data, "01") == 0) ||
+            (strcmp(data, "02") == 0) || (strcmp(data, "03") == 0) ||
+            (strcmp(data, "04") == 0));
+}
+
+bool val_mis_angle_num_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_long(data) == true);
+}
+
+bool val_static_flag_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 2U) &&
+           ((strcmp(data, "00") == 0) || (strcmp(data, "01") == 0));
+}
+
+bool val_user_code_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_gst_data_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_long(data) == true);
+}
+
+bool val_line_flag_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == '0') || (data[0] == '1'));
+}
+
+bool val_mis_att_flag_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 2U) &&
+           ((strcmp(data, "00") == 0) || (strcmp(data, "01") == 0));
+}
+
+bool val_imu_kind_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == '0') || (data[0] == '1') || (data[0] == '2') ||
+            (data[0] == '7') || (data[0] == '8'));
+}
+
+bool val_ubi_car_kind_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == '1') || (data[0] == '2') || (data[0] == '4'));
+}
+
+bool val_mileage_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_double(data) == true);
+}
+
+bool val_run_inetial_flag_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 2U) &&
+           ((strcmp(data, "00") == 0) || (strcmp(data, "01") == 0) ||
+            (strcmp(data, "02") == 0) || (strcmp(data, "03") == 0) ||
+            (strcmp(data, "04") == 0));
+}
+
+bool val_speed_enable_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+           ((data[0] == '0') || (data[0] == '1'));
+}
+
+bool val_speed_num_gpatt(const char *data)
+{
+    return (val_element_size(data) == true) && (str_is_long(data) == true);
+}
+
+bool val_custom_flag(const char *data)
+{
+    return val_element_size(data);
+}
+
+bool val_checksum(const char *data)
+{
+    return val_element_size(data);
+}
+
+/* The first comma-separated token of every sentence is its literal tag
+   rather than a formatted value, so each sentence gets its own tiny
+   validator instead of a shared val_* helper. Internal linkage: only the
+   field tables below reference these (Rule 8.7). */
+static bool val_tag_gngga(const char *data) { return (data != NULL) && (strcmp(data, "$GNGGA") == 0); }
+static bool val_tag_gnrmc(const char *data) { return (data != NULL) && (strcmp(data, "$GNRMC") == 0); }
+static bool val_tag_gpatt(const char *data) { return (data != NULL) && (strcmp(data, "$GPATT") == 0); }
+
+/* Rule 8.7: internal linkage; collapses a 3-way repeated condition used by
+   both readGPS() and validateGPSData() into one named check. */
+static bool all_gps_sentences_collected(void)
+{
+    return (serial1Data.gngga_bool == true) &&
+           (serial1Data.gnrmc_bool == true) &&
+           (serial1Data.gpatt_bool == true);
+}
+
+typedef bool (*GpsFieldValidator)(const char *data);
+
+/*
+ * One entry per comma-separated token of a sentence. validate==NULL marks a
+ * token that needs no further handling here (its checksum is verified by
+ * validateChecksumSerial1() before the sentence is tokenized at all).
+ * strip_checksum_suffix marks the one token in each sentence that has the
+ * "*XX" checksum appended directly to it with no separating comma.
+ *
+ * Rule 16.x: this table plus a single small loop (see GNGGA() below)
+ * replaces a switch with one case per token index.
+ */
+typedef struct {
+    char (GNGGAStruct::*field)[MAX_GLOBAL_ELEMENT_SIZE];
+    GpsFieldValidator validate;
+    bool strip_checksum_suffix;
+} GNGGAFieldSpec;
+
+static const GNGGAFieldSpec gngga_fields[MAX_GNGGA_ELEMENTS] = {
+    { &GNGGAStruct::tag,                  val_tag_gngga,                 false },
+    { &GNGGAStruct::utc_time,             val_utc_time,                  false },
+    { &GNGGAStruct::latitude,             val_latitude,                  false },
+    { &GNGGAStruct::latitude_hemisphere,  val_latitude_H,                false },
+    { &GNGGAStruct::longitude,            val_longitude,                 false },
+    { &GNGGAStruct::longitude_hemisphere, val_longitude_H,               false },
+    { &GNGGAStruct::solution_status,      val_positioning_status_gngga,  false },
+    { &GNGGAStruct::satellite_count,      val_satellite_count,           false },
+    { &GNGGAStruct::gps_precision_factor, val_gps_precision_factor,      false },
+    { &GNGGAStruct::altitude,             val_altitude,                  false },
+    { &GNGGAStruct::altitude_units,       val_altitude_units,            false },
+    { &GNGGAStruct::geoidal,              val_geoidal,                   false },
+    { &GNGGAStruct::geoidal_units,        val_geoidal_units,             false },
+    { &GNGGAStruct::differential_delay,   val_differential_delay,        false },
+    { &GNGGAStruct::base_station_id,      val_basestation_id,            true  },
+    { nullptr,                            nullptr,                       false }, /* checksum: verified before tokenizing */
+};
+
+typedef struct {
+    char (GNRMCStruct::*field)[MAX_GLOBAL_ELEMENT_SIZE];
+    GpsFieldValidator validate;
+    bool strip_checksum_suffix;
+} GNRMCFieldSpec;
+
+static const GNRMCFieldSpec gnrmc_fields[MAX_GNRMC_ELEMENTS] = {
+    { &GNRMCStruct::tag,                          val_tag_gnrmc,                    false },
+    { &GNRMCStruct::utc_time,                     val_utc_time,                     false },
+    { &GNRMCStruct::positioning_status,           val_positioning_status_gnrmc,     false },
+    { &GNRMCStruct::latitude,                     val_latitude,                     false },
+    { &GNRMCStruct::latitude_hemisphere,          val_latitude_H,                   false },
+    { &GNRMCStruct::longitude,                    val_longitude,                    false },
+    { &GNRMCStruct::longitude_hemisphere,         val_longitude_H,                  false },
+    { &GNRMCStruct::ground_speed,                 val_ground_speed,                 false },
+    { &GNRMCStruct::ground_heading,               val_ground_heading,               false },
+    { &GNRMCStruct::utc_date,                     val_utc_date,                     false },
+    { &GNRMCStruct::installation_angle,           val_installation_angle,           false },
+    { &GNRMCStruct::installation_angle_direction, val_installation_angle_direction, false },
+    { &GNRMCStruct::mode_indication,              val_mode_indication,              true  },
+    { nullptr,                                    nullptr,                          false }, /* checksum: verified before tokenizing */
+};
+
+typedef struct {
+    char (GPATTStruct::*field)[MAX_GLOBAL_ELEMENT_SIZE];
+    GpsFieldValidator validate;
+    bool strip_checksum_suffix;
+} GPATTFieldSpec;
+
+static const GPATTFieldSpec gpatt_fields[MAX_GPATT_ELEMENTS] = {
+    { &GPATTStruct::tag,               val_tag_gpatt,                 false },
+    { &GPATTStruct::pitch,             val_pitch_gpatt,               false },
+    { &GPATTStruct::angle_channel_0,   val_angle_channle_p_gpatt,     false },
+    { &GPATTStruct::roll,              val_roll_gpatt,                false },
+    { &GPATTStruct::angle_channel_1,   val_angle_channle_r_gpatt,     false },
+    { &GPATTStruct::yaw,               val_yaw_gpatt,                 false },
+    { &GPATTStruct::angle_channel_2,   val_angle_channle_y_gpatt,     false },
+    { &GPATTStruct::software_version,  val_software_version_gpatt,    false },
+    { &GPATTStruct::version_channel,   val_version_channel_s_gpatt,   false },
+    { &GPATTStruct::product_id,        val_product_id_gpatt,          false },
+    { &GPATTStruct::id_channel,        val_id_channel_gpatt,          false },
+    { &GPATTStruct::ins,               val_ins_gpatt,                 false },
+    { &GPATTStruct::ins_channel,       val_ins_channel_gpatt,         false },
+    { &GPATTStruct::hardware_version,  val_hardware_version_gpatt,    false },
+    { &GPATTStruct::run_state_flag,    val_run_state_flag_gpatt,      false },
+    { &GPATTStruct::mis_angle_num,     val_mis_angle_num_gpatt,       false },
+    { &GPATTStruct::custom_logo_0,     val_custom_flag,               false },
+    { &GPATTStruct::custom_logo_1,     val_custom_flag,               false },
+    { &GPATTStruct::custom_logo_2,     val_custom_flag,               false },
+    { &GPATTStruct::static_flag,       val_static_flag_gpatt,         false },
+    { &GPATTStruct::user_code,         val_user_code_gpatt,           false },
+    { &GPATTStruct::gst_data,          val_gst_data_gpatt,            false },
+    { &GPATTStruct::line_flag,         val_line_flag_gpatt,           false },
+    { &GPATTStruct::custom_logo_3,     val_custom_flag,               false },
+    { &GPATTStruct::mis_att_flag,      val_mis_att_flag_gpatt,        false },
+    { &GPATTStruct::imu_kind,          val_imu_kind_gpatt,            false },
+    { &GPATTStruct::ubi_car_kind,      val_ubi_car_kind_gpatt,        false },
+    { &GPATTStruct::mileage,           val_mileage_gpatt,             false },
+    { &GPATTStruct::custom_logo_4,     val_custom_flag,               false },
+    { &GPATTStruct::custom_logo_5,     val_custom_flag,               false },
+    { &GPATTStruct::run_inetial_flag,  val_run_inetial_flag_gpatt,    false },
+    { &GPATTStruct::custom_logo_6,     val_custom_flag,               false },
+    { &GPATTStruct::custom_logo_7,     val_custom_flag,               false },
+    { &GPATTStruct::custom_logo_8,     val_custom_flag,               false },
+    { &GPATTStruct::custom_logo_9,     val_custom_flag,               false },
+    { &GPATTStruct::speed_enable,      val_speed_enable_gpatt,        false },
+    { &GPATTStruct::custom_logo_10,    val_custom_flag,               false },
+    { &GPATTStruct::custom_logo_11,    val_custom_flag,               false },
+    { &GPATTStruct::speed_num,         val_speed_num_gpatt,           false },
+    { &GPATTStruct::scalable,          val_custom_flag,               false },
+    { nullptr,                         nullptr,                       false }, /* checksum: verified before tokenizing */
+};
+
+void GNGGA(void)
+{
+    char *token;
+    size_t idx = 0U;
+
+    token = strtok(gnggaData.sentence, ",");
+
+    /* Walk one token per field-table entry: validate, then copy into the
+       matching struct member (strncpy null-pads any unused tail, so no
+       separate memset is needed), or mark the element bad. */
+    while ((token != NULL) && (idx < (size_t)MAX_GNGGA_ELEMENTS))
+    {
+        const GNGGAFieldSpec *spec = &gngga_fields[idx];
+
+        if (spec->strip_checksum_suffix == true)
+        {
+            token = strtok(token, "*"); /* drop the "*XX" checksum suffix appended to this token */
+        }
+
+        if (spec->validate == nullptr)
+        {
+            /* checksum element: already verified before the sentence was tokenized */
+        }
+        else if ((token != NULL) && (spec->validate(token) == true))
+        {
+            char *dest = gnggaData.*(spec->field);
+
+            (void)strncpy(dest, token, (size_t)MAX_GLOBAL_ELEMENT_SIZE - 1U);
+            dest[MAX_GLOBAL_ELEMENT_SIZE - 1U] = '\0';
+            gnggaData.bad_element_bool[idx] = false;
+        }
+        else
+        {
+            gnggaData.bad_element_count[idx]++;
+            gnggaData.bad_element_bool[idx] = true;
+        }
+
+        token = strtok(NULL, ",");
+        idx++;
+    }
+
+    {
+        int total_bad = 0;
+
+        for (int i = 0; i < MAX_GNGGA_ELEMENTS; i++)
+        {
+            if (gnggaData.bad_element_bool[i] == true)
+            {
+                total_bad++;
             }
-          }
-          // -------------------------------------------------
-          // Read GNRMC.
-          // -------------------------------------------------   
-          else if (serial1Data.gnrmc_bool==false) {
-            if (strncmp(serial1Data.BUFFER, "$GNRMC", 6)==0) {
-                memset(gnrmcData.sentence, 0, sizeof(gnrmcData.sentence));
-                strcpy(gnrmcData.sentence, serial1Data.BUFFER);
-                serial1Data.gnrmc_bool=true;
-                if (serial1Data.gngga_bool==true && serial1Data.gnrmc_bool==true && serial1Data.gpatt_bool==true) {break;}
+            if (gnggaData.bad_element_count[i] >= gnggaData.max_bad)
+            {
+                gnggaData.bad_element_count[i] = 0UL;
             }
-          }
-          // -------------------------------------------------
-          // Read GPATT.
-          // -------------------------------------------------   
-          else if (serial1Data.gpatt_bool==false) {
-            if (strncmp(serial1Data.BUFFER, "$GPATT", 6)==0) {
-                memset(gpattData.sentence, 0, sizeof(gpattData.sentence));
-                strcpy(gpattData.sentence, serial1Data.BUFFER);
-                serial1Data.gpatt_bool=true;
-                if (serial1Data.gngga_bool==true && serial1Data.gnrmc_bool==true && serial1Data.gpatt_bool==true) {break;}
-            }
-          }
         }
-      }
-      delay(1);
+
+        gnggaData.total_bad_elements = total_bad;
     }
 }
 
-// ------------------------------------------------------------------------------
-// Isolate the checksum.
-// ------------------------------------------------------------------------------
-int getCheckSumSerial1(char * string) {
-  for (serial1Data.XOR=0, serial1Data.i_XOR=0; serial1Data.i_XOR < strlen(string); serial1Data.i_XOR++) {
-    serial1Data.c_XOR=(unsigned char)string[serial1Data.i_XOR];
-    if (serial1Data.c_XOR=='*') break;
-    if (serial1Data.c_XOR != '$') serial1Data.XOR ^= serial1Data.c_XOR;
-  }
-  return serial1Data.XOR;
+void GNRMC(void)
+{
+    char *token;
+    size_t idx = 0U;
+
+    token = strtok(gnrmcData.sentence, ",");
+
+    /* Same per-token walk as GNGGA(), over gnrmc_fields. */
+    while ((token != NULL) && (idx < (size_t)MAX_GNRMC_ELEMENTS))
+    {
+        const GNRMCFieldSpec *spec = &gnrmc_fields[idx];
+
+        if (spec->strip_checksum_suffix == true)
+        {
+            token = strtok(token, "*");
+        }
+
+        if (spec->validate == nullptr)
+        {
+            /* checksum element: already verified before the sentence was tokenized */
+        }
+        else if ((token != NULL) && (spec->validate(token) == true))
+        {
+            char *dest = gnrmcData.*(spec->field);
+
+            (void)strncpy(dest, token, (size_t)MAX_GLOBAL_ELEMENT_SIZE - 1U);
+            dest[MAX_GLOBAL_ELEMENT_SIZE - 1U] = '\0';
+            gnrmcData.bad_element_bool[idx] = false;
+        }
+        else
+        {
+            gnrmcData.bad_element_count[idx]++;
+            gnrmcData.bad_element_bool[idx] = true;
+        }
+
+        token = strtok(NULL, ",");
+        idx++;
+    }
+
+    {
+        int total_bad = 0;
+
+        for (int i = 0; i < MAX_GNRMC_ELEMENTS; i++)
+        {
+            if (gnrmcData.bad_element_bool[i] == true)
+            {
+                total_bad++;
+            }
+            if (gnrmcData.bad_element_count[i] >= gnrmcData.max_bad)
+            {
+                gnrmcData.bad_element_count[i] = 0UL;
+            }
+        }
+
+        gnrmcData.total_bad_elements = total_bad;
+    }
 }
 
-// ------------------------------------------------------------------------------
-// Checksum validator.
-// ------------------------------------------------------------------------------
-bool validateChecksumSerial1(char * buffer) {
-  memset(serial1Data.gotSum, 0, sizeof(serial1Data.gotSum));
-  serial1Data.gotSum[0]=buffer[strlen(buffer) - 3];
-  serial1Data.gotSum[1]=buffer[strlen(buffer) - 2];
-  serial1Data.checksum_of_buffer= getCheckSumSerial1(buffer);
-  serial1Data.checksum_in_buffer=h2d2(serial1Data.gotSum[0], serial1Data.gotSum[1]);
-  if (serial1Data.checksum_in_buffer==serial1Data.checksum_of_buffer) {return true;}
-  return false;
+void GPATT(void)
+{
+    char *token;
+    size_t idx = 0U;
+
+    token = strtok(gpattData.sentence, ",");
+
+    /* Same per-token walk as GNGGA(), over gpatt_fields. */
+    while ((token != NULL) && (idx < (size_t)MAX_GPATT_ELEMENTS))
+    {
+        const GPATTFieldSpec *spec = &gpatt_fields[idx];
+
+        if (spec->strip_checksum_suffix == true)
+        {
+            token = strtok(token, "*");
+        }
+
+        if (spec->validate == nullptr)
+        {
+            /* checksum element: already verified before the sentence was tokenized */
+        }
+        else if ((token != NULL) && (spec->validate(token) == true))
+        {
+            char *dest = gpattData.*(spec->field);
+
+            (void)strncpy(dest, token, (size_t)MAX_GLOBAL_ELEMENT_SIZE - 1U);
+            dest[MAX_GLOBAL_ELEMENT_SIZE - 1U] = '\0';
+            gpattData.bad_element_bool[idx] = false;
+        }
+        else
+        {
+            gpattData.bad_element_count[idx]++;
+            gpattData.bad_element_bool[idx] = true;
+        }
+
+        token = strtok(NULL, ",");
+        idx++;
+    }
+
+    {
+        int total_bad = 0;
+
+        for (int i = 0; i < MAX_GPATT_ELEMENTS; i++)
+        {
+            if (gpattData.bad_element_bool[i] == true)
+            {
+                total_bad++;
+            }
+            if (gpattData.bad_element_count[i] >= gpattData.max_bad)
+            {
+                gpattData.bad_element_count[i] = 0UL;
+            }
+        }
+
+        gpattData.total_bad_elements = total_bad;
+    }
 }
 
-// ------------------------------------------------------------------------------
-// Data validate.
-// ------------------------------------------------------------------------------
-void validateGPSData(void) {
-    // --------------------------------------------------------------------------
-    // Parse data if all sentences have been collected.
-    // --------------------------------------------------------------------------
-    if (serial1Data.gngga_bool==true && serial1Data.gnrmc_bool==true && serial1Data.gpatt_bool==true) {
-      // -------------------------------------------------
-      // Check GNGGA.
-      // -------------------------------------------------
-      memset(gnggaData.outsentence, 0, sizeof(gnggaData.outsentence));
-      strcpy(gnggaData.outsentence, gnggaData.sentence);
-      gnggaData.valid_checksum=validateChecksumSerial1(gnggaData.sentence);
-      if (gnggaData.valid_checksum==true) {GNGGA();}
-      // -------------------------------------------------
-      // Read GNRMC.
-      // -------------------------------------------------
-      memset(gnrmcData.outsentence, 0, sizeof(gnrmcData.outsentence));
-      strcpy(gnrmcData.outsentence, gnrmcData.sentence);
-      gnrmcData.valid_checksum=validateChecksumSerial1(gnrmcData.sentence);
-      if (gnrmcData.valid_checksum==true) {GNRMC();}
-      // -------------------------------------------------
-      // Read GPATT.
-      // -------------------------------------------------
-      memset(gpattData.outsentence, 0, sizeof(gpattData.outsentence));
-      strcpy(gpattData.outsentence, gpattData.sentence);
-      gpattData.valid_checksum=validateChecksumSerial1(gpattData.sentence);
-      if (gpattData.valid_checksum==true) {GPATT();}
+void readGPS(void)
+{
+    bool done;
+
+    serial1Data.gngga_bool = false;
+    serial1Data.gnrmc_bool = false;
+    serial1Data.gpatt_bool = false;
+    done = false;
+
+    /* WTGPS300P outputs every 100ms; collect one of each sentence type
+       before returning. Rule 15.4: no break statements in this loop —
+       `done` is the single point of control instead. */
+    while (done == false)
+    {
+        esp_task_wdt_reset();
+
+        if (Serial1.available() > 0)
+        {
+            memset(serial1Data.BUFFER, 0, sizeof(serial1Data.BUFFER));
+            serial1Data.nbytes = Serial1.readBytesUntil('\n', serial1Data.BUFFER, sizeof(serial1Data.BUFFER));
+
+            /* Exclude partial reads. */
+            if (serial1Data.nbytes > 10UL)
+            {
+                /* GNRMC is only checked once GNGGA has been collected this
+                   cycle, and GPATT only once both GNGGA and GNRMC have —
+                   the device emits sentences in that fixed order. */
+                if (serial1Data.gngga_bool == false)
+                {
+                    if (strncmp(serial1Data.BUFFER, "$GNGGA", 6) == 0)
+                    {
+                        (void)strncpy(gnggaData.sentence, serial1Data.BUFFER, sizeof(gnggaData.sentence) - 1U);
+                        gnggaData.sentence[sizeof(gnggaData.sentence) - 1U] = '\0';
+                        serial1Data.gngga_bool = true;
+                    }
+                }
+                else if (serial1Data.gnrmc_bool == false)
+                {
+                    if (strncmp(serial1Data.BUFFER, "$GNRMC", 6) == 0)
+                    {
+                        (void)strncpy(gnrmcData.sentence, serial1Data.BUFFER, sizeof(gnrmcData.sentence) - 1U);
+                        gnrmcData.sentence[sizeof(gnrmcData.sentence) - 1U] = '\0';
+                        serial1Data.gnrmc_bool = true;
+                    }
+                }
+                else if (serial1Data.gpatt_bool == false)
+                {
+                    if (strncmp(serial1Data.BUFFER, "$GPATT", 6) == 0)
+                    {
+                        (void)strncpy(gpattData.sentence, serial1Data.BUFFER, sizeof(gpattData.sentence) - 1U);
+                        gpattData.sentence[sizeof(gpattData.sentence) - 1U] = '\0';
+                        serial1Data.gpatt_bool = true;
+                    }
+                }
+                else
+                {
+                    /* all three sentences already collected this cycle */
+                }
+            }
+
+            done = all_gps_sentences_collected();
+        }
+
+        if (done == false)
+        {
+            delay(1);
+        }
+    }
+}
+
+/* Rule 8.7: internal linkage; only validateChecksumSerial1() calls this. */
+static int getCheckSumSerial1(const char *string)
+{
+    size_t len = strlen(string);
+    size_t i;
+    int result = 0;
+
+    /* XOR every byte between the leading '$' and the trailing '*', exactly
+       as the WTGPS300P computes its own checksum. i is the sole loop
+       control variable (Rule 14.2). */
+    for (i = 0U; i < len; i++)
+    {
+        unsigned char c = (unsigned char)string[i];
+
+        if (c == '*')
+        {
+            break; /* single break in this loop (Rule 15.4) */
+        }
+        if (c != '$')
+        {
+            result ^= c;
+        }
+    }
+
+    return result;
+}
+
+/* Rule 8.7: internal linkage; only validateGPSData() calls this. */
+static bool validateChecksumSerial1(const char *buffer)
+{
+    bool result;
+    size_t len = strlen(buffer);
+
+    if (len < 3U)
+    {
+        printf("validateChecksumSerial1: buffer too short (len=%u): \"%s\"\n", (unsigned)len, buffer);
+        result = false;
+    }
+    else
+    {
+        char checksum_chars[2];
+        int checksum_of_buffer;
+        uint8_t checksum_in_buffer;
+
+        /* The last 2 characters before the sentence's final byte are the
+           transmitted checksum's hex digits. */
+        checksum_chars[0] = buffer[len - 3U];
+        checksum_chars[1] = buffer[len - 2U];
+
+        checksum_of_buffer = getCheckSumSerial1(buffer);
+        checksum_in_buffer = h2d2(checksum_chars[0], checksum_chars[1]);
+
+        if (checksum_in_buffer == H2D_INVALID_VALUE)
+        {
+            printf("validateChecksumSerial1: invalid hex digits in checksum field: '%c%c' buffer=\"%s\"\n",
+                   checksum_chars[0], checksum_chars[1], buffer);
+            result = false;
+        }
+        else if ((int)checksum_in_buffer == checksum_of_buffer)
+        {
+            result = true;
+        }
+        else
+        {
+            printf("validateChecksumSerial1: checksum mismatch (calc=0x%02X, recv=0x%02X) buffer=\"%s\"\n",
+                   checksum_of_buffer, checksum_in_buffer, buffer);
+            result = false;
+        }
+    }
+
+    return result;
+}
+
+void validateGPSData(void)
+{
+    /* Parse data only once all three sentences have been collected. */
+    if (all_gps_sentences_collected() == true)
+    {
+        (void)strncpy(gnggaData.outsentence, gnggaData.sentence, sizeof(gnggaData.outsentence) - 1U);
+        gnggaData.outsentence[sizeof(gnggaData.outsentence) - 1U] = '\0';
+        gnggaData.valid_checksum = validateChecksumSerial1(gnggaData.sentence);
+        if (gnggaData.valid_checksum == true)
+        {
+            GNGGA();
+        }
+
+        (void)strncpy(gnrmcData.outsentence, gnrmcData.sentence, sizeof(gnrmcData.outsentence) - 1U);
+        gnrmcData.outsentence[sizeof(gnrmcData.outsentence) - 1U] = '\0';
+        gnrmcData.valid_checksum = validateChecksumSerial1(gnrmcData.sentence);
+        if (gnrmcData.valid_checksum == true)
+        {
+            GNRMC();
+        }
+
+        (void)strncpy(gpattData.outsentence, gpattData.sentence, sizeof(gpattData.outsentence) - 1U);
+        gpattData.outsentence[sizeof(gpattData.outsentence) - 1U] = '\0';
+        gpattData.valid_checksum = validateChecksumSerial1(gpattData.sentence);
+        if (gpattData.valid_checksum == true)
+        {
+            GPATT();
+        }
     }
 }

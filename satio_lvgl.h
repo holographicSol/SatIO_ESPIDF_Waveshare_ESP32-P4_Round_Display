@@ -81,22 +81,14 @@
 //     #define LV_DRAW_SW_ASM          LV_DRAW_SW_ASM_NONE
 // #endif
 
-LV_FONT_DECLARE(Mono_Bold_12);
 LV_FONT_DECLARE(Mono_Bold_14);
-LV_FONT_DECLARE(Mono_Bold_16);
-
-// LV_FONT_DECLARE(active_space_10);
-// LV_FONT_DECLARE(space_ranger_15);
 LV_FONT_DECLARE(cobalt_alien_17);
-// LV_FONT_DECLARE(space_ranger_19);
-// LV_FONT_DECLARE(space_ranger_21);
-// LV_FONT_DECLARE(space_ranger_23);
 LV_FONT_DECLARE(cobalt_alien_25);
 
 #define LV_TXT_ALPHA_LC "abcdefghijklmnopqrstuvwxyz"
 #define LV_TXT_ALPHA_UC "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define LV_TXT_NUM      "0123456789"
-#define LV_TXT_NUMDEC  "0123456789.-"
+#define LV_TXT_NUMDEC   "0123456789.-"
 #define LV_TXT_ALNUMDEC "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-"
 
 /** ---------------------------------------------------------------------------------------

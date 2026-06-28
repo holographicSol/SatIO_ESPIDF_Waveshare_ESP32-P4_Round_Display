@@ -3,6 +3,8 @@
 
 /*
   strval - Written By Benjamin Jack Cullen
+
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include <stdbool.h>  // For bool

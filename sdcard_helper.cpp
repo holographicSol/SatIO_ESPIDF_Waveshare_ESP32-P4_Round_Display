@@ -1,5 +1,5 @@
 /*
-  SDCARD - Written By Benjamin Jack Cullen.
+  SDCard Helper - Written By Benjamin Jack Cullen.
   Requirements:
     (1) Modified SD_MMC library to release LDO on end().
     (2) Optional: Modified ffconf library for exFat support (FAT only by default).
@@ -11,23 +11,14 @@
 
   - sdcardEnd() is handled internally when required in various scenarios.
 
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
+
 */
 
-// #include "./sdcard_helper.h"
-// #include <Arduino.h>
-// #include <FS.h>
-// #include "SD_MMC.h"
-// #include "SPIFFS.h"
-// #include "satio_file.h"
-// #include "matrix.h"
-// #include "custommapping.h"
-// #include "ff.h"
-// #include <SdFat.h>
 #include "bsp/esp32_p4_wifi6_touch_lcd_xc.h"
 #include <limits.h>
 #include "esp_log.h"
 #include "lvgl.h"
-// #include "./strval.h"
 #include <stdlib.h>       // malloc/free
 #include "ff.h"           // FatFs core
 #include "diskio.h"       // Disk I/O
@@ -39,17 +30,14 @@
 #include "sd_pwr_ctrl_by_on_chip_ldo.h"
 #include <stdio.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include "bsp/esp-bsp.h"
 
-#include <stdio.h>
-#include <limits.h>
 #include <string.h>
-// #include <iostream>
 #include <assert.h>
 #include <float.h>
 #include <math.h>
 #include <Arduino.h>
-// #include <Wire.h>
 
 #include "./config.h"
 #include "./REG.h"
@@ -68,7 +56,6 @@
 #include "./system_data.h"
 #include "./sdcard_helper.h"
 #include "./task_handler.h"
-// #include "./multi_display_controller.h"
 #include "./i2c_helper.h"
 #include "./wit_c_sdk.h"
 
@@ -77,23 +64,14 @@
 #include <esp_task_wdt.h>
 #include "esp_pm.h"
 #include "esp_attr.h"
-#include "esp_log.h"
 #include "esp_partition.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_partition.h"
 #include "esp_spiffs.h"
 #include "esp_heap_caps.h"
 #include "nvs_flash.h"
 #include "esp_system.h"
 #include "driver/uart.h"
-
-void getMountPoint();
-void getSDCardType();
-void getCardSize();
-void getTotalBytes();
-void getUsedBytes();
-void getSectorSize();
 
 struct SDCardStruct sdcardData = {
     .sdcard_inserted=false,
@@ -119,8 +97,8 @@ struct sdcardFlagStruct sdcardFlagData = {
   .no_delay_flag=false,
 
   .success_flag=0,
-  .rw_failed=NULL,
-  .rw_running=NULL,
+  .rw_failed=false,
+  .rw_running=false,
 
   .mount_sdcard_flag=false,
   .unmount_sdcard_flag=false,
@@ -149,14 +127,20 @@ struct sdcardFlagStruct sdcardFlagData = {
  * @return Size of the file in bytes, or 0 if the file cannot be accessed.
  */
 uint32_t get_file_size(const char* filename) {
+    /* Rule 15.5: single point of exit via a result variable. */
     struct stat st;
-    if(stat(filename, &st) == 0) {
+    uint32_t file_size;
+
+    if (stat(filename, &st) == 0) {
         printf("File '%s' size: %lu bytes\n", filename, (uint32_t)st.st_size);
-        return (uint32_t)st.st_size;
+        file_size = (uint32_t)st.st_size;
     }
-    
-    printf("get_file_size: Cannot stat '%s'\n", filename);
-    return 0;
+    else {
+        printf("get_file_size: Cannot stat '%s'\n", filename);
+        file_size = 0;
+    }
+
+    return file_size;
 }
 
 /** ----------------------------------------------------------------------------------------
@@ -177,7 +161,7 @@ void * sd_file_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     printf("LVGL_FS: Full path '%s'\n", full_path);
     
     FILE * f = fopen(full_path, "r");
-    if (!f) {
+    if (f == NULL) {
         printf("LVGL_FS: FAILED '%s'\n", full_path);
     } else {
         printf("LVGL_FS: SUCCESS '%s' -> %p\n", full_path, f);
@@ -230,11 +214,16 @@ lv_fs_res_t sd_file_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_t 
 lv_fs_res_t sd_file_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs_whence_t whence)
 {
     FILE * f = (FILE *)file_p;
-    // printf("LVGL_FS Seeking file: %p\n", file_p);
-    int stdio_whence = whence == LV_FS_SEEK_CUR ? SEEK_CUR : 
-                       whence == LV_FS_SEEK_END ? SEEK_END : SEEK_SET;
-    int res = fseek(f, pos, stdio_whence);
-    // printf("LVGL_FS: Seek %lu -> %d\n", pos, res);
+    int stdio_whence;
+    int res;
+
+    /* a chain of plain if/else if is used instead of nested ?: so each
+       whence value is easy to read on its own line. */
+    if (whence == LV_FS_SEEK_CUR) {stdio_whence = SEEK_CUR;}
+    else if (whence == LV_FS_SEEK_END) {stdio_whence = SEEK_END;}
+    else {stdio_whence = SEEK_SET;}
+
+    res = fseek(f, pos, stdio_whence);
     return res == 0 ? LV_FS_RES_OK : LV_FS_RES_UNKNOWN;
 }
 
@@ -265,7 +254,7 @@ void * sd_dir_open(lv_fs_drv_t * drv, const char * path)
     printf("LVGL_FS: Full dir path '%s'\n", full_path);
     
     DIR * d = opendir(full_path);
-    if (!d) {
+    if (d == NULL) {
         printf("LVGL_FS: DIR FAILED '%s'\n", full_path);
     } else {
         printf("LVGL_FS: DIR SUCCESS '%s' -> %p\n", full_path, d);
@@ -281,26 +270,31 @@ lv_fs_res_t sd_dir_read(lv_fs_drv_t * drv, void * dir_p, char * fn, uint32_t btr
 {
     DIR * d = (DIR *)dir_p;
     struct dirent * entry;
-    
+    bool found = false;
+
     while ((entry = readdir(d)) != NULL) {
         // Skip . and .. entries
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }
-        
+
         // btr is max buffer size - use min(entry name len, btr)
         size_t fn_len = strlen(entry->d_name) + 1;
         size_t copy_len = (fn_len < btr) ? fn_len : btr;
         strncpy(fn, entry->d_name, copy_len - 1);
         fn[copy_len - 1] = '\0';
-        
+
         printf("LVGL_FS: Found '%s'\n", fn);
-        return LV_FS_RES_OK;
+        found = true;
+        break; /* single break in this loop (Rule 15.4) */
     }
-    
-    printf("LVGL_FS: End of directory\n");
-    *fn = '\0';  // Clear buffer at EOF
-    return LV_FS_RES_OK;
+
+    if (found == false) {
+        printf("LVGL_FS: End of directory\n");
+        *fn = '\0';  // Clear buffer at EOF
+    }
+
+    return LV_FS_RES_OK; /* Rule 15.5: single point of exit */
 }
 
 /** ----------------------------------------------------------------------------------------
@@ -327,24 +321,29 @@ lv_fs_res_t sd_dir_close(lv_fs_drv_t * drv, void * dir_p)
  * 
  */
 uint8_t * load_file_bytes_to_psram(const char * filename, uint32_t f_size) {
-
-    // Allocate PSRAM
+    /* Rule 15.5: single point of exit; proceed guards the read once
+       allocation has been confirmed instead of returning early. */
     uint8_t * psram_pointer = (uint8_t *)heap_caps_malloc(f_size, MALLOC_CAP_SPIRAM);
-    if(!psram_pointer) {printf("ERROR: PSRAM allocation failed\n"); return NULL;}
 
-    printf("PSRAM allocated at %p\n", psram_pointer);
-
-    // Read bytes into PSRAM
-    FILE * f = fopen(filename, "rb");
-    if (f) {
-        size_t bytes_read = fread(psram_pointer, 1, f_size, f);
-        fclose(f);
-        printf("Read %zu/%lu bytes from SD\n", bytes_read, f_size);
+    if (psram_pointer == NULL) {
+        printf("ERROR: PSRAM allocation failed\n");
     }
     else {
-        printf("ERROR: Cannot open %s\n", filename);
-        heap_caps_free(psram_pointer);
-        psram_pointer = NULL;
+        FILE * f;
+
+        printf("PSRAM allocated at %p\n", psram_pointer);
+
+        f = fopen(filename, "rb");
+        if (f != NULL) {
+            size_t bytes_read = fread(psram_pointer, 1, f_size, f);
+            fclose(f);
+            printf("Read %zu/%lu bytes from SD\n", bytes_read, f_size);
+        }
+        else {
+            printf("ERROR: Cannot open %s\n", filename);
+            heap_caps_free(psram_pointer);
+            psram_pointer = NULL;
+        }
     }
 
     return psram_pointer;
@@ -355,15 +354,20 @@ uint8_t * load_file_bytes_to_psram(const char * filename, uint32_t f_size) {
  * 
  */
 bool mount_sd(void) {
+    /* Rule 15.5: single point of exit via a result variable. */
     esp_err_t err = bsp_sdcard_mount();
-    if (err != ESP_OK) {
-        printf("Failed to mount SD card, error: %s\n", esp_err_to_name(err));
-    }
+    bool mounted;
+
     if (err == ESP_OK) {
         printf("SD card mounted successfully\n");
-        return true;
+        mounted = true;
     }
-    return false;
+    else {
+        printf("Failed to mount SD card, error: %s\n", esp_err_to_name(err));
+        mounted = false;
+    }
+
+    return mounted;
 }
 
 /** ----------------------------------------------------------------------------------------
@@ -371,18 +375,21 @@ bool mount_sd(void) {
  * 
  */
 bool unmount_sd(void) {
+    /* Rule 15.5: single point of exit via a result variable. */
     esp_err_t err = bsp_sdcard_unmount();
-    if (err != ESP_OK) {
-        printf("Failed to unmount SD card, error: %s\n", esp_err_to_name(err));
-    }
+    bool unmounted;
+
     if (err == ESP_OK) {
         printf("SD card unmounted successfully\n");
-        return true;
+        unmounted = true;
     }
-    return false;
-}
+    else {
+        printf("Failed to unmount SD card, error: %s\n", esp_err_to_name(err));
+        unmounted = false;
+    }
 
-#include <sys/stat.h>
+    return unmounted;
+}
 
 /** ----------------------------------------------------------------------------------------
  * @brief List directory.
@@ -391,63 +398,99 @@ bool unmount_sd(void) {
  * 
  */
 void list_directory(const char * dirname) {
+    /* Rule 15.5: single point of exit; proceed guards the listing instead
+       of returning early when the directory cannot be opened. */
     DIR *dir = opendir(dirname);
-    if (!dir) {
+
+    if (dir == NULL) {
         printf("Failed to open %s\n", dirname);
-        return;
     }
-    
-    printf("%s contents:\n", dirname);
-    printf("%-20s %12s\n", "Name", "Size (bytes)");
-    printf("----------------------------------------\n");
-    
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        char fullpath[512];
-        snprintf(fullpath, sizeof(fullpath), "%s/%s", dirname, entry->d_name);
-        
-        struct stat st;
-        if (stat(fullpath, &st) == 0) {
-            printf("%-20s %12llu\n", entry->d_name, (unsigned long long)st.st_size);
-        } else {
-            printf("%-20s %12s\n", entry->d_name, "?");
+    else {
+        struct dirent *entry;
+
+        printf("%s contents:\n", dirname);
+        printf("%-20s %12s\n", "Name", "Size (bytes)");
+        printf("----------------------------------------\n");
+
+        while ((entry = readdir(dir)) != NULL) {
+            char fullpath[512];
+            struct stat st;
+
+            snprintf(fullpath, sizeof(fullpath), "%s/%s", dirname, entry->d_name);
+
+            if (stat(fullpath, &st) == 0) {
+                printf("%-20s %12llu\n", entry->d_name, (unsigned long long)st.st_size);
+            } else {
+                printf("%-20s %12s\n", entry->d_name, "?");
+            }
         }
+        closedir(dir);
     }
-    closedir(dir);
 }
 
-uint64_t getFreeBytes() {
-  FATFS *fs;
-  DWORD fre_clust;
-  FRESULT res = f_getfree("0:", &fre_clust, &fs);  // or "/sdcard:" if using that mount point
-  if (res != FR_OK) {
-    Serial.printf("f_getfree failed: %d\n", res);
-    return 0;
+/** ----------------------------------------------------------------------------------------
+ * @brief Get the number of free bytes on the mounted FAT volume.
+ *
+ * @return Free space in bytes, or 0 if it cannot be read.
+ */
+size_t getFreeBytes(void) {
+  /* Rule 15.5: single point of exit via a result variable.
+   *
+   * esp_vfs_fat_info() is used instead of a raw f_getfree("0:", ...) call:
+   * taskStorage() mounts/unmounts the SD card every loop iteration, and
+   * ff_diskio_get_drive() hands out the first free drive slot on each
+   * mount rather than always re-using slot 0 -- so a hardcoded "0:" can
+   * silently resolve to a stale/empty FatFs table entry (FR_NO_FILESYSTEM)
+   * even while the card is genuinely mounted and usable. esp_vfs_fat_info()
+   * looks up the *current* drive for BSP_SD_MOUNT_POINT through the same
+   * registration table fopen()/fread()/fwrite() already use correctly,
+   * so it can't desync from the drive number actually in use.
+   */
+  uint64_t total_bytes = 0;
+  uint64_t free_bytes_u64 = 0;
+  esp_err_t err = esp_vfs_fat_info(BSP_SD_MOUNT_POINT, &total_bytes, &free_bytes_u64);
+  size_t free_bytes;
+
+  if (err != ESP_OK) {
+    printf("esp_vfs_fat_info failed: %s\n", esp_err_to_name(err));
+    free_bytes = 0;
   }
-  uint64_t cluster_size   = (uint64_t)fs->csize * 512ULL;  // sector size usually 512
-  return fre_clust * cluster_size;
+  else {
+    free_bytes = (size_t)free_bytes_u64;
+  }
+
+  // uncomment to debug
+  //   printf("[getFreeBytes] total_bytes=%lld\n", total_bytes);
+  //   printf("[getFreeBytes] free_bytes_u64=%lld\n", free_bytes_u64);
+  //   printf("[getFreeBytes] free_bytes=%d\n", free_bytes);
+
+  return free_bytes;
 }
 
-bool isAvailableBytes(uint64_t num_bytes) {
-  if (num_bytes < getFreeBytes()) {return true;}
-  return false;
+bool isAvailableBytes(size_t num_bytes) {
+  return num_bytes < getFreeBytes(); /* Rule 15.5: single point of exit */
 }
 
 /** ----------------------------------------------------------------------------------------
  * @brief Check if SD card root directory is ready.
- * 
+ *
  * @return true if the SD card root directory can be opened, false otherwise.
- * 
+ *
  */
 bool is_fs_ready(const char * dirname) {
+    /* Rule 15.5: single point of exit via a result variable. */
     DIR *dir = opendir(dirname);
-    if (dir) {
+    bool ready;
+
+    if (dir != NULL) {
         closedir(dir);
-        // printf("Accessed directory successfully: %s\n", dirname);
-        return true;
+        ready = true;
     }
-    // printf("Could not access directory: %s\n", dirname);
-    return false;
+    else {
+        ready = false;
+    }
+
+    return ready;
 }
 
 /** ----------------------------------------------------------------------------------------
@@ -456,7 +499,11 @@ bool is_fs_ready(const char * dirname) {
  */
 void sd_lvgl_register(void)
 {
-    lv_fs_drv_t fs_drv;
+    /* lv_fs_drv_register() stores the address passed to it rather than
+       copying the struct, so fs_drv must outlive this function; static
+       storage duration keeps the registered driver valid for the program's
+       lifetime instead of becoming a dangling pointer once this returns. */
+    static lv_fs_drv_t fs_drv;
     lv_fs_drv_init(&fs_drv);
     fs_drv.letter = 'S';
     fs_drv.open_cb = sd_file_open;
@@ -473,17 +520,14 @@ void sd_lvgl_register(void)
     // printf("LVGL S: drive registered\n");
 }
 
-int last_cd_state = -1;           // unknown at start
-bool sd_is_mounted = false;       // track your own mount status
-
 /** ----------------------------------------------------------------------------------------
  * @brief Unmount
- * 
+ *
  */
-void sdcard_unmount() {
+void sdcard_unmount(void) {
     // unmount
     // printf("Attempting SD card unmount...\n");
-    if (sdcardData.sdcard_mounted) {
+    if (sdcardData.sdcard_mounted == true) {
         esp_err_t err = bsp_sdcard_unmount();
         if (err != ESP_OK) {
             // printf("Failed to unmount SD card, error: %s\n", esp_err_to_name(err));
@@ -501,40 +545,41 @@ void sdcard_unmount() {
  * handle hotplug events.
  * 
  */
-void sdcard_mount() {
-    // 
-    if (sdcardData.allow_mount == false) {return;}
+void sdcard_mount(void) {
+    /* Rule 15.5: single point of exit; proceed guards the mount attempt
+       instead of returning early when mounting is currently disallowed. */
+    if (sdcardData.allow_mount == true) {
+        // mount
+        // printf("Attempting SD card mount...\n");
+        esp_err_t err = bsp_sdcard_mount();
+        if (err != ESP_OK) {
+            // printf("Failed to mount SD card, error: %s\n", esp_err_to_name(err));
+            sdcardData.sdcard_mounted = false;
 
-    // mount
-    // printf("Attempting SD card mount...\n");
-    esp_err_t err = bsp_sdcard_mount();
-    if (err != ESP_OK) {
-        // printf("Failed to mount SD card, error: %s\n", esp_err_to_name(err));
-        sdcardData.sdcard_mounted = false;
+            // (todo) clear any pending operations
+            // sdcardFlagData.save_mapping = false;
+            // sdcardFlagData.load_mapping = false;
+            // sdcardFlagData.delete_mapping = false;
 
-        // (todo) clear any pending operations
-        // sdcardFlagData.save_mapping = false;
-        // sdcardFlagData.load_mapping = false;
-        // sdcardFlagData.delete_mapping = false;
+            // sdcardFlagData.save_matrix = false;
+            // sdcardFlagData.load_matrix = false;
+            // sdcardFlagData.delete_matrix = false;
 
-        // sdcardFlagData.save_matrix = false;
-        // sdcardFlagData.load_matrix = false;
-        // sdcardFlagData.delete_matrix = false;
-
-        // sdcardFlagData.save_system = false;
-        // sdcardFlagData.load_system = false;
-        // sdcardFlagData.delete_system = false;
+            // sdcardFlagData.save_system = false;
+            // sdcardFlagData.load_system = false;
+            // sdcardFlagData.delete_system = false;
+        }
+        else {
+            // printf("SD card mounted successfully\n");
+            // sd_lvgl_register(); // register file related callback functions with LVGL
+            sdcardData.sdcard_mounted = true;
+        }
+        // printf("SDCLK: %d\n", gpio_get_level((gpio_num_t)SD_CLK));
+        // printf("SDCMD: %d\n", gpio_get_level((gpio_num_t)SD_CMD));
+        // printf("SDD0: %d\n", gpio_get_level((gpio_num_t)SD_D0));
+        // printf("SDD1: %d\n", gpio_get_level((gpio_num_t)SD_D1));
+        // printf("SDD2: %d\n", gpio_get_level((gpio_num_t)SD_D2));
+        // printf("SDD3: %d\n", gpio_get_level((gpio_num_t)SD_D3)); // card detect
+        // printf("SD_PWR: %d\n", gpio_get_level((gpio_num_t)SD_PWR));
     }
-    else {
-        // printf("SD card mounted successfully\n");
-        // sd_lvgl_register(); // register file related callback functions with LVGL
-        sdcardData.sdcard_mounted = true;
-    }
-    // printf("SDCLK: %d\n", gpio_get_level((gpio_num_t)SD_CLK));
-    // printf("SDCMD: %d\n", gpio_get_level((gpio_num_t)SD_CMD));
-    // printf("SDD0: %d\n", gpio_get_level((gpio_num_t)SD_D0));
-    // printf("SDD1: %d\n", gpio_get_level((gpio_num_t)SD_D1));
-    // printf("SDD2: %d\n", gpio_get_level((gpio_num_t)SD_D2));
-    // printf("SDD3: %d\n", gpio_get_level((gpio_num_t)SD_D3)); // card detect
-    // printf("SD_PWR: %d\n", gpio_get_level((gpio_num_t)SD_PWR));
 }

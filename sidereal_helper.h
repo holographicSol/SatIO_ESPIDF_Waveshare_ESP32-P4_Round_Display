@@ -1,5 +1,7 @@
 /*
     Sidereal Helper. Written by Benjamin Jack Cullen.
+
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef SIDEREAL_HELPER_H
@@ -13,6 +15,12 @@ extern SiderealPlanets myAstro;
 
 // ----------------------------------------------------------------------------------------
 // Planet Data Structure.
+//
+// One block of ra/dec/az/alt/r/s per tracked body, plus helio_ecliptic_lat/
+// long/radius_vector/distance/ecliptic_lat/long for every body except the
+// Sun (which also mirrors its ecliptic position into earth_ecliptic_lat/
+// long) and the Moon (which instead has phase/luminance fields, having no
+// heliocentric position of its own).
 // ----------------------------------------------------------------------------------------
 struct SiderealPlantetsStruct {
     bool track_sun;
@@ -171,44 +179,95 @@ extern struct SiderealExtraData siderealExtraData;
 // ----------------------------------------------------------------------------------------
 // Function Prototypes.
 // ----------------------------------------------------------------------------------------
+
+/**
+ * Sets the observer's location, UTC date/time, and local date/time used by
+ * every track*()/trackObject() call that follows.
+ * @note Must be called before trackPlanets() or trackObject().
+ */
 void setSiderealData(double latitude, double longitude,
     double utc_year, double utc_month, double utc_mday,
     double utc_hour, double utc_minute, double utc_second,
     double local_hour, double local_minute, double local_second,
     double altitude);
 
+/**
+ * Computes RA/Dec, Alt/Az, and rise/set times for the object at object_i
+ * within the table named by object_table_i, and stores the result in
+ * siderealObjectData.
+ * @note setSiderealData() must be called first.
+ */
 void trackObject(int object_table_i, int object_i);
 
+/**
+ * Identifies the object nearest the given RA/Dec coordinates across every
+ * object table, and populates siderealObjectData with its identity (but
+ * not yet its Alt/Az or rise/set times — see trackObject()).
+ */
 void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m, float dec_s);
 
+/**
+ * Identifies the object nearest the given RA/Dec coordinates, then tracks
+ * it (Alt/Az and rise/set times).
+ */
 void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s);
 
-void trackSun(void);
-void trackPlanets();
+/**
+ * Tracks every enabled body (Sun, Moon, and planets) for the current
+ * sidereal data set by setSiderealData().
+ */
+void trackPlanets(void);
 
-RaDecData gyroOffsetZenithRADec(double deg_ra, double deg_dec);
+/**
+ * Offsets the local zenith RA/Dec by a gyroscope yaw/pitch delta, handling
+ * wraparound and pole-crossing, and returns the result formatted as both
+ * colon-separated and zero-padded strings.
+ * @param gyro_yaw_deg Yaw delta in degrees, applied to RA
+ * @param gyro_pitch_deg Pitch delta in degrees, applied to Dec
+ */
+RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg);
 
+/** Tracks the Sun: RA/Dec, Alt/Az, ecliptic position, sunrise/sunset. */
 void trackSun(void);
+/** Tracks the Moon: RA/Dec, Alt/Az, moonrise/moonset, phase, luminance. */
 void trackLuna(void);
+/** Tracks Mercury: RA/Dec, Alt/Az, heliocentric/ecliptic position, rise/set. */
 void trackMercury(void);
+/** Tracks Venus: RA/Dec, Alt/Az, heliocentric/ecliptic position, rise/set. */
 void trackVenus(void);
+/** Tracks Mars: RA/Dec, Alt/Az, heliocentric/ecliptic position, rise/set. */
 void trackMars(void);
+/** Tracks Jupiter: RA/Dec, Alt/Az, heliocentric/ecliptic position, rise/set. */
 void trackJupiter(void);
+/** Tracks Saturn: RA/Dec, Alt/Az, heliocentric/ecliptic position, rise/set. */
 void trackSaturn(void);
+/** Tracks Uranus: RA/Dec, Alt/Az, heliocentric/ecliptic position, rise/set. */
 void trackUranus(void);
+/** Tracks Neptune: RA/Dec, Alt/Az, heliocentric/ecliptic position, rise/set. */
 void trackNeptune(void);
 
+/** Resets the Sun's tracked fields to NAN. */
 void clearSun(void);
+/** Resets the Moon's tracked fields to NAN. */
 void clearLuna(void);
+/** Resets Mercury's tracked fields to NAN. */
 void clearMercury(void);
+/** Resets Venus's tracked fields to NAN. */
 void clearVenus(void);
+/** Resets Mars's tracked fields to NAN. */
 void clearMars(void);
+/** Resets Jupiter's tracked fields to NAN. */
 void clearJupiter(void);
+/** Resets Saturn's tracked fields to NAN. */
 void clearSaturn(void);
+/** Resets Uranus's tracked fields to NAN. */
 void clearUranus(void);
+/** Resets Neptune's tracked fields to NAN. */
 void clearNeptune(void);
+/** Resets every tracked body's fields to NAN. */
 void clearTrackPlanets(void);
 
+/** Initializes the underlying SiderealPlanets instance (myAstro). */
 void myAstroBegin(void);
 
 #endif

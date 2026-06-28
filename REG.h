@@ -67,7 +67,7 @@ extern "C" {
 #define GZ					0x39
 #define HX					0x3a
 #define HY					0x3b
-// #define HZ					0x3c // uncomment to include definition. commented due to redefinition in current project.
+#define HZ					0x3c
 #define Roll				0x3d
 #define Pitch				0x3e
 #define Yaw					0x3f

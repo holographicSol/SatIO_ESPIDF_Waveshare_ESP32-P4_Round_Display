@@ -50,30 +50,24 @@ TaskHandle_t TaskUniverse;
 #define TASK_GPS_PRIORITY                   5    // High: Time/location sync critical
 #define TASK_GYRO_PRIORITY                  4    // High: Sensor reading
 #define TASK_MULTIPLEXERS_PRIORITY          4    // High: Analog multiplexing
-
 #define TASK_SWITCHES_PRIORITY              4    // High: Logic processing
 #define TASK_SERIALINFOCMD_PRIORITY         3    // High: User interaction & debugging
 #define TASK_UNIVERSE_PRIORITY              2    // LOW: Computational, non-critical delay
 #define TASK_STORAGE_PRIORITY               2    // LOW: I/O operations, can wait
-#define TASK_LOGGING_PRIORITY               2    // LOW: Asynchronous data recording
 
-// CORE 0 ASSIGNMENT
+// CORE ASSIGNMENT
 #define TASK_SERIALINFOCMD_CORE             0    // Core 0: Keep on main (timing-sensitive)
 #define TASK_GYRO_CORE                      0    // Core 0: Sensor reading (less critical)
 #define TASK_MULTIPLEXERS_CORE              0    // Core 0: ADC/multiplexing
 #define TASK_PORTCONTROLLERINPUT_CORE       0    // Core 0: I2C/GPIO input
 #define TASK_SWITCHES_CORE                  0    // Core 0: Outputs need responsiveness
 #define TASK_UNIVERSE_CORE                  0    // Core 0: Heavy compute, can defer
-#define TASK_STORAGE_CORE                   0    // Core 0: I/O-heavy, doesn't need Core 0
-#define TASK_LOGGING_CORE                   0    // Core 0: I/O operations
+#define TASK_STORAGE_CORE                   1    // Core 1: Deferred to Core 1 while Core 0 is too busy
 #define TASK_DISPLAY_CORE                   0    // Core 0: UI responsiveness
-
-// CORE 1 ASSIGNMENT
 #define TASK_GPS_CORE                       0    // Critical for system timing regardless of gps
 
 // STACK SIZES (Adjusted for task complexity)
 #define TASK_STORAGE_STACK_SIZE             6144    // +50%: SDMMC operations
-#define TASK_LOGGING_STACK_SIZE             5120    // +25%: File I/O
 #define TASK_SERIALINFOCMD_STACK_SIZE       16384   // Keep: Complex serial processing
 #define TASK_GPS_STACK_SIZE                 5120    // +25%: NMEA parsing + INS updates
 #define TASK_GYRO_STACK_SIZE                4608    // +12%: Math operations
@@ -144,22 +138,25 @@ void taskStorage(void * pvParameters) {
   for (;;) {
     esp_task_wdt_reset();
     // ------------------------------------------------
-    // SDCard Begin
+    // SDCard Detect/Mount
     // ------------------------------------------------
     sdcard_mount();
     esp_task_wdt_reset();
     // statSDCard(); // uncomment to debug
+
     // ------------------------------------------------
     // Check Flags
     // ------------------------------------------------
+    if (systemData.logging_enabled==true) {
+      Serial.printf("[log] setting write flag true\n");
+      sdcardFlagData.write_log=true;
+    }
     sdcardFlagHandler();
     esp_task_wdt_reset();
+    
     // ------------------------------------------------
-    // Power Down and persist sdcard data
+    // SDCard Power Down / Unmount
     // ------------------------------------------------
-    // sdcardSleepMode0();
-    // vTaskDelay(500 / portTICK_PERIOD_MS); // give some time for sdcard to settle before unmount
-
     sdcard_unmount();
     esp_task_wdt_reset();
     // ------------------------------------------------
@@ -179,54 +176,6 @@ void createTaskStorage() {
     TASK_STORAGE_PRIORITY, /* Priority of the task */
     &TaskStorage,          /* Task handle. */
     TASK_STORAGE_CORE);    /* Core where the task should run */
-}
-
-/** ----------------------------------------------------------------------------
- * Logging Task.
- * 
- * @brief Writes logs to disk.
- */
-void taskLogging(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
-  for (;;) {
-    esp_task_wdt_reset();
-    // check disk space
-    // delete old logs if required
-    // write new log
-    // dt,x,y,z
-    // Serial.printf("[log] flag: %d\n", systemData.logging_enabled);
-    if (systemData.logging_enabled) {
-      Serial.printf("[log] setting write flag true\n");
-      sdcardFlagData.write_log=true;
-    }
-    esp_task_wdt_reset();
-    // else {Serial.println("[log] not enabled");}
-    // ------------------------------------------------
-    // Counters
-    // ------------------------------------------------.
-    systemData.i_count_logging++;
-    systemData.interval_breach_logging = true;
-    if (systemData.i_count_logging >= UINT32_MAX - 2)
-    systemData.i_count_logging = 0;
-    esp_task_wdt_reset();
-    // ------------------------------------------------
-    // Delay next iteration of task.
-    // ------------------------------------------------
-    if (TICK_DELAY_TASK_LOGGING==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_LOGGING / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_LOGGING);}
-  }
-}
-void createTaskLogging() {
-    xTaskCreatePinnedToCore(
-    taskLogging,   /* Function to implement the task */
-    "TaskLogging", /* Name of the task */
-    TASK_LOGGING_STACK_SIZE, /* Stack size in words */
-    NULL,          /* Task input parameter */
-    TASK_LOGGING_PRIORITY, /* Priority of the task */
-    &TaskLogging,          /* Task handle. */
-    TASK_LOGGING_CORE);    /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
@@ -352,106 +301,6 @@ void system_timing() {
         prev_tv_sec = tv_now.tv_sec;
         systemData.interval_breach_1_second_output=true;
         intervalBreach1Second();
-        printf(
-            "[ %llu ] "
-            "gps=%s "
-            "rtc=%s "
-            "lcl=%s "
-            "lmst=%s "
-            "lst=%f "
-            "syn=%s "
-
-            "t_loop=%ld "
-            "t_gps=%ld "
-            "t_ins=%ld "
-            "t_gyr=%ld "
-            "t_mlx=%ld "
-            "t_uni=%ld "
-            "t_pci=%ld "
-            "t_mtx=%ld "
-            "t_pco=%ld "
-            "t_dsp=%ld  "
-
-            "sat=%s "
-            "deg_lat=%.7f "
-            "deg_lon=%.7f "
-            "usr_lat=%.7f "
-            "usr_lon=%.7f "
-            "sys_lat=%.7f "
-            "sys_lon=%.7f "
-
-            "current_zenith_ra=%s "
-            "current_zenith_dec=%s "
-            "gyro_0_ra=%s "
-            "gyro_0_dec=%s "
-
-            "alt=%.2f "
-            "ghd=%.2f "
-            "spd=%.2f "
-            
-            "ang_x=%.2f "
-            "ang_y=%.2f "
-            "ang_z=%.2f "
-            "gyr_x=%.2f "
-            "gyr_y=%.2f "
-            "gyr_z=%.2f "
-            "acc_x=%.2f "
-            "acc_y=%.2f "
-            "acc_z=%.2f "
-            "mag_x=%d "
-            "mag_y=%d "
-            "mag_z=%d\n",
-            
-            satioData.local_unixtime_uS,
-            gnrmcData.utc_time,
-            satioData.padded_rtc_time_HHMMSS,
-            satioData.padded_local_time_HHMMSS,
-            satioData.padded_LMST_time_HHMMSS,
-            siderealExtraData.local_sidereal_time,
-            satioData.padded_rtc_sync_time_HHMMSS,
-
-            systemData.total_loops_a_second,
-            systemData.total_gps,
-            systemData.total_ins,
-            systemData.total_gyro_0,
-            systemData.total_mplex_0,
-            systemData.total_universe,
-            systemData.total_portcontroller_input,
-            systemData.total_matrix,
-            systemData.total_portcontroller_output,
-            systemData.total_display,
-
-            gnggaData.satellite_count,
-            satioData.degrees_latitude,
-            satioData.degrees_longitude,
-            satioData.user_degrees_latitude,
-            satioData.user_degrees_longitude,
-            satioData.system_degrees_latitude,
-            satioData.system_degrees_longitude,
-
-            siderealExtraData.local_zenith_ra_dec.formatted_ra_str,
-            siderealExtraData.local_zenith_ra_dec.formatted_dec_str,
-
-            siderealExtraData.gyro_0_ra_dec.formatted_ra_str,
-            siderealExtraData.gyro_0_ra_dec.formatted_dec_str,
-
-            satioData.altitude,
-            satioData.ground_heading,
-            satioData.speed,
-
-            gyroData.gyro_0_ang_x,
-            gyroData.gyro_0_ang_y,
-            gyroData.gyro_0_ang_z,
-            gyroData.gyro_0_gyr_x,
-            gyroData.gyro_0_gyr_y,
-            gyroData.gyro_0_gyr_z,
-            gyroData.gyro_0_acc_x,
-            gyroData.gyro_0_acc_y,
-            gyroData.gyro_0_acc_z,
-            gyroData.gyro_0_mag_x,
-            gyroData.gyro_0_mag_y,
-            gyroData.gyro_0_mag_z
-        );
     }
 }
 
@@ -888,10 +737,6 @@ void setTasksDelayUltimatePerformance() {
     TICK_DELAY_TASK_SWITCHES=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SWITCHES;
     xTaskNotifyGive(TaskSwitches);
 
-    DELAY_TASK_LOGGING=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_LOGGING;
-    TICK_DELAY_TASK_LOGGING=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_LOGGING;
-    xTaskNotifyGive(TaskLogging);
-
     // DELAY_TASK_STORAGE=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_STORAGE;
     // TICK_DELAY_TASK_STORAGE=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_STORAGE;
     // xTaskNotifyGive(TaskStorage);
@@ -926,10 +771,6 @@ void setTasksDelayPowerSaving() {
     DELAY_TASK_SWITCHES=POWER_CONFIG_1_SECOND_DELAY_TASK_SWITCHES;
     TICK_DELAY_TASK_SWITCHES=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_SWITCHES;
     xTaskNotifyGive(TaskSwitches);
-
-    DELAY_TASK_LOGGING=POWER_CONFIG_1_SECOND_DELAY_TASK_LOGGING;
-    TICK_DELAY_TASK_LOGGING=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_LOGGING;
-    xTaskNotifyGive(TaskLogging);
 
     // DELAY_TASK_STORAGE=POWER_CONFIG_1_SECOND_DELAY_TASK_STORAGE;
     // TICK_DELAY_TASK_STORAGE=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_STORAGE;

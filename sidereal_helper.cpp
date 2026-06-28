@@ -1,5 +1,7 @@
 /*
     Sidereal Helper. Written by Benjamin Jack Cullen.
+
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include "sidereal_helper.h"
@@ -30,7 +32,7 @@ struct SiderealPlantetsStruct siderealPlanetData = {
 
     .earth_ecliptic_lat = 0.0,
     .earth_ecliptic_long = 0.0,
-    
+
     .sun_ra = NAN,
     .sun_dec = NAN,
     .sun_az = NAN,
@@ -194,22 +196,26 @@ struct SiderealExtraData siderealExtraData = {
     },
 };
 
-static inline double radec_to_ra_deg(const RaDecData *r) {
-    double sign = (r->ra_h < 0) ? -1.0 : 1.0; // RA hours shouldn't be negative, but guard anyway
+static inline double radec_to_ra_deg(const RaDecData *r)
+{
+    double sign = (r->ra_h < 0) ? -1.0 : 1.0; /* RA hours shouldn't be negative, but guard anyway */
     double hours = fabs((double)r->ra_h) + (double)r->ra_m / 60.0 + (double)r->ra_s / 3600.0;
-    return sign * hours * 15.0; // 15 deg per hour
+    return sign * hours * 15.0; /* 15 deg per hour */
 }
 
-static inline double radec_to_dec_deg(const RaDecData *r) {
+static inline double radec_to_dec_deg(const RaDecData *r)
+{
     double sign = (r->dec_d < 0) ? -1.0 : 1.0;
     double deg = fabs((double)r->dec_d) + (double)r->dec_m / 60.0 + (double)r->dec_s / 3600.0;
     return sign * deg;
 }
 
-// gyro_yaw_deg    -> applied to RA  (ang_z)
-// gyro_pitch_deg  -> applied to Dec (ang_y)
-RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
-
+/*
+ * gyro_yaw_deg   -> applied to RA  (ang_z)
+ * gyro_pitch_deg -> applied to Dec (ang_y)
+ */
+RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg)
+{
     RaDecData radecData = {
         0,   // ra_h
         0,   // ra_m
@@ -217,34 +223,43 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
         0,   // dec_d
         0,   // dec_m
         0.0, // dec_s
-        {0},  // formatted_ra_str
-        {0}   // formatted_dec_str
+        {0}, // formatted_ra_str
+        {0}  // formatted_dec_str
     };
-    
-    // convert ra and dec to degrees to make the following conversions easier
-    double ra_deg  = radec_to_ra_deg(&siderealExtraData.local_zenith_ra_dec);
+
+    /* Convert RA and Dec to degrees to make the following conversions easier. */
+    double ra_deg = radec_to_ra_deg(&siderealExtraData.local_zenith_ra_dec);
     double dec_deg = radec_to_dec_deg(&siderealExtraData.local_zenith_ra_dec);
 
-    // Dec offset is a direct angular offset
+    /* Dec offset is a direct angular offset. */
     double new_dec = dec_deg + gyro_pitch_deg;
 
-    // RA offset: yaw
+    /* RA offset scales with 1/cos(dec) (degrees of RA shrink toward the poles). */
     double cos_dec = cos(dec_deg * M_PI / 180.0);
-    double ra_scale = (fabs(cos_dec) > 1e-6) ? (1.0 / cos_dec) : 1.0; // guard near pole
-    double new_ra = ra_deg + gyro_yaw_deg * ra_scale;
+    double ra_scale = (fabs(cos_dec) > 1e-6) ? (1.0 / cos_dec) : 1.0; /* guard near pole */
+    double new_ra = ra_deg + (gyro_yaw_deg * ra_scale);
 
-    // Handle Dec pole-crossing: reflect back into [-90,90] and flip RA 180°
-    if (new_dec > 90.0) {
+    /* Handle Dec pole-crossing: reflect back into [-90,90] and flip RA 180 degrees. */
+    if (new_dec > 90.0)
+    {
         new_dec = 180.0 - new_dec;
         new_ra += 180.0;
-    } else if (new_dec < -90.0) {
+    }
+    else if (new_dec < -90.0)
+    {
         new_dec = -180.0 - new_dec;
         new_ra += 180.0;
     }
+    else
+    {
+        /* no pole crossing */
+    }
 
-    // RA
     new_ra = fmod(new_ra, 360.0);
-    if (new_ra < 0.0) new_ra += 360.0;
+    if (new_ra < 0.0)
+    {
+        new_ra += 360.0;
+    }
 
     double ra_hours = new_ra / 15.0;
     int ra_h = (int)ra_hours;
@@ -252,28 +267,38 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
     int ra_m = (int)ra_rem_min;
     double ra_s = (ra_rem_min - ra_m) * 60.0;
 
-    if (ra_s >= 59.9995) {
+    if (ra_s >= 59.9995)
+    {
         ra_s = 0.0;
         ra_m++;
-        if (ra_m >= 60) { ra_m = 0; ra_h++; if (ra_h >= 24) ra_h = 0; }
+        if (ra_m >= 60)
+        {
+            ra_m = 0;
+            ra_h++;
+            if (ra_h >= 24)
+            {
+                ra_h = 0;
+            }
+        }
     }
 
-    // Dec
-    char sign = (new_dec < 0.0) ? '-' : '+';
     double adeg = fabs(new_dec);
-
     int dec_d = (int)adeg;
     double dec_rem_min = (adeg - dec_d) * 60.0;
     int dec_m = (int)dec_rem_min;
     double dec_s = (dec_rem_min - dec_m) * 60.0;
 
-    if (dec_s >= 59.995) {
+    if (dec_s >= 59.995)
+    {
         dec_s = 0.0;
         dec_m++;
-        if (dec_m >= 60) { dec_m = 0; dec_d++; }
+        if (dec_m >= 60)
+        {
+            dec_m = 0;
+            dec_d++;
+        }
     }
 
-    // Populate the RaDecData structure
     radecData.ra_h = ra_h;
     radecData.ra_m = ra_m;
     radecData.ra_s = ra_s;
@@ -281,237 +306,197 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg) {
     radecData.dec_m = dec_m;
     radecData.dec_s = dec_s;
 
-    // Format RA
-    memset(radecData.formatted_ra_str, 0, sizeof(radecData.formatted_ra_str));
     snprintf(radecData.formatted_ra_str, sizeof(radecData.formatted_ra_str), "%02d:%02d:%02.2f", ra_h, ra_m, ra_s);
-    // printf("[gyroOffsetZenithRADec] formatted ra:  %s\n", radecData.formatted_ra_str);
-    // Format Dec
-    memset(radecData.formatted_dec_str, 0, sizeof(radecData.formatted_dec_str));
     snprintf(radecData.formatted_dec_str, sizeof(radecData.formatted_dec_str), "%+02d:%02d:%02.2f", dec_d, dec_m, dec_s);
-    // printf("[gyroOffsetZenithRADec] formatted dec: %s\n", radecData.formatted_dec_str);
-
-    // Format padded RA
-    memset(radecData.padded_ra_str, 0, sizeof(radecData.padded_ra_str));
     snprintf(radecData.padded_ra_str, sizeof(radecData.padded_ra_str), "%02d%02d%02.2f", ra_h, ra_m, ra_s);
-    // printf("[gyroOffsetZenithRADec] padded ra:  %s\n", radecData.padded_ra_str);
-    // Format padded Dec
-    memset(radecData.padded_dec_str, 0, sizeof(radecData.padded_dec_str));
     snprintf(radecData.padded_dec_str, sizeof(radecData.padded_dec_str), "%+02d%02d%02.2f", dec_d, dec_m, dec_s);
-    // printf("[gyroOffsetZenithRADec] padded dec: %s\n", radecData.padded_dec_str);
 
-    return radecData;
+    return radecData; /* Rule 15.5: single point of exit */
+}
+
+/*
+ * Object identity fields (name/type/constellation) share one shape: look
+ * up a number (already range-checked by the caller's getXIdentifiedObjectNumber()),
+ * and either copy the matching vendor-table string into dest, or "Unidentified"
+ * if the number is out of range. Rule 16.x: this helper plus a pointer to
+ * the matching SiderealObjects::print*() method replaces ~14 duplicated
+ * functions with one implementation per call site.
+ */
+typedef char *(SiderealObjects::*ObjectPrintFn)(int n);
+
+static void setObjectStringField(char *dest, size_t dest_size, int num, int max_num, ObjectPrintFn print_fn)
+{
+    const char *value;
+
+    if ((num >= 0) && (num <= max_num))
+    {
+        value = (myAstroObj.*print_fn)(num);
+    }
+    else
+    {
+        value = "Unidentified";
+    }
+
+    (void)strncpy(dest, value, dest_size - 1U);
+    dest[dest_size - 1U] = '\0';
+}
+
+/*
+ * Object distance fields have no "Unidentified" fallback: if num is out of
+ * range, *dest is left exactly as the caller (always clearAllObjects()
+ * first) already set it.
+ */
+typedef double (SiderealObjects::*ObjectDistFn)(int n);
+
+static void setObjectDistField(double *dest, int num, int max_num, ObjectDistFn dist_fn)
+{
+    if ((num >= 0) && (num <= max_num))
+    {
+        *dest = (myAstroObj.*dist_fn)(num);
+    }
 }
 
 // ----------------------------------------------------------------------------------------
 // Set Object Name.
 // ----------------------------------------------------------------------------------------
-void setObjectStarName() {
-    int num = myAstroObj.getIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsstars_names_num) {
-        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_name, myAstroObj.printStarName(num));
-    }
-    else {
-        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_name, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectStarName(void)
+{
+    setObjectStringField(siderealObjectData.object_name, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getIdentifiedObjectNumber(), SObjectsstars_names_num,
+                          &SiderealObjects::printStarName);
 }
-void setObjectMessierName() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsmessier_names_num) {
-        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_name, myAstroObj.printMessierName(num));
-    }
-    else {
-        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_name, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectMessierName(void)
+{
+    setObjectStringField(siderealObjectData.object_name, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getAltIdentifiedObjectNumber(), SObjectsmessier_names_num,
+                          &SiderealObjects::printMessierName);
 }
-void setObjectCaldwellName() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectcaldwell_names_num) {
-        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_name, myAstroObj.printCaldwellName(num));
-    }
-    else {
-        memset(siderealObjectData.object_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_name, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectCaldwellName(void)
+{
+    setObjectStringField(siderealObjectData.object_name, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getAltIdentifiedObjectNumber(), SObjectcaldwell_names_num,
+                          &SiderealObjects::printCaldwellName);
 }
+
 // ----------------------------------------------------------------------------------------
 // Set Object Type.
 // ----------------------------------------------------------------------------------------
-void setObjectStarType() {
-    int num = myAstroObj.getIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsstars_names_num) {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_type, myAstroObj.printStarType(num));
-    }
-    else {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectStarType(void)
+{
+    setObjectStringField(siderealObjectData.object_type, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getIdentifiedObjectNumber(), SObjectsstars_names_num,
+                          &SiderealObjects::printStarType);
 }
-void setObjectNGCType() {
-    int num = myAstroObj.getIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsNGC_names_num) {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_type, myAstroObj.printNGCType(num));
-    }
-    else {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectNGCType(void)
+{
+    setObjectStringField(siderealObjectData.object_type, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getIdentifiedObjectNumber(), SObjectsNGC_names_num,
+                          &SiderealObjects::printNGCType);
+}
+static void setObjectICType(void)
+{
+    setObjectStringField(siderealObjectData.object_type, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getIdentifiedObjectNumber(), SObjectsIC_names_num,
+                          &SiderealObjects::printICType);
+}
+static void setObjectMessierType(void)
+{
+    setObjectStringField(siderealObjectData.object_type, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getAltIdentifiedObjectNumber(), SObjectsmessier_names_num,
+                          &SiderealObjects::printMessierType);
+}
+static void setObjectCaldwelllType(void)
+{
+    setObjectStringField(siderealObjectData.object_type, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getAltIdentifiedObjectNumber(), SObjectcaldwell_names_num,
+                          &SiderealObjects::printCaldwellType);
+}
+static void setObjectHerschelType(void)
+{
+    setObjectStringField(siderealObjectData.object_type, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getAltIdentifiedObjectNumber(), SObjectHerschel400_names_num,
+                          &SiderealObjects::printHerschel400Type);
 }
 
-void setObjectICType() {
-    int num = myAstroObj.getIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsIC_names_num) {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_type, myAstroObj.printICType(num));
-    }
-    else {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
-}
-
-void setObjectMessierType() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsmessier_names_num) {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_type, myAstroObj.printMessierType(num));
-    }
-    else {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
-}
-void setObjectCaldwelllType() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectcaldwell_names_num) {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_type, myAstroObj.printCaldwellType(num));
-    }
-    else {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
-}
-void setObjectHerschelType() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectHerschel400_names_num) {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_type, myAstroObj.printHerschel400Type(num));
-    }
-    else {
-        memset(siderealObjectData.object_type, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_type, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
-}
 // ----------------------------------------------------------------------------------------
 // Set Object Constellation.
 // ----------------------------------------------------------------------------------------
-// void setObjectStarConstellation() {
-//     if (myAstroObj.getIdentifiedObjectNumber() <= SObjectsstars_names_num) {
-//     memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-//     strcpy(siderealObjectData.object_con, myAstroObj.printStarCon(myAstroObj.getIdentifiedObjectNumber()));
-//     }
-// }
-void setObjectNGCConstellation() {
-    int num = myAstroObj.getIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsNGC_names_num) {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_con, myAstroObj.printNGCCon(num));
-    }
-    else {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+// Stars have no constellation lookup in the vendor table (no printStarCon()).
+static void setObjectNGCConstellation(void)
+{
+    setObjectStringField(siderealObjectData.object_con, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getIdentifiedObjectNumber(), SObjectsNGC_names_num,
+                          &SiderealObjects::printNGCCon);
 }
-void setObjectICConstellation() {
-    int num = myAstroObj.getIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsIC_names_num) {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_con, myAstroObj.printICCon(num));
-    }
-    else {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectICConstellation(void)
+{
+    setObjectStringField(siderealObjectData.object_con, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getIdentifiedObjectNumber(), SObjectsIC_names_num,
+                          &SiderealObjects::printICCon);
 }
-void setObjectMessierConstellation() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsmessier_names_num) {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_con, myAstroObj.printMessierCon(num));
-    }
-    else {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectMessierConstellation(void)
+{
+    setObjectStringField(siderealObjectData.object_con, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getAltIdentifiedObjectNumber(), SObjectsmessier_names_num,
+                          &SiderealObjects::printMessierCon);
 }
-void setObjectCaldwellConstellation() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectcaldwell_names_num) {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_con, myAstroObj.printCaldwellCon(num));
-    }
-    else {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectCaldwellConstellation(void)
+{
+    setObjectStringField(siderealObjectData.object_con, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getAltIdentifiedObjectNumber(), SObjectcaldwell_names_num,
+                          &SiderealObjects::printCaldwellCon);
 }
-void setObjectHerschelConstellation() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectHerschel400_names_num) {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strcpy(siderealObjectData.object_con, myAstroObj.printHerschel400Con(num));
-    }
-    else {
-        memset(siderealObjectData.object_con, 0, MAX_GLOBAL_ELEMENT_SIZE);
-        strncpy(siderealObjectData.object_con, "Unidentified", MAX_GLOBAL_ELEMENT_SIZE - 1);
-    }
+static void setObjectHerschelConstellation(void)
+{
+    setObjectStringField(siderealObjectData.object_con, MAX_GLOBAL_ELEMENT_SIZE,
+                          myAstroObj.getAltIdentifiedObjectNumber(), SObjectHerschel400_names_num,
+                          &SiderealObjects::printHerschel400Con);
 }
+
 // ----------------------------------------------------------------------------------------
 // Set Object Distance.
 // ----------------------------------------------------------------------------------------
-void setObjectStarDist() {
-    int num = myAstroObj.getIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsstars_names_num) {
-        siderealObjectData.object_dist = myAstroObj.printStarDist(num);
-    }
+static void setObjectStarDist(void)
+{
+    setObjectDistField(&siderealObjectData.object_dist, myAstroObj.getIdentifiedObjectNumber(),
+                        SObjectsstars_names_num, &SiderealObjects::printStarDist);
 }
-void setObjectMessierDist() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectsmessier_names_num) {
-        siderealObjectData.object_dist = myAstroObj.printMessierDist(num);
-    }
+static void setObjectMessierDist(void)
+{
+    setObjectDistField(&siderealObjectData.object_dist, myAstroObj.getAltIdentifiedObjectNumber(),
+                        SObjectsmessier_names_num, &SiderealObjects::printMessierDist);
 }
-void setObjectCaldwellDist() {
-    int num = myAstroObj.getAltIdentifiedObjectNumber();
-    if (num >= 0 && num <= SObjectcaldwell_names_num) {
-        siderealObjectData.object_dist = myAstroObj.printCaldwellDist(num);
-    }
+static void setObjectCaldwellDist(void)
+{
+    setObjectDistField(&siderealObjectData.object_dist, myAstroObj.getAltIdentifiedObjectNumber(),
+                        SObjectcaldwell_names_num, &SiderealObjects::printCaldwellDist);
 }
+
 // ----------------------------------------------------------------------------------------
 // Set Object Table Name.
 // ----------------------------------------------------------------------------------------
-void setObjectTableName() {
-    memset(siderealObjectData.object_table_name, 0, MAX_GLOBAL_ELEMENT_SIZE);
-    strcpy(siderealObjectData.object_table_name, siderealObjectData.object_table[siderealObjectData.object_table_i]);
+static void setObjectTableName(void)
+{
+    const char *name = siderealObjectData.object_table[siderealObjectData.object_table_i];
+
+    (void)strncpy(siderealObjectData.object_table_name, name, MAX_GLOBAL_ELEMENT_SIZE - 1U);
+    siderealObjectData.object_table_name[MAX_GLOBAL_ELEMENT_SIZE - 1U] = '\0';
 }
+
 // ----------------------------------------------------------------------------------------
 // Set Object ID.
 // ----------------------------------------------------------------------------------------
-void setID() {
+static void setID(void)
+{
     siderealObjectData.object_number = myAstroObj.getIdentifiedObjectNumber();
 }
-void setAltID() {
+static void setAltID(void)
+{
     siderealObjectData.object_number = myAstroObj.getAltIdentifiedObjectNumber();
 }
 
-void clearAllObjects() {
+static void clearAllObjects(void)
+{
     siderealObjectData.object_ra = NAN;
     siderealObjectData.object_dec = NAN;
     siderealObjectData.object_az = NAN;
@@ -526,13 +511,13 @@ void clearAllObjects() {
     memset(siderealObjectData.object_desc, 0, MAX_GLOBAL_ELEMENT_SIZE);
 }
 
-void setStars() {
+static void setStars(void)
+{
     clearAllObjects();
     setObjectTableName();
     setID();
     setObjectStarName();
     setObjectStarType();
-    // setObjectStarConstellation();
     setObjectStarDist();
     // distance from earth
     // distance from system
@@ -540,19 +525,21 @@ void setStars() {
     // magnitude from system
 }
 
-void setNGC() {
+static void setNGC(void)
+{
     clearAllObjects();
     setObjectTableName();
     setID();
     setObjectNGCType();
-    setObjectNGCConstellation(); 
+    setObjectNGCConstellation();
     // distance
     // distance from system
     // magnitude from earth
     // magnitude from system
 }
 
-void setIC() {
+static void setIC(void)
+{
     clearAllObjects();
     setObjectTableName();
     setID();
@@ -564,7 +551,8 @@ void setIC() {
     // magnitude from system
 }
 
-void setOther() {
+static void setOther(void)
+{
     clearAllObjects();
     setObjectTableName();
     setID();
@@ -577,7 +565,8 @@ void setOther() {
     // magnitude from system
 }
 
-void setMessier() {
+static void setMessier(void)
+{
     clearAllObjects();
     setObjectTableName();
     setAltID();
@@ -590,7 +579,8 @@ void setMessier() {
     // magnitude from system
 }
 
-void setCaldwell() {
+static void setCaldwell(void)
+{
     clearAllObjects();
     setObjectTableName();
     setAltID();
@@ -603,7 +593,8 @@ void setCaldwell() {
     // magnitude from system
 }
 
-void setHerschel400() {
+static void setHerschel400(void)
+{
     clearAllObjects();
     setObjectTableName();
     setAltID();
@@ -618,7 +609,8 @@ void setHerschel400() {
 // ----------------------------------------------------------------------------------------
 // Track Planets.
 // ----------------------------------------------------------------------------------------
-void trackSun(void) {
+void trackSun(void)
+{
     myAstro.doSun();
     siderealPlanetData.sun_ra = myAstro.getRAdec();
     siderealPlanetData.sun_dec = myAstro.getDeclinationDec();
@@ -638,7 +630,8 @@ void trackSun(void) {
     siderealPlanetData.sun_s = myAstro.getSunsetTime();
 }
 
-void trackLuna(void) {
+void trackLuna(void)
+{
     myAstro.doMoon();
     siderealPlanetData.luna_ra = myAstro.getRAdec();
     siderealPlanetData.luna_dec = myAstro.getDeclinationDec();
@@ -652,136 +645,144 @@ void trackLuna(void) {
     siderealPlanetData.luna_lum = myAstro.getLunarLuminance();
 }
 
-void trackMercury(void) {
-    myAstro.doMercury();
-    siderealPlanetData.mercury_ra = myAstro.getRAdec();
-    siderealPlanetData.mercury_dec = myAstro.getDeclinationDec();
+/*
+ * Mercury through Neptune are tracked identically: do<Planet>(), pull
+ * RA/Dec, convert to Alt/Az, pull heliocentric/ecliptic position, then
+ * rise/set times via a fixed horizontal-displacement constant. Only the
+ * do<Planet>() call and the destination fields differ per planet, so one
+ * table plus one generic function (trackOuterPlanet()/clearOuterPlanet()
+ * below) replaces what would otherwise be 7 duplicated ~14-line bodies.
+ */
+typedef boolean (SiderealPlanets::*DoPlanetFn)(void);
+
+typedef struct {
+    DoPlanetFn do_planet;
+    double SiderealPlantetsStruct::*ra;
+    double SiderealPlantetsStruct::*dec;
+    double SiderealPlantetsStruct::*az;
+    double SiderealPlantetsStruct::*alt;
+    double SiderealPlantetsStruct::*helio_lat;
+    double SiderealPlantetsStruct::*helio_long;
+    double SiderealPlantetsStruct::*radius_vector;
+    double SiderealPlantetsStruct::*distance;
+    double SiderealPlantetsStruct::*ecliptic_lat;
+    double SiderealPlantetsStruct::*ecliptic_long;
+    double SiderealPlantetsStruct::*r;
+    double SiderealPlantetsStruct::*s;
+} OuterPlanetSpec;
+
+static const OuterPlanetSpec mercury_spec = {
+    &SiderealPlanets::doMercury,
+    &SiderealPlantetsStruct::mercury_ra, &SiderealPlantetsStruct::mercury_dec,
+    &SiderealPlantetsStruct::mercury_az, &SiderealPlantetsStruct::mercury_alt,
+    &SiderealPlantetsStruct::mercury_helio_ecliptic_lat, &SiderealPlantetsStruct::mercury_helio_ecliptic_long,
+    &SiderealPlantetsStruct::mercury_radius_vector, &SiderealPlantetsStruct::mercury_distance,
+    &SiderealPlantetsStruct::mercury_ecliptic_lat, &SiderealPlantetsStruct::mercury_ecliptic_long,
+    &SiderealPlantetsStruct::mercury_r, &SiderealPlantetsStruct::mercury_s
+};
+static const OuterPlanetSpec venus_spec = {
+    &SiderealPlanets::doVenus,
+    &SiderealPlantetsStruct::venus_ra, &SiderealPlantetsStruct::venus_dec,
+    &SiderealPlantetsStruct::venus_az, &SiderealPlantetsStruct::venus_alt,
+    &SiderealPlantetsStruct::venus_helio_ecliptic_lat, &SiderealPlantetsStruct::venus_helio_ecliptic_long,
+    &SiderealPlantetsStruct::venus_radius_vector, &SiderealPlantetsStruct::venus_distance,
+    &SiderealPlantetsStruct::venus_ecliptic_lat, &SiderealPlantetsStruct::venus_ecliptic_long,
+    &SiderealPlantetsStruct::venus_r, &SiderealPlantetsStruct::venus_s
+};
+static const OuterPlanetSpec mars_spec = {
+    &SiderealPlanets::doMars,
+    &SiderealPlantetsStruct::mars_ra, &SiderealPlantetsStruct::mars_dec,
+    &SiderealPlantetsStruct::mars_az, &SiderealPlantetsStruct::mars_alt,
+    &SiderealPlantetsStruct::mars_helio_ecliptic_lat, &SiderealPlantetsStruct::mars_helio_ecliptic_long,
+    &SiderealPlantetsStruct::mars_radius_vector, &SiderealPlantetsStruct::mars_distance,
+    &SiderealPlantetsStruct::mars_ecliptic_lat, &SiderealPlantetsStruct::mars_ecliptic_long,
+    &SiderealPlantetsStruct::mars_r, &SiderealPlantetsStruct::mars_s
+};
+static const OuterPlanetSpec jupiter_spec = {
+    &SiderealPlanets::doJupiter,
+    &SiderealPlantetsStruct::jupiter_ra, &SiderealPlantetsStruct::jupiter_dec,
+    &SiderealPlantetsStruct::jupiter_az, &SiderealPlantetsStruct::jupiter_alt,
+    &SiderealPlantetsStruct::jupiter_helio_ecliptic_lat, &SiderealPlantetsStruct::jupiter_helio_ecliptic_long,
+    &SiderealPlantetsStruct::jupiter_radius_vector, &SiderealPlantetsStruct::jupiter_distance,
+    &SiderealPlantetsStruct::jupiter_ecliptic_lat, &SiderealPlantetsStruct::jupiter_ecliptic_long,
+    &SiderealPlantetsStruct::jupiter_r, &SiderealPlantetsStruct::jupiter_s
+};
+static const OuterPlanetSpec saturn_spec = {
+    &SiderealPlanets::doSaturn,
+    &SiderealPlantetsStruct::saturn_ra, &SiderealPlantetsStruct::saturn_dec,
+    &SiderealPlantetsStruct::saturn_az, &SiderealPlantetsStruct::saturn_alt,
+    &SiderealPlantetsStruct::saturn_helio_ecliptic_lat, &SiderealPlantetsStruct::saturn_helio_ecliptic_long,
+    &SiderealPlantetsStruct::saturn_radius_vector, &SiderealPlantetsStruct::saturn_distance,
+    &SiderealPlantetsStruct::saturn_ecliptic_lat, &SiderealPlantetsStruct::saturn_ecliptic_long,
+    &SiderealPlantetsStruct::saturn_r, &SiderealPlantetsStruct::saturn_s
+};
+static const OuterPlanetSpec uranus_spec = {
+    &SiderealPlanets::doUranus,
+    &SiderealPlantetsStruct::uranus_ra, &SiderealPlantetsStruct::uranus_dec,
+    &SiderealPlantetsStruct::uranus_az, &SiderealPlantetsStruct::uranus_alt,
+    &SiderealPlantetsStruct::uranus_helio_ecliptic_lat, &SiderealPlantetsStruct::uranus_helio_ecliptic_long,
+    &SiderealPlantetsStruct::uranus_radius_vector, &SiderealPlantetsStruct::uranus_distance,
+    &SiderealPlantetsStruct::uranus_ecliptic_lat, &SiderealPlantetsStruct::uranus_ecliptic_long,
+    &SiderealPlantetsStruct::uranus_r, &SiderealPlantetsStruct::uranus_s
+};
+static const OuterPlanetSpec neptune_spec = {
+    &SiderealPlanets::doNeptune,
+    &SiderealPlantetsStruct::neptune_ra, &SiderealPlantetsStruct::neptune_dec,
+    &SiderealPlantetsStruct::neptune_az, &SiderealPlantetsStruct::neptune_alt,
+    &SiderealPlantetsStruct::neptune_helio_ecliptic_lat, &SiderealPlantetsStruct::neptune_helio_ecliptic_long,
+    &SiderealPlantetsStruct::neptune_radius_vector, &SiderealPlantetsStruct::neptune_distance,
+    &SiderealPlantetsStruct::neptune_ecliptic_lat, &SiderealPlantetsStruct::neptune_ecliptic_long,
+    &SiderealPlantetsStruct::neptune_r, &SiderealPlantetsStruct::neptune_s
+};
+
+static void trackOuterPlanet(const OuterPlanetSpec *spec)
+{
+    (myAstro.*(spec->do_planet))();
+    siderealPlanetData.*(spec->ra) = myAstro.getRAdec();
+    siderealPlanetData.*(spec->dec) = myAstro.getDeclinationDec();
     myAstro.doRAdec2AltAz();
-    siderealPlanetData.mercury_az = myAstro.getAzimuth();
-    siderealPlanetData.mercury_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
-    siderealPlanetData.mercury_helio_ecliptic_lat = myAstro.getHelioLat();
-    siderealPlanetData.mercury_helio_ecliptic_long = myAstro.getHelioLong();
-    siderealPlanetData.mercury_radius_vector = myAstro.getRadiusVec();
-    siderealPlanetData.mercury_distance = myAstro.getDistance();
-    siderealPlanetData.mercury_ecliptic_lat = myAstro.getEclipticLatitude();
-    siderealPlanetData.mercury_ecliptic_long = myAstro.getEclipticLongitude();
-    myAstro.doXRiseSetTimes(1.454441e-2); // toDo: actual horizonatal displacement
-    siderealPlanetData.mercury_r = myAstro.getRiseTime();
-    siderealPlanetData.mercury_s = myAstro.getSetTime();
+    siderealPlanetData.*(spec->az) = myAstro.getAzimuth();
+    siderealPlanetData.*(spec->alt) = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
+    siderealPlanetData.*(spec->helio_lat) = myAstro.getHelioLat();
+    siderealPlanetData.*(spec->helio_long) = myAstro.getHelioLong();
+    siderealPlanetData.*(spec->radius_vector) = myAstro.getRadiusVec();
+    siderealPlanetData.*(spec->distance) = myAstro.getDistance();
+    siderealPlanetData.*(spec->ecliptic_lat) = myAstro.getEclipticLatitude();
+    siderealPlanetData.*(spec->ecliptic_long) = myAstro.getEclipticLongitude();
+    myAstro.doXRiseSetTimes(1.454441e-2); /* toDo: actual horizontal displacement */
+    siderealPlanetData.*(spec->r) = myAstro.getRiseTime();
+    siderealPlanetData.*(spec->s) = myAstro.getSetTime();
 }
 
-void trackVenus(void) {
-    myAstro.doVenus();
-    siderealPlanetData.venus_ra = myAstro.getRAdec();
-    siderealPlanetData.venus_dec = myAstro.getDeclinationDec();
-    myAstro.doRAdec2AltAz();
-    siderealPlanetData.venus_az = myAstro.getAzimuth();
-    siderealPlanetData.venus_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
-    siderealPlanetData.venus_helio_ecliptic_lat = myAstro.getHelioLat();
-    siderealPlanetData.venus_helio_ecliptic_long = myAstro.getHelioLong();
-    siderealPlanetData.venus_radius_vector = myAstro.getRadiusVec();
-    siderealPlanetData.venus_distance = myAstro.getDistance();
-    siderealPlanetData.venus_ecliptic_lat = myAstro.getEclipticLatitude();
-    siderealPlanetData.venus_ecliptic_long = myAstro.getEclipticLongitude();
-    myAstro.doXRiseSetTimes(1.454441e-2); // toDo: actual horizonatal displacement
-    siderealPlanetData.venus_r = myAstro.getRiseTime();
-    siderealPlanetData.venus_s = myAstro.getSetTime();
+static void clearOuterPlanet(const OuterPlanetSpec *spec)
+{
+    siderealPlanetData.*(spec->ra) = NAN;
+    siderealPlanetData.*(spec->dec) = NAN;
+    siderealPlanetData.*(spec->az) = NAN;
+    siderealPlanetData.*(spec->alt) = NAN;
+    siderealPlanetData.*(spec->helio_lat) = NAN;
+    siderealPlanetData.*(spec->helio_long) = NAN;
+    siderealPlanetData.*(spec->radius_vector) = NAN;
+    siderealPlanetData.*(spec->distance) = NAN;
+    siderealPlanetData.*(spec->ecliptic_lat) = NAN;
+    siderealPlanetData.*(spec->ecliptic_long) = NAN;
+    siderealPlanetData.*(spec->r) = NAN;
+    siderealPlanetData.*(spec->s) = NAN;
 }
 
-void trackMars(void) {
-    myAstro.doMars();
-    siderealPlanetData.mars_ra = myAstro.getRAdec();
-    siderealPlanetData.mars_dec = myAstro.getDeclinationDec();
-    myAstro.doRAdec2AltAz();
-    siderealPlanetData.mars_az = myAstro.getAzimuth();
-    siderealPlanetData.mars_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
-    siderealPlanetData.mars_helio_ecliptic_lat = myAstro.getHelioLat();
-    siderealPlanetData.mars_helio_ecliptic_long = myAstro.getHelioLong();
-    siderealPlanetData.mars_radius_vector = myAstro.getRadiusVec();
-    siderealPlanetData.mars_distance = myAstro.getDistance();
-    siderealPlanetData.mars_ecliptic_lat = myAstro.getEclipticLatitude();
-    siderealPlanetData.mars_ecliptic_long = myAstro.getEclipticLongitude();
-    myAstro.doXRiseSetTimes(1.454441e-2); // toDo: actual horizonatal displacement
-    siderealPlanetData.mars_r = myAstro.getRiseTime();
-    siderealPlanetData.mars_s = myAstro.getSetTime();
-}
-
-void trackJupiter(void) {
-    myAstro.doJupiter();
-    siderealPlanetData.jupiter_ra = myAstro.getRAdec();
-    siderealPlanetData.jupiter_dec = myAstro.getDeclinationDec();
-    myAstro.doRAdec2AltAz();
-    siderealPlanetData.jupiter_az = myAstro.getAzimuth();
-    siderealPlanetData.jupiter_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
-    siderealPlanetData.jupiter_helio_ecliptic_lat = myAstro.getHelioLat();
-    siderealPlanetData.jupiter_helio_ecliptic_long = myAstro.getHelioLong();
-    siderealPlanetData.jupiter_radius_vector = myAstro.getRadiusVec();
-    siderealPlanetData.jupiter_distance = myAstro.getDistance();
-    siderealPlanetData.jupiter_ecliptic_lat = myAstro.getEclipticLatitude();
-    siderealPlanetData.jupiter_ecliptic_long = myAstro.getEclipticLongitude();
-    myAstro.doXRiseSetTimes(1.454441e-2); // toDo: actual horizonatal displacement
-    siderealPlanetData.jupiter_r = myAstro.getRiseTime();
-    siderealPlanetData.jupiter_s = myAstro.getSetTime();
-}
-
-void trackSaturn(void) {
-    myAstro.doSaturn();
-    siderealPlanetData.saturn_ra = myAstro.getRAdec();
-    siderealPlanetData.saturn_dec = myAstro.getDeclinationDec();
-    myAstro.doRAdec2AltAz();
-    siderealPlanetData.saturn_az = myAstro.getAzimuth();
-    siderealPlanetData.saturn_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
-    siderealPlanetData.saturn_helio_ecliptic_lat = myAstro.getHelioLat();
-    siderealPlanetData.saturn_helio_ecliptic_long = myAstro.getHelioLong();
-    siderealPlanetData.saturn_radius_vector = myAstro.getRadiusVec();
-    siderealPlanetData.saturn_distance = myAstro.getDistance();
-    siderealPlanetData.saturn_ecliptic_lat = myAstro.getEclipticLatitude();
-    siderealPlanetData.saturn_ecliptic_long = myAstro.getEclipticLongitude();
-    myAstro.doXRiseSetTimes(1.454441e-2); // toDo: actual horizonatal displacement
-    siderealPlanetData.saturn_r = myAstro.getRiseTime();
-    siderealPlanetData.saturn_s = myAstro.getSetTime();
-}
-
-void trackUranus(void) {
-    myAstro.doUranus();
-    siderealPlanetData.uranus_ra = myAstro.getRAdec();
-    siderealPlanetData.uranus_dec = myAstro.getDeclinationDec();
-    myAstro.doRAdec2AltAz();
-    siderealPlanetData.uranus_az = myAstro.getAzimuth();
-    siderealPlanetData.uranus_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
-    siderealPlanetData.uranus_helio_ecliptic_lat = myAstro.getHelioLat();
-    siderealPlanetData.uranus_helio_ecliptic_long = myAstro.getHelioLong();
-    siderealPlanetData.uranus_radius_vector = myAstro.getRadiusVec();
-    siderealPlanetData.uranus_distance = myAstro.getDistance();
-    siderealPlanetData.uranus_ecliptic_lat = myAstro.getEclipticLatitude();
-    siderealPlanetData.uranus_ecliptic_long = myAstro.getEclipticLongitude();
-    myAstro.doXRiseSetTimes(1.454441e-2); // toDo: actual horizonatal displacement
-    siderealPlanetData.uranus_r = myAstro.getRiseTime();
-    siderealPlanetData.uranus_s = myAstro.getSetTime();
-}
-
-void trackNeptune(void) {
-    myAstro.doNeptune();
-    siderealPlanetData.neptune_ra = myAstro.getRAdec();
-    siderealPlanetData.neptune_dec = myAstro.getDeclinationDec();
-    myAstro.doRAdec2AltAz();
-    siderealPlanetData.neptune_az = myAstro.getAzimuth();
-    siderealPlanetData.neptune_alt = myAstro.getAltitude() + myAstro.spData.DegreesAltitudeOffsetByElevationM;
-    siderealPlanetData.neptune_helio_ecliptic_lat = myAstro.getHelioLat();
-    siderealPlanetData.neptune_helio_ecliptic_long = myAstro.getHelioLong();
-    siderealPlanetData.neptune_radius_vector = myAstro.getRadiusVec();
-    siderealPlanetData.neptune_distance = myAstro.getDistance();
-    siderealPlanetData.neptune_ecliptic_lat = myAstro.getEclipticLatitude();
-    siderealPlanetData.neptune_ecliptic_long = myAstro.getEclipticLongitude();
-    myAstro.doXRiseSetTimes(1.454441e-2); // toDo: actual horizonatal displacement
-    siderealPlanetData.neptune_r = myAstro.getRiseTime();
-    siderealPlanetData.neptune_s = myAstro.getSetTime();
-}
+void trackMercury(void) { trackOuterPlanet(&mercury_spec); }
+void trackVenus(void)   { trackOuterPlanet(&venus_spec); }
+void trackMars(void)    { trackOuterPlanet(&mars_spec); }
+void trackJupiter(void) { trackOuterPlanet(&jupiter_spec); }
+void trackSaturn(void)  { trackOuterPlanet(&saturn_spec); }
+void trackUranus(void)  { trackOuterPlanet(&uranus_spec); }
+void trackNeptune(void) { trackOuterPlanet(&neptune_spec); }
 
 // ----------------------------------------------------------------------------------------
 // Clear Planet Data.
 // ----------------------------------------------------------------------------------------
-void clearSun(void) {
+void clearSun(void)
+{
     siderealPlanetData.sun_ra = NAN;
     siderealPlanetData.sun_dec = NAN;
     siderealPlanetData.sun_az = NAN;
@@ -790,7 +791,8 @@ void clearSun(void) {
     siderealPlanetData.sun_s = NAN;
 }
 
-void clearLuna(void) {
+void clearLuna(void)
+{
     siderealPlanetData.luna_ra = NAN;
     siderealPlanetData.luna_dec = NAN;
     siderealPlanetData.luna_az = NAN;
@@ -801,112 +803,16 @@ void clearLuna(void) {
     siderealPlanetData.luna_lum = NAN;
 }
 
-void clearMercury(void) {
-    siderealPlanetData.mercury_ra = NAN;
-    siderealPlanetData.mercury_dec = NAN;
-    siderealPlanetData.mercury_az = NAN;
-    siderealPlanetData.mercury_alt = NAN;
-    siderealPlanetData.mercury_r = NAN;
-    siderealPlanetData.mercury_s = NAN;
-    siderealPlanetData.mercury_helio_ecliptic_lat = NAN;
-    siderealPlanetData.mercury_helio_ecliptic_long = NAN;
-    siderealPlanetData.mercury_radius_vector = NAN;
-    siderealPlanetData.mercury_distance = NAN;
-    siderealPlanetData.mercury_ecliptic_lat = NAN;
-    siderealPlanetData.mercury_ecliptic_long = NAN;
-}
+void clearMercury(void) { clearOuterPlanet(&mercury_spec); }
+void clearVenus(void)   { clearOuterPlanet(&venus_spec); }
+void clearMars(void)    { clearOuterPlanet(&mars_spec); }
+void clearJupiter(void) { clearOuterPlanet(&jupiter_spec); }
+void clearSaturn(void)  { clearOuterPlanet(&saturn_spec); }
+void clearUranus(void)  { clearOuterPlanet(&uranus_spec); }
+void clearNeptune(void) { clearOuterPlanet(&neptune_spec); }
 
-void clearVenus(void) {
-    siderealPlanetData.venus_ra = NAN;
-    siderealPlanetData.venus_dec = NAN;
-    siderealPlanetData.venus_az = NAN;
-    siderealPlanetData.venus_alt = NAN;
-    siderealPlanetData.venus_r = NAN;
-    siderealPlanetData.venus_s = NAN;
-    siderealPlanetData.venus_helio_ecliptic_lat = NAN;
-    siderealPlanetData.venus_helio_ecliptic_long = NAN;
-    siderealPlanetData.venus_radius_vector = NAN;
-    siderealPlanetData.venus_distance = NAN;
-    siderealPlanetData.venus_ecliptic_lat = NAN;
-    siderealPlanetData.venus_ecliptic_long = NAN;
-}
-
-void clearMars(void) {
-    siderealPlanetData.mars_ra = NAN;
-    siderealPlanetData.mars_dec = NAN;
-    siderealPlanetData.mars_az = NAN;
-    siderealPlanetData.mars_alt = NAN;
-    siderealPlanetData.mars_r = NAN;
-    siderealPlanetData.mars_s = NAN;
-    siderealPlanetData.mars_helio_ecliptic_lat = NAN;
-    siderealPlanetData.mars_helio_ecliptic_long = NAN;
-    siderealPlanetData.mars_radius_vector = NAN;
-    siderealPlanetData.mars_distance = NAN;
-    siderealPlanetData.mars_ecliptic_lat = NAN;
-    siderealPlanetData.mars_ecliptic_long = NAN;
-}
-
-void clearJupiter(void) {
-    siderealPlanetData.jupiter_ra = NAN;
-    siderealPlanetData.jupiter_dec = NAN;
-    siderealPlanetData.jupiter_az = NAN;
-    siderealPlanetData.jupiter_alt = NAN;
-    siderealPlanetData.jupiter_r = NAN;
-    siderealPlanetData.jupiter_s = NAN;
-    siderealPlanetData.jupiter_helio_ecliptic_lat = NAN;
-    siderealPlanetData.jupiter_helio_ecliptic_long = NAN;
-    siderealPlanetData.jupiter_radius_vector = NAN;
-    siderealPlanetData.jupiter_distance = NAN;
-    siderealPlanetData.jupiter_ecliptic_lat = NAN;
-    siderealPlanetData.jupiter_ecliptic_long = NAN;
-}
-
-void clearSaturn(void) {
-    siderealPlanetData.saturn_ra = NAN;
-    siderealPlanetData.saturn_dec = NAN;
-    siderealPlanetData.saturn_az = NAN;
-    siderealPlanetData.saturn_alt = NAN;
-    siderealPlanetData.saturn_r = NAN;
-    siderealPlanetData.saturn_s = NAN;
-    siderealPlanetData.saturn_helio_ecliptic_lat = NAN;
-    siderealPlanetData.saturn_helio_ecliptic_long = NAN;
-    siderealPlanetData.saturn_radius_vector = NAN;
-    siderealPlanetData.saturn_distance = NAN;
-    siderealPlanetData.saturn_ecliptic_lat = NAN;
-    siderealPlanetData.saturn_ecliptic_long = NAN;
-}
-
-void clearUranus(void) {
-    siderealPlanetData.uranus_ra = NAN;
-    siderealPlanetData.uranus_dec = NAN;
-    siderealPlanetData.uranus_az = NAN;
-    siderealPlanetData.uranus_alt = NAN;
-    siderealPlanetData.uranus_r = NAN;
-    siderealPlanetData.uranus_s = NAN;
-    siderealPlanetData.uranus_helio_ecliptic_lat = NAN;
-    siderealPlanetData.uranus_helio_ecliptic_long = NAN;
-    siderealPlanetData.uranus_radius_vector = NAN;
-    siderealPlanetData.uranus_distance = NAN;
-    siderealPlanetData.uranus_ecliptic_lat = NAN;
-    siderealPlanetData.uranus_ecliptic_long = NAN;
-}
-
-void clearNeptune(void) {
-    siderealPlanetData.neptune_ra = NAN;
-    siderealPlanetData.neptune_dec = NAN;
-    siderealPlanetData.neptune_az = NAN;
-    siderealPlanetData.neptune_alt = NAN;
-    siderealPlanetData.neptune_r = NAN;
-    siderealPlanetData.neptune_s = NAN;
-    siderealPlanetData.neptune_helio_ecliptic_lat = NAN;
-    siderealPlanetData.neptune_helio_ecliptic_long = NAN;
-    siderealPlanetData.neptune_radius_vector = NAN;
-    siderealPlanetData.neptune_distance = NAN;
-    siderealPlanetData.neptune_ecliptic_lat = NAN;
-    siderealPlanetData.neptune_ecliptic_long = NAN;
-}
-
-void clearTrackPlanets(void) {
+void clearTrackPlanets(void)
+{
     clearSun();
     clearLuna();
     clearMercury();
@@ -921,28 +827,58 @@ void clearTrackPlanets(void) {
 // ----------------------------------------------------------------------------------------
 // Identify Object.
 // ----------------------------------------------------------------------------------------
-// Useful for arbitray identification predicated upon manual input and or attitude input.
+// Useful for arbitrary identification predicated upon manual input and or attitude input.
 // ----------------------------------------------------------------------------------------
-void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m, float dec_s) {
-    siderealObjectData.object_table_i= -1;
-    siderealObjectData.object_number= -1;
+void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m, float dec_s)
+{
+    siderealObjectData.object_table_i = -1;
+    siderealObjectData.object_number = -1;
     myAstroObj.setRAdec(myAstro.decimalDegrees(ra_hour, ra_min, ra_sec), myAstro.decimalDegrees(dec_d, dec_m, dec_s));
-    // myAstro.doRAdec2AltAz();
     myAstroObj.identifyObject();
     clearAllObjects();
-    switch (myAstroObj.getIdentifiedObjectTable()) {
-        case 1: siderealObjectData.object_table_i = INDEX_SIDEREAL_STAR_TABLE; setStars(); break; // Star
-        case 2: siderealObjectData.object_table_i = INDEX_SIDEREAL_NGC_TABLE; setNGC(); break; // NGC
-        case 3: siderealObjectData.object_table_i = INDEX_SIDEREAL_IC_TABLE; setIC(); break; // IC
-        case 7: siderealObjectData.object_table_i = INDEX_SIDEREAL_OTHER_OBJECTS_TABLE; setOther(); break; // Other
-        default: clearAllObjects();
+
+    switch (myAstroObj.getIdentifiedObjectTable())
+    {
+        case 1: /* Star */
+            siderealObjectData.object_table_i = INDEX_SIDEREAL_STAR_TABLE;
+            setStars();
+            break;
+        case 2: /* NGC */
+            siderealObjectData.object_table_i = INDEX_SIDEREAL_NGC_TABLE;
+            setNGC();
+            break;
+        case 3: /* IC */
+            siderealObjectData.object_table_i = INDEX_SIDEREAL_IC_TABLE;
+            setIC();
+            break;
+        case 7: /* Other */
+            siderealObjectData.object_table_i = INDEX_SIDEREAL_OTHER_OBJECTS_TABLE;
+            setOther();
+            break;
+        default:
+            clearAllObjects();
+            break;
     }
-    if (myAstroObj.getAltIdentifiedObjectTable()) {
-        switch (myAstroObj.getAltIdentifiedObjectTable()) {
-            case 4: siderealObjectData.object_table_i = INDEX_SIDEREAL_MESSIER_TABLE; setMessier(); break; // Messier
-            case 5: siderealObjectData.object_table_i = INDEX_SIDEREAL_CALDWELL_TABLE; setCaldwell(); break; // Caldwell
-            case 6: siderealObjectData.object_table_i = INDEX_SIDEREAL_HERSHEL400_TABLE; setHerschel400(); break; // Herschel 400
-            default: clearAllObjects();
+
+    if (myAstroObj.getAltIdentifiedObjectTable() != 0)
+    {
+        switch (myAstroObj.getAltIdentifiedObjectTable())
+        {
+            case 4: /* Messier */
+                siderealObjectData.object_table_i = INDEX_SIDEREAL_MESSIER_TABLE;
+                setMessier();
+                break;
+            case 5: /* Caldwell */
+                siderealObjectData.object_table_i = INDEX_SIDEREAL_CALDWELL_TABLE;
+                setCaldwell();
+                break;
+            case 6: /* Herschel 400 */
+                siderealObjectData.object_table_i = INDEX_SIDEREAL_HERSHEL400_TABLE;
+                setHerschel400();
+                break;
+            default:
+                clearAllObjects();
+                break;
         }
     }
 }
@@ -953,73 +889,60 @@ void IdentifyObject(int ra_hour, int ra_min, float ra_sec, int dec_d, int dec_m,
 // Useful for an object that is known and or has been identified.
 // setSiderealData() must be called before calling this function.
 // ----------------------------------------------------------------------------------------
-void trackObject(int object_table_i, int object_i) {
+void trackObject(int object_table_i, int object_i)
+{
+    bool valid_table = true;
 
-    if      (object_table_i == INDEX_SIDEREAL_STAR_TABLE) { myAstroObj.selectStarTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_NGC_TABLE) { myAstroObj.selectNGCTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_IC_TABLE) { myAstroObj.selectICTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_MESSIER_TABLE) { myAstroObj.selectMessierTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_CALDWELL_TABLE) { myAstroObj.selectCaldwellTable(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_HERSHEL400_TABLE) { myAstroObj.selectHershel400Table(object_i); }
-    else if (object_table_i == INDEX_SIDEREAL_OTHER_OBJECTS_TABLE) { myAstroObj.selectOtherObjectsTable(object_i); }
-    else {return;} // invalid table index
+    switch (object_table_i)
+    {
+        case INDEX_SIDEREAL_STAR_TABLE:             myAstroObj.selectStarTable(object_i); break;
+        case INDEX_SIDEREAL_NGC_TABLE:              myAstroObj.selectNGCTable(object_i); break;
+        case INDEX_SIDEREAL_IC_TABLE:               myAstroObj.selectICTable(object_i); break;
+        case INDEX_SIDEREAL_MESSIER_TABLE:          myAstroObj.selectMessierTable(object_i); break;
+        case INDEX_SIDEREAL_CALDWELL_TABLE:         myAstroObj.selectCaldwellTable(object_i); break;
+        case INDEX_SIDEREAL_HERSHEL400_TABLE:       myAstroObj.selectHershel400Table(object_i); break;
+        case INDEX_SIDEREAL_OTHER_OBJECTS_TABLE:    myAstroObj.selectOtherObjectsTable(object_i); break;
+        default:
+            valid_table = false; /* invalid table index */
+            break;
+    }
 
-    // Pull RA/Dec from myAstroObj
-    siderealObjectData.object_ra = myAstroObj.getRAdec();
-    siderealObjectData.object_dec = myAstroObj.getDeclinationDec();
+    if (valid_table == true)
+    {
+        // Pull RA/Dec from myAstroObj.
+        siderealObjectData.object_ra = myAstroObj.getRAdec();
+        siderealObjectData.object_dec = myAstroObj.getDeclinationDec();
 
-    // Feed Ra/Dec into myAstro because myAstro has RA/Dec to Alt/Az conversion functions
-    myAstro.setRAdec(siderealObjectData.object_ra, siderealObjectData.object_dec);
+        // Feed Ra/Dec into myAstro because myAstro has RA/Dec to Alt/Az conversion functions.
+        myAstro.setRAdec(siderealObjectData.object_ra, siderealObjectData.object_dec);
 
-    // Convert RA/Dec to Alt/Az
-    myAstro.doRAdec2AltAz();
-    siderealObjectData.object_az = myAstro.getAzimuth();
-    siderealObjectData.object_alt = myAstro.getAltitude();
+        // Convert RA/Dec to Alt/Az.
+        myAstro.doRAdec2AltAz();
+        siderealObjectData.object_az = myAstro.getAzimuth();
+        siderealObjectData.object_alt = myAstro.getAltitude();
 
-    // Rise/set times
-    myAstro.doXRiseSetTimes(0.0); // set 0 for stars. consider non zero values for planets, galaxies, etc.
-    siderealObjectData.object_r = myAstro.getRiseTime();
-    siderealObjectData.object_s = myAstro.getSetTime();
+        // Rise/set times. 0 for stars; consider non-zero values for planets, galaxies, etc.
+        myAstro.doXRiseSetTimes(0.0);
+        siderealObjectData.object_r = myAstro.getRiseTime();
+        siderealObjectData.object_s = myAstro.getSetTime();
+    }
 }
 
 /**
  * @brief A prototype function that initially identifies closest object to
  *        altitude 90 degrees (zenith for a given time, location on earth).
- * 
+ *
  * @note This function may be renamed to something like buildCelestialSphere.
  */
-void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s) {
+void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_s)
+{
+    // Identify nearest object to RA/Dec coordinates.
+    IdentifyObject(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s);
 
-    // Identify nearest object to RA/Dec coordinates
-    IdentifyObject(
-      ra_h,
-      ra_m,
-      ra_s,
-      dec_d,
-      dec_m,
-      dec_s
-    );
-
-    // Track Object (Gets Alt/Az and Rise/Set times)
-    if (siderealObjectData.object_table_i >= 0 && siderealObjectData.object_number >= 0) {
+    // Track Object (gets Alt/Az and rise/set times).
+    if ((siderealObjectData.object_table_i >= 0) && (siderealObjectData.object_number >= 0))
+    {
         trackObject(siderealObjectData.object_table_i, siderealObjectData.object_number);
-        // printf("---------------------------------------------\n");
-        // printf("Input RA:      %02d:%02d:%06.3f\n", ra_h, ra_m, ra_s);
-        // printf("Input Dec:     %02d:%02d:%06.3f\n", dec_d, dec_m, dec_s);
-        // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-        // printf("Table:         %s\n", siderealObjectData.object_table_name);
-        // printf("Number:        %d\n", siderealObjectData.object_number);
-        // printf("Name:          %s\n", siderealObjectData.object_name);
-        // printf("Type:          %s\n", siderealObjectData.object_type);
-        // printf("Constellation: %s\n", siderealObjectData.object_con);
-        // printf("Distance:      %f\n", siderealObjectData.object_dist);
-        // printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
-        // printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
-        // printf("Azimuth:       %f\n", siderealObjectData.object_az);
-        // printf("Altitude:      %f\n", siderealObjectData.object_alt);
-        // printf("Rise:          %f\n", siderealObjectData.object_r);
-        // printf("Set:           %f\n", siderealObjectData.object_s);
-        // printf("---------------------------------------------\n");
     }
 
     // go on to build celestial sphere from identified object (centered on zenith)...
@@ -1028,16 +951,16 @@ void setStarNav(int ra_h, int ra_m, float ra_s, int dec_d, int dec_m, float dec_
 // ----------------------------------------------------------------------------------------
 // Track All Planets.
 // ----------------------------------------------------------------------------------------
-void trackPlanets(void) {
-    // printf("Tracking Planets...\n");
+void trackPlanets(void)
+{
     // -------------------------------------------------------
-    // Get Sun First
+    // Get Sun first.
     // -------------------------------------------------------
     myAstro.doPlanetElements();
     myAstro.doSun();
     trackSun();
     // -------------------------------------------------------
-    // Now do other plans.
+    // Now do the other planets.
     // -------------------------------------------------------
     trackLuna();
     trackMercury();
@@ -1051,23 +974,15 @@ void trackPlanets(void) {
 
 /**
  * @brief Set Sidereal Data for a given location and time.
- * 
+ *
  * @note Must be called before calling trackPlanets() or trackObject() functions.
  */
 void setSiderealData(double latitude, double longitude,
     double utc_year, double utc_month, double utc_mday,
     double utc_hour, double utc_minute, double utc_second,
     double local_hour, double local_minute, double local_second,
-    double altitude) {
-
-    // printf("Setting Sidereal Data...\n");
-    // printf("Latitude:  %f\n", latitude);
-    // printf("Longitude: %f\n", longitude);
-    // printf("UTC Date:  %04d-%02d-%02d\n", (int)utc_year, (int)utc_month, (int)utc_mday);
-    // printf("UTC Time:  %02d:%02d:%06.3f\n", (int)utc_hour, (int)utc_minute, (float)utc_second);
-    // printf("Local Time:  %02d:%02d:%06.3f\n", (int)local_hour, (int)local_minute, (float)local_second);
-    // printf("Altitude:  %f\n", altitude);
-
+    double altitude)
+{
     // ----------------------------------------------------------------------------------
     // Use degrees latitude & longitude converted from GNGGA/GNRMC data.
     // ----------------------------------------------------------------------------------
@@ -1094,12 +1009,12 @@ void setSiderealData(double latitude, double longitude,
     // myAstro.spData.DegreesAltitudeOffsetByElevationM = myAstro.inRange90(myAstro.getDegreesAltitudeOffsetByElevationM(altitude));
 
     // -------------------------------------------------------
-    // Get Sidereal Time Data
+    // Get Sidereal Time Data.
     // -------------------------------------------------------
     siderealExtraData.local_sidereal_time = myAstro.getLocalSiderealTime();
-    // printf("Local Sidereal Time: %f\n", siderealExtraData.local_sidereal_time);
 }
 
-void myAstroBegin(void) {
+void myAstroBegin(void)
+{
     myAstro.begin();
 }

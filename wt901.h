@@ -1,5 +1,7 @@
 /*
     WT901 Library. Written by Benjamin Jack Cullen. Based on Witmotion example code.
+
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef WT901_H
@@ -8,15 +10,14 @@
 #include <stdint.h>
 #include "config.h"
 
+#define MAX_GYRO_BAUDRATES 10  // Number of entries in gyro_0_c_uiBaud, including the unused index 0
 
 /**
  * @struct GyroData
- * 
- * Data for gyroscope sensor data from WT901, including acceleration,
- * gyroscope readings, angles, magnetic fields, and configuration.
+ *
+ * Latest gyroscope sensor data from the WT901, decoded from the vendor
+ * Witmotion SDK's register cache into named fields.
  */
-#define MAX_GYRO_BAUDRATES 10
-
 struct GyroData {
   uint8_t gyro_0_s_cDataUpdate; // Update flags
   float gyro_0_fAcc[3];         // Acceleration (x, y, z)
@@ -36,7 +37,6 @@ struct GyroData {
   int16_t gyro_0_mag_z;         // Magnetic field z
   int32_t gyro_0_c_uiBaud[MAX_GYRO_BAUDRATES];  // Baud rates for scanning
   int32_t gyro_0_current_uiBaud; // Current baud rate
-  char gyro_sentence[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
 };
 extern struct GyroData gyroData;
 
@@ -72,8 +72,8 @@ void Gyro0AutoScan(void);
 bool readGyro(void);
 
 /**
- * Tests the WT901 sensor by reading and printing data from it.
- * @note This function never returns (infinite loop).
+ * Reads raw bytes from the WT901 UART for approximately 2 seconds,
+ * printing each byte and counting how many 0x55 sync bytes were seen.
  */
 void testWT901(void);
 

@@ -7,6 +7,8 @@
         - gnggaData
         - gnrmcData
         - gpattData
+    
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef WTGPS300P_H
@@ -19,23 +21,17 @@
 
 /**
  * @struct Serial1DataStruct
+ * Working state for reading raw lines from Serial1. Only readGPS() persists
+ * state across calls here (gngga_bool/gnrmc_bool/gpatt_bool track which
+ * sentences have been collected for the current cycle); all other parsing
+ * state is local to the function that needs it.
  */
 struct Serial1DataStruct {
-    unsigned long nbytes;                // Number of bytes read by serial
-    unsigned long iter_token;            // Count token iterations
-    char BUFFER[MAX_GLOBAL_SERIAL_BUFFER_SIZE]; // Serial buffer
-    char *token;                         // Token pointer
-    int collected;                       // Counts unique sentences collected
-    bool gngga_bool;                     // GNGGA sentence collected
-    bool gnrmc_bool;                     // GNRMC sentence collected
-    bool gpatt_bool;                     // GPATT sentence collected
-    char checksum[MAX_CHECKSUM_SIZE];    // Checksum string
-    uint8_t checksum_of_buffer;          // Calculated checksum
-    uint8_t checksum_in_buffer;          // Checksum from sentence
-    char gotSum[MAX_CHEKSUM_SUM_SIZE];   // Parsed checksum
-    int i_XOR;                           // XOR calculation index
-    int XOR;                             // XOR result
-    int c_XOR;                           // Checksum XOR
+    unsigned long nbytes;                       // Number of bytes read by the last serial read
+    char BUFFER[MAX_GLOBAL_SERIAL_BUFFER_SIZE];  // Raw line most recently read from Serial1
+    bool gngga_bool;                             // GNGGA sentence collected this cycle
+    bool gnrmc_bool;                             // GNRMC sentence collected this cycle
+    bool gpatt_bool;                             // GPATT sentence collected this cycle
 };
 extern struct Serial1DataStruct serial1Data;
 
@@ -69,7 +65,6 @@ struct GNGGAStruct {
     int total_bad_elements;                              // Total bad elements
 };
 extern struct GNGGAStruct gnggaData;
-extern int gngga_total_bad_elements;
 
 /**
  * @struct GNRMCStruct
@@ -99,7 +94,6 @@ struct GNRMCStruct {
     int total_bad_elements;                              // Total bad elements
 };
 extern struct GNRMCStruct gnrmcData;
-extern int gnrmc_total_bad_elements;
 
 /**
  * @struct GPATTStruct
@@ -157,7 +151,6 @@ struct GPATTStruct {
     int total_bad_elements;                              // Total bad elements
 };
 extern struct GPATTStruct gpattData;
-extern int gpatt_total_bad_elements;
 
 // internal
 /**
@@ -510,7 +503,7 @@ bool val_checksum(const char *data);
  */
 bool val_element_size(const char *data);
 
-// external 
+// external
 /**
  * Processes and parses a GNGGA NMEA sentence from the serial buffer.
  */

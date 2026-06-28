@@ -37,9 +37,6 @@ extern bool  TICK_DELAY_TASK_PORTCONTROLLER_INPUT;
 extern long  DELAY_TASK_STORAGE;
 extern bool  TICK_DELAY_TASK_STORAGE;
 
-extern long  DELAY_TASK_LOGGING;
-extern bool  TICK_DELAY_TASK_LOGGING;
-
 extern bool global_task_sync;
 extern long system_sync_retry_max;
 
@@ -84,9 +81,6 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define POWER_CONFIG_1_SECOND_DELAY_TASK_STORAGE                     500
 #define POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_STORAGE                false
 
-#define POWER_CONFIG_1_SECOND_DELAY_TASK_LOGGING                     1000
-#define POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_LOGGING                false
-
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GPS                         1
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GPS                    true
 
@@ -110,10 +104,6 @@ extern bool ISR_Bool_MultiDisplayController_0;
 
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_STORAGE                     500
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_STORAGE                false
-
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_LOGGING                     1000
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_LOGGING                false
-
 
 #define POWER_CONFIG_TRACK_PLANTETS_TIMING_uS  1000000L
 #define POWER_CONFIG_STAR_NAVIGATION_TIMING_uS 5000L

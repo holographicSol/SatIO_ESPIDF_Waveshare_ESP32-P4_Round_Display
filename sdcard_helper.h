@@ -1,5 +1,5 @@
 /*
-  SDCARD - Written By Benjamin Jack Cullen.
+  SDCard Helper - Written By Benjamin Jack Cullen.
   Requirements:
     (1) Modified SD_MMC library to release LDO on end().
     (2) Optional: Modified ffconf library for exFat support (FAT only by default).
@@ -10,6 +10,8 @@
   (3) Optionally (lastly) in loop call sdcardSleepMode0() to save power during intervals.
 
   - sdcardEnd() is handled internally when required in various scenarios.
+
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
 
 */
 
@@ -221,7 +223,7 @@ bool unmount_sd(void);
  */
 void list_directory(const char * dirname);
 
-bool isAvailableBytes(uint64_t num_bytes);
+bool isAvailableBytes(size_t num_bytes);
 
 /** ----------------------------------------------------------------------------------------
  * @brief Check if SD card root directory is ready.
@@ -241,12 +243,12 @@ void sd_lvgl_register(void);
  * @brief Mount SD card
  * 
  */
-void sdcard_mount();
+void sdcard_mount(void);
 
 /** ----------------------------------------------------------------------------------------
  * @brief Unmount SD card.
- * 
+ *
  */
-void sdcard_unmount();
+void sdcard_unmount(void);
 
 #endif

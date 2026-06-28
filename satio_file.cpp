@@ -1,5 +1,7 @@
 /*
   SatioFile - Written By Benjamin Jack Cullen.
+
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include "satio_file.h"
@@ -64,34 +66,46 @@ struct satioFileStruct satioFileData = {
 int yield_every_n_lines=8;
 int yield_counter=0;
 
-void yieldForTasks() {
-    if (yield_every_n_lines <= 0) { 
+/* Rule 8.7: internal linkage; only used within this file.
+ *
+ * The watchdog reset is unconditional on every call (it only clears a
+ * timer, so it is cheap) and is kept separate from the throttled
+ * vTaskDelay(1) yield below: callers of this function are not necessarily
+ * called often enough to hit yield_every_n_lines within a single task-
+ * watchdog timeout window (e.g. writeLog() makes only 4 calls per
+ * invocation), so gating the watchdog reset on that same counter could
+ * starve it long enough to trip the watchdog during slow SD I/O.
+ */
+static void yieldForTasks(void) {
+    esp_task_wdt_reset();
+
+    /* Rule 15.5: single point of exit via an if/else instead of an early
+       return for the "always yield" case. */
+    if (yield_every_n_lines <= 0) {
         // Always yield if yield_every_n_lines set to 0 or negative
         vTaskDelay(1);
-        esp_task_wdt_reset();
-        return;
     }
-    yield_counter++;
-    if (yield_counter >= yield_every_n_lines) {
-        // Perform the actual yield
-        vTaskDelay(1);
-        esp_task_wdt_reset();
-        yield_counter = 0; // Reset counter after yielding
+    else {
+        yield_counter++;
+        if (yield_counter >= yield_every_n_lines) {
+            // // Perform the actual yield
+            // vTaskDelay(1);
+            yield_counter = 0; // Reset counter after yielding
+        }
+        // Otherwise, just pass through
     }
-    // Otherwise, just pass through
 }
-
-void set_rw_running_true() {sdcardFlagData.rw_running=true;}
-void set_rw_running_false() {sdcardFlagData.rw_running=false;}
 
 /**
  * @brief Set Read/Write Success Flag.
- * 
+ *
  * Sustains flag for a period of time while also non-blocking before setting flag back to NULL.
- * 
+ *
  * @param flag Specify result of a read/write operation.
+ *
+ * Rule 8.7: internal linkage; only called from sdcardFlagHandler() in this file.
  */
-void set_storage_success_flag(bool flag) {
+static void set_storage_success_flag(bool flag) {
     if (flag==true) {sdcardFlagData.success_flag=2; vTaskDelay(1000 / portTICK_PERIOD_MS);}
     else            {sdcardFlagData.success_flag=1; vTaskDelay(1000 / portTICK_PERIOD_MS);}
                      sdcardFlagData.success_flag=0;
@@ -103,15 +117,19 @@ void set_storage_success_flag(bool flag) {
 
 /**
  * @brief Create full path with /sdcard prefix
+ *
+ * Rule 8.7: internal linkage; only used within this file.
  */
-void sd_fullpath(const char* path, char* fullpath, size_t size) {
+static void sd_fullpath(const char* path, char* fullpath, size_t size) {
     snprintf(fullpath, size, "/sdcard%s", path);
 }
 
 /**
  * @brief Check if file exists
+ *
+ * Rule 8.7: internal linkage; only used within this file.
  */
-bool sd_exists(const char* path) {
+static bool sd_exists(const char* path) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
     struct stat st;
@@ -120,8 +138,10 @@ bool sd_exists(const char* path) {
 
 /**
  * @brief Remove file
+ *
+ * Rule 8.7: internal linkage; only used within this file.
  */
-bool sd_remove(const char* path) {
+static bool sd_remove(const char* path) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
     return (remove(fullpath) == 0);
@@ -129,35 +149,50 @@ bool sd_remove(const char* path) {
 
 /**
  * @brief Get file size
+ *
+ * Rule 8.7: internal linkage; only used within this file.
  */
-uint64_t sd_file_size(const char* path) {
+static uint64_t sd_file_size(const char* path) {
+    /* Rule 15.5: single point of exit via a result variable. */
     char fullpath[256];
-    sd_fullpath(path, fullpath, sizeof(fullpath));
+    uint64_t file_size;
     struct stat st;
+
+    sd_fullpath(path, fullpath, sizeof(fullpath));
     if (stat(fullpath, &st) == 0) {
-        return (uint64_t)st.st_size;
+        file_size = (uint64_t)st.st_size;
     }
-    return 0;
+    else {
+        file_size = 0;
+    }
+
+    return file_size;
 }
 
 /**
  * @brief Create directory recursively
+ *
+ * Rule 8.7: internal linkage; only used within this file.
  */
-bool sd_mkdir(const char* path) {
+static bool sd_mkdir(const char* path) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
     
+    /* Rule 21.x: strncpy() alone does not guarantee null-termination when
+       fullpath's length is >= sizeof(tmp); reserving the last byte and
+       explicitly terminating keeps the strlen() below provably in bounds. */
     char tmp[256];
-    strncpy(tmp, fullpath, sizeof(tmp));
+    strncpy(tmp, fullpath, sizeof(tmp) - 1U);
+    tmp[sizeof(tmp) - 1U] = '\0';
     size_t len = strlen(tmp);
-    
+
     // Remove trailing slash
     if (tmp[len - 1] == '/') {
         tmp[len - 1] = '\0';
     }
-    
+
     // Create directories recursively
-    for (char* p = tmp + 1; *p; p++) {
+    for (char* p = tmp + 1; *p != '\0'; p++) {
         if (*p == '/') {
             *p = '\0';
             mkdir(tmp, 0755);
@@ -169,207 +204,251 @@ bool sd_mkdir(const char* path) {
 
 /**
  * @brief Open file with /sdcard prefix
+ *
+ * Rule 8.7: internal linkage; only used within this file.
  */
-FILE* sd_fopen(const char* path, const char* mode) {
+static FILE* sd_fopen(const char* path, const char* mode) {
     char fullpath[256];
     sd_fullpath(path, fullpath, sizeof(fullpath));
-    printf("[sd_fopen] fullpath: %s, mode: %s\n", fullpath, mode);
+    // printf("[sd_fopen] fullpath: %s, mode: %s\n", fullpath, mode);
     fflush(stdout);
     
     // Create parent directory if writing
-    if (strchr(mode, 'w') || strchr(mode, 'a')) {
+    if ((strchr(mode, 'w') != NULL) || (strchr(mode, 'a') != NULL)) {
         char dirpath[256];
         strncpy(dirpath, fullpath, sizeof(dirpath) - 1);
         dirpath[sizeof(dirpath) - 1] = '\0';
         char* lastSlash = strrchr(dirpath, '/');
-        if (lastSlash && lastSlash != dirpath) {
+
+        if ((lastSlash != NULL) && (lastSlash != dirpath)) {
+            struct stat dir_st;
+
             *lastSlash = '\0';
-            printf("[sd_fopen] creating dir: %s\n", dirpath);
-            fflush(stdout);
-            // Create directory directly with full path (already has /sdcard)
-            char tmp[256];
-            strncpy(tmp, dirpath, sizeof(tmp) - 1);
-            tmp[sizeof(tmp) - 1] = '\0';
-            for (char* p = tmp + 1; *p; p++) {
-                if (*p == '/') {
-                    *p = '\0';
-                    int ret = mkdir(tmp, 0755);
-                    if (ret != 0 && errno != EEXIST) {
-                        printf("[sd_fopen] mkdir(%s) failed: %s\n", tmp, strerror(errno));
+
+            /* Every sd_fopen("a"/"w") call re-ran the full recursive
+               mkdir() walk below even when the directory already existed,
+               adding SD I/O latency to every single write/append call;
+               skipping the walk once stat() confirms the directory is
+               already there avoids that repeated cost (each mkdir() that
+               hits the SD card takes real time the task watchdog is
+               counting against). */
+            if (stat(dirpath, &dir_st) != 0) {
+                // printf("[sd_fopen] creating dir: %s\n", dirpath);
+                fflush(stdout);
+                // Create directory directly with full path (already has /sdcard)
+                char tmp[256];
+                strncpy(tmp, dirpath, sizeof(tmp) - 1);
+                tmp[sizeof(tmp) - 1] = '\0';
+                for (char* p = tmp + 1; *p != '\0'; p++) {
+                    if (*p == '/') {
+                        *p = '\0';
+                        int ret = mkdir(tmp, 0755);
+                        if (ret != 0 && errno != EEXIST) {
+                            printf("[sd_fopen] mkdir(%s) failed: %s\n", tmp, strerror(errno));
+                        }
+                        *p = '/';
                     }
-                    *p = '/';
                 }
+                int ret = mkdir(tmp, 0755);
+                if (ret != 0 && errno != EEXIST) {
+                    printf("[sd_fopen] final mkdir(%s) failed: %s\n", tmp, strerror(errno));
+                }
+                fflush(stdout);
             }
-            int ret = mkdir(tmp, 0755);
-            if (ret != 0 && errno != EEXIST) {
-                printf("[sd_fopen] final mkdir(%s) failed: %s\n", tmp, strerror(errno));
-            }
-            fflush(stdout);
         }
     }
-    
+
     // Create file
     FILE* f = fopen(fullpath, mode);
-    if (!f) {
+    if (f == NULL) {
         printf("[sd_fopen] fopen(%s) failed: errno=%d (%s)\n", fullpath, errno, strerror(errno));
         fflush(stdout);
     }
     return f;
 }
 
-// /** 
-//  * @brief Write string to file with newline
-//  */
-// bool sd_fprintln(FILE* f, const char* str) {
-//     if (!f) return false;
-//     fputs(str, f);
-//     fputc('\n', f);
-//     return true;
-// }
-
-// bool isOpen(File root) {
-//  if (!root) {
-//     Serial.println("[getLogFiles] Failed to open directory");
-//     return false;
-//   }
-//   if (!root.isDirectory()) {
-//     Serial.println("[getLogFiles] Not a directory");
-//     root.close();
-//     return false;
-//   }
-//   return true;
-// }
-
 /**
  * @brief Get a log filename.
  * @param mode Specify mode: 0=oldest 1=latest.
+ *
+ * Rule 8.7: internal linkage; only used within this file.
  */
-bool getLogFile(int mode) {
-  // printf("[getLogFiles] Listing directory: %s\n", satioFileData.log_dir);
+static bool getLogFile(int mode) {
+  /* Rule 15.5: single point of exit via a result variable; the two
+     failure cases (directory can't be opened, no valid log file found)
+     become guards around the rest of the work instead of early returns. */
+  bool found = true;
 
   // Open dir (and create dir if not exist)
   char fullpath[256];
   sd_fullpath(satioFileData.log_dir, fullpath, sizeof(fullpath));
   sd_mkdir(satioFileData.log_dir); // ensure directory exists
-  
+
   DIR* root = opendir(fullpath);
-  if (!root) {return false;}
+  if (root == NULL) {
+    found = false;
+  }
+  else {
+    // Set target
+    if (mode==0) {satioFileData.unixtimestamp=INT64_MAX;} // for finding oldest
+    else {satioFileData.unixtimestamp=0;} // for finding latest
 
-  // Set target
-  if (mode==0) {satioFileData.unixtimestamp=INT64_MAX;} // for finding oldest
-  else {satioFileData.unixtimestamp=0;} // for finding latest
-  
-  // Iterate through files in directory
-  satioFileData.number_of_log_files=0;
-  struct dirent* entry;
-  while ((entry = readdir(root)) != NULL) {
-    // Skip . and .. and directories
-    if (entry->d_name[0] == '.') continue;
-    if (entry->d_type == DT_DIR) continue;
-    
-    // printf("  FILE : %s\n", entry->d_name);
+    // Iterate through files in directory
+    satioFileData.number_of_log_files=0;
+    struct dirent* entry;
+    while ((entry = readdir(root)) != NULL) {
+      // Skip . and .. and directories
+      if (entry->d_name[0] == '.') continue;
+      if (entry->d_type == DT_DIR) continue;
 
-    // Create a copy of filename
-    memset(satioFileData.tmp_chars, 0, sizeof(satioFileData.tmp_chars));
-    strncpy(satioFileData.tmp_chars, entry->d_name, sizeof(satioFileData.tmp_chars));
+      // Create a copy of filename
+      memset(satioFileData.tmp_chars, 0, sizeof(satioFileData.tmp_chars));
+      strncpy(satioFileData.tmp_chars, entry->d_name, sizeof(satioFileData.tmp_chars) - 1U);
 
-    // Tokenize
-    int i_san=0;
-    satioFileData.tmp_unixtimestamp=0;
-    satioFileData.i_token = 0;
-    satioFileData.token = strtok(satioFileData.tmp_chars, ".");
-    while (satioFileData.token != NULL) {
-      switch (satioFileData.i_token) {
-          case 0: if (satioFileData.token != NULL && str_is_int64(satioFileData.token)) {
-              i_san++; char *endptr; satioFileData.tmp_unixtimestamp = strtoll(satioFileData.token, &endptr, 10);} break;
-          case 1: if (strcmp(satioFileData.token, "csv")==0) {i_san++;} break;
+      // Tokenize
+      int i_san=0;
+      satioFileData.tmp_unixtimestamp=0;
+      satioFileData.i_token = 0;
+      satioFileData.token = strtok(satioFileData.tmp_chars, ".");
+      while (satioFileData.token != NULL) {
+        switch (satioFileData.i_token) {
+            case 0: if (satioFileData.token != NULL && str_is_int64(satioFileData.token)) {
+                i_san++; satioFileData.tmp_unixtimestamp = strtoll(satioFileData.token, NULL, 10);} break;
+            case 1: if (strcmp(satioFileData.token, "csv")==0) {i_san++;} break;
+        }
+        satioFileData.token = strtok(NULL, ".");
+        satioFileData.i_token++;
       }
-      satioFileData.token = strtok(NULL, ".");
-      satioFileData.i_token++;
+      // Update unixtimestamp
+      if (i_san==2) {
+        satioFileData.number_of_log_files++;
+        if      (mode==0 && satioFileData.tmp_unixtimestamp<satioFileData.unixtimestamp) {satioFileData.unixtimestamp=satioFileData.tmp_unixtimestamp;}
+        else if (mode==1 && satioFileData.tmp_unixtimestamp>satioFileData.unixtimestamp) {satioFileData.unixtimestamp=satioFileData.tmp_unixtimestamp;}
+      }
     }
-    // Update unixtimestamp
-    if (i_san==2) {
-      satioFileData.number_of_log_files++;
-      if      (mode==0 && satioFileData.tmp_unixtimestamp<satioFileData.unixtimestamp) {satioFileData.unixtimestamp=satioFileData.tmp_unixtimestamp;}
-      else if (mode==1 && satioFileData.tmp_unixtimestamp>satioFileData.unixtimestamp) {satioFileData.unixtimestamp=satioFileData.tmp_unixtimestamp;}
-    }
-  }
-  closedir(root);
-  // printf("[getLogFiles] number_of_log_files: %llu\n", satioFileData.number_of_log_files);
-  if (satioFileData.unixtimestamp==0 || satioFileData.unixtimestamp==INT64_MIN) {return false;} 
+    closedir(root);
 
-  // Store filename of interest
-  memset(satioFileData.log_filepath, 0, sizeof(satioFileData.log_filepath));
-  int written = snprintf(satioFileData.log_filepath, sizeof(satioFileData.log_filepath), "%s%lld.csv", satioFileData.log_dir, (long long)satioFileData.unixtimestamp);
-  if (written < 0 || (size_t)written >= sizeof(satioFileData.log_filepath)) {
-    printf("[getLogFiles] log_filepath truncated\n");
+    /* mode 0 (oldest) starts unixtimestamp at INT64_MAX and mode 1 (latest)
+       starts it at 0; either sentinel surviving the loop above means no
+       valid log file was found. */
+    if (satioFileData.unixtimestamp==0 || satioFileData.unixtimestamp==INT64_MAX) {
+      found = false;
+    }
+    else {
+      // Store filename of interest
+      char fname[128];
+      int written = snprintf(fname, sizeof(satioFileData.log_filepath), "%s%lld.csv", satioFileData.log_dir, (long long)satioFileData.unixtimestamp);
+      if (written < 0 || (size_t)written >= sizeof(satioFileData.log_filepath)) {
+          /* A truncated path is not a usable path: fail outright instead of
+          letting a caller write to a corrupted filename. */
+          printf("[getLogFile] log_filepath truncated, rejecting.\n");
+          found = false;
+        }
+        else {
+          memset(satioFileData.log_filepath, 0, sizeof(satioFileData.log_filepath));
+          strncpy(satioFileData.log_filepath, fname, written);
+      }
+    }
   }
-  // printf("[getLogFiles] current log file: %s\n", satioFileData.log_filepath);
-  return true;
+
+  return found;
 }
 
-void createNewLogFilename() {
-  memset(satioFileData.log_filepath, 0, sizeof(satioFileData.log_filepath));
+/**
+ * @brief Build a new log filename from the current local time.
+ * @return false if the filename would have been truncated (log_filepath is
+ *         left empty in that case), true otherwise.
+ *
+ * Rule 8.7: internal linkage; only used within this file.
+ */
+static bool createNewLogFilename(void) {
+  bool ok = true;
+
   // Use local_unixtime_uS for filename
-  int written = snprintf(satioFileData.log_filepath, sizeof(satioFileData.log_filepath), "%s%lld.csv", satioFileData.log_dir, (long long)satioData.local_unixtime_uS);
+  char fname[128];
+  int written = snprintf(fname, sizeof(satioFileData.log_filepath), "%s%lld.csv", satioFileData.log_dir, (long long)satioData.local_unixtime_uS);
   if (written < 0 || (size_t)written >= sizeof(satioFileData.log_filepath)) {
-    printf("[createNewLogFilename] log_filepath truncated\n");
+      /* A truncated path is not a usable path: fail outright instead of
+      letting a caller write to a corrupted filename. */
+      printf("[createNewLogFilename] log_filepath truncated, rejecting.\n");
+      memset(satioFileData.log_filepath, 0, sizeof(satioFileData.log_filepath));
+      ok = false;
+    }
+    else {
+      memset(satioFileData.log_filepath, 0, sizeof(satioFileData.log_filepath));
+      strncpy(satioFileData.log_filepath, fname, written);
   }
-  // printf("[createNewLogFilename] current log file: %s\n", satioFileData.log_filepath);
+
+  return ok;
 }
 
-void deleteOldestLogFile() {
+/* Rule 8.7: internal linkage; only used within this file. */
+static void deleteOldestLogFile(void) {
   if (getLogFile(0)==true && satioFileData.number_of_log_files>MAX_LOG_FILES) {
-    // printf("[deleteOldestLogFile] attempting to delete log file: %s\n", satioFileData.log_filepath);
     sd_remove(satioFileData.log_filepath);
-    if (!sd_exists(satioFileData.log_filepath)) {
+    if (sd_exists(satioFileData.log_filepath) == false) {
         printf("[deleteOldestLogFile] log file deleted successfully.\n");
     }
     else {printf("[deleteOldestLogFile] failed to delete log file.\n");}
   }
 }
 
-void printLogLine(const char* line_str) {
+/* Rule 8.7: internal linkage; only used within this file. */
+static void printLogLine(const char* line_str) {
+    /* Rule 15.5: single point of exit; proceed/have_filepath guard the
+       write instead of returning early when there is no disk space
+       available or no valid (un-truncated) log filename could be resolved. */
+
     // Critical! This may take a moment, yield for other tasks!
     yieldForTasks();
 
-    // printf("[printLogLine]\n");
     size_t line_len = strlen(line_str);
-
-    // Check disk space
-    if (!isAvailableBytes(line_len + 1)) {printf("No more diskspace available!\n"); return;}
-
-    // Select log filename
-    deleteOldestLogFile();
-    if (getLogFile(1)==false) {createNewLogFilename();}
-    
-    // Ensure file exists (create if needed)
-    FILE* f = sd_fopen(satioFileData.log_filepath, "a");
-    if (f) fclose(f);
-
-    // Check file size
-    uint64_t file_size = sd_file_size(satioFileData.log_filepath);
-    // printf("[printLogLine] line_size=%zu, file_size=%llu\n", line_len, file_size);
-    if (file_size + line_len + 1 > MAX_LOG_FILE_SIZE) {
-      printf("[printLogLine] creating new log file..\n");
+    if (isAvailableBytes(line_len + 1) == false) {
+      printf("[printLogLine] No more diskspace available!\n");
+    }
+    else {
+      // Select log filename
+      bool have_filepath = true;
       deleteOldestLogFile();
-      createNewLogFilename();
-    }
+      if (getLogFile(1)==false) {
+        have_filepath = createNewLogFilename();
+      }
 
-    // Write to log file
-    // printf("[printLogLine] writing to log file: %s\n", satioFileData.log_filepath);
-    f = sd_fopen(satioFileData.log_filepath, "a");
-    if (f) {
-      fputs(line_str, f);
-      fputc('\n', f);
-      fclose(f);
+      if (have_filepath == false) {
+        printf("[printLogLine] could not resolve a log filename, aborting write.\n");
+      }
+      else {
+        // Ensure file exists (create if needed)
+        FILE* f = sd_fopen(satioFileData.log_filepath, "a");
+        if (f != NULL) {fclose(f);}
+
+        // Check file size
+        uint64_t file_size = sd_file_size(satioFileData.log_filepath);
+        if (file_size + line_len + 1 > MAX_LOG_FILE_SIZE) {
+          deleteOldestLogFile();
+          have_filepath = createNewLogFilename();
+        }
+
+        if (have_filepath == false) {
+          printf("[printLogLine] could not resolve a log filename, aborting write.\n");
+        }
+        else {
+          // Write to log file
+          f = sd_fopen(satioFileData.log_filepath, "a");
+          if (f != NULL) {
+            fputs(line_str, f);
+            fputc('\n', f);
+            fclose(f);
+          }
+          else {printf("[printLogLine] file does not exist: %s\n", satioFileData.log_filepath);}
+        }
+      }
     }
-    else {printf("[printLogLine] file does not exist: %s\n", satioFileData.log_filepath);}
 }
 
-bool writeLog() {
+void writeLog(void) {
     // printf("--------------------------------------\n");
-    printf("[writeLog] writing log\n");
+    // printf("[writeLog] writing log\n");
 
     // --------------------------------
     // Log Line: Timestamp & Basic Stat
@@ -438,20 +517,25 @@ bool writeLog() {
     line=line+ String(gyroData.gyro_0_mag_y) + ",";
     line=line+ String(gyroData.gyro_0_mag_z) + ",";
     printLogLine(line.c_str());
-
-    return true;
 }
 
-void printLine(FILE* f, const char* line) {
-    if (!f) return;
-    // if (!isAvailableBytes(strlen(line) + 1)) {printf("No more diskspace available!\n"); return;}
-    fputs(line, f);
-    fputc('\n', f);
-    // Critical! This may take a moment, yield for other tasks!
-    yieldForTasks();
+/* Rule 8.7: internal linkage; only used within this file. */
+static void printLine(FILE* f, const char* line) {
+    /* Rule 15.5: single point of exit; proceed guards the write instead of
+       returning early when f is NULL. */
+    size_t line_len = strlen(line);
+    if (isAvailableBytes(line_len + 1) == false) {
+      printf("[printLine] No more diskspace available!\n");
+    }
+    else {
+        if (f != NULL) {
+        fputs(line, f);
+        fputc('\n', f);
+        // Critical! This may take a moment, yield for other tasks!
+        yieldForTasks();
+        }
+    }
 }
-
-char *endptr;
 
 // ---------------------------------------------------------------------------------------------------------------------------
 // MAPPING
@@ -471,7 +555,10 @@ typedef enum {
     MAP_CONFIG_5,
 } mapping_tag_t;
 
-char * getMapTag(int t) {
+/* Rule 7.4: a string literal's type is "array of const char", so the
+   function returning one must return const char* rather than char*.
+   Rule 8.7: internal linkage; only used within this file. */
+static const char * getMapTag(int t) {
     switch (t) {
         case MAP_MODE:     return "MAP_MODE";
         case FUNCTION_N:   return "FUNCTION_N";
@@ -487,7 +574,7 @@ bool saveMappingFile(const char *filepath) {
     printf("[saveMappingFile] Attempting to save mapping file...\n");
 
     FILE* f = sd_fopen(filepath, "w");
-    if (!f) { printf("[saveMappingFile] Failed to open mapping file.\n"); return false; }
+    if (f == NULL) { printf("[saveMappingFile] Failed to open mapping file.\n"); return false; }
     
     char lineBuf[256];
     for (int i_tag=0; i_tag<MAX_MAPPING_TAGS; i_tag++) {
@@ -511,10 +598,10 @@ bool saveMappingFile(const char *filepath) {
 bool loadMappingFile(const char *filepath) {
     printf("[loadMappingFile] Attempting to load mapping file...\n");
     
-    if (!sd_exists(filepath)) {printf("[loadMappingFile] Could not find mapping file.\n");}
+    if (sd_exists(filepath) == false) {printf("[loadMappingFile] Could not find mapping file.\n");}
     
     FILE* f = sd_fopen(filepath, "r");
-    if (!f) { printf("[loadMappingFile] Failed to open mapping file.\n"); return false; }
+    if (f == NULL) { printf("[loadMappingFile] Failed to open mapping file.\n"); return false; }
     
     override_all_computer_assists();
     set_all_mapping_default(); // avoid mixing current values with loaded values
@@ -540,16 +627,16 @@ bool loadMappingFile(const char *filepath) {
 
         while (token != NULL) {if (tokenCount==0) {data_0=token;} else if (tokenCount==1) {data_1=token;} else if (tokenCount==2) {data_2=token;} token = strtok(NULL, ","); tokenCount++;}
         if      (tag_index==MAP_MODE)     {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {mappingData.map_mode[0][atoi(data_0.c_str())]=atoi(data_1.c_str());}}
-        else if (tag_index==FUNCTION_N)   {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C0]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==MAP_CONFIG_1) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C1]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==MAP_CONFIG_2) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C2]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==MAP_CONFIG_3) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C3]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==MAP_CONFIG_4) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C4]=strtol(data_1.c_str(), &endptr, 10);}}
-        else if (tag_index==MAP_CONFIG_5) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C5]=strtol(data_1.c_str(), &endptr, 10);}}
+        else if (tag_index==FUNCTION_N)   {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C0]=strtol(data_1.c_str(), NULL, 10);}}
+        else if (tag_index==MAP_CONFIG_1) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C1]=strtol(data_1.c_str(), NULL, 10);}}
+        else if (tag_index==MAP_CONFIG_2) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C2]=strtol(data_1.c_str(), NULL, 10);}}
+        else if (tag_index==MAP_CONFIG_3) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C3]=strtol(data_1.c_str(), NULL, 10);}}
+        else if (tag_index==MAP_CONFIG_4) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C4]=strtol(data_1.c_str(), NULL, 10);}}
+        else if (tag_index==MAP_CONFIG_5) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {mappingData.mapping_config[0][atoi(data_0.c_str())][INDEX_MAP_C5]=strtol(data_1.c_str(), NULL, 10);}}
         currentTag++;
     }
     fclose(f);
-    if (currentTag == 0) {printf("$MAPPINGLOADFAILED\n"); return false;}
+    if (currentTag == 0) {printf("$MAPPINGLOADFAILED\n");}
     printf("$MAPPINGLOADED\n");
     return true;
 }
@@ -587,7 +674,10 @@ typedef enum {
     XYZ_MODE_Z
 } matrix_tag_t;
 
-char * getMatrixTag(int t) {
+/* Rule 7.4: a string literal's type is "array of const char", so the
+   function returning one must return const char* rather than char*.
+   Rule 8.7: internal linkage; only used within this file. */
+static const char * getMatrixTag(int t) {
     switch (t) {
         case SWITCH_PORT:        return "SWITCH_PORT";
         case SWITCH_FUNCTION:    return "SWITCH_FUNCTION";
@@ -613,7 +703,7 @@ bool saveMatrixFile() {
     printf("[saveMatrixFile] Attempting to save matrix file.\n");
 
     FILE* f = sd_fopen(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path], "w");
-    if (!f) {printf("[saveMatrixFile] Failed to open matrix file.\n"); return false;}
+    if (f == NULL) {printf("[saveMatrixFile] Failed to open matrix file.\n"); return false;}
     
     char lineBuf[256];
 
@@ -739,10 +829,10 @@ bool saveMatrixFile() {
 bool loadMatrixFile() {
     printf("[loadMatrixFile] Attempting to load matrix file...\n");
 
-    if (!sd_exists(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path])) { printf("[loadMatrixFile] Could not find matrix file.\n"); return false; }
+    if (sd_exists(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path]) == false) { printf("[loadMatrixFile] Could not find matrix file.\n"); return false; }
     
     FILE* f = sd_fopen(satioFileData.matix_filepaths[satioFileData.i_current_matrix_file_path], "r");
-    if (!f) { printf("[loadMatrixFile] Failed to open matrix file.\n"); return false; }
+    if (f == NULL) { printf("[loadMatrixFile] Failed to open matrix file.\n"); return false; }
     
     printf("[loadMatrixFile] attempting to clear matrix...");
     override_all_computer_assists();
@@ -770,15 +860,15 @@ bool loadMatrixFile() {
 
         if      (tag_index==SWITCH_PORT) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.matrix_port_map[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==SWITCH_FUNCTION) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==FUNCTION_X) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==FUNCTION_Y) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==FUNCTION_Z) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Z]=strtod(data_2.c_str(), &endptr);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==FUNCTION_X) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=strtod(data_2.c_str(), NULL);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==FUNCTION_Y) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=strtod(data_2.c_str(), NULL);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==FUNCTION_Z) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Z]=strtod(data_2.c_str(), NULL);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==FUNCTION_OPERATOR) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_switch_operator_index[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==FUNCTION_INVERT) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_switch_inverted_logic[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==SWITCH_OUTPUT_MODE) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.output_mode[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==SWITCH_PWM_VALUE_0) {if (str_is_int8(data_0.c_str()) && str_is_uint32(data_1.c_str())) {matrixData.output_pwm[0][atoi(data_0.c_str())][INDEX_MATRIX_SWITCH_PWM_OFF]=strtoul(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==SWITCH_PWM_VALUE_1) {if (str_is_int8(data_0.c_str()) && str_is_uint32(data_1.c_str())) {matrixData.output_pwm[0][atoi(data_0.c_str())][INDEX_MATRIX_SWITCH_PWM_ON]=strtoul(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==SWITCH_FLUX) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {matrixData.flux_value[0][atoi(data_0.c_str())]=strtol(data_1.c_str(), &endptr, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_PWM_VALUE_0) {if (str_is_int8(data_0.c_str()) && str_is_uint32(data_1.c_str())) {matrixData.output_pwm[0][atoi(data_0.c_str())][INDEX_MATRIX_SWITCH_PWM_OFF]=strtoul(data_1.c_str(), NULL, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_PWM_VALUE_1) {if (str_is_int8(data_0.c_str()) && str_is_uint32(data_1.c_str())) {matrixData.output_pwm[0][atoi(data_0.c_str())][INDEX_MATRIX_SWITCH_PWM_ON]=strtoul(data_1.c_str(), NULL, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_FLUX) {if (str_is_int8(data_0.c_str()) && str_is_long(data_1.c_str())) {matrixData.flux_value[0][atoi(data_0.c_str())]=strtol(data_1.c_str(), NULL, 10);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==COMPUTER_ASSIST) {if (str_is_int8(data_0.c_str()) && str_is_bool(data_1.c_str())) {matrixData.computer_assist[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==MAP_SLOT) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.index_mapped_value[0][atoi(data_0.c_str())]=atoi(data_1.c_str());}}
         else if (tag_index==XYZ_MODE_X) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function_mode_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
@@ -856,7 +946,10 @@ typedef enum {
     SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE, 
 } system_tag_t;
 
-char * getSystemTag(int t) {
+/* Rule 7.4: a string literal's type is "array of const char", so the
+   function returning one must return const char* rather than char*.
+   Rule 8.7: internal linkage; only used within this file. */
+static const char * getSystemTag(int t) {
     switch (t) {
         case SYSTEM_FILE_MATRIX_FILE:                    return "MATRIX_FILE";
         case SYSTEM_FILE_LOAD_MATRIX_ON_STARTUP:         return "LOAD_MATRIX_ON_STARTUP";
@@ -914,11 +1007,11 @@ bool saveSystemFile(const char *filepath) {
     printf("[saveSystemFile] Attempting to save system file...\n");
 
     FILE* f = sd_fopen(filepath, "w");
-    if (!f) { printf("[saveSystemFile] fopen failed, errno: %d (%s)\n", errno, strerror(errno)); return false; }
+    if (f == NULL) { printf("[saveSystemFile] fopen failed, errno: %d (%s)\n", errno, strerror(errno)); return false; }
     
     // Use heap-allocated buffer to avoid stack overflow
     char* lineBuf = (char*)malloc(256);
-    if (!lineBuf) {fclose(f); printf("[saveSystemFile] Failed to allocate memory.\n"); return false;}
+    if (lineBuf == NULL) {fclose(f); printf("[saveSystemFile] Failed to allocate memory.\n"); return false;}
     
     #define WRITE_INT_TAG(idx, val)  snprintf(lineBuf, 256, "%s,%d",   getSystemTag(idx), (int)(val));    printLine(f, lineBuf)
     #define WRITE_LONG_TAG(idx, val) snprintf(lineBuf, 256, "%s,%ld",  getSystemTag(idx), (long)(val));   printLine(f, lineBuf)
@@ -932,10 +1025,10 @@ bool saveSystemFile(const char *filepath) {
     WRITE_INT_TAG(SYSTEM_FILE_SERIAL_COMMAND, systemData.serial_command);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_ALL, systemData.output_satio_all);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_SATIO, systemData.output_satio_enabled);
-    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GNGGA, systemData.output_ins_enabled);
-    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GNRMC, systemData.output_gngga_enabled);
-    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GPATT, systemData.output_gnrmc_enabled);
-    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_INS, systemData.output_gpatt_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_INS, systemData.output_ins_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GNGGA, systemData.output_gngga_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GNRMC, systemData.output_gnrmc_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GPATT, systemData.output_gpatt_enabled);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_MATRIX, systemData.output_matrix_enabled);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_ADMPLEX0, systemData.output_admplex0_enabled);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GYRO0, systemData.output_gyro_0_enabled);
@@ -987,17 +1080,17 @@ bool saveSystemFile(const char *filepath) {
 bool loadSystemFile(const char *filepath) {
     printf("[loadSystemFile] Attempting to load system file..\n");
 
-    if (!sd_exists(filepath)) {printf("[loadSystemFile] Could not find system file.\n"); return false;}
+    if (sd_exists(filepath) == false) {printf("[loadSystemFile] Could not find system file.\n"); return false;}
 
     FILE* f = sd_fopen(filepath, "r");
-    if (!f) {printf("[loadSystemFile] Could not open system file.\n"); return false;}
+    if (f == NULL) {printf("[loadSystemFile] Could not open system file.\n"); return false;}
 
     char lineBuffer[256];
 
     #define READ_BOOL_TAG(idx, var) if (tag_index == idx) { if (str_is_bool(val)) { var = atoi(val); } }
     #define READ_INT8_TAG(idx, var) if (tag_index == idx) { if (str_is_int8(val)) { var = atoi(val); } }
-    #define READ_LONG_TAG(idx, var) if (tag_index == idx) { if (str_is_long(val)) { var = strtol(val, &endptr, 10); } }
-    #define READ_DBL_TAG(idx, var)  if (tag_index == idx) { if (str_is_double(val)) { var = strtod(val, &endptr); } }
+    #define READ_LONG_TAG(idx, var) if (tag_index == idx) { if (str_is_long(val)) { var = strtol(val, NULL, 10); } }
+    #define READ_DBL_TAG(idx, var)  if (tag_index == idx) { if (str_is_double(val)) { var = strtod(val, NULL); } }
 
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
 
@@ -1008,7 +1101,7 @@ bool loadSystemFile(const char *filepath) {
         if (len == 0) continue;
 
         char *token = strtok(lineBuffer, ",");
-        if (!token) continue;
+        if (token == NULL) continue;
 
         int tag_index = -1;
         for (int i = 0; i < MAX_SYSTEM_TAGS; i++) {if (strcmp(getSystemTag(i), token) == 0) {tag_index = i; break;}}
@@ -1016,9 +1109,7 @@ bool loadSystemFile(const char *filepath) {
         if (tag_index == -1) {printf("Unrecognized tag: %s\n", token); continue;}
 
         char *val = strtok(NULL, ",");
-        if (!val) continue;
-
-        char *endptr;
+        if (val == NULL) continue;
 
         READ_INT8_TAG(SYSTEM_FILE_MATRIX_FILE, satioFileData.i_current_matrix_file_path);
         READ_BOOL_TAG(SYSTEM_FILE_LOAD_MATRIX_ON_STARTUP, matrixData.load_matrix_on_startup);
@@ -1069,7 +1160,7 @@ bool loadSystemFile(const char *filepath) {
         READ_INT8_TAG(SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE, satioData.ground_heading_value_mode);
     }
 
-    #undef READ_INT_TAG
+    #undef READ_BOOL_TAG
     #undef READ_INT8_TAG
     #undef READ_LONG_TAG
     #undef READ_DBL_TAG
@@ -1107,10 +1198,7 @@ void sdcardFlagHandler() {
 //     sdcard_mount();
 //   }
 
-  if (sdcardData.sdcard_mounted==false) {
-  }
-
-  else if (sdcardData.sdcard_mounted==true) {
+  if (sdcardData.sdcard_mounted==true) {
 
     // ---- MAPPING ----
 
@@ -1217,9 +1305,10 @@ void sdcardFlagHandler() {
     // ---- LOG ----
 
     else if (sdcardFlagData.write_log) {
-      if (writeLog())
-        {printf("[log] successfull.\n"); set_storage_success_flag(true);}
-      else {printf("[log] failed.\n"); set_storage_success_flag(false);}
+    //   if (writeLog()==true)
+    //     {printf("[log] successfull.\n"); set_storage_success_flag(true);}
+    //   else {printf("[log] failed.\n"); set_storage_success_flag(false);}
+      writeLog();
       sdcardFlagData.no_delay_flag=false;
       sdcardFlagData.write_log=false;
     }

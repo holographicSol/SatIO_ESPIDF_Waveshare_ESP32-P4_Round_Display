@@ -265,8 +265,8 @@ extern "C" void app_main(void)
     sdcardFlagData.load_system=true; // Set load system flag ready for sdcard flag handler
     printf("creating storage task\n");
     createTaskStorage();             // (target: 2/ps)    SD card
-    printf("creating logging task\n");
-    createTaskLogging();             // (target: n/ps)    Log to sdcard
+    // printf("creating logging task\n");
+    // createTaskLogging();             // (target: n/ps)    Log to sdcard
     
     // GPS
     printf("creating GPS task\n");

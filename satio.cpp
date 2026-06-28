@@ -1,6 +1,7 @@
 /*
     SATIO Library. Written by Benjamin Jack Cullen.
 
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include "./satio.h"
@@ -234,11 +235,11 @@ struct SpeedStruct speedData = {
 
 /**
  * Set SatIO Altitude According To Update Mode. (The following should either be set or not set. If not set then conditions the be checked elsewhere)
+ *
+ * Rule 8.7: internal linkage; only called from setSatIOData() in this file.
  */
-void setSatIOAltitude() {
-  /* set converted values */
-  // ...
-  satioData.altitude = atoi(gnggaData.altitude);
+static void setSatIOAltitude(void) {
+  satioData.altitude = atof(gnggaData.altitude);
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
   // ---------------------------------------------------------------------
@@ -248,10 +249,10 @@ void setSatIOAltitude() {
 
 /**
  * Set SatIO Speed According To Update Mode. (The following should either be set or not set. If not set then conditions the be checked elsewhere)
+ *
+ * Rule 8.7: internal linkage; only called from setSatIOData() in this file.
  */
-void setSatIOSspeed() {
-  /* set converted values */
-  // ...
+static void setSatIOSpeed(void) {
   satioData.speed = atof(gnrmcData.ground_speed);
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
@@ -262,8 +263,10 @@ void setSatIOSspeed() {
 
 /**
  * Set SatIO Ground Heading According To Update Mode. (The following should either be set or not set. If not set then conditions the be checked elsewhere)
+ *
+ * Rule 8.7: internal linkage; only called from setSatIOData() in this file.
  */
-void setSatIOGroundHeading() {
+static void setSatIOGroundHeading(void) {
   satioData.ground_heading = atof(gnrmcData.ground_heading);
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
@@ -275,34 +278,47 @@ void setSatIOGroundHeading() {
 // ----------------------------------------------------------------------------------------
 // groundHeadingDegreesToNESW.
 // ----------------------------------------------------------------------------------------
-String groundHeadingDegreesToNESW(float num) {
-  if (num == 0 || num == 360)      {return String("N");}
-  else if (num > 0 && num < 45)    {return String("NNE");}
-  else if (num == 45)              {return String("NE");}
-  else if (num > 45 && num < 90)   {return String("ENE");}
-  else if (num == 90)              {return String("E");}
-  else if (num > 90 && num < 135)  {return String("ESE");}
-  else if (num == 135)             {return String("SE");}
-  else if (num > 135 && num < 180) {return String("SSE");}
-  else if (num == 180)             {return String("S");}
-  else if (num > 180 && num < 225) {return String("SSW");}
-  else if (num == 225)             {return String("SW");}
-  else if (num > 225 && num < 270) {return String("WSW");}
-  else if (num == 270)             {return String("W");}
-  else if (num > 270 && num < 315) {return String("WNW");}
-  else if (num == 315)             {return String("NW");}
-  else if (num > 315 && num < 360) {return String("NNW");}
-  return String("");
+/* Rule 8.7: internal linkage; only called from setGroundHeadingName() in
+   this file. Rule 15.5: single point of exit via a result variable instead
+   of one return per compass direction. */
+static String groundHeadingDegreesToNESW(float num) {
+  String direction;
+
+  if (num == 0 || num == 360)      {direction = "N";}
+  else if (num > 0 && num < 45)    {direction = "NNE";}
+  else if (num == 45)              {direction = "NE";}
+  else if (num > 45 && num < 90)   {direction = "ENE";}
+  else if (num == 90)              {direction = "E";}
+  else if (num > 90 && num < 135)  {direction = "ESE";}
+  else if (num == 135)             {direction = "SE";}
+  else if (num > 135 && num < 180) {direction = "SSE";}
+  else if (num == 180)             {direction = "S";}
+  else if (num > 180 && num < 225) {direction = "SSW";}
+  else if (num == 225)             {direction = "SW";}
+  else if (num > 225 && num < 270) {direction = "WSW";}
+  else if (num == 270)             {direction = "W";}
+  else if (num > 270 && num < 315) {direction = "WNW";}
+  else if (num == 315)             {direction = "NW";}
+  else if (num > 315 && num < 360) {direction = "NNW";}
+  else                              {direction = "";}
+
+  return direction;
 }
 void setGroundHeadingName(float num) {
+  /* Rule 21.x: bounded replacement for strcpy(); String::c_str() can never
+     exceed the longest literal above, but strncpy keeps the destination
+     write provably within ground_heading_name's bounds. */
+  String direction = groundHeadingDegreesToNESW(num);
+
   memset(satioData.ground_heading_name, 0, sizeof(satioData.ground_heading_name));
-  strcpy(satioData.ground_heading_name, groundHeadingDegreesToNESW(num).c_str());
+  strncpy(satioData.ground_heading_name, direction.c_str(), sizeof(satioData.ground_heading_name) - 1U);
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------
 //                                                                                                         CONVERT COORDINTE DATA
 // ------------------------------------------------------------------------------------------------------------------------------
-void setSatioCoordinates(){
+/* Rule 8.7: internal linkage; only called from setSatIOData() in this file. */
+static void setSatioCoordinates(void){
   // ----------------------------------------------------------------------------------------------------------------------------
   //                                                                                                  GNGGA COORDINATE CONVERSION
   // ----------------------------------------------------------------------------------------------------------------------------
@@ -350,10 +366,6 @@ void setSatioCoordinates(){
     satioData.degrees_latitude=0 - satioData.degrees_latitude;
   }
   // -----------------------------------------------------------------------------------------
-  // Save formatted latitude value as a string for later use.
-  // -----------------------------------------------------------------------------------------
-  scanf("%lf17", &satioData.degrees_latitude);
-  // -----------------------------------------------------------------------------------------
   // Extract absolute longitude value from GNGGA data as decimal degrees.
   // -----------------------------------------------------------------------------------------
   satioData.abs_longitude_gngga_0=atof(String(gnggaData.longitude).c_str());
@@ -393,10 +405,6 @@ void setSatioCoordinates(){
   if (strcmp(gnggaData.longitude_hemisphere, "W")==0) {
     satioData.degrees_longitude=0 - satioData.degrees_longitude;
   }
-  // -----------------------------------------------------------------------------------------
-  // Save formatted latitude value as a string for later use.
-  // -----------------------------------------------------------------------------------------
-  scanf("%lf17", &satioData.degrees_longitude);
   // ----------------------------------------------------------------------------------------------------------------------------
   //                                                                                                     USER DEFINED COORDINATES
   // ----------------------------------------------------------------------------------------------------------------------------
@@ -511,17 +519,38 @@ void printAllTimes(void) {
 }
 
 // ----------------------------------------------------------------------------------------
-// padDigitsZero.
+// Shared time/date formatting (Rule 8.7: internal linkage; storeRTCTime(),
+// storeLocalTime(), storeLMST(), and storeRTCSYNCTime() each need the same
+// colon/slash-separated and compact-padded strings built from their own
+// clock source, so the snprintf() calls live here once instead of being
+// repeated per function). "%02d"/"%04d" zero-pad directly, so no separate
+// digit-padding helper is needed.
 // ----------------------------------------------------------------------------------------
-void padDigitsZero(int digits, char* output, size_t output_size) {
-    // Prepends a zero to pad a string of digits evenly
-    memset(output, 0, output_size);
-    if (digits < 10) {
-        strcpy(output, "0");
+static void formatTimeStrings(uint8_t hour, uint8_t minute, uint8_t second,
+                               char *formatted_time, size_t formatted_time_size,
+                               char *padded_time, size_t padded_time_size) {
+    snprintf(formatted_time, formatted_time_size, "%02d:%02d:%02d", hour, minute, second);
+    snprintf(padded_time, padded_time_size, "%02d%02d%02d", hour, minute, second);
+}
+
+/* formatted_short_date/padded_short_date may be NULL where a caller has no
+   short-date field to fill (storeRTCTime has neither). */
+static void formatDateStrings(uint8_t day, uint8_t month, uint16_t year,
+                               char *formatted_date, size_t formatted_date_size,
+                               char *padded_date, size_t padded_date_size,
+                               char *formatted_short_date, size_t formatted_short_date_size,
+                               char *padded_short_date, size_t padded_short_date_size) {
+    uint16_t short_year = year % 100U;
+
+    snprintf(formatted_date, formatted_date_size, "%02d/%02d/%04d", day, month, year);
+    snprintf(padded_date, padded_date_size, "%02d%02d%04d", day, month, year);
+
+    if (formatted_short_date != NULL) {
+        snprintf(formatted_short_date, formatted_short_date_size, "%02d/%02d/%02d", day, month, short_year);
     }
-    char temp[12]; // Enough for int32_t in base 10
-    itoa(digits, temp, 10);
-    strncat(output, temp, output_size - strlen(output) - 1);
+    if (padded_short_date != NULL) {
+        snprintf(padded_short_date, padded_short_date_size, "%02d%02d%02d", day, month, short_year);
+    }
 }
 
 // ----------------------------------------------------------------------------------------
@@ -541,43 +570,18 @@ void storeRTCTime(void) {
     satioData.rtc_unixtime = rtc.now().unixtime();
     // xSemaphoreGive(i2c_bus0_mutex);
 
-    // Debug output without String
-    // char debug_str[MAX_GLOBAL_ELEMENT_SIZE];
-    // snprintf(debug_str, MAX_GLOBAL_ELEMENT_SIZE, "RTC: %d", satioData.rtc_hour);
-    // Serial.println(debug_str);
-
     // Copy weekday name
     memset(satioData.rtc_wday_name, 0, sizeof(satioData.rtc_wday_name));
-    strcpy(satioData.rtc_wday_name, satioData.week_day_names[satioData.rtc_wday]);
+    strncpy(satioData.rtc_wday_name, satioData.week_day_names[satioData.rtc_wday], sizeof(satioData.rtc_wday_name) - 1U);
 
-    // Format time (HH:MM:SS)
-    char hour_str[3], min_str[3], sec_str[3];
-    padDigitsZero(satioData.rtc_hour, hour_str, sizeof(hour_str));
-    padDigitsZero(satioData.rtc_minute, min_str, sizeof(min_str));
-    padDigitsZero(satioData.rtc_second, sec_str, sizeof(sec_str));
-    memset(satioData.formatted_rtc_time, 0, sizeof(satioData.formatted_rtc_time));
-    snprintf(satioData.formatted_rtc_time, sizeof(satioData.formatted_rtc_time), "%s:%s:%s", hour_str, min_str, sec_str);
+    formatTimeStrings(satioData.rtc_hour, satioData.rtc_minute, satioData.rtc_second,
+                       satioData.formatted_rtc_time, sizeof(satioData.formatted_rtc_time),
+                       satioData.padded_rtc_time_HHMMSS, sizeof(satioData.padded_rtc_time_HHMMSS));
 
-    // Debug formatted time
-    // snprintf(debug_str, MAX_GLOBAL_ELEMENT_SIZE, "formatted_rtc_time: %s", satioData.formatted_rtc_time);
-    // Serial.println(debug_str);
-
-    // Format date (DD/MM/YYYY)
-    char day_str[3], month_str[3], year_str[5];
-    padDigitsZero(satioData.rtc_mday, day_str, sizeof(day_str));
-    padDigitsZero(satioData.rtc_month, month_str, sizeof(month_str));
-    padDigitsZero(satioData.rtc_year, year_str, sizeof(year_str));
-
-    memset(satioData.formatted_rtc_date, 0, sizeof(satioData.formatted_rtc_date));
-    snprintf(satioData.formatted_rtc_date, sizeof(satioData.formatted_rtc_date), "%s/%s/%s", day_str, month_str, year_str);
-
-    // Format padded time (HHMMSS)
-    memset(satioData.padded_rtc_time_HHMMSS, 0, sizeof(satioData.padded_rtc_time_HHMMSS));
-    snprintf(satioData.padded_rtc_time_HHMMSS, sizeof(satioData.padded_rtc_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
-
-    // Format padded date (DDMMYYYY)
-    memset(satioData.padded_rtc_date_DDMMYYYY, 0, sizeof(satioData.padded_rtc_date_DDMMYYYY));
-    snprintf(satioData.padded_rtc_date_DDMMYYYY, sizeof(satioData.padded_rtc_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
+    formatDateStrings(satioData.rtc_mday, satioData.rtc_month, satioData.rtc_year,
+                       satioData.formatted_rtc_date, sizeof(satioData.formatted_rtc_date),
+                       satioData.padded_rtc_date_DDMMYYYY, sizeof(satioData.padded_rtc_date_DDMMYYYY),
+                       NULL, 0, NULL, 0);
 }
 
 // ----------------------------------------------------------------------------------------
@@ -597,66 +601,35 @@ void storeLocalTime(void) {
 
     // Copy weekday name
     memset(satioData.local_wday_name, 0, sizeof(satioData.local_wday_name));
-    strcpy(satioData.local_wday_name, satioData.week_day_names[satioData.local_wday]);
+    strncpy(satioData.local_wday_name, satioData.week_day_names[satioData.local_wday], sizeof(satioData.local_wday_name) - 1U);
 
     // Copy month name
     memset(satioData.local_month_name, 0, sizeof(satioData.local_month_name));
-    strcpy(satioData.local_month_name, satioData.month_names[satioData.local_month-1]);
+    strncpy(satioData.local_month_name, satioData.month_names[satioData.local_month-1], sizeof(satioData.local_month_name) - 1U);
 
-    // Format time (HH:MM:SS)
-    char hour_str[3], min_str[3], sec_str[3];
-    padDigitsZero(satioData.local_hour, hour_str, sizeof(hour_str));
-    padDigitsZero(satioData.local_minute, min_str, sizeof(min_str));
-    padDigitsZero(satioData.local_second, sec_str, sizeof(sec_str));
-    memset(satioData.formatted_local_time_HHMMSS, 0, sizeof(satioData.formatted_local_time_HHMMSS));
-    snprintf(satioData.formatted_local_time_HHMMSS, sizeof(satioData.formatted_local_time_HHMMSS), "%s:%s:%s", hour_str, min_str, sec_str);
+    formatTimeStrings(satioData.local_hour, satioData.local_minute, satioData.local_second,
+                       satioData.formatted_local_time_HHMMSS, sizeof(satioData.formatted_local_time_HHMMSS),
+                       satioData.padded_local_time_HHMMSS, sizeof(satioData.padded_local_time_HHMMSS));
 
-    char day_str[3], month_str[3], year_str[5];
-    padDigitsZero(satioData.local_mday, day_str, sizeof(day_str));
-    padDigitsZero(satioData.local_month, month_str, sizeof(month_str));
-    padDigitsZero(satioData.local_year, year_str, sizeof(year_str));
-    memset(satioData.formatted_local_date_DDMMYYYY, 0, sizeof(satioData.formatted_local_date_DDMMYYYY));
-    snprintf(satioData.formatted_local_date_DDMMYYYY, sizeof(satioData.formatted_local_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
+    formatDateStrings(satioData.local_mday, satioData.local_month, satioData.local_year,
+                       satioData.formatted_local_date_DDMMYYYY, sizeof(satioData.formatted_local_date_DDMMYYYY),
+                       satioData.padded_local_date_DDMMYYYY, sizeof(satioData.padded_local_date_DDMMYYYY),
+                       satioData.formatted_local_short_date_DDMMYY, sizeof(satioData.formatted_local_short_date_DDMMYY),
+                       satioData.padded_local_short_date_DDMMYY, sizeof(satioData.padded_local_short_date_DDMMYY));
 
-    char short_year_str[3] = { year_str[2], year_str[3], '\0' };
-    memset(satioData.formatted_local_short_date_DDMMYY, 0, sizeof(satioData.formatted_local_short_date_DDMMYY));
-    snprintf(satioData.formatted_local_short_date_DDMMYY, sizeof(satioData.formatted_local_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
-
-    memset(satioData.padded_local_time_HHMMSS, 0, sizeof(satioData.padded_local_time_HHMMSS));
-    snprintf(satioData.padded_local_time_HHMMSS, sizeof(satioData.padded_local_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
-
-    memset(satioData.padded_local_date_DDMMYYYY, 0, sizeof(satioData.padded_local_date_DDMMYYYY));
-    snprintf(satioData.padded_local_date_DDMMYYYY, sizeof(satioData.padded_local_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
-
-    memset(satioData.padded_local_short_date_DDMMYY, 0, sizeof(satioData.padded_local_short_date_DDMMYY));
-    snprintf(satioData.padded_local_short_date_DDMMYY, sizeof(satioData.padded_local_short_date_DDMMYY), "%s%s%s", day_str, month_str, short_year_str);
-
-    // Format padded hour (HH)
-    memset(satioData.padded_local_hour, 0, sizeof(satioData.padded_local_hour));
-    snprintf(satioData.padded_local_hour, MAX_GLOBAL_ELEMENT_SIZE, "%s", hour_str);
-
-    // Format padded minute (MM)
-    memset(satioData.padded_local_minute, 0, sizeof(satioData.padded_local_minute));
-    snprintf(satioData.padded_local_minute, MAX_GLOBAL_ELEMENT_SIZE, "%s", min_str);
-
-    // Format padded second (SS)
-    memset(satioData.padded_local_second, 0, sizeof(satioData.padded_local_second));
-    snprintf(satioData.padded_local_second, MAX_GLOBAL_ELEMENT_SIZE, "%s", sec_str);
-
-    // Format padded day (DD)
-    memset(satioData.padded_local_day, 0, sizeof(satioData.padded_local_day));
-    snprintf(satioData.padded_local_day, MAX_GLOBAL_ELEMENT_SIZE, "%s", day_str);
-
-    // Format padded month (MM)
-    memset(satioData.padded_local_month, 0, sizeof(satioData.padded_local_month));
-    snprintf(satioData.padded_local_month, MAX_GLOBAL_ELEMENT_SIZE, "%s", month_str);
-
-    // Format padded year (YY)
-    memset(satioData.padded_local_year, 0, sizeof(satioData.padded_local_year));
-    snprintf(satioData.padded_local_year, MAX_GLOBAL_ELEMENT_SIZE, "%s", String(String(year_str[2]) + String(year_str[3])).c_str());
+    // The individually-padded fields below are unique to local time (no
+    // other clock source exposes its components separately), so they are
+    // formatted directly here rather than through the shared helpers.
+    snprintf(satioData.padded_local_hour, sizeof(satioData.padded_local_hour), "%02d", satioData.local_hour);
+    snprintf(satioData.padded_local_minute, sizeof(satioData.padded_local_minute), "%02d", satioData.local_minute);
+    snprintf(satioData.padded_local_second, sizeof(satioData.padded_local_second), "%02d", satioData.local_second);
+    snprintf(satioData.padded_local_day, sizeof(satioData.padded_local_day), "%02d", satioData.local_mday);
+    snprintf(satioData.padded_local_month, sizeof(satioData.padded_local_month), "%02d", satioData.local_month);
+    snprintf(satioData.padded_local_year, sizeof(satioData.padded_local_year), "%02d", satioData.local_year % 100U);
 }
 
-void setPhotoPeriodSchedule_LMST() {
+/* Rule 8.7: internal linkage; only called from storeLMST() in this file. */
+static void setPhotoPeriodSchedule_LMST(void) {
   satioData.LMST_photo_period_schedule = getPhotoPeriodData(
     satioData.system_degrees_latitude,
     satioData.system_degrees_longitude,
@@ -680,51 +653,26 @@ void storeLMST(void) {
     satioData.degrees_latitude,
     satioData.degrees_longitude
   );
-  satioData.LMST_year        = (double)(satioData.LMST_tm.tm_year + LAST_EPOCH);
-  satioData.LMST_month       = (double)(satioData.LMST_tm.tm_mon + 1);
-  satioData.LMST_day         = (double)satioData.LMST_tm.tm_mday;
-  satioData.LMST_hour        = (double)satioData.LMST_tm.tm_hour;
-  satioData.LMST_minute      = (double)satioData.LMST_tm.tm_min;
-  satioData.LMST_second      = (double)satioData.LMST_tm.tm_sec;
+  /* LMST_year/month/day/hour/minute/second are uint16_t/uint8_t fields
+     (Rule 10.x: assigning through an unrelated floating type is misleading
+     and unnecessary when the destination is already an integer type). */
+  satioData.LMST_year        = satioData.LMST_tm.tm_year + LAST_EPOCH;
+  satioData.LMST_month       = satioData.LMST_tm.tm_mon + 1;
+  satioData.LMST_day         = satioData.LMST_tm.tm_mday;
+  satioData.LMST_hour        = satioData.LMST_tm.tm_hour;
+  satioData.LMST_minute      = satioData.LMST_tm.tm_min;
+  satioData.LMST_second      = satioData.LMST_tm.tm_sec;
 
+  formatTimeStrings(satioData.LMST_hour, satioData.LMST_minute, satioData.LMST_second,
+                     satioData.formatted_LMST_time, sizeof(satioData.formatted_LMST_time),
+                     satioData.padded_LMST_time_HHMMSS, sizeof(satioData.padded_LMST_time_HHMMSS));
 
-  // printf("LMST Time : %02d:%02d:%02d %02d/%02d/%04d\n",
-  //         (int)satioData.LMST_hour,
-  //         (int)satioData.LMST_minute,
-  //         (int)satioData.LMST_second,
-  //         (int)satioData.LMST_day,
-  //         (int)satioData.LMST_month,
-  //         (int)satioData.LMST_year);
+  formatDateStrings(satioData.LMST_day, satioData.LMST_month, satioData.LMST_year,
+                     satioData.formatted_LMST_date_DDMMYYYY, sizeof(satioData.formatted_LMST_date_DDMMYYYY),
+                     satioData.padded_LMST_date_DDMMYYYY, sizeof(satioData.padded_LMST_date_DDMMYYYY),
+                     satioData.formatted_LMST_short_date_DDMMYY, sizeof(satioData.formatted_LMST_short_date_DDMMYY),
+                     NULL, 0);
 
-  // Format LMST time (HH:MM:SS)
-  char hour_str[3], min_str[3], sec_str[3];
-  padDigitsZero(satioData.LMST_hour, hour_str, sizeof(hour_str));
-  padDigitsZero(satioData.LMST_minute, min_str, sizeof(min_str));
-  padDigitsZero(satioData.LMST_second, sec_str, sizeof(sec_str));
-  memset(satioData.formatted_LMST_time, 0, sizeof(satioData.formatted_LMST_time));
-  snprintf(satioData.formatted_LMST_time, sizeof(satioData.formatted_LMST_time), "%s:%s:%s", hour_str, min_str, sec_str);
-
-  // Format LMST date (DD/MM/YYYY)
-  char day_str[3], month_str[3], year_str[5];
-  padDigitsZero(satioData.LMST_day, day_str, sizeof(day_str));
-  padDigitsZero(satioData.LMST_month, month_str, sizeof(month_str));
-  padDigitsZero(satioData.LMST_year, year_str, sizeof(year_str));
-  memset(satioData.formatted_LMST_date_DDMMYYYY, 0, sizeof(satioData.formatted_LMST_date_DDMMYYYY));
-  snprintf(satioData.formatted_LMST_date_DDMMYYYY, sizeof(satioData.formatted_LMST_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
-
-  // Format LMST short date (DD/MM/YY)
-  char short_year_str[3] = { year_str[2], year_str[3], '\0' };
-  memset(satioData.formatted_LMST_short_date_DDMMYY, 0, sizeof(satioData.formatted_LMST_short_date_DDMMYY));
-  snprintf(satioData.formatted_LMST_short_date_DDMMYY, sizeof(satioData.formatted_LMST_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
-
-  // Format padded LMST time (HHMMSS)
-  memset(satioData.padded_LMST_time_HHMMSS, 0, sizeof(satioData.padded_LMST_time_HHMMSS));
-  snprintf(satioData.padded_LMST_time_HHMMSS, sizeof(satioData.padded_LMST_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
-
-  // Format padded LMST date (DDMMYYYY)
-  memset(satioData.padded_LMST_date_DDMMYYYY, 0, sizeof(satioData.padded_LMST_date_DDMMYYYY));
-  snprintf(satioData.padded_LMST_date_DDMMYYYY, sizeof(satioData.padded_LMST_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
-  
   // Store photo period schedule for LMST
   setPhotoPeriodSchedule_LMST();
 }
@@ -740,51 +688,24 @@ void storeRTCSYNCTime(void) {
     satioData.rtcsync_year = satioData.local_year;
     satioData.rtcsync_month = satioData.local_month;
     satioData.rtcsync_day = satioData.local_mday;
-    // Serial.printf("[writeI2C] storeRTCSYNCTime\n");
-    // xSemaphoreTake(i2c_bus0_mutex, 1000 / portTICK_PERIOD_MS);
     satioData.rtcsync_unixtime = rtc.now().unixtime();
-    // xSemaphoreGive(i2c_bus0_mutex);
 
-    // Format sync time (HH:MM:SS)
-    char hour_str[3], min_str[3], sec_str[3];
-    padDigitsZero(satioData.rtcsync_hour, hour_str, sizeof(hour_str));
-    padDigitsZero(satioData.rtcsync_minute, min_str, sizeof(min_str));
-    padDigitsZero(satioData.rtcsync_second, sec_str, sizeof(sec_str));
-    memset(satioData.formatted_rtc_sync_time, 0, sizeof(satioData.formatted_rtc_sync_time));
-    snprintf(satioData.formatted_rtc_sync_time, sizeof(satioData.formatted_rtc_sync_time), "%s:%s:%s", hour_str, min_str, sec_str);
+    formatTimeStrings(satioData.rtcsync_hour, satioData.rtcsync_minute, satioData.rtcsync_second,
+                       satioData.formatted_rtc_sync_time, sizeof(satioData.formatted_rtc_sync_time),
+                       satioData.padded_rtc_sync_time_HHMMSS, sizeof(satioData.padded_rtc_sync_time_HHMMSS));
 
-    char day_str[3], month_str[3], year_str[5];
-    padDigitsZero(satioData.rtcsync_day, day_str, sizeof(day_str));
-    padDigitsZero(satioData.rtcsync_month, month_str, sizeof(month_str));
-    padDigitsZero(satioData.rtcsync_year, year_str, sizeof(year_str));
+    formatDateStrings(satioData.rtcsync_day, satioData.rtcsync_month, satioData.rtcsync_year,
+                       satioData.formatted_rtc_sync_date_DDMMYYYY, sizeof(satioData.formatted_rtc_sync_date_DDMMYYYY),
+                       satioData.padded_rtc_sync_date_DDMMYYYY, sizeof(satioData.padded_rtc_sync_date_DDMMYYYY),
+                       satioData.formatted_rtc_sync_short_date_DDMMYY, sizeof(satioData.formatted_rtc_sync_short_date_DDMMYY),
+                       NULL, 0);
 
-    memset(satioData.formatted_rtc_sync_date_DDMMYYYY, 0, sizeof(satioData.formatted_rtc_sync_date_DDMMYYYY));
-    snprintf(satioData.formatted_rtc_sync_date_DDMMYYYY, sizeof(satioData.formatted_rtc_sync_date_DDMMYYYY), "%s/%s/%s", day_str, month_str, year_str);
+    // RTC sync latitude/longitude/altitude (unique to this function).
+    snprintf(satioData.rtcsync_latitude, sizeof(satioData.rtcsync_latitude), "%.7f", satioData.degrees_latitude);
+    snprintf(satioData.rtcsync_longitude, sizeof(satioData.rtcsync_longitude), "%.7f", satioData.degrees_longitude);
 
-    char short_year_str[3] = { year_str[2], year_str[3], '\0' };
-    memset(satioData.formatted_rtc_sync_short_date_DDMMYY, 0, sizeof(satioData.formatted_rtc_sync_short_date_DDMMYY));
-    snprintf(satioData.formatted_rtc_sync_short_date_DDMMYY, sizeof(satioData.formatted_rtc_sync_short_date_DDMMYY), "%s/%s/%s", day_str, month_str, short_year_str);
-
-    memset(satioData.padded_rtc_sync_time_HHMMSS, 0, sizeof(satioData.padded_rtc_sync_time_HHMMSS));
-    snprintf(satioData.padded_rtc_sync_time_HHMMSS, sizeof(satioData.padded_rtc_sync_time_HHMMSS), "%s%s%s", hour_str, min_str, sec_str);
-
-    memset(satioData.padded_rtc_sync_date_DDMMYYYY, 0, sizeof(satioData.padded_rtc_sync_date_DDMMYYYY));
-    snprintf(satioData.padded_rtc_sync_date_DDMMYYYY, sizeof(satioData.padded_rtc_sync_date_DDMMYYYY), "%s%s%s", day_str, month_str, year_str);
-
-    // RTC sync latitude
-    char temp_str[MAX_GLOBAL_ELEMENT_SIZE];
-    snprintf(temp_str, MAX_GLOBAL_ELEMENT_SIZE, "%.7f", satioData.degrees_latitude);
-    memset(satioData.rtcsync_latitude, 0, sizeof(satioData.rtcsync_latitude));
-    strcpy(satioData.rtcsync_latitude, temp_str);
-
-    // RTC sync longitude
-    snprintf(temp_str, MAX_GLOBAL_ELEMENT_SIZE, "%.7f", satioData.degrees_longitude);
-    memset(satioData.rtcsync_longitude, 0, sizeof(satioData.rtcsync_longitude));
-    strcpy(satioData.rtcsync_longitude, temp_str);
-
-    // RTC sync altitude
     memset(satioData.rtcsync_altitude, 0, sizeof(satioData.rtcsync_altitude));
-    strcpy(satioData.rtcsync_altitude, gnggaData.altitude);
+    strncpy(satioData.rtcsync_altitude, gnggaData.altitude, sizeof(satioData.rtcsync_altitude) - 1U);
 }
 
 // ----------------------------------------------------------------------------------------
@@ -795,24 +716,21 @@ void setSystemTime(long usec) {
   // System time = Local Time.
   // -----------------------------------------------------
   struct tm tmpti = {0};
-  memset(&tmpti, 0, sizeof(tmpti));
-  // Serial.printf("[writeI2C] setSystemTime\n");
-  // xSemaphoreTake(i2c_bus0_mutex, 1000 / portTICK_PERIOD_MS);
   tmpti.tm_year = int(rtc.now().year()) - LAST_EPOCH; // Years since 1900 (since last epoch)
   tmpti.tm_mon = rtc.now().month() - 1; // Months 0-11
   tmpti.tm_mday = rtc.now().day();
   tmpti.tm_hour = rtc.now().hour();
   tmpti.tm_min = rtc.now().minute();
   tmpti.tm_sec = rtc.now().second();
-  // xSemaphoreGive(i2c_bus0_mutex);
   tmpti.tm_isdst = -1; // No DST
   time_t now = mktime(&tmpti);
   tv_now = {
       .tv_sec = now + satioData.utc_second_offset, // negative utc_second_offset will be deducted.
       .tv_usec = usec
   };
-  if (settimeofday(&tv_now, NULL) == 0) {}
-  else {Serial.println("[settimeofday] failed");}
+  /* Rule 15.7: a terminating else with no empty if-branch -- the failure
+     case is the one that needs handling, so it is the if, not the else. */
+  if (settimeofday(&tv_now, NULL) != 0) {Serial.println("[settimeofday] failed");}
 }
 
 // ----------------------------------------------------------------------------------------
@@ -868,7 +786,8 @@ void extractDateTimeFromGPSData(void) {
   satioData.tmp_millisecond_int=atoi(satioData.tmp_millisecond);
 }
 
-void setRTCDateTime() {
+/* Rule 8.7: internal linkage; only called from syncRTC() in this file. */
+static void setRTCDateTime(void) {
   rtc.adjust(DateTime((uint16_t)satioData.tmp_year_int,
             (uint8_t)satioData.tmp_month_int,
             (uint8_t)satioData.tmp_day_int,
@@ -878,23 +797,17 @@ void setRTCDateTime() {
   // Serial.println("[ " + String(satioData.local_unixtime_uS) + " ] sync time in setRTCDateTime");
   storeRTCSYNCTime();
   satioData.sync_rtc_immediately_flag=false;
-  
 }
 
 // GPS sync timeout timer
 int64_t gps_sync_timestamp = 0;
 const int64_t GPS_SYNC_TIMEOUT_uS = 1000000; // Reset gps_sync after 1 second
 
-void syncRTC() {
+void syncRTC(void) {
   // Set GPS sync flag false
-  if (satioData.gps_sync) {
-    if
-      (
-      satioData.local_unixtime_uS >= gps_sync_timestamp + GPS_SYNC_TIMEOUT_uS
-      ||
-      satioData.local_unixtime_uS < gps_sync_timestamp
-      )
-    {
+  if (satioData.gps_sync == true) {
+    if ((satioData.local_unixtime_uS >= gps_sync_timestamp + GPS_SYNC_TIMEOUT_uS) ||
+        (satioData.local_unixtime_uS < gps_sync_timestamp)) {
       satioData.gps_sync = false;
     }
   }
@@ -981,7 +894,7 @@ void setSatIOData(void) {
     setSatioCoordinates();
     setSatIOAltitude();
 
-    setSatIOSspeed();
+    setSatIOSpeed();
     setSatIOGroundHeading();
     setGroundHeadingName(atof(gnrmcData.ground_heading));
 }
@@ -993,8 +906,9 @@ void initSystemTime(void) {
   Serial.println("[SYNC] synchronizing system time with RTC");
   int rtc_second_now=rtc.now().second();
   getSystemTime();
-  while (rtc_second_now==rtc.now().second()) // wait to sync
-  setSystemTime(0);
+  while (rtc_second_now==rtc.now().second()) { // wait to sync
+    setSystemTime(0);
+  }
   getSystemTime();
   storeLocalTime();
   storeRTCTime();
