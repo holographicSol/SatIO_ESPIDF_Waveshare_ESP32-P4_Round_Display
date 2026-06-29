@@ -27,10 +27,17 @@
     Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
+/**
+ * @brief SATIO_DISPLAY_OPTION_LVGL - LVGL display option.
+ * @def If defined then the project will be comiled for use with LVGL.
+ * @note If not defined then the project will be comiled for use without LVGL.
+ * @warning Unless the intention is to compile headless, then ensure a display option is defined. 
+ */
+#define SATIO_DISPLAY_OPTION_LVGL
+
 #include "bsp/esp32_p4_wifi6_touch_lcd_xc.h"
 #include "bsp/esp-bsp.h"
 #include "esp_log.h"
-#include "lvgl.h"
 #include "ff.h"           // FatFs core
 #include "diskio.h"       // Disk I/O
 #include "diskio_impl.h"  // ESP32 disk impl
@@ -47,6 +54,22 @@
 #include <float.h>
 #include <math.h>
 #include <Arduino.h>
+
+#include <sys/time.h>
+#include <rtc_wdt.h>
+#include <esp_task_wdt.h>
+#include "esp_pm.h"
+#include "esp_attr.h"
+#include "esp_partition.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_spiffs.h"
+#include "esp_heap_caps.h"
+#include "nvs_flash.h"
+#include "esp_system.h"
+#include "driver/uart.h"
+#include "esp_rom_uart.h"
 
 #include "./config.h"
 #include "./REG.h"
@@ -67,24 +90,12 @@
 #include "./task_handler.h"
 #include "./i2c_helper.h"
 #include "./wit_c_sdk.h"
+
+#ifdef SATIO_DISPLAY_OPTION_LVGL
+#include "lvgl.h"
 #include "./satio_lvgl.h"
 #include "./astroclock.h"
-
-#include <sys/time.h>
-#include <rtc_wdt.h>
-#include <esp_task_wdt.h>
-#include "esp_pm.h"
-#include "esp_attr.h"
-#include "esp_partition.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "esp_spiffs.h"
-#include "esp_heap_caps.h"
-#include "nvs_flash.h"
-#include "esp_system.h"
-#include "driver/uart.h"
-#include "esp_rom_uart.h"
+#endif
 
 #define UART0_NUM               UART_NUM_0
 #define UART0_BUF_SIZE          (512)
@@ -255,7 +266,9 @@ extern "C" void app_main(void)
     // --------------------------------------------------------------
     // LVGL Initialization
     // --------------------------------------------------------------
+    #ifdef SATIO_DISPLAY_OPTION_LVGL
     initSatIOUI();
+    #endif
 
     /** ----------------------------------------------------------------------------
      * Diagnostic UART0 Setup.
@@ -407,9 +420,11 @@ extern "C" void app_main(void)
      * initSatIOUI() already ran earlier to drive the loading screen; only
      * the home screen needs to be shown now that every task is running.
      */
+    #ifdef SATIO_DISPLAY_OPTION_LVGL
     ESP_LOGI(APP_MAIN_TAG, "starting SatIO UI");
     flag_display_home_screen = true;
     satio_ui_begin();
+    #endif
 
     // app_main() may now return: every task created above keeps running
     // under the FreeRTOS scheduler, and the ESP-IDF idle task takes over
