@@ -1,5 +1,23 @@
 /*
-    Custom Mapping Library. Written by Benjamin Jack Cullen.
+    Custom Mapping Library.
+    Written by Benjamin Jack Cullen.
+
+    Converts a raw sensor or digital input value into an output value
+    according to a configurable set of mapping slots.
+
+    MISRA-relevant conventions used throughout this module:
+    - Every numeric field and parameter uses a fixed-width type from
+      <stdint.h> (int32_t), so the size and signedness of every value is
+      explicit and does not depend on the target platform.
+    - Every public function that takes a map_slot validates it against
+      MAX_MAP_SLOTS before using it, so an out-of-range index cannot cause
+      an out-of-bounds array access.
+    - Every switch statement has an explicit default clause, and every
+      switch-clause is terminated by an explicit break or return.
+    - Every if / else-if chain that selects between a fixed set of outcomes
+      ends in a plain else, so every reachable case is handled.
+    
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef CUSTOMMAPPING_H
@@ -10,100 +28,138 @@
 #include "config.h"
 
 /**
+ * @brief Number of configuration-label slots stored per map mode.
+ *
+ * One label per mapping_config parameter (MAX_MAPPING_PARAMETERS) plus one
+ * extra label slot. Defined in terms of MAX_MAPPING_PARAMETERS, rather than
+ * as its own literal, so the two values cannot drift apart.
+ */
+#define MAP_MODE_CONFIG_LABEL_COUNT (MAX_MAPPING_PARAMETERS + 1)
+
+/**
  * @struct CustomMappingStruct
+ * @brief Holds the configuration and results for every mapping slot.
  */
 struct CustomMappingStruct {
-    int32_t center_map_x0; // Negative axis mapped value.
-    int32_t center_map_x1; // Positive axis mapped value.
-    char char_map_value[MAX_MAPPABLE_VALUES][MAX_GLOBAL_ELEMENT_SIZE]; // Mapping names.
 
     /**
-     * Map Mode.
-     * Mode 0 maps min to max.
-     * Mode 1 maps x0 (min to center).
-     * Mode 2 maps x1 (center to max).
-     * Aligns with map_mode, mapping_config, mapped_value.
+     * Centered-map result for the negative side of center.
+     * Set by center_map() when a slot's map_mode is MAP_CENTER_X0.
      */
-    int map_mode[1][MAX_MAP_SLOTS];
+    int32_t center_map_x0;
 
     /**
-     * Map Mode Names.
-     * 
-     * Mode 0: [ 0: Title ] [ 1-5: C0-C5 ]
-     * Mode 1: [ 0: Title ] [ 1-5: C0-C5 ]
+     * Centered-map result for the positive side of center.
+     * Set by center_map() when a slot's map_mode is MAP_CENTER_X1.
      */
-    char char_map_mode_names[3][MAX_GLOBAL_ELEMENT_SIZE];
-
-    char char_map_mode_config_names[3][7][MAX_GLOBAL_ELEMENT_SIZE];
+    int32_t center_map_x1;
 
     /**
-     * Map Configuration.
+     * Display name of every value a map slot can read from, indexed by the
+     * INDEX_MAPPABLE_VALUES_* constants defined in config.h.
+     */
+    char char_map_value[MAX_MAPPABLE_VALUES][MAX_GLOBAL_ELEMENT_SIZE];
+
+    /**
+     * Selected map mode for every map slot: MAP_MIN_TO_MAX, MAP_CENTER_X0,
+     * or MAP_CENTER_X1 (config.h). The leading dimension holds a single
+     * group of slots, following the same convention used by the other
+     * per-slot arrays below.
+     */
+    int8_t map_mode[1][MAX_MAP_SLOTS];
+
+    /**
+     * Display name of every map mode, in the order MAP_MIN_TO_MAX,
+     * MAP_CENTER_X0, MAP_CENTER_X1.
+     */
+    char char_map_mode_names[MAX_MAP_MODES][MAX_GLOBAL_ELEMENT_SIZE];
+
+    /**
+     * Display name of every configuration parameter, grouped by map mode.
+     */
+    char char_map_mode_config_names[MAX_MAP_MODES][MAP_MODE_CONFIG_LABEL_COUNT][MAX_GLOBAL_ELEMENT_SIZE];
+
+    /**
+     * Configuration parameters for every map slot. The meaning of each
+     * parameter depends on the slot's map_mode:
      *
-     * Map Mode 0:
-     * 0 : Value index         : (default 0: digital low).
-     * 1 : Expected value min  : (defalut 0: digital low).
-     * 2 : Expected value max  : (defalut 1: digital high).
-     * 3 : Output value min    : (defalut 0: digital low).
-     * 4 : Output value max    : (defalut 1: digital high).
-     * 5 : Null.
+     * MAP_MIN_TO_MAX:
+     *   INDEX_MAP_VALUE : index of the value to read (config.h).
+     *   INDEX_MAP_EMIN  : expected minimum input value.
+     *   INDEX_MAP_EMAX  : expected maximum input value.
+     *   INDEX_MAP_OMIN  : output value for an input at or below EMIN.
+     *   INDEX_MAP_OMAX  : output value for an input at or above EMAX.
      *
-     * Map Mode 1 & 2:
-     * 0 : Value index : (default 0).
-     * 1 : Center      : approximate center value.
-     * 2 : Neg_range   : 0 to approximate center value.
-     * 3 : Pos_range   : ADC max - neg range.
-     * 4 : Output_max  : maximum resulting value.
-     * 5 : DEADZONE    : expected flutuation at center.
-     *
-     * Aligns with map_mode, mapping_config, mapped_value.
+     * MAP_CENTER_X0 / MAP_CENTER_X1:
+     *   INDEX_CMAP_VALUE     : index of the value to read (config.h).
+     *   INDEX_CMAP_CENTER    : input value treated as center (0 output).
+     *   INDEX_CMAP_NEG_RANGE : distance from center to the expected minimum.
+     *   INDEX_CMAP_POS_RANGE : distance from center to the expected maximum.
+     *   INDEX_CMAP_OMAX      : output magnitude at the input minimum/maximum.
+     *   INDEX_CMAP_DEADZONE  : output magnitude below which the result is 0.
      */
     int32_t mapping_config[1][MAX_MAP_SLOTS][MAX_MAPPING_PARAMETERS];
 
     /**
-     * Mapped results.
-     *
-     * Aligns with map_mode, mapping_config, mapped_value.
+     * Final mapped output value for every map slot, written by map_values().
      */
-    signed long mapped_value[1][MAX_MAP_SLOTS];
+    int32_t mapped_value[1][MAX_MAP_SLOTS];
 };
 extern struct CustomMappingStruct mappingData;
 
 /**
- * Centered Map.
- * @param map_slot Specify mapping_config slot
- * @param var Value to be mapped
- * @return No return
+ * @brief Map a value around a configured center point.
+ *
+ * Normalizes raw_value relative to the slot's configured center, scales it
+ * to INDEX_CMAP_OMAX using the appropriate side's range, clamps it to
+ * +/-INDEX_CMAP_OMAX, applies the configured deadzone, and stores the
+ * result on the side of center (MAP_CENTER_X0 or MAP_CENTER_X1) selected by
+ * the slot's map_mode.
+ *
+ * Bounds-checked against MAX_MAP_SLOTS so an invalid index cannot index the
+ * mapping arrays out of bounds.
+ *
+ * @param map_slot Map slot to update; ignored if outside [0, MAX_MAP_SLOTS).
+ * @param raw_value Input value to map.
  */
-void center_map(int map_slot, int32_t var);
+void center_map(int32_t map_slot, int32_t raw_value);
 
 /**
- * Map Values.
- * Maps values according to map_mode.
- * @return No return
+ * @brief Recompute the mapped output value of every map slot.
+ *
+ * For each map slot, reads the value selected by its INDEX_MAP_VALUE
+ * configuration parameter and applies the slot's configured map_mode,
+ * storing the result in mapped_value.
  */
 void map_values(void);
 
 /**
- * @brief Get Target value to be mapped.
- * 
- * @param mapslot Specify target mapslot.
- * @return Char value is returned so that map value types are returned as a uniform type.
+ * @brief Read the current raw input value targeted by a map slot.
+ *
+ * Returns the unmapped value, for display purposes.
+ *
+ * Bounds-checked against MAX_MAP_SLOTS so an invalid index cannot index the
+ * mapping_config array out of bounds.
+ *
+ * @param map_slot Map slot to read; returns 0.0 if outside [0, MAX_MAP_SLOTS).
+ * @return Raw input value as a double, the common type used to return every
+ *         possible input regardless of its underlying type.
  */
-double get_mapping_input_value(int map_slot);
+double get_mapping_input_value(int32_t map_slot);
 
 /**
- * Reset a single map slot.
- * @param map_slot Specify map slot
- * @return No return
+ * @brief Reset a single map slot to its default (unmapped, zeroed) state.
+ *
+ * Bounds-checked against MAX_MAP_SLOTS so an invalid index cannot index the
+ * mapping arrays out of bounds.
+ *
+ * @param map_slot Map slot to reset; ignored if outside [0, MAX_MAP_SLOTS).
  */
-void set_mapping_default(int map_slot);
+void set_mapping_default(int32_t map_slot);
 
 /**
- * Reset all map slots.
- * Overrides all computer assists.
- * Clears all map configurations.
- * @return No return
+ * @brief Reset every map slot to its default (unmapped, zeroed) state.
  */
 void set_all_mapping_default(void);
 
-#endif
+#endif // CUSTOMMAPPING_H

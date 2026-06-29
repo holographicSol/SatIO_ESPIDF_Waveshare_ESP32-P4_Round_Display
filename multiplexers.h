@@ -2,6 +2,8 @@
   Multiplexers Library. Written by Benjamin Jack Cullen.
 
   For TCA9548A & CD74HC4067.
+
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef MULTIPLEXERS_H
@@ -83,7 +85,7 @@ void initADMultiplexer(AnalogDigitalMultiplexer &mux_id);
  * @param channel Specify analog/digital multiplexer channel
  * @return None
  */
-void setADMultiplexerChannel(AnalogDigitalMultiplexer &mux_id, int channel);
+void setADMultiplexerChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel);
 
 /**
  * Read from channel.

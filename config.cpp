@@ -1,3 +1,8 @@
+/**
+ * Config - Written by Benjamin Jack Cullen.
+ *
+*/
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "config.h"

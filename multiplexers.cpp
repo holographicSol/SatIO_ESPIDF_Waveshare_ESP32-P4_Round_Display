@@ -2,6 +2,8 @@
   Multiplexers Library. Written by Benjamin Jack Cullen.
 
   For TCA9548A & CD74HC4067.
+
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include <Arduino.h>
@@ -37,15 +39,27 @@ I2CMultiplexer i2c_mux_0 = {
 // ------------------------------------------------------------------------------------
 // IIC
 // ------------------------------------------------------------------------------------
+/**
+ * Selects one of the TCA9548A's 8 channels by writing a single bit-mask
+ * byte to its control register over I2C.
+ *
+ * Rule 18.1: channel is bounds-checked against the device's real channel
+ * count before being used to compute the bit to write; an out-of-range
+ * channel is rejected rather than silently writing a meaningless mask.
+ */
 void setI2CMultiplexChannel(TwoWire &wire, I2CMultiplexer &mux_id, uint8_t channel) {
-  /* Set the channel on specified I2C multiplexer */
-  wire.beginTransmission(mux_id.address);
-  wire.write(1 << channel);
-  wire.endTransmission();
+  if (channel < MAX_I2C_MULTIPLEXER_TCA9548A_CHANNELS) {
+    wire.beginTransmission(mux_id.address);
+    wire.write(1 << channel);
+    wire.endTransmission();
+  }
 }
 
+/**
+ * Marks every channel of an I2C multiplexer instance as having no valid
+ * reading (NAN), e.g. before a fresh read pass.
+ */
 void setI2CMultiplexerDataNAN(I2CMultiplexer &mux_id) {
-  /* Set all I2C multiplexer channel data to NAN */
   for (int i=0; i<MAX_I2C_MULTIPLEXER_TCA9548A_CHANNELS; i++)
     {mux_id.data[i]=NAN;}
 }
@@ -53,6 +67,13 @@ void setI2CMultiplexerDataNAN(I2CMultiplexer &mux_id) {
 // ------------------------------------------------------------------------------------
 // Analog/Digital
 // ------------------------------------------------------------------------------------
+/**
+ * Row N is the 4-bit binary pattern (S3 S2 S1 S0) that the CD74HC4067
+ * datasheet maps to channel N; setADMultiplexerChannel() writes row
+ * [channel] to the multiplexer's 4 control pins to select it.
+ *
+ * Rule 8.7: internal linkage; only used within this file.
+ */
 static const int AD_MUX_CHANNEL_TABLE[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS][MAX_ANALOG_DIGITAL_MULTIPLEXER_CONTROL_PINS] = {
   {0,0,0,0}, // channel 0 
   {1,0,0,0}, // channel 1 
@@ -72,64 +93,120 @@ static const int AD_MUX_CHANNEL_TABLE[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS][M
   {1,1,1,1}  // channel 15
 };
 
-void setADMultiplexerChannel(AnalogDigitalMultiplexer &mux_id, int channel) {
-  /* Set the channel on specified analog/digital multiplexer */
-  for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CONTROL_PINS; i++) {
-      digitalWrite(mux_id.pins[i], AD_MUX_CHANNEL_TABLE[channel][i]);
+/**
+ * Drives the CD74HC4067's 4 control pins with the bit pattern that
+ * connects its shared SIG pin to the requested channel.
+ *
+ * Rule 18.1: channel is bounds-checked against AD_MUX_CHANNEL_TABLE's real
+ * row count before being used as an index, so an out-of-range channel is
+ * rejected rather than reading past the end of the table.
+ */
+void setADMultiplexerChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel) {
+  if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
+    for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CONTROL_PINS; i++) {
+        digitalWrite(mux_id.pins[i], AD_MUX_CHANNEL_TABLE[channel][i]);
+    }
   }
 }
 
+/**
+ * Selects channel, then reads its analog value into mux_id.data[channel]
+ * (raw ADC counts by default; customize as required).
+ *
+ * Rule 18.1: channel is bounds-checked against mux_id.data's real size
+ * before being used as an index, so an out-of-range channel is rejected
+ * rather than writing past the end of the data array.
+ */
 void readADMultiplexerAnalogChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel) {
-  /* Default is to store raw data (customize as required). */
-  setADMultiplexerChannel(mux_id, channel);
-  pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], INPUT);
-  mux_id.data[channel] = analogRead(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG]);
+  if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
+    setADMultiplexerChannel(mux_id, channel);
+    pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], INPUT);
+    mux_id.data[channel] = analogRead(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG]);
+  }
 }
 
+/**
+ * Reads every channel of an analog/digital multiplexer instance as an
+ * analog value, in order.
+ */
 void readAllADMultiplexerAnalogChannels(AnalogDigitalMultiplexer &mux_id) {
   for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i++) {
     readADMultiplexerAnalogChannel(mux_id, i);
   }
 }
 
+/**
+ * Selects channel, then reads its digital value into mux_id.data[channel]
+ * (raw HIGH/LOW reading by default; customize as required).
+ *
+ * Rule 18.1: channel is bounds-checked against mux_id.data's real size
+ * before being used as an index, so an out-of-range channel is rejected
+ * rather than writing past the end of the data array.
+ */
 void readADMultiplexerDigitalChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel) {
-  /* Default is to store raw data (customize as required). */
-  setADMultiplexerChannel(mux_id, channel);
-  pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], INPUT);
-  mux_id.data[channel] = digitalRead(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG]);
+  if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
+    setADMultiplexerChannel(mux_id, channel);
+    pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], INPUT);
+    mux_id.data[channel] = digitalRead(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG]);
+  }
 }
 
+/**
+ * Reads every channel of an analog/digital multiplexer instance as a
+ * digital value, in order.
+ */
 void readAllADMultiplexerDigitalChannels(AnalogDigitalMultiplexer &mux_id) {
   for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i++) {
     readADMultiplexerDigitalChannel(mux_id, i);
   }
 }
 
+/**
+ * Selects channel, then drives its value with an analog (PWM) write.
+ *
+ * Rule 18.1: channel is bounds-checked before selection, consistent with
+ * the other channel-access functions in this file.
+ */
 void writeADMultiplexerAnalogChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel, int data) {
-  /* Write analog data to channel */
-  setADMultiplexerChannel(mux_id, channel);
-  pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], OUTPUT);
-  analogWrite(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], data);
+  if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
+    setADMultiplexerChannel(mux_id, channel);
+    pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], OUTPUT);
+    analogWrite(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], data);
+  }
 }
 
+/**
+ * Selects channel, then drives its value with a digital (HIGH/LOW) write.
+ *
+ * Rule 18.1: channel is bounds-checked before selection, consistent with
+ * the other channel-access functions in this file.
+ */
 void writeADMultiplexerDigitalChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel, int data) {
-  /* Write digital data to channel */
-  setADMultiplexerChannel(mux_id, channel);
-  pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], OUTPUT);
-  digitalWrite(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], data);
+  if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
+    setADMultiplexerChannel(mux_id, channel);
+    pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], OUTPUT);
+    digitalWrite(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], data);
+  }
 }
 
+/**
+ * Marks every channel of an analog/digital multiplexer instance as having
+ * no valid reading (NAN), e.g. before a fresh read pass.
+ */
 void setADMultiplexerDataNAN(AnalogDigitalMultiplexer &mux_id) {
-  /* Set all analog/digital multiplexer channel data to NAN */
   for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i++) {mux_id.data[i]=NAN;}
 }
 
+/**
+ * Configures an analog/digital multiplexer instance's pins: the 4 control
+ * pins as outputs (driven low), and the shared SIG pin as an input,
+ * ready for setADMultiplexerChannel()/readADMultiplexerAnalogChannel().
+ */
 void initADMultiplexer(AnalogDigitalMultiplexer &mux_id) {
-  /* Initialize an analog/digital multiplexer instance */
   for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CONTROL_PINS; i++) {
     // control pins as outputs
-      pinMode(mux_id.pins[i], OUTPUT);
-      digitalWrite(mux_id.pins[i], LOW);
+    pinMode(mux_id.pins[i], OUTPUT);
+    digitalWrite(mux_id.pins[i], LOW);
   }
   // signal pin as direction
   pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], INPUT);

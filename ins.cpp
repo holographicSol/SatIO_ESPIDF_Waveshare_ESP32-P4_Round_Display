@@ -4,7 +4,7 @@
     Estimate location using gyro data and or dead reckoning.
 */
 
-#include <ins.h>
+#include "./ins.h"
 #include <Arduino.h>
 #include "satio.h"
 
@@ -28,30 +28,49 @@ struct InsData insData = {
   .ins_dt_prev = 0,
 };
 
+/**
+ * Reports whether angle1 and angle2 (degrees) are within range of each
+ * other, accounting for wraparound at the 0/360 boundary (e.g. 1 and 359
+ * are 2 degrees apart, not 358).
+ *
+ * Rule 10.x: fmod()/fabs() (not fmodf()/fabsf()) and double literals are
+ * used throughout, matching this function's double parameters; mixing in
+ * the float-precision forms here would silently narrow and re-widen every
+ * value, losing precision for no reason.
+ * Rule 15.6: braces are used on every if/while body, including the
+ * single-statement angle normalization below.
+ */
 bool angles_are_close(double angle1,
                       double angle2,
                       double range) {
   // -------------------------------------------------------------------------------
   // Normalize angles to [0, 360).
   // -------------------------------------------------------------------------------
-  angle1 = fmodf(angle1, 360.0f);
-  angle2 = fmodf(angle2, 360.0f);
-  if (angle1 < 0) angle1 += 360.0f;
-  if (angle2 < 0) angle2 += 360.0f;
+  angle1 = fmod(angle1, 360.0);
+  angle2 = fmod(angle2, 360.0);
+  if (angle1 < 0.0) {angle1 += 360.0;}
+  if (angle2 < 0.0) {angle2 += 360.0;}
   // -------------------------------------------------------------------------------
   // Calculate the absolute difference.
   // -------------------------------------------------------------------------------
-  double diff = fabsf(angle1 - angle2);
+  double diff = fabs(angle1 - angle2);
   // -------------------------------------------------------------------------------
   // Consider wraparound (e.g., 0 and 360 are close).
   // -------------------------------------------------------------------------------
-  if (diff > 180.0f) {diff = 360.0f - diff;}
+  if (diff > 180.0) {diff = 360.0 - diff;}
   // -------------------------------------------------------------------------------
   // Check if difference is within the specified range.
   // -------------------------------------------------------------------------------
   return diff <= range;
 }
 
+/**
+ * Re-evaluates the INS initialization level from scratch: starts at 0 and
+ * adds 1 for each of the 4 independent readiness conditions currently
+ * met (GPS precision, speed, heading agreement, master enable), so the
+ * result reaches MAX_INS_INITIALIZATION_FLAG only when every condition
+ * holds simultaneously.
+ */
 void ins_init(double gps_precision_factor,
               double ground_heading,
               double ground_speed,
@@ -61,18 +80,16 @@ void ins_init(double gps_precision_factor,
   // -------------------------------------------------------------------------------
   insData.tmp_ins_initialization_flag=0;
   // -------------------------------------------------------------------------------
-  // 1 : Check GPS precsion.
+  // 1 : Check GPS precision.
   // -------------------------------------------------------------------------------
-  if (gps_precision_factor<=insData.INS_REQ_GPS_PRECISION)
-    {insData.tmp_ins_initialization_flag++;
-    //  Serial.println("INS precision flag: true");
-    }
+  if (gps_precision_factor<=insData.INS_REQ_GPS_PRECISION) {
+    insData.tmp_ins_initialization_flag++;
+  }
   // -----------------------------------------------------------------------------
   // 2 : Check Speed.
   // -----------------------------------------------------------------------------
-  if (ground_speed>=insData.INS_REQ_MIN_SPEED)
-  {insData.tmp_ins_initialization_flag++;
-  //  Serial.println("INS speed flag: true");
+  if (ground_speed>=insData.INS_REQ_MIN_SPEED) {
+    insData.tmp_ins_initialization_flag++;
   }
   // ---------------------------------------------------------------------------
   // 3 : Check Heading.
@@ -80,24 +97,25 @@ void ins_init(double gps_precision_factor,
   if ((angles_are_close(ground_heading,
       gyro_heading,
       insData.INS_REQ_HEADING_RANGE_DIFF)==true) ||
-      (insData.INS_USE_GYRO_HEADING==false))
-    {insData.tmp_ins_initialization_flag++;
-    //  Serial.println("INS gyro flag: true");
-    }
+      (insData.INS_USE_GYRO_HEADING==false)) {
+    insData.tmp_ins_initialization_flag++;
+  }
   // -------------------------------------------------------------------------
   // 4 : Check enabled.
   // -------------------------------------------------------------------------
-  if (insData.INS_ENABLED==true)
-    {insData.tmp_ins_initialization_flag++;
-    //  Serial.println("INS enabled: true");
-    }
+  if (insData.INS_ENABLED==true) {
+    insData.tmp_ins_initialization_flag++;
+  }
   // -------------------------------------------------------------------------
   // Set INS initialization
   // -------------------------------------------------------------------------
   insData.INS_INITIALIZATION_FLAG=insData.tmp_ins_initialization_flag;
 }
 
-void set_ins_data_as_gps(double gps_latitude,
+/**
+ * Rule 8.7: internal linkage; only called from set_ins() in this file.
+ */
+static void set_ins_data_as_gps(double gps_latitude,
                          double gps_longitude,
                          double gps_altitude,
                          double ground_heading) {
@@ -107,6 +125,15 @@ void set_ins_data_as_gps(double gps_latitude,
   insData.ins_heading=ground_heading;
 }
 
+/**
+ * Sets INS data and INS_ENABLED according to the current INS_MODE: OFF and
+ * DYNAMIC both take GPS data directly every call (OFF leaves INS_ENABLED
+ * false so ins_estimate_position() never runs; DYNAMIC leaves it true so
+ * estimation fills the gaps between GPS updates). HOLD_THE_LINE takes GPS
+ * data once, on the first call after initialization completes, then
+ * leaves INS_FORCED_ON_FLAG set so it is never overwritten by GPS again
+ * until that flag is cleared elsewhere.
+ */
 void set_ins(double gps_latitude,
              double gps_longitude,
              double gps_altitude,
@@ -115,25 +142,25 @@ void set_ins(double gps_latitude,
              double gps_precision_factor,
              double gyro_heading) {
   // -------------------------------------------------------------------------------
-  // 0 : Off.
+  // Off.
   // -------------------------------------------------------------------------------
-  if (insData.INS_MODE==0) {
+  if (insData.INS_MODE==INS_MODE_OFF) {
     insData.INS_ENABLED=false;
     set_ins_data_as_gps(gps_latitude, gps_longitude, gps_altitude, ground_heading);
     ins_init(gps_precision_factor, ground_heading, ground_speed, gyro_heading);
   }
   // -------------------------------------------------------------------------------
-  // 1 : Dynamic.
+  // Dynamic.
   // -------------------------------------------------------------------------------
-  else if (insData.INS_MODE==1) {
+  else if (insData.INS_MODE==INS_MODE_DYNAMIC) {
     insData.INS_ENABLED=true;
     set_ins_data_as_gps(gps_latitude, gps_longitude, gps_altitude, ground_heading);
     ins_init(gps_precision_factor, ground_heading, ground_speed, gyro_heading);
   }
   // -------------------------------------------------------------------------------
-  // 2 : Forced.
+  // Forced (Hold the Line).
   // -------------------------------------------------------------------------------
-  else if (insData.INS_MODE==2) {
+  else if (insData.INS_MODE==INS_MODE_HOLD_THE_LINE) {
     insData.INS_ENABLED=true;
     // Check initialization flag because INS_FORCED_ON_FLAG overrides.
     if (insData.INS_INITIALIZATION_FLAG==MAX_INS_INITIALIZATION_FLAG &&
@@ -148,28 +175,38 @@ void set_ins(double gps_latitude,
   }
 }
 
-double temp_lat;
-double temp_lon;
+/**
+ * Dead-reckons forward from the last known INS position using gyro pitch
+ * and yaw plus GPS ground speed, over the elapsed time since the previous
+ * call (insData.ins_dt_prev). Only estimates while the INS is fully
+ * initialized or held forced-on; otherwise leaves insData untouched and
+ * reports that no estimate was produced.
+ *
+ * @return true if insData was updated with a new estimate, false if the
+ *         INS was not ready and nothing changed.
+ *
+ * Rule 8.9: temp_lat/temp_lon are declared here at block scope rather than
+ * at file scope, since they are scratch values used only within this
+ * function.
+ * Rule 15.5: single point of exit via a result variable.
+ * Rule 15.6: braces are used on every if/while body, including the
+ * single-statement angle/latitude normalization loops below.
+ */
 bool ins_estimate_position(double pitch,
                            double yaw,
                            double ground_heading,
                            double ground_speed,
                            int64_t dt) {
-  // -------------------------------------------------------------------------------
-  // uncomment to force values for testing purposes
-  // -------------------------------------------------------------------------------
-  // pitch=0; // force pitch
-  // yaw=90; // force heading
-  // ground_speed=500000; // force speed
-  // INS_INITIALIZATION_FLAG=MAX_INS_INITIALIZATION_FLAG;
+  bool position_updated = false;
 
   if (insData.INS_INITIALIZATION_FLAG==MAX_INS_INITIALIZATION_FLAG ||
       insData.INS_FORCED_ON_FLAG==true) {
+    double temp_lat;
+    double temp_lon;
     // -------------------------------------------------------------------------------
     // Calculate time interval in seconds from microseconds dt.
     // -------------------------------------------------------------------------------
     double dt_interval = (double)(dt - insData.ins_dt_prev) / 1000000.0;
-    // Serial.println(dt_interval);
     // -------------------------------------------------------------------------------
     // Ensure positive time interval; fallback to 0.001s if invalid.
     // -------------------------------------------------------------------------------
@@ -177,8 +214,8 @@ bool ins_estimate_position(double pitch,
     // -------------------------------------------------------------------------------
     // Normalize yaw to [0, 360°).
     // -------------------------------------------------------------------------------
-    while (yaw >= 360.0) yaw -= 360.0;
-    while (yaw < 0.0) yaw += 360.0;
+    while (yaw >= 360.0) {yaw -= 360.0;}
+    while (yaw < 0.0) {yaw += 360.0;}
     // -------------------------------------------------------------------------------
     // Convert angles to radians.
     // -------------------------------------------------------------------------------
@@ -222,8 +259,8 @@ bool ins_estimate_position(double pitch,
     // -------------------------------------------------------------------------------
     // Normalize latitude to [-90°, 90°], reflecting at poles.
     // -------------------------------------------------------------------------------
-    while (temp_lat > 90.0) temp_lat = 180.0 - temp_lat;
-    while (temp_lat < -90.0) temp_lat = -180.0 - temp_lat;
+    while (temp_lat > 90.0) {temp_lat = 180.0 - temp_lat;}
+    while (temp_lat < -90.0) {temp_lat = -180.0 - temp_lat;}
     // -------------------------------------------------------------------------------
     // Normalize longitude to [-180°, 180°].
     // -------------------------------------------------------------------------------
@@ -240,10 +277,11 @@ bool ins_estimate_position(double pitch,
     if (insData.INS_USE_GYRO_HEADING==true) {insData.ins_heading=yaw;}
     else {insData.ins_heading=ground_heading;}
     // -------------------------------------------------------------------------------
-    // Ensure presvious datetime is set to current datetime.
+    // Ensure previous datetime is set to current datetime.
     // -------------------------------------------------------------------------------
     insData.ins_dt_prev=dt;
-    return true;
+    position_updated = true;
   }
-  return false;
+
+  return position_updated;
 }

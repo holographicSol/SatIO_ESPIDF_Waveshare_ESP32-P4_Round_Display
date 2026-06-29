@@ -1,13 +1,15 @@
-/*
+/**
+ * Config - Written by Benjamin Jack Cullen.
+ *
 */
 
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <Arduino.h>
+#include <Wire.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <Arduino.h>   // <<< REQUIRED FIRST
-#include <Wire.h>   // REQUIRED for TwoWire type
 #include "config.h"
 
 extern long  DELAY_TASK_DISPLAY;
@@ -410,23 +412,23 @@ extern bool ISR_Bool_MultiDisplayController_0;
 // datetime
 #define MAX_METEOR_SHOWER_DATETIME          2
 #define MAX_METEOR_SHOWER_DATETIME_ELEMENTS 2
-#define INDEDX_METEOR_DATETIME_START        0
-#define INDEDX_METEOR_DATETIME_END          1
-#define INDEDX_METEOR_DATETIME_MONTH_START  0
-#define INDEDX_METEOR_DATETIME_DAY_START    1
-#define INDEDX_METEOR_DATETIME_MONTH_END    0
-#define INDEDX_METEOR_DATETIME_DAY_END      1
+#define INDEX_METEOR_DATETIME_START        0
+#define INDEX_METEOR_DATETIME_END          1
+#define INDEX_METEOR_DATETIME_MONTH_START  0
+#define INDEX_METEOR_DATETIME_DAY_START    1
+#define INDEX_METEOR_DATETIME_MONTH_END    0
+#define INDEX_METEOR_DATETIME_DAY_END      1
 // peak datetime
 #define MAX_METEOR_SHOWER_PEAK_DATETIME               2
 #define MAX_METEOR_SHOWER_PEAK_DATETIME_ELEMENTS      3
-#define INDEDX_METEOR_PEAK_DATETIME_START             0
-#define INDEDX_METEOR_PEAK_DATETIME_END               1
-#define INDEDX_METEOR_PEAK_DATETIME_MONTH_0_START     0
-#define INDEDX_METEOR_PEAK_DATETIME_MONTH_0_DAY_START 1
-#define INDEDX_METEOR_PEAK_DATETIME_MONTH_0_DAY_END   2
-#define INDEDX_METEOR_PEAK_DATETIME_MONTH_1_END       0
-#define INDEDX_METEOR_PEAK_DATETIME_MONTH_1_DAY_START 1
-#define INDEDX_METEOR_PEAK_DATETIME_MONTH_1_DAY_END   2
+#define INDEX_METEOR_PEAK_DATETIME_START             0
+#define INDEX_METEOR_PEAK_DATETIME_END               1
+#define INDEX_METEOR_PEAK_DATETIME_MONTH_0_START     0
+#define INDEX_METEOR_PEAK_DATETIME_MONTH_0_DAY_START 1
+#define INDEX_METEOR_PEAK_DATETIME_MONTH_0_DAY_END   2
+#define INDEX_METEOR_PEAK_DATETIME_MONTH_1_END       0
+#define INDEX_METEOR_PEAK_DATETIME_MONTH_1_DAY_START 1
+#define INDEX_METEOR_PEAK_DATETIME_MONTH_1_DAY_END   2
 // ----------------------------------------------------------------------------------------
 // SatIO.
 // ----------------------------------------------------------------------------------------

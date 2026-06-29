@@ -18055,7 +18055,7 @@ void update_display()
                 for(uint32_t i = 0; i < grid_child_cnt; i++) {
                     lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
 
-                    // vTaskDelay(1);
+                    vTaskDelay(1 / portTICK_PERIOD_MS); // yield
 
                     /* Computer Assist (yellow outline) */
                     if (matrixData.computer_assist[0][i]==true) {lv_obj_set_style_outline_color(btn, lv_color_make(255, 255, 0), LV_PART_MAIN);}

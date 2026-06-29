@@ -1,5 +1,7 @@
 /*
   Meteors Library. Written by Benjamin Jack Cullen.
+
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef METEORS_H
@@ -10,8 +12,8 @@
 #include "config.h"
 
 /**
- * A list of meteor shor names.
- * 
+ * A list of meteor shower names.
+ *
  * 0 : Quadrantids
  * 1 : Lyrids
  * 2 : Eta Aquariids
@@ -54,7 +56,15 @@ extern bool meteor_shower_warning_system[MAX_METEOR_SHOWERS][MAX_METEOR_RESULT_E
  */
 void setMeteorShowerWarning(int month, int mday);
 
-bool sumMeteorShowerWarning();
-bool sumMeteorShowerPeakWarning();
+/**
+ * @return true if any meteor shower is currently within its datetime range.
+ */
+bool sumMeteorShowerWarning(void);
+
+/**
+ * @return true if any meteor shower is currently within its peak datetime
+ *         range.
+ */
+bool sumMeteorShowerPeakWarning(void);
 
 #endif

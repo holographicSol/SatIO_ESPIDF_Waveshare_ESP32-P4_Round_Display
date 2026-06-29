@@ -446,7 +446,7 @@ void taskMultiplexers(void * pvParameters) {
     // ------------------------------------------------
     // read muiltiplexer channels (customize as required).
     // ------------------------------------------------
-    for (uint8_t i_chan = 0; i_chan < 16; i_chan++) {
+    for (uint8_t i_chan = 0; i_chan < MAX_AD_MUX_CHANNELS; i_chan++) {
       readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
       vTaskDelay(1);
       // esp_task_wdt_reset();
