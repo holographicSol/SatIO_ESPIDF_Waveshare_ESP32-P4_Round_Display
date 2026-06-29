@@ -1525,6 +1525,9 @@ void astro_clock_begin(
     printf("DEBUG: Creating sun.target_box\n");
     sun.target_box = create_target_box(astro_container, sun.radius * 2);
     if (!sun.target_box) { printf("ERROR: Failed to create sun.target_box\n"); return;}
+    sun.x = SOLAR_CENTER_X - sun.radius;
+    sun.y = SOLAR_CENTER_Y - sun.radius;
+    lv_obj_set_pos(sun.target_box, sun.x - 4, sun.y - 4);
     printf("DEBUG: sun.target_box done\n");
 
     
