@@ -558,8 +558,6 @@ static void formatDateStrings(uint8_t day, uint8_t month, uint16_t year,
 // ----------------------------------------------------------------------------------------
 void storeRTCTime(void) {
     // Store RTC time (UTC) to avoid multiple calls to rtc.now()
-    // Serial.printf("[writeI2C] storeRTCTime\n");
-    // xSemaphoreTake(i2c_bus0_mutex, 1000 / portTICK_PERIOD_MS);
     satioData.rtc_hour = rtc.now().hour();
     satioData.rtc_minute = rtc.now().minute();
     satioData.rtc_second = rtc.now().second();
@@ -568,7 +566,6 @@ void storeRTCTime(void) {
     satioData.rtc_wday = rtc.now().dayOfTheWeek();
     satioData.rtc_mday = rtc.now().day();
     satioData.rtc_unixtime = rtc.now().unixtime();
-    // xSemaphoreGive(i2c_bus0_mutex);
 
     // Copy weekday name
     memset(satioData.rtc_wday_name, 0, sizeof(satioData.rtc_wday_name));

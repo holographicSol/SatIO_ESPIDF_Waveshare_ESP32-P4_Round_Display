@@ -2,6 +2,8 @@
     INS Library. Written by Benjamin Jack Cullen.
 
     Estimate location using gyro data and or dead reckoning.
+
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef INS_H
@@ -10,6 +12,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "./config.h"
+
+#define DEFAULT_INS_REQ_GPS_PRECISION 0.5
+#define DEFAULT_INS_REQ_MIN_SPEED 0.1
+#define DEFAULT_INS_REQ_HEADING_RANGE_DIFF 1.0
+#define DEFAULT_INS_USE_GYRO_HEADING true
+#define DEFAULT_INS_MODE INS_MODE_DYNAMIC
+#define DEFAULT_INS_FORCED_ON_FLAG false
 
 /**
  * @struct InsData

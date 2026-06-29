@@ -48,182 +48,41 @@
 struct MatrixStruct matrixData = {
   .i_count_matrix=0,
   .load_matrix_on_startup=false,
+  
   .i_computer_assist_enabled=0,
   .i_computer_assist_disabled=0,
   .i_switch_intention_high=0,
   .i_switch_intention_low=0,
   .i_computer_intention_high=0,
   .i_computer_intention_low=0,
+
   .matrix_sentence={0},
-  .computer_assist={
-    {
-      false, false, false, false, false, false, false, false, false, false, // 0-9
-      false, false, false, false, false, false, false, false, false, false, // 10-19
-      false, false, false, false, false, false, false, false, false, false, // 20-29
-      false, false, false, false, false, false, false, false, false, false, // 30-39
-      false, false, false, false, false
-    }
-  },
-  .switch_intention={
-    {
-      false, false, false, false, false, false, false, false, false, false, // 0-9
-      false, false, false, false, false, false, false, false, false, false, // 10-19
-      false, false, false, false, false, false, false, false, false, false, // 20-29
-      false, false, false, false, false, false, false, false, false, false, // 30-39
-      false, false, false, false, false
-    }
-  },
-  .prev_switch_intention={
-    {
-      false, false, false, false, false, false, false, false, false, false, // 0-9
-      false, false, false, false, false, false, false, false, false, false, // 10-19
-      false, false, false, false, false, false, false, false, false, false, // 20-29
-      false, false, false, false, false, false, false, false, false, false, // 30-39
-      false, false, false, false, false
-    }
-  },
-  .computer_intention={
-    {
-      false, false, false, false, false, false, false, false, false, false, // 0-9
-      false, false, false, false, false, false, false, false, false, false, // 10-19
-      false, false, false, false, false, false, false, false, false, false, // 20-29
-      false, false, false, false, false, false, false, false, false, false, // 30-39
-      false, false, false, false, false
-    }
-  },
-  .matrix_port_map={
-    {
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0-9
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 10-19
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 20-29
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 30-39
-      -1, -1, -1, -1, -1
-    }
-  },
-  .output_value={
-    {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10-19
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-29
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-39
-      0, 0, 0, 0, 0
-    }
-  },
-  .prev_output_value={
-    {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10-19
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-29
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-39
-      0, 0, 0, 0, 0
-    }
-  },
-  .flux_value={
-    {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10-19
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-29
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-39
-      0, 0, 0, 0, 0
-    }
-  },
+
+  .computer_assist={ {false} },
+  .switch_intention={ {false} },
+  .prev_switch_intention={{ false} },
+  .computer_intention={ {false} },
+  .matrix_port_map={ {-1} },
+  .output_value={ {0} },
+  .prev_output_value={ {0} },
+  .flux_value={ {0} },
   .override_output_value={ {0} },
   .override_prev_output_value={ {0} },
-  .output_mode={
-    {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10-19
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-29
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-39
-      0, 0, 0, 0, 0
-    }
-  },
+  .output_mode={ {0} },
   .output_mode_names=
   {
     "Digital", // 0
     "Mapped"   // 1
   },
-  .index_mapped_value={
-    {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10-19
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-29
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-39
-      0, 0, 0, 0, 0
-    }
-  },
-  .matrix_switch_write_required={
-    {
-      false, false, false, false, false, false, false, false, false, false, // 0-9
-      false, false, false, false, false, false, false, false, false, false, // 10-19
-      false, false, false, false, false, false, false, false, false, false, // 20-29
-      false, false, false, false, false, false, false, false, false, false, // 30-39
-      false, false, false, false, false
-    }
-  },
-  .output_pwm={
-    {
-      {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, // 0-9
-      {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, // 10-19
-      {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, // 20-29
-      {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, // 30-39
-      {0,0}, {0,0}, {0,0}, {0,0}, {0,0}
-    }
-  },
+  .index_mapped_value={ {0} },
+  .matrix_switch_write_required={ {false} },
+  .output_pwm={ {{0,0}} },
   .inverted_logic_names=
   {
     "Standard", // 0
     "Inverted"   // 1
   },
-  .matrix_switch_inverted_logic={
-    {
-      {false, false, false, false, false, false, false, false, false, false}, // 0
-      {false, false, false, false, false, false, false, false, false, false}, // 1
-      {false, false, false, false, false, false, false, false, false, false}, // 2
-      {false, false, false, false, false, false, false, false, false, false}, // 3
-      {false, false, false, false, false, false, false, false, false, false}, // 4
-      {false, false, false, false, false, false, false, false, false, false}, // 5
-      {false, false, false, false, false, false, false, false, false, false}, // 6
-      {false, false, false, false, false, false, false, false, false, false}, // 7
-      {false, false, false, false, false, false, false, false, false, false}, // 8
-      {false, false, false, false, false, false, false, false, false, false}, // 9
-      {false, false, false, false, false, false, false, false, false, false}, // 10
-      {false, false, false, false, false, false, false, false, false, false}, // 11
-      {false, false, false, false, false, false, false, false, false, false}, // 12
-      {false, false, false, false, false, false, false, false, false, false}, // 13
-      {false, false, false, false, false, false, false, false, false, false}, // 14
-      {false, false, false, false, false, false, false, false, false, false}, // 15
-      {false, false, false, false, false, false, false, false, false, false}, // 16
-      {false, false, false, false, false, false, false, false, false, false}, // 17
-      {false, false, false, false, false, false, false, false, false, false}, // 18
-      {false, false, false, false, false, false, false, false, false, false}, // 19
-      {false, false, false, false, false, false, false, false, false, false}, // 20
-      {false, false, false, false, false, false, false, false, false, false}, // 21
-      {false, false, false, false, false, false, false, false, false, false}, // 22
-      {false, false, false, false, false, false, false, false, false, false}, // 23
-      {false, false, false, false, false, false, false, false, false, false}, // 24
-      {false, false, false, false, false, false, false, false, false, false}, // 25
-      {false, false, false, false, false, false, false, false, false, false}, // 26
-      {false, false, false, false, false, false, false, false, false, false}, // 27
-      {false, false, false, false, false, false, false, false, false, false}, // 28
-      {false, false, false, false, false, false, false, false, false, false}, // 29
-      {false, false, false, false, false, false, false, false, false, false}, // 30
-      {false, false, false, false, false, false, false, false, false, false}, // 31
-      {false, false, false, false, false, false, false, false, false, false}, // 32
-      {false, false, false, false, false, false, false, false, false, false}, // 33
-      {false, false, false, false, false, false, false, false, false, false}, // 34
-      {false, false, false, false, false, false, false, false, false, false}, // 35
-      {false, false, false, false, false, false, false, false, false, false}, // 36
-      {false, false, false, false, false, false, false, false, false, false}, // 37
-      {false, false, false, false, false, false, false, false, false, false}, // 38
-      {false, false, false, false, false, false, false, false, false, false}, // 39
-      {false, false, false, false, false, false, false, false, false, false}, // 40
-      {false, false, false, false, false, false, false, false, false, false}, // 41
-      {false, false, false, false, false, false, false, false, false, false}, // 42
-      {false, false, false, false, false, false, false, false, false, false}, // 43
-      {false, false, false, false, false, false, false, false, false, false}, // 44
-    }
-  },
+  .matrix_switch_inverted_logic={ {{false, false, false, false, false, false, false, false, false, false}} },
   .matrix_function={ { {0} } },
   .matrix_function_xyz={ { { {0.0, 0.0, 0.0} } } },
   .matrix_function_mode_xyz={ { { {0, 0, 0} } } },
@@ -363,15 +222,7 @@ struct MatrixStruct matrixData = {
     "Gyro 0 RA", // 118
     "Gyro 0 Dec", // 119
   },
-  .input_value = {
-    {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10-19
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-29
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-39
-      0, 0, 0, 0, 0
-    }
-  },
+  .input_value = { {0} },
   .input_port_map={
     {
       // --------------------------------------------

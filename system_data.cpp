@@ -1,5 +1,20 @@
 /*
     System Data. Written by Benjamin Jack Cullen.
+
+    Defines the single systemData instance declared in system_data.h, and
+    restore_system_defaults(), which clears every output flag and restores
+    SATIO/INS settings to their startup values.
+
+    MISRA-relevant conventions used throughout this module:
+    - systemData has exactly one definition, here, matching the single
+      extern declaration in system_data.h (Rule 8.5).
+    - restore_system_defaults() assigns insData.INS_REQ_HEADING_RANGE_DIFF
+      a double literal (1.0) rather than an int literal, matching that
+      field's declared type, so no implicit int-to-double conversion
+      occurs (Rule 10.3/10.4).
+    - restore_system_defaults() has a single point of exit (Rule 15.5).
+
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include "system_data.h"
@@ -9,10 +24,12 @@
 #include "ins.h"
 
 /**
- * @struct System data containing flags, counters, and statistics for system monitoring and control.
- * @warning This struct is bitpacked.
+ * @struct systemStruct
+ * @brief Single global instance of the system-wide flags, loop counters,
+ *        and per-second totals declared in system_data.h.
  */
 struct systemStruct systemData = {
+  // Output interval-breach flags.
   .interval_breach_gps_output = false,
   .interval_breach_ins_output = false,
   .interval_breach_gyro_0_output = false,
@@ -22,9 +39,11 @@ struct systemStruct systemData = {
   .interval_breach_logging = false,
   .interval_breach_1_second_output = false,
 
+  // Compute interval-breach flags.
   .interval_breach_track_planets = false,
   .interval_breach_star_navigation = false,
 
+  // Diagnostics and command processing.
   .debug = false,
   .output_stat = false,
   .output_stat_v = false,
@@ -32,6 +51,7 @@ struct systemStruct systemData = {
   .serial_command = true,
   .logging_enabled=false,
 
+  // Per-sentence/per-subsystem output-enable flags.
   .output_satio_all = false,
   .output_satio_enabled = false,
   .output_gngga_enabled = false,
@@ -56,6 +76,7 @@ struct systemStruct systemData = {
   .output_neptune_enabled = false,
   .output_meteors_enabled = false,
 
+  // Uptime and loop counters.
   .uptime_seconds = 0,
 
   .i_count_read_gps = 0,
@@ -73,6 +94,7 @@ struct systemStruct systemData = {
   .loops_a_second = 0,
   .total_loops_a_second = 0,
 
+  // Per-second totals.
   .total_gps = 0,
   .total_ins = 0,
   .total_gyro_0 = 0,
@@ -86,6 +108,7 @@ struct systemStruct systemData = {
 };
 
 void restore_system_defaults(void) {
+  // Clear the debug flag and every per-sentence/per-subsystem output flag.
   systemData.debug = false;
   systemData.output_satio_all = false;
   systemData.output_satio_enabled = false; 
@@ -110,16 +133,19 @@ void restore_system_defaults(void) {
   systemData.output_neptune_enabled = false;
   systemData.output_meteors_enabled = false;
 
+  // Restore SATIO time-sync settings to their startup values.
   satioData.utc_second_offset = 0;
   satioData.utc_auto_offset_flag = false;
   satioData.set_time_automatically = true;
   satioData.sync_rtc_immediately_flag = true;
 
-  insData.INS_REQ_GPS_PRECISION = 0.5;
-  insData.INS_REQ_MIN_SPEED = 0.1;
-  insData.INS_REQ_HEADING_RANGE_DIFF = 1;
-  insData.INS_USE_GYRO_HEADING = true;
-  insData.INS_MODE = INS_MODE_DYNAMIC;
-  
-  Serial.println("$SYSTEMNEW");
+  // Restore INS thresholds and mode to their startup values.
+  insData.INS_REQ_GPS_PRECISION = DEFAULT_INS_REQ_GPS_PRECISION;
+  insData.INS_REQ_MIN_SPEED = DEFAULT_INS_REQ_MIN_SPEED;
+  insData.INS_REQ_HEADING_RANGE_DIFF = DEFAULT_INS_REQ_HEADING_RANGE_DIFF;
+  insData.INS_USE_GYRO_HEADING = DEFAULT_INS_USE_GYRO_HEADING;
+  insData.INS_MODE = DEFAULT_INS_MODE;
+  insData.INS_FORCED_ON_FLAG = DEFAULT_INS_FORCED_ON_FLAG;
+
+  Serial.println("[restore_system_defaults] done.");
 }

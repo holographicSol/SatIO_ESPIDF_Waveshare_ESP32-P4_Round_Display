@@ -21,7 +21,8 @@
  * checksum/XOR scratch state is local to the functions that compute it.
  */
 struct Serial0Struct {
-  char BUFFER[MAX_GLOBAL_SERIAL_BUFFER_SIZE]; // serial buffer.
+  char BUFFER_RX[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+  char BUFFER_TX[MAX_GLOBAL_SERIAL_BUFFER_SIZE]; // serial buffer.
   char checksum[MAX_CHECKSUM_SIZE];           // hex checksum for the sentence currently being built.
 };
 extern struct Serial0Struct serial0Data;

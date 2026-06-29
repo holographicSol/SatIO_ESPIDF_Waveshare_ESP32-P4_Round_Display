@@ -1,5 +1,13 @@
 /*
     TaskHandler - Written By Benjamin Jack Cullen.
+
+    MISRA conventions used throughout this library:
+    (1) Every if/else/while/for body is a braced compound statement (MISRA C 2012 Rule 15.6).
+    (2) Boolean objects are tested directly instead of being compared to true/false
+        (MISRA C 2012 Rule 14.4 - essentially Boolean controlling expressions).
+    (3) Null pointers are written as nullptr, the type-safe C++ null pointer constant.
+
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include <Arduino.h>
@@ -15,7 +23,6 @@
 #include "./wtgps300p.h"
 #include "./wt901.h"
 #include "./multiplexers.h"
-// #include "./esp32_helper.h"
 #include <SiderealPlanets.h>
 #include <SiderealObjects.h>
 #include "./sidereal_helper.h"
@@ -27,15 +34,10 @@
 #include "./matrix.h"
 #include "./serial_infocmd.h"
 #include "./system_data.h"
-#include "./satio_file.h"
 #include "./sdcard_helper.h"
 #include "./task_handler.h"
-// #include "./multi_display_controller.h"
-#include "freertos/semphr.h"
 #include "i2c_helper.h"
 #include "./satio_lvgl.h"
-
-SemaphoreHandle_t i2c_bus0_mutex;
 
 TaskHandle_t TaskGPS;
 TaskHandle_t TaskGyro;
@@ -43,7 +45,6 @@ TaskHandle_t TaskMultiplexers;
 TaskHandle_t TaskSerialInfoCMD;
 TaskHandle_t TaskSwitches;
 TaskHandle_t TaskStorage;
-TaskHandle_t TaskLogging;
 TaskHandle_t TaskUniverse;
 
 // PRIORITY
@@ -59,11 +60,9 @@ TaskHandle_t TaskUniverse;
 #define TASK_SERIALINFOCMD_CORE             0    // Core 0: Keep on main (timing-sensitive)
 #define TASK_GYRO_CORE                      0    // Core 0: Sensor reading (less critical)
 #define TASK_MULTIPLEXERS_CORE              0    // Core 0: ADC/multiplexing
-#define TASK_PORTCONTROLLERINPUT_CORE       0    // Core 0: I2C/GPIO input
 #define TASK_SWITCHES_CORE                  0    // Core 0: Outputs need responsiveness
 #define TASK_UNIVERSE_CORE                  0    // Core 0: Heavy compute, can defer
 #define TASK_STORAGE_CORE                   1    // Core 1: Deferred to Core 1 while Core 0 is too busy
-#define TASK_DISPLAY_CORE                   0    // Core 0: UI responsiveness
 #define TASK_GPS_CORE                       0    // Critical for system timing regardless of gps
 
 // STACK SIZES (Adjusted for task complexity)
@@ -72,69 +71,164 @@ TaskHandle_t TaskUniverse;
 #define TASK_GPS_STACK_SIZE                 5120    // +25%: NMEA parsing + INS updates
 #define TASK_GYRO_STACK_SIZE                4608    // +12%: Math operations
 #define TASK_MULTIPLEXERS_STACK_SIZE        4096    // Keep: Simple ADC reading
-#define TASK_PORTCONTROLLERINPUT_STACK_SIZE 4608    // +12%: I2C buffer + processing
 #define TASK_SWITCHES_STACK_SIZE            5120    // +25%: Matrix calculations, mappings
 #define TASK_UNIVERSE_STACK_SIZE            20480   // +25%: Expensive float math (planets, etc.)
-#define TASK_DISPLAY_STACK_SIZE             20480    // +50%: Multiple display updates + formatting
 
 /** ----------------------------------------------------------------------------
  * Syncronize Tasks.
- * 
+ *
  * @brief Time syncronize tasks. Main loop and some tasks will not begin until
  *        this function has completed.
- * 
+ *
  *        Inital synchronization trigger is GPS milliseconds 00 (any second).
- * 
+ *
  *        After initial synchronization the system will attempt to synchronize
  *        every GPS seconds zero (minutely).
  */
 void syncTasks() {
   Serial.println("[syncronizing system] please wait");
-  global_task_sync=false;
-  while (satioData.sync_rtc_immediately_flag==true) {
+  global_task_sync = false;
+  // Boolean object used directly as the controlling expression (MISRA C 2012 Rule 14.4).
+  while (satioData.sync_rtc_immediately_flag) {
     getSystemTime();
     system_sync_retry_max--;
-    if (system_sync_retry_max<=0) {Serial.println("[sync] took too long!"); break;}
-    // Serial.println("[SYN] " + String(system_sync_retry_max));
+    if (system_sync_retry_max <= 0) {
+      Serial.println("[sync] took too long!");
+      break;
+    }
     delayMicroseconds(1);
   }
-  global_task_sync=true;
-  // Serial.println("[SYN] syncronized." + String(system_sync_retry_max));
-  // Serial.println("[SYN] local unixtime_uS " + String(satioData.local_unixtime_uS));
+  global_task_sync = true;
 }
 
 /** ----------------------------------------------------------------------------
  * Is Task Delayed.
- * 
+ *
  * @brief Returns bool for task delayed.
  */
 bool isTaskDelayed(TaskHandle_t taskHandle) {
-    if (taskHandle == NULL) return false;
-    eTaskState state = eTaskGetState(taskHandle);
-    return (state == eBlocked) || (state == eSuspended);
+  // Compound statement required for the if-body (MISRA C 2012 Rule 15.6).
+  if (taskHandle == nullptr) {
+    return false;
+  }
+  eTaskState state = eTaskGetState(taskHandle);
+  return (state == eBlocked) || (state == eSuspended);
 }
 
-/*
-  Todo:
-      Task States: Running, Ready, Blocked, Suspended, Deleted, Invalid.
-      Device States: Found, Not Found, Initializing.
-*/
+/** ----------------------------------------------------------------------------------------
+ * @brief Interval breach (System counters).
+ *
+ *        Referenced only inside this translation unit, so internal linkage keeps them out
+ *        of the global symbol table (MISRA C 2012 Rule 8.7).
+ */
+static int64_t prev_tv_sec;
+static int64_t prev_tv_uS_track_planets;
+static int64_t prev_tv_uS_star_navigation;
+
+/** ----------------------------------------------------------------------------
+ * Interval Breach: 1 Second.
+ *
+ * @brief Stores time-of-day snapshots, rolls every per-task counter into its
+ *        "total" field, resets the counter for the next second, and raises the
+ *        1-second output flag.
+ */
+static void intervalBreach1Second(void) {
+  storeLocalTime();
+  storeRTCTime();
+  storeLMST();
+
+  systemData.total_loops_a_second = systemData.loops_a_second;
+  systemData.loops_a_second = 0;
+
+  systemData.total_gps = systemData.i_count_read_gps;
+  systemData.i_count_read_gps = 0;
+
+  systemData.total_ins = systemData.i_count_read_ins;
+  systemData.i_count_read_ins = 0;
+
+  systemData.total_gyro_0 = systemData.i_count_read_gyro_0;
+  systemData.i_count_read_gyro_0 = 0;
+
+  systemData.total_mplex_0 = systemData.i_count_read_mplex_0;
+  systemData.i_count_read_mplex_0 = 0;
+
+  systemData.total_matrix = systemData.i_count_matrix;
+  systemData.i_count_matrix = 0;
+
+  systemData.total_portcontroller_output = systemData.i_count_port_controller_output;
+  systemData.i_count_port_controller_output = 0;
+
+  systemData.total_universe = systemData.i_count_track_planets;
+  systemData.i_count_track_planets = 0;
+
+  systemData.total_infocmd = systemData.i_count_read_serial_commands;
+  systemData.i_count_read_serial_commands = 0;
+
+  systemData.total_portcontroller_input = systemData.i_count_portcontroller_input;
+  systemData.i_count_portcontroller_input = 0;
+
+  systemData.total_display = systemData.i_count_display;
+  systemData.i_count_display = 0;
+
+  systemData.interval_breach_track_planets_output = true;
+
+  systemData.uptime_seconds++;
+  // uptime_seconds is int32_t, so the wrap check uses the signed 32-bit limit
+  // matching its essential type (MISRA C 2012 Rule 10.4).
+  if (systemData.uptime_seconds >= INT32_MAX - 2) {
+    systemData.uptime_seconds = 0;
+    printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
+  }
+}
+
+/** ----------------------------------------------------------------------------
+ * System Timing.
+ *
+ * @brief Refreshes the local time-of-day, then raises interval-breach flags
+ *        whenever the planet-tracking interval, the star-navigation interval,
+ *        or a calendar second has elapsed since it was last raised.
+ */
+static void system_timing() {
+  gettimeofday(&tv_now, NULL);
+  timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
+  satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+
+  // Track Planets interval breach.
+  if (satioData.local_unixtime_uS >= prev_tv_uS_track_planets + POWER_CONFIG_TRACK_PLANTETS_TIMING_uS ||
+      satioData.local_unixtime_uS <= prev_tv_uS_track_planets - POWER_CONFIG_TRACK_PLANTETS_TIMING_uS) {
+    prev_tv_uS_track_planets = satioData.local_unixtime_uS;
+    systemData.interval_breach_track_planets = true;
+  }
+
+  // StarNavigation interval breach.
+  if (satioData.local_unixtime_uS >= prev_tv_uS_star_navigation + POWER_CONFIG_STAR_NAVIGATION_TIMING_uS ||
+      satioData.local_unixtime_uS <= prev_tv_uS_star_navigation - POWER_CONFIG_STAR_NAVIGATION_TIMING_uS) {
+    prev_tv_uS_star_navigation = satioData.local_unixtime_uS;
+    systemData.interval_breach_star_navigation = true;
+  }
+
+  // 1-second interval breach.
+  if (tv_now.tv_sec != prev_tv_sec) {
+    prev_tv_sec = tv_now.tv_sec;
+    systemData.interval_breach_1_second_output = true;
+    intervalBreach1Second();
+  }
+}
 
 /** ----------------------------------------------------------------------------
  * Storage Task.
- * 
- * @brief Performas many operations including:
+ *
+ * @brief Performs many operations including:
  *  (1) Card insertion checks.
  *  (2) Mount automatically.
  *  (3) Unmount automatically.
  *  (4) Read/write operations.
  *  (5) Other storage operations.
- *  (6) Powers down the sdcard when not in use. 
+ *  (6) Powers down the sdcard when not in use.
  */
-void taskStorage(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  // esp_task_wdt_delete(NULL);
-  // while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
+static void taskStorage(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
   for (;;) {
     esp_task_wdt_reset();
     // ------------------------------------------------
@@ -142,174 +236,95 @@ void taskStorage(void * pvParameters) {
     // ------------------------------------------------
     sdcard_mount();
     esp_task_wdt_reset();
-    // statSDCard(); // uncomment to debug
 
     // ------------------------------------------------
     // Check Flags
     // ------------------------------------------------
-    if (systemData.logging_enabled==true) {
+    if (systemData.logging_enabled) {
       Serial.printf("[log] setting write flag true\n");
-      sdcardFlagData.write_log=true;
+      sdcardFlagData.write_log = true;
     }
     sdcardFlagHandler();
     esp_task_wdt_reset();
-    
+
     // ------------------------------------------------
     // SDCard Power Down / Unmount
     // ------------------------------------------------
     sdcard_unmount();
     esp_task_wdt_reset();
+
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (TICK_DELAY_TASK_STORAGE==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_STORAGE / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_STORAGE);}
+    if (!TICK_DELAY_TASK_STORAGE) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_STORAGE / portTICK_PERIOD_MS);
+    } else {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_STORAGE);
+    }
   }
 }
 void createTaskStorage() {
-    xTaskCreatePinnedToCore(
-    taskStorage,   /* Function to implement the task */
-    "TaskStorage", /* Name of the task */
+  xTaskCreatePinnedToCore(
+    taskStorage,             /* Function to implement the task */
+    "TaskStorage",           /* Name of the task */
     TASK_STORAGE_STACK_SIZE, /* Stack size in words */
-    NULL,          /* Task input parameter */
-    TASK_STORAGE_PRIORITY, /* Priority of the task */
-    &TaskStorage,          /* Task handle. */
-    TASK_STORAGE_CORE);    /* Core where the task should run */
+    nullptr,                 /* Task input parameter */
+    TASK_STORAGE_PRIORITY,   /* Priority of the task */
+    &TaskStorage,            /* Task handle. */
+    TASK_STORAGE_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
  * Info Command Task.
- * 
+ *
  * @brief Processes a serial TXD and RXD operations:
  *  (1) Information out for other system and debug.
  *  (2) Commands in.
+ *
+ *        System statistics are produced by the main loop; this task is
+ *        responsible only for serial command input and status output.
  */
-void taskSerialInfoCMD(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
+static void taskSerialInfoCMD(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  while (!global_task_sync) {
+    esp_task_wdt_reset();
+    vTaskDelay(1);
+  }
   for (;;) {
     esp_task_wdt_reset();
-    // ------------------------------------------------
-    // Note that stat is ran in main loop, not here.
-    // ------------------------------------------------
-    // CmdProcess(); // ported to espidf method
     outputSentences();
     esp_task_wdt_reset();
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (TICK_DELAY_TASK_SERIAL_INFOCMD==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_SERIAL_INFOCMD / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_SERIAL_INFOCMD);}
+    if (!TICK_DELAY_TASK_SERIAL_INFOCMD) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_SERIAL_INFOCMD / portTICK_PERIOD_MS);
+    } else {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_SERIAL_INFOCMD);
+    }
   }
 }
 void createTaskSerialInfoCMD() {
   xTaskCreatePinnedToCore(
-    taskSerialInfoCMD,   /* Function to implement the task */
-    "TaskSerialInfoCMD", /* Name of the task */
+    taskSerialInfoCMD,             /* Function to implement the task */
+    "TaskSerialInfoCMD",           /* Name of the task */
     TASK_SERIALINFOCMD_STACK_SIZE, /* Stack size in words */
-    NULL,                /* Task input parameter */
-    TASK_SERIALINFOCMD_PRIORITY, /* Priority of the task */
-    &TaskSerialInfoCMD,          /* Task handle. */
-    TASK_SERIALINFOCMD_CORE);    /* Core where the task should run */
-}
-
-/** ----------------------------------------------------------------------------------------
- * @brief Interval breach (System counters).
- */
-int64_t prev_tv_sec;
-int64_t prev_tv_uS;
-int64_t prev_tv_uS_track_planets;
-int64_t prev_tv_uS_star_navigation;
-
-void intervalBreach1Second(void) {
-  // if (systemData.interval_breach_1_second) {
-    // store system time
-    storeLocalTime();
-    // store rtc time
-    storeRTCTime();
-    // store lmst
-    storeLMST();
-    // set loop counter
-    systemData.total_loops_a_second = systemData.loops_a_second;
-    systemData.loops_a_second = 0;
-    // set gps counters
-    systemData.total_gps = systemData.i_count_read_gps;
-    systemData.i_count_read_gps = 0;
-    // set ins counters
-    systemData.total_ins = systemData.i_count_read_ins;
-    systemData.i_count_read_ins = 0;
-    // set gyro counters
-    systemData.total_gyro_0 = systemData.i_count_read_gyro_0;
-    systemData.i_count_read_gyro_0 = 0;
-    // set mplex counters
-    systemData.total_mplex_0 = systemData.i_count_read_mplex_0;
-    systemData.i_count_read_mplex_0 = 0;
-    // set mplex counters
-    systemData.total_matrix = systemData.i_count_matrix;
-    systemData.i_count_matrix = 0;
-    // set mplex counters
-    systemData.total_portcontroller_output = systemData.i_count_port_controller_output;
-    systemData.i_count_port_controller_output = 0;
-    // set mplex counters
-    systemData.total_universe = systemData.i_count_track_planets;
-    systemData.i_count_track_planets = 0;
-    // set mplex counters
-    systemData.total_infocmd = systemData.i_count_read_serial_commands;
-    systemData.i_count_read_serial_commands = 0;
-    // set portcontroller input counters
-    systemData.total_portcontroller_input = systemData.i_count_portcontroller_input;
-    systemData.i_count_portcontroller_input = 0;
-    // set display counters
-    systemData.total_display = systemData.i_count_display;
-    systemData.i_count_display = 0;
-    // set second flags
-    systemData.interval_breach_track_planets_output = 1;
-    // set uptime
-    systemData.uptime_seconds++;
-    if (systemData.uptime_seconds >= LONG_MAX - 2)
-      {systemData.uptime_seconds = 0;
-        printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
-      }
-  // }
-}
-
-void system_timing() {
-    // printf("[LOOP] %ld\n", systemData.loops_a_second);
-    gettimeofday(&tv_now, NULL);
-    timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
-    satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
-    // printf("[LOOP] localtime: %lld\n", satioData.local_unixtime_uS);
-
-    // Check for Track Planets interval breach
-    if (satioData.local_unixtime_uS >= prev_tv_uS_track_planets + POWER_CONFIG_TRACK_PLANTETS_TIMING_uS ||
-        satioData.local_unixtime_uS <= prev_tv_uS_track_planets - POWER_CONFIG_TRACK_PLANTETS_TIMING_uS) {
-        prev_tv_uS_track_planets = satioData.local_unixtime_uS;
-        systemData.interval_breach_track_planets = true;
-    }
-
-    // Check for StarNavigation interval breach
-    if (satioData.local_unixtime_uS >= prev_tv_uS_star_navigation + POWER_CONFIG_STAR_NAVIGATION_TIMING_uS ||
-        satioData.local_unixtime_uS <= prev_tv_uS_star_navigation - POWER_CONFIG_STAR_NAVIGATION_TIMING_uS) {
-        prev_tv_uS_star_navigation = satioData.local_unixtime_uS;
-        systemData.interval_breach_star_navigation = true;
-    }
-
-    // Check for 1-second interval breach
-    if (tv_now.tv_sec != prev_tv_sec) {
-        prev_tv_sec = tv_now.tv_sec;
-        systemData.interval_breach_1_second_output=true;
-        intervalBreach1Second();
-    }
+    nullptr,                       /* Task input parameter */
+    TASK_SERIALINFOCMD_PRIORITY,   /* Priority of the task */
+    &TaskSerialInfoCMD,            /* Task handle. */
+    TASK_SERIALINFOCMD_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
  * GPS Task.
- * 
+ *
+ * @brief Reads and validates GPS sentences, commits the resulting position
+ *        and timing data, and updates the inertial navigation system.
  */
-void taskGPS(void * pvParameters) {
-  esp_task_wdt_add(NULL);
+static void taskGPS(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
   for (;;) {
     esp_task_wdt_reset();
 
@@ -317,180 +332,208 @@ void taskGPS(void * pvParameters) {
     // ------------------------------------------------
     // Get, check and set gps data.
     // ------------------------------------------------
-    gnggaData.valid_checksum=false;
-    gnrmcData.valid_checksum=false;
-    gpattData.valid_checksum=false;
+    gnggaData.valid_checksum = false;
+    gnrmcData.valid_checksum = false;
+    gpattData.valid_checksum = false;
     readGPS();
     esp_task_wdt_reset();
     validateGPSData();
     esp_task_wdt_reset();
     // ------------------------------------------------
-    // Set SatIO data.
+    // Set SatIO data once every sentence checksum is valid, or when an RTC
+    // time sync has been explicitly requested.
     // ------------------------------------------------
-    if (((gnggaData.valid_checksum=true) &&
-        (gnrmcData.valid_checksum=true) &&
-        (gpattData.valid_checksum=true))
-          ||
-          satioData.set_rtc_datetime_flag==true) {
+    if ((gnggaData.valid_checksum && gnrmcData.valid_checksum && gpattData.valid_checksum) ||
+        satioData.set_rtc_datetime_flag) {
 
-        // -> syncRTC -- > setRTCDateTime --> setSystemTime, storeRTCSYNCTime
-        satioData.set_rtc_datetime_flag=true;
-        setSatIOData();
-        esp_task_wdt_reset();
+      // -> syncRTC -- > setRTCDateTime --> setSystemTime, storeRTCSYNCTime
+      satioData.set_rtc_datetime_flag = true;
+      setSatIOData();
+      esp_task_wdt_reset();
 
-        // --------------------------------------------
-        // Set INS data. (Can be used without GPS)
-        // --------------------------------------------
-        set_ins(satioData.system_degrees_latitude,
-                satioData.system_degrees_latitude,
-                satioData.system_altitude,
-                satioData.system_ground_heading,
-                satioData.system_speed,
-                atof(gnggaData.gps_precision_factor),
-                gyroData.gyro_0_ang_z);
-        esp_task_wdt_reset();
+      // --------------------------------------------
+      // Set INS data. (Can be used without GPS)
+      // --------------------------------------------
+      set_ins(satioData.system_degrees_latitude,
+              satioData.system_degrees_latitude,
+              satioData.system_altitude,
+              satioData.system_ground_heading,
+              satioData.system_speed,
+              atof(gnggaData.gps_precision_factor),
+              gyroData.gyro_0_ang_z);
+      esp_task_wdt_reset();
 
-        // --------------------------------------------
-        // Counters.
-        // --------------------------------------------
-        systemData.i_count_read_gps++;
-        systemData.interval_breach_gps_output = true;
-        if (systemData.i_count_read_gps>=UINT32_MAX-2)
-          {systemData.i_count_read_gps=0;}
-        esp_task_wdt_reset();
+      // --------------------------------------------
+      // Counters.
+      // --------------------------------------------
+      systemData.i_count_read_gps++;
+      systemData.interval_breach_gps_output = true;
+      // i_count_read_gps is int32_t, so the wrap check uses the signed 32-bit
+      // limit matching its essential type (MISRA C 2012 Rule 10.4).
+      if (systemData.i_count_read_gps >= INT32_MAX - 2) {
+        systemData.i_count_read_gps = 0;
+      }
+      esp_task_wdt_reset();
     }
     esp_task_wdt_reset();
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (TICK_DELAY_TASK_GPS==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_GPS / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_GPS);}
+    if (!TICK_DELAY_TASK_GPS) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_GPS / portTICK_PERIOD_MS);
+    } else {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_GPS);
+    }
   }
 }
 void createTaskGPS() {
-    xTaskCreatePinnedToCore(
-    taskGPS,   /* Function to implement the task */
-    "TaskGPS", /* Name of the task */
+  xTaskCreatePinnedToCore(
+    taskGPS,             /* Function to implement the task */
+    "TaskGPS",           /* Name of the task */
     TASK_GPS_STACK_SIZE, /* Stack size in words */
-    NULL,      /* Task input parameter */
-    TASK_GPS_PRIORITY, /* Priority of the task */
-    &TaskGPS,          /* Task handle. */
-    TASK_GPS_CORE);    /* Core where the task should run */
+    nullptr,             /* Task input parameter */
+    TASK_GPS_PRIORITY,   /* Priority of the task */
+    &TaskGPS,            /* Task handle. */
+    TASK_GPS_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
  * Gyro Task.
- * 
- * @brief Reads and stores gyroscopic data.
+ *
+ * @brief Reads and stores gyroscopic data, and feeds it into the inertial
+ *        navigation position estimate.
  */
-void taskGyro(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
+static void taskGyro(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  while (!global_task_sync) {
+    esp_task_wdt_reset();
+    vTaskDelay(1);
+  }
   for (;;) {
     esp_task_wdt_reset();
-    if (readGyro()==true) {
+    if (readGyro()) {
       esp_task_wdt_reset();
       systemData.i_count_read_gyro_0++;
       systemData.interval_breach_gyro_0_output = true;
-      if (systemData.i_count_read_gyro_0>=UINT32_MAX-2)
-        {systemData.i_count_read_gyro_0=0;}
+      // i_count_read_gyro_0 is int32_t, so the wrap check uses the signed
+      // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
+      if (systemData.i_count_read_gyro_0 >= INT32_MAX - 2) {
+        systemData.i_count_read_gyro_0 = 0;
+      }
       esp_task_wdt_reset();
       // ----------------------------------------------
       // Estimate INS data. (Can be used without GPS)
-      // INS data is fed bsck into INS.
+      // INS data is fed back into INS.
       // ----------------------------------------------
-      if (systemData.interval_breach_gyro_0_output==true) {
-      if (ins_estimate_position(gyroData.gyro_0_ang_y,
-                          gyroData.gyro_0_ang_z,
-                          satioData.system_ground_heading,
-                          satioData.system_speed,
-                          satioData.local_unixtime_uS)==true) {
-                          systemData.i_count_read_ins++;
-                          systemData.interval_breach_ins_output=true;
-                          if (systemData.i_count_read_ins>=UINT32_MAX-2)
-                            {systemData.i_count_read_ins=0;}}
-      esp_task_wdt_reset();
+      if (systemData.interval_breach_gyro_0_output) {
+        if (ins_estimate_position(gyroData.gyro_0_ang_y,
+                                   gyroData.gyro_0_ang_z,
+                                   satioData.system_ground_heading,
+                                   satioData.system_speed,
+                                   satioData.local_unixtime_uS)) {
+          systemData.i_count_read_ins++;
+          systemData.interval_breach_ins_output = true;
+          // i_count_read_ins is int32_t, so the wrap check uses the signed
+          // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
+          if (systemData.i_count_read_ins >= INT32_MAX - 2) {
+            systemData.i_count_read_ins = 0;
+          }
+        }
+        esp_task_wdt_reset();
       }
     }
     esp_task_wdt_reset();
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (TICK_DELAY_TASK_GYRO0==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_GYRO0 / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_GYRO0);}
+    if (!TICK_DELAY_TASK_GYRO0) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_GYRO0 / portTICK_PERIOD_MS);
+    } else {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_GYRO0);
+    }
   }
 }
 void createTaskGyro() {
-    xTaskCreatePinnedToCore(
-    taskGyro,   /* Function to implement the task */
-    "TaskGyro", /* Name of the task */
+  xTaskCreatePinnedToCore(
+    taskGyro,             /* Function to implement the task */
+    "TaskGyro",           /* Name of the task */
     TASK_GYRO_STACK_SIZE, /* Stack size in words */
-    NULL,       /* Task input parameter */
-    TASK_GYRO_PRIORITY, /* Priority of the task */
-    &TaskGyro,          /* Task handle. */
-    TASK_GYRO_CORE);    /* Core where the task should run */
+    nullptr,              /* Task input parameter */
+    TASK_GYRO_PRIORITY,   /* Priority of the task */
+    &TaskGyro,            /* Task handle. */
+    TASK_GYRO_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
  * Multiplexer Task.
- * 
+ *
  * @brief Reads all analog/digital multiplexer channels.
  */
-void taskMultiplexers(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
+static void taskMultiplexers(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  while (!global_task_sync) {
+    esp_task_wdt_reset();
+    vTaskDelay(1);
+  }
   for (;;) {
     esp_task_wdt_reset();
     // ------------------------------------------------
-    // read muiltiplexer channels (customize as required).
+    // Read multiplexer channels (customize as required).
     // ------------------------------------------------
     for (uint8_t i_chan = 0; i_chan < MAX_AD_MUX_CHANNELS; i_chan++) {
       readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
       vTaskDelay(1);
-      // esp_task_wdt_reset();
-      // printf("[ad] %d: %f\n", i_chan, ad_mux_0.data[i_chan]);
     }
     // ------------------------------------------------
     // Counters
     // ------------------------------------------------
     systemData.i_count_read_mplex_0++;
     systemData.interval_breach_mplex_0_output = true;
-    if (systemData.i_count_read_mplex_0 >= UINT32_MAX - 2)
-    systemData.i_count_read_mplex_0 = 0;
+    // i_count_read_mplex_0 is int32_t, so the wrap check uses the signed
+    // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
+    if (systemData.i_count_read_mplex_0 >= INT32_MAX - 2) {
+      systemData.i_count_read_mplex_0 = 0;
+    }
     esp_task_wdt_reset();
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (TICK_DELAY_TASK_MULTIPLEXERS==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_MULTIPLEXERS / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_MULTIPLEXERS);}
+    if (!TICK_DELAY_TASK_MULTIPLEXERS) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_MULTIPLEXERS / portTICK_PERIOD_MS);
+    } else {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_MULTIPLEXERS);
+    }
   }
 }
 void createTaskMultiplexers() {
-    xTaskCreatePinnedToCore(
-    taskMultiplexers,   /* Function to implement the task */
-    "TaskMultiplexers", /* Name of the task */
+  xTaskCreatePinnedToCore(
+    taskMultiplexers,             /* Function to implement the task */
+    "TaskMultiplexers",           /* Name of the task */
     TASK_MULTIPLEXERS_STACK_SIZE, /* Stack size in words */
-    NULL,               /* Task input parameter */
-    TASK_MULTIPLEXERS_PRIORITY, /* Priority of the task */
-    &TaskMultiplexers,          /* Task handle. */
-    TASK_MULTIPLEXERS_CORE);    /* Core where the task should run */
+    nullptr,                      /* Task input parameter */
+    TASK_MULTIPLEXERS_PRIORITY,   /* Priority of the task */
+    &TaskMultiplexers,            /* Task handle. */
+    TASK_MULTIPLEXERS_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
  * Switch Task.
- * 
+ *
  * @brief Performs various operations including:
- *  (1) Martix calculations.
+ *  (1) Matrix calculations.
  *  (2) Mapping values.
  *  (3) Sets output values.
  *  (4) Instructing the portcontroller accordingly.
  */
-void taskSwitches(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
+static void taskSwitches(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  while (!global_task_sync) {
+    esp_task_wdt_reset();
+    vTaskDelay(1);
+  }
   for (;;) {
     esp_task_wdt_reset();
     // ------------------------------------------------
@@ -499,9 +542,12 @@ void taskSwitches(void * pvParameters) {
     if (matrixSwitch()) {
       esp_task_wdt_reset();
       systemData.i_count_matrix++;
-      systemData.interval_breach_matrix_output=true;
-      if (systemData.i_count_matrix>=UINT64_MAX-2)
-        {systemData.i_count_matrix=0;}
+      systemData.interval_breach_matrix_output = true;
+      // i_count_matrix is int32_t, so the wrap check uses the signed 32-bit
+      // limit matching its essential type (MISRA C 2012 Rule 10.4).
+      if (systemData.i_count_matrix >= INT32_MAX - 2) {
+        systemData.i_count_matrix = 0;
+      }
     }
     esp_task_wdt_reset();
     // ------------------------------------------------
@@ -516,34 +562,43 @@ void taskSwitches(void * pvParameters) {
     esp_task_wdt_reset();
     writeOutputPortControllerSetPins(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER);
     esp_task_wdt_reset();
-    // SwitchStat();
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (TICK_DELAY_TASK_SWITCHES==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_SWITCHES / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_SWITCHES);}
+    if (!TICK_DELAY_TASK_SWITCHES) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_SWITCHES / portTICK_PERIOD_MS);
+    } else {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_SWITCHES);
+    }
   }
 }
 void createTaskSwitches() {
-    xTaskCreatePinnedToCore(
-    taskSwitches,   /* Function to implement the task */
-    "TaskSwitches", /* Name of the task */
+  xTaskCreatePinnedToCore(
+    taskSwitches,             /* Function to implement the task */
+    "TaskSwitches",           /* Name of the task */
     TASK_SWITCHES_STACK_SIZE, /* Stack size in words */
-    NULL,           /* Task input parameter */
-    TASK_SWITCHES_PRIORITY, /* Priority of the task */
-    &TaskSwitches,          /* Task handle. */
-    TASK_SWITCHES_CORE);    /* Core where the task should run */
+    nullptr,                  /* Task input parameter */
+    TASK_SWITCHES_PRIORITY,   /* Priority of the task */
+    &TaskSwitches,            /* Task handle. */
+    TASK_SWITCHES_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
  * Universe Task.
- * 
+ *
  * @brief Stores various information about the universe!
+ *
+ *        Tracks planets and meteor showers once per the configured interval,
+ *        and continuously evaluates the nearest catalogue object to both the
+ *        system zenith and the zenith offset by the gyroscope attitude.
  */
-void taskUniverse(void * pvParameters) {
-  esp_task_wdt_add(NULL);
-  while (global_task_sync==false) {esp_task_wdt_reset(); vTaskDelay(1);}
+static void taskUniverse(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  while (!global_task_sync) {
+    esp_task_wdt_reset();
+    vTaskDelay(1);
+  }
   for (;;) {
     esp_task_wdt_reset();
 
@@ -551,39 +606,28 @@ void taskUniverse(void * pvParameters) {
     // Set Sidereal Data for Planet/Object Tracking.
     // ------------------------------------------------
     setSiderealData(
-                satioData.system_degrees_latitude,
-                satioData.system_degrees_longitude,
-                satioData.rtc_year,
-                satioData.rtc_month,
-                satioData.rtc_mday,
-                satioData.rtc_hour,
-                satioData.rtc_minute,
-                satioData.rtc_second,
-                // uncomment to use geo-political local time (UTC+-UTCOffset)
-                satioData.local_hour,
-                satioData.local_minute,
-                satioData.local_second,
-                // uncomment to use LMST (Local Mean Solar Time) (UTC+-LongitudeOffset)
-                // satioData.LMST_hour,
-                // satioData.LMST_minute,
-                // satioData.LMST_second,
-                satioData.system_altitude);
+      satioData.system_degrees_latitude,
+      satioData.system_degrees_longitude,
+      satioData.rtc_year,
+      satioData.rtc_month,
+      satioData.rtc_mday,
+      satioData.rtc_hour,
+      satioData.rtc_minute,
+      satioData.rtc_second,
+      satioData.local_hour,
+      satioData.local_minute,
+      satioData.local_second,
+      satioData.system_altitude);
 
     // ------------------------------------------------
     // Track Planets/Meteors Every Interval (see config.h)
     // ------------------------------------------------
-    if (systemData.interval_breach_track_planets==true) {
-      systemData.interval_breach_track_planets=false;
+    if (systemData.interval_breach_track_planets) {
+      systemData.interval_breach_track_planets = false;
 
       esp_task_wdt_reset();
-      // ------------------------------------------------
-      // Track Planets.
-      // ------------------------------------------------
       trackPlanets();
       esp_task_wdt_reset();
-      // ------------------------------------------------
-      // Track Meteors.
-      // ------------------------------------------------
       setMeteorShowerWarning(satioData.local_month, satioData.local_mday);
       esp_task_wdt_reset();
     }
@@ -599,198 +643,141 @@ void taskUniverse(void * pvParameters) {
     // Set RA & Dec for system zenith +- Gyro. (add to matrix)
     // ------------------------------------------------
     siderealExtraData.gyro_0_ra_dec = gyroOffsetZenithRADec(gyroData.gyro_0_ang_z, gyroData.gyro_0_ang_y);
-    // printf("Gyro Yaw->RA: %d:%d:%f\n",
-    //   siderealExtraData.gyro_0_ra_dec.ra_h,
-    //   siderealExtraData.gyro_0_ra_dec.ra_m,
-    //   siderealExtraData.gyro_0_ra_dec.ra_s);
-    // printf("Gyro Pitch->Dec: %d:%d:%f\n",
-    //   siderealExtraData.gyro_0_ra_dec.dec_d,
-    //   siderealExtraData.gyro_0_ra_dec.dec_m,
-    //   siderealExtraData.gyro_0_ra_dec.dec_s);
-
-    // printf("[taskUniverse] zenith ra: %s dec: %s\n",
-    //   siderealPlanetData.local_zenith_ra_dec.formatted_ra_str,
-    //   siderealPlanetData.local_zenith_ra_dec.formatted_dec_str);
 
     // ------------------------------------------------
     // StarNav Dynamic Test Zenith Every Interval
     // ------------------------------------------------
-      setStarNav(
-        siderealExtraData.local_zenith_ra_dec.ra_h,
-        siderealExtraData.local_zenith_ra_dec.ra_m,
-        siderealExtraData.local_zenith_ra_dec.ra_s,
-        siderealExtraData.local_zenith_ra_dec.dec_d,
-        siderealExtraData.local_zenith_ra_dec.dec_m,
-        siderealExtraData.local_zenith_ra_dec.dec_s
-      );
-        // printf("---------------------------------------------\n");
-        // printf("Nearest Object to Zenith:\n");
-        // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-        // printf("Table:         %s\n", siderealObjectData.object_table_name);
-        // printf("Number:        %d\n", siderealObjectData.object_number);
-        // printf("Name:          %s\n", siderealObjectData.object_name);
-        // printf("Type:          %s\n", siderealObjectData.object_type);
-        // printf("Constellation: %s\n", siderealObjectData.object_con);
-        // printf("Distance:      %f\n", siderealObjectData.object_dist);
-        // printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
-        // printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
-        // printf("Azimuth:       %f\n", siderealObjectData.object_az);
-        // printf("Altitude:      %f\n", siderealObjectData.object_alt);
-        // printf("Rise:          %f\n", siderealObjectData.object_r);
-        // printf("Set:           %f\n", siderealObjectData.object_s);
-        // printf("---------------------------------------------\n");
+    setStarNav(
+      siderealExtraData.local_zenith_ra_dec.ra_h,
+      siderealExtraData.local_zenith_ra_dec.ra_m,
+      siderealExtraData.local_zenith_ra_dec.ra_s,
+      siderealExtraData.local_zenith_ra_dec.dec_d,
+      siderealExtraData.local_zenith_ra_dec.dec_m,
+      siderealExtraData.local_zenith_ra_dec.dec_s
+    );
+
     // ------------------------------------------------
     // StarNav Dynamic Test Zenith+-Gyro Offset
     // ------------------------------------------------
-      setStarNav(
-        siderealExtraData.gyro_0_ra_dec.ra_h,
-        siderealExtraData.gyro_0_ra_dec.ra_m,
-        siderealExtraData.gyro_0_ra_dec.ra_s,
-        siderealExtraData.gyro_0_ra_dec.dec_d,
-        siderealExtraData.gyro_0_ra_dec.dec_m,
-        siderealExtraData.gyro_0_ra_dec.dec_s
-      );
-        // printf("---------------------------------------------\n");
-        // printf("Nearest Object to Gyro Attitude Data:\n");
-        // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
-        // printf("Table:         %s\n", siderealObjectData.object_table_name);
-        // printf("Number:        %d\n", siderealObjectData.object_number);
-        // printf("Name:          %s\n", siderealObjectData.object_name);
-        // printf("Type:          %s\n", siderealObjectData.object_type);
-        // printf("Constellation: %s\n", siderealObjectData.object_con);
-        // printf("Distance:      %f\n", siderealObjectData.object_dist);
-        // printf("RA Decimal:    %f\n", siderealObjectData.object_ra);
-        // printf("Dec Decimal:   %f\n", siderealObjectData.object_dec);
-        // printf("Azimuth:       %f\n", siderealObjectData.object_az);
-        // printf("Altitude:      %f\n", siderealObjectData.object_alt);
-        // printf("Rise:          %f\n", siderealObjectData.object_r);
-        // printf("Set:           %f\n", siderealObjectData.object_s);
-        // printf("---------------------------------------------\n");
-
-      // static test (should always be sirius)
-      // setStarNav(
-      //   6,
-      //   45,
-      //   8.9,
-      //   -16,
-      //   42,
-      //   58.0
-      // );
-      esp_task_wdt_reset();
-    // }
+    setStarNav(
+      siderealExtraData.gyro_0_ra_dec.ra_h,
+      siderealExtraData.gyro_0_ra_dec.ra_m,
+      siderealExtraData.gyro_0_ra_dec.ra_s,
+      siderealExtraData.gyro_0_ra_dec.dec_d,
+      siderealExtraData.gyro_0_ra_dec.dec_m,
+      siderealExtraData.gyro_0_ra_dec.dec_s
+    );
+    esp_task_wdt_reset();
 
     // ------------------------------------------------
     // Set counters and flags
     // ------------------------------------------------
     systemData.i_count_track_planets++;
     systemData.interval_breach_track_planets_output = true;
-    if (systemData.i_count_track_planets>=UINT32_MAX-2)
-      {systemData.i_count_track_planets=0;}
+    // i_count_track_planets is int32_t, so the wrap check uses the signed
+    // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
+    if (systemData.i_count_track_planets >= INT32_MAX - 2) {
+      systemData.i_count_track_planets = 0;
+    }
     esp_task_wdt_reset();
 
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (TICK_DELAY_TASK_UNIVERSE==false)
-      {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_UNIVERSE / portTICK_PERIOD_MS);}
-    else {xTaskNotifyWait(0x00, 0x00, NULL, DELAY_TASK_UNIVERSE);}
+    if (!TICK_DELAY_TASK_UNIVERSE) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_UNIVERSE / portTICK_PERIOD_MS);
+    } else {
+      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_UNIVERSE);
+    }
   }
 }
 void createTaskUniverse() {
-    xTaskCreatePinnedToCore(
-    taskUniverse,   /* Function to implement the task */
-    "TaskUniverse", /* Name of the task */
+  xTaskCreatePinnedToCore(
+    taskUniverse,             /* Function to implement the task */
+    "TaskUniverse",           /* Name of the task */
     TASK_UNIVERSE_STACK_SIZE, /* Stack size in words */
-    NULL,           /* Task input parameter */
-    TASK_UNIVERSE_PRIORITY, /* Priority of the task */
-    &TaskUniverse,          /* Task handle. */
-    TASK_UNIVERSE_CORE);    /* Core where the task should run */
+    nullptr,                  /* Task input parameter */
+    TASK_UNIVERSE_PRIORITY,   /* Priority of the task */
+    &TaskUniverse,            /* Task handle. */
+    TASK_UNIVERSE_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
  * PowerCfg: Ultimate Performance.
- * 
- * @brief Sets all task delay timings to optimum performance.  
+ *
+ * @brief Sets all task delay timings to optimum performance.
+ *
+ *        The serial command task and storage task keep their own timings in
+ *        every power profile, so they are left untouched here.
  */
 void setTasksDelayUltimatePerformance() {
-    // DELAY_TASK_SERIAL_INFOCMD=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SERIAL_INFOCMD;
-    // TICK_DELAY_TASK_SERIAL_INFOCMD=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SERIAL_INFOCMD;
-    // xTaskNotifyGive(TaskSerialInfoCMD);
+  DELAY_TASK_MULTIPLEXERS = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_MULTIPLEXERS;
+  TICK_DELAY_TASK_MULTIPLEXERS = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_MULTIPLEXERS;
+  xTaskNotifyGive(TaskMultiplexers);
 
-    DELAY_TASK_MULTIPLEXERS=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_MULTIPLEXERS;
-    TICK_DELAY_TASK_MULTIPLEXERS=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_MULTIPLEXERS;
-    xTaskNotifyGive(TaskMultiplexers);
+  DELAY_TASK_GYRO0 = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GYRO;
+  TICK_DELAY_TASK_GYRO0 = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GYRO;
+  xTaskNotifyGive(TaskGyro);
 
-    DELAY_TASK_GYRO0=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GYRO;
-    TICK_DELAY_TASK_GYRO0=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GYRO;
-    xTaskNotifyGive(TaskGyro);
+  DELAY_TASK_UNIVERSE = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_UNIVERSE;
+  TICK_DELAY_TASK_UNIVERSE = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_UNIVERSE;
+  xTaskNotifyGive(TaskUniverse);
 
-    DELAY_TASK_UNIVERSE=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_UNIVERSE;
-    TICK_DELAY_TASK_UNIVERSE=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_UNIVERSE;
-    xTaskNotifyGive(TaskUniverse);
+  DELAY_TASK_GPS = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GPS;
+  TICK_DELAY_TASK_GPS = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GPS;
+  xTaskNotifyGive(TaskGPS);
 
-    DELAY_TASK_GPS=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GPS;
-    TICK_DELAY_TASK_GPS=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GPS;
-    xTaskNotifyGive(TaskGPS);
-
-    DELAY_TASK_SWITCHES=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SWITCHES;
-    TICK_DELAY_TASK_SWITCHES=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SWITCHES;
-    xTaskNotifyGive(TaskSwitches);
-
-    // DELAY_TASK_STORAGE=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_STORAGE;
-    // TICK_DELAY_TASK_STORAGE=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_STORAGE;
-    // xTaskNotifyGive(TaskStorage);
-    // xTaskNotifyGive(TaskSerialInfoCMD);
+  DELAY_TASK_SWITCHES = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SWITCHES;
+  TICK_DELAY_TASK_SWITCHES = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SWITCHES;
+  xTaskNotifyGive(TaskSwitches);
 }
 
 /** ----------------------------------------------------------------------------
  * PowerCfg: Power Saving.
- * 
- * @brief Sets all task delay timings to power saving.  
+ *
+ * @brief Sets all task delay timings to power saving.
+ *
+ *        The serial command task and storage task keep their own timings in
+ *        every power profile, so they are left untouched here.
  */
 void setTasksDelayPowerSaving() {
-    // DELAY_TASK_SERIAL_INFOCMD=POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SERIAL_INFOCMD;
-    // TICK_DELAY_TASK_SERIAL_INFOCMD=POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SERIAL_INFOCMD;
+  DELAY_TASK_MULTIPLEXERS = POWER_CONFIG_1_SECOND_DELAY_TASK_MULTIPLEXERS;
+  TICK_DELAY_TASK_MULTIPLEXERS = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_MULTIPLEXERS;
+  xTaskNotifyGive(TaskMultiplexers);
 
-    DELAY_TASK_MULTIPLEXERS=POWER_CONFIG_1_SECOND_DELAY_TASK_MULTIPLEXERS;
-    TICK_DELAY_TASK_MULTIPLEXERS=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_MULTIPLEXERS;
-    xTaskNotifyGive(TaskMultiplexers);
+  DELAY_TASK_GYRO0 = POWER_CONFIG_1_SECOND_DELAY_TASK_GYRO;
+  TICK_DELAY_TASK_GYRO0 = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_GYRO;
+  xTaskNotifyGive(TaskGyro);
 
-    DELAY_TASK_GYRO0=POWER_CONFIG_1_SECOND_DELAY_TASK_GYRO;
-    TICK_DELAY_TASK_GYRO0=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_GYRO;
-    xTaskNotifyGive(TaskGyro);
+  DELAY_TASK_UNIVERSE = POWER_CONFIG_1_SECOND_DELAY_TASK_UNIVERSE;
+  TICK_DELAY_TASK_UNIVERSE = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_UNIVERSE;
+  xTaskNotifyGive(TaskUniverse);
 
-    DELAY_TASK_UNIVERSE=POWER_CONFIG_1_SECOND_DELAY_TASK_UNIVERSE;
-    TICK_DELAY_TASK_UNIVERSE=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_UNIVERSE;
-    xTaskNotifyGive(TaskUniverse);
+  DELAY_TASK_GPS = POWER_CONFIG_1_SECOND_DELAY_TASK_GPS;
+  TICK_DELAY_TASK_GPS = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_GPS;
+  xTaskNotifyGive(TaskGPS);
 
-    DELAY_TASK_GPS=POWER_CONFIG_1_SECOND_DELAY_TASK_GPS;
-    TICK_DELAY_TASK_GPS=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_GPS;
-    xTaskNotifyGive(TaskGPS);
-
-    DELAY_TASK_SWITCHES=POWER_CONFIG_1_SECOND_DELAY_TASK_SWITCHES;
-    TICK_DELAY_TASK_SWITCHES=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_SWITCHES;
-    xTaskNotifyGive(TaskSwitches);
-
-    // DELAY_TASK_STORAGE=POWER_CONFIG_1_SECOND_DELAY_TASK_STORAGE;
-    // TICK_DELAY_TASK_STORAGE=POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_STORAGE;
-    // xTaskNotifyGive(TaskStorage);
+  DELAY_TASK_SWITCHES = POWER_CONFIG_1_SECOND_DELAY_TASK_SWITCHES;
+  TICK_DELAY_TASK_SWITCHES = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_SWITCHES;
+  xTaskNotifyGive(TaskSwitches);
 }
 
 /** ----------------------------------------------------------------------------
  * Set Tick.
- * 
+ *
  * @brief Manually override use of millisecond or ticks for delays.
  */
 void setTick(TaskHandle_t task_handle, bool *tick_delay, bool use_tick) {
-  *tick_delay=use_tick; xTaskNotifyGive(task_handle);
+  *tick_delay = use_tick;
+  xTaskNotifyGive(task_handle);
 }
 
 /** ----------------------------------------------------------------------------
  * Set Delay.
- * 
+ *
  * @brief Manually override delay timing.
  */
 void setDelay(TaskHandle_t task_handle, long *task_delay, long time_delay) {
-  *task_delay=time_delay; xTaskNotifyGive(task_handle);
+  *task_delay = time_delay;
+  xTaskNotifyGive(task_handle);
 }

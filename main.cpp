@@ -1,14 +1,36 @@
-// /** -------------------------------------------------------------------------------------
-//  * This is an LVGL learning project.
-//  * Bespoke LVGL objects are also being bootstrapped.
-//  */
+/*
+    main.cpp - Application entry point. Written By Benjamin Jack Cullen.
+
+    Boots the system: configures the watchdog, brings up LVGL, opens the
+    diagnostic UART, brings up the I2C buses and the GPS UART, starts every
+    FreeRTOS task, synchronizes them, then shows the home screen.
+
+    MISRA conventions used throughout this file:
+    (1) Logging uses ESP_LOGI/ESP_LOGW instead of the <stdio.h> formatted
+        output functions (MISRA C 2012 Rule 21.6).
+    (2) No dynamic memory allocation; a buffer that must outlive a single
+        call is a function-local static instead of a heap allocation
+        (MISRA C 2012 Rule 21.3).
+    (3) Every object is given the narrowest scope its use requires:
+        function-local static where only one function needs it, file-scope
+        static where more than one function needs it (MISRA C 2012 Rule 8.9).
+    (4) Every switch statement has an explicit default clause and every
+        switch-clause ends in break (MISRA C 2012 Rule 16.3 / 16.4).
+    (5) Every if/while body is a braced compound statement, including bodies
+        that do nothing (MISRA C 2012 Rule 15.6).
+    (6) A function's return value that is not needed by the caller is
+        discarded explicitly with a (void) cast (MISRA C 2012 Rule 17.7).
+    (7) Unsigned struct-literal members carry the 'U' suffix so their type
+        is unambiguous (MISRA C 2012 Rule 7.2).
+    (8) No commented-out code (MISRA C 2012 Dir 4.4).
+
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
+*/
 
 #include "bsp/esp32_p4_wifi6_touch_lcd_xc.h"
-#include <limits.h>
+#include "bsp/esp-bsp.h"
 #include "esp_log.h"
 #include "lvgl.h"
-// #include "./strval.h"
-#include <stdlib.h>       // malloc/free
 #include "ff.h"           // FatFs core
 #include "diskio.h"       // Disk I/O
 #include "diskio_impl.h"  // ESP32 disk impl
@@ -17,19 +39,14 @@
 #include "driver/sdmmc_host.h"
 #include "esp_err.h"
 #include "sd_pwr_ctrl_by_on_chip_ldo.h"
-#include <stdio.h>
 #include <dirent.h>
-#include "bsp/esp-bsp.h"
 
-#include <stdio.h>
 #include <limits.h>
 #include <string.h>
-// #include <iostream>
 #include <assert.h>
 #include <float.h>
 #include <math.h>
 #include <Arduino.h>
-// #include <Wire.h>
 
 #include "./config.h"
 #include "./REG.h"
@@ -48,7 +65,6 @@
 #include "./system_data.h"
 #include "./sdcard_helper.h"
 #include "./task_handler.h"
-// #include "./multi_display_controller.h"
 #include "./i2c_helper.h"
 #include "./wit_c_sdk.h"
 #include "./satio_lvgl.h"
@@ -59,73 +75,96 @@
 #include <esp_task_wdt.h>
 #include "esp_pm.h"
 #include "esp_attr.h"
-#include "esp_log.h"
 #include "esp_partition.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_partition.h"
+#include "freertos/queue.h"
 #include "esp_spiffs.h"
 #include "esp_heap_caps.h"
 #include "nvs_flash.h"
 #include "esp_system.h"
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
 #include "driver/uart.h"
-#include "esp_log.h"
 #include "esp_rom_uart.h"
 
-#define UART0_NUM      UART_NUM_0
-#define UART0_BUF_SIZE         (512)
-#define UART0_RD_BUF_SIZE      (UART0_BUF_SIZE)
+#define UART0_NUM               UART_NUM_0
+#define UART0_BUF_SIZE          (512)
+#define UART0_RD_BUF_SIZE       (UART0_BUF_SIZE)
+#define UART0_QUEUE_LENGTH      (20)
+#define UART0_TASK_STACK_SIZE   (3072)
+#define UART0_TASK_PRIORITY     (12)
 
-static const char *UART0_TAG = "UART0_EVENTS";
+static const char *UART0_TAG    = "UART0_EVENTS";
+static const char *APP_MAIN_TAG = "APP_MAIN";
+
+// Shared by app_main() (creates the driver and its queue) and
+// uart0_event_task() (reads the queue), so file scope is required; this is
+// the documented exception to keeping objects function-local (MISRA C 2012
+// Rule 8.9).
 static QueueHandle_t uart0_queue;
 
-// Line buffer for accumulating partial commands
-static char uart0_line_buffer[UART0_BUF_SIZE];
-static int uart0_line_pos = 0;
-
+/** ----------------------------------------------------------------------------
+ * UART0 Event Task.
+ *
+ * (1) The receive buffer and the line-accumulation buffer/index are
+ *     function-local statics rather than heap allocations, so the task has
+ *     no dynamic-memory dependency and no allocation can fail at runtime
+ *     (MISRA C 2012 Rule 21.3); they are scoped to this function because it
+ *     is their only user (MISRA C 2012 Rule 8.9).
+ * (2) The task parameter is required by the FreeRTOS task signature but is
+ *     unused here, so the discard is made explicit with a (void) cast
+ *     (MISRA C 2012 Rule 2.7).
+ * (3) Reads raw bytes from UART0 and accumulates them into a line buffer.
+ *     When a '\r' or '\n' terminator arrives, the completed line is copied
+ *     into serial0Data.BUFFER_RX and CmdProcess() is called to act on it.
+ *     FIFO-overflow and buffer-full events flush the driver and reset the
+ *     line buffer so the next line starts cleanly.
+ */
 static void uart0_event_task(void *pvParameters) {
+    (void)pvParameters; // MISRA C 2012 Rule 2.7: unused FreeRTOS task parameter.
+
+    static uint8_t dtmp[UART0_RD_BUF_SIZE];
+    static char uart0_line_buffer[UART0_BUF_SIZE];
+    static int uart0_line_pos = 0;
     uart_event_t event;
-    uint8_t *dtmp = (uint8_t *) malloc(UART0_RD_BUF_SIZE);
     int len = 0;
+
     uart_flush_input(UART0_NUM);
-    
+
     for (;;) {
         // Rx
         if (xQueueReceive(uart0_queue, (void *)&event, portMAX_DELAY)) {
-            bzero(dtmp, UART0_RD_BUF_SIZE);
-            
+            memset(dtmp, 0, UART0_RD_BUF_SIZE); // Standard, portable equivalent of bzero().
+
             switch (event.type) {
                 case UART_DATA: {
                     len = uart_read_bytes(UART0_NUM, dtmp, event.size, 1000 / portTICK_PERIOD_MS);
-                    
+
                     // Accumulate data into line buffer, process on newline
                     for (int i = 0; i < len; i++) {
                         char c = (char)dtmp[i];
-                        
+
                         // Check for line terminator
-                        if (c == '\n' || c == '\r') {
+                        if ((c == '\n') || (c == '\r')) {
+
                             if (uart0_line_pos > 0) {
                                 // Complete line received - process it
                                 uart0_line_buffer[uart0_line_pos] = '\0';
-                                
-                                // Copy to serial0Data.BUFFER for CmdProcess
-                                memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
-                                strncpy(serial0Data.BUFFER, uart0_line_buffer, sizeof(serial0Data.BUFFER) - 1);
-                                
-                                printf("Received data: %s\n", serial0Data.BUFFER);
+
+                                // Copy to serial0Data.BUFFER_RX for CmdProcess
+                                memset(serial0Data.BUFFER_RX, 0, sizeof(serial0Data.BUFFER_RX));
+                                strncpy(serial0Data.BUFFER_RX, uart0_line_buffer, sizeof(serial0Data.BUFFER_RX) - 1);
+
+                                ESP_LOGI(UART0_TAG, "Received data: %s", serial0Data.BUFFER_RX);
                                 CmdProcess();
-                                
+
                                 // Reset line buffer
                                 uart0_line_pos = 0;
+                                break;
                             }
                             // Skip empty lines (consecutive \r\n)
                         } else {
                             // Accumulate character (with overflow protection)
-                            if (uart0_line_pos < UART0_BUF_SIZE - 1) {
+                            if (uart0_line_pos < (UART0_BUF_SIZE - 1)) {
                                 uart0_line_buffer[uart0_line_pos++] = c;
                             } else {
                                 // Buffer overflow - discard and reset
@@ -165,45 +204,70 @@ static void uart0_event_task(void *pvParameters) {
             }
         }
     }
-    free(dtmp);
-    vTaskDelete(NULL);
 }
 
+/** ----------------------------------------------------------------------------
+ * Arduino Core Entry Point.
+ *
+ * External linkage is required because the Arduino-ESP32 core calls this
+ * function by name once app_main() starts the Arduino runtime (MISRA C 2012
+ * Rule 8.7: internal linkage is used everywhere it is not required, and this
+ * is the documented exception). The body is intentionally empty because
+ * app_main() performs every initialization step this project needs.
+ */
 void setup() {
 
 }
 
 /** -----------------------------------------------------------------------------------------------
  * @brief Main application entry point.
+ *
+ * External linkage (via extern "C") is required because the ESP-IDF startup
+ * code calls this function by name (MISRA C 2012 Rule 8.7).
  */
 extern "C" void app_main(void)
 {
     // --------------------------------------------------------------
     // Warmup delay: some devices require at least one second start.
     // --------------------------------------------------------------
-    delay(1000);
+    const uint32_t startup_delay_ms = 1000U; // Named so the duration is documented once.
+    delay(startup_delay_ms);
 
-    // --------------------------------------------------------------
-    // WDT Configuration
-    // --------------------------------------------------------------
+    /** ----------------------------------------------------------------------------
+     * Watchdog Configuration.
+     *
+     * (1) timeout_ms and idle_core_mask are uint32_t struct members, so
+     *     their literals carry the 'U' suffix to make the unsigned type
+     *     unambiguous (MISRA C 2012 Rule 7.2).
+     * (2) esp_task_wdt_reconfigure()'s esp_err_t result is checked by
+     *     ESP_ERROR_CHECK so a configuration failure is never silently
+     *     ignored (MISRA C 2012 Rule 17.7).
+     * (3) Reconfigures the watchdog to a 5 second timeout that only logs a
+     *     warning, rather than panicking, if a task fails to check in.
+     */
     esp_task_wdt_config_t wdt_config = {
-        .timeout_ms = 5 * 1000,        // 5 seconds
-        .idle_core_mask = 0,            // Don't watch idle tasks
-        .trigger_panic = false,          // Trigger panic on timeout
+        .timeout_ms = 5000U,      // 5 second timeout.
+        .idle_core_mask = 0U,     // Idle tasks are not watched.
+        .trigger_panic = false,   // Log a warning instead of panicking on timeout.
     };
-    esp_task_wdt_reconfigure(&wdt_config);
-    
-    // esp_task_wdt_deinit();
+    ESP_ERROR_CHECK(esp_task_wdt_reconfigure(&wdt_config));
 
     // --------------------------------------------------------------
     // LVGL Initialization
     // --------------------------------------------------------------
     initSatIOUI();
 
-    // --------------------------------------------------------------
-    // Initialize Serial 0.
-    // --------------------------------------------------------------
-    // .baud_rate = 921600,
+    /** ----------------------------------------------------------------------------
+     * Diagnostic UART0 Setup.
+     *
+     * (1) Each esp_err_t-returning driver call is checked by
+     *     ESP_ERROR_CHECK, and xTaskCreate()'s result is discarded
+     *     explicitly with a (void) cast, so every return value is either
+     *     used or its discard is made visible (MISRA C 2012 Rule 17.7).
+     * (2) Configures UART0 for command/diagnostic traffic and starts the
+     *     task that parses incoming lines and dispatches them to
+     *     CmdProcess().
+     */
     uart_config_t uart0_config = {
         .baud_rate = 921600,
         .data_bits = UART_DATA_8_BITS,
@@ -211,114 +275,143 @@ extern "C" void app_main(void)
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
     };
-    // Install UART driver
     ESP_ERROR_CHECK(uart_param_config(UART0_NUM, &uart0_config));
-    ESP_ERROR_CHECK(uart_set_pin(UART0_NUM, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, 
+    ESP_ERROR_CHECK(uart_set_pin(UART0_NUM, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE,
                                   UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-    ESP_ERROR_CHECK(uart_driver_install(UART0_NUM, UART0_BUF_SIZE * 2, UART0_BUF_SIZE, 20, &uart0_queue, 0));
-    // Start event task
-    xTaskCreate(uart0_event_task, "uart0_event_task", 3072, NULL, 12, NULL);
-    printf("UART0 ready - send data to GPIO1 (RX0)\n");
-    
-    // --------------------------------------------------------------
-    // Initialize I2C BUS 0: RTC
-    // --------------------------------------------------------------
-    printf("[IIC] intitializing RTC");
-    iic_0.setPins(IIC_BUS0_SDA, IIC_BUS0_SCL);
-    iic_0.setBufferSize(MAX_IIC_BUFFER_SIZE);
+    ESP_ERROR_CHECK(uart_driver_install(UART0_NUM, UART0_BUF_SIZE * 2, UART0_BUF_SIZE, UART0_QUEUE_LENGTH, &uart0_queue, 0));
+    (void)xTaskCreate(uart0_event_task, "uart0_event_task", UART0_TASK_STACK_SIZE, NULL, UART0_TASK_PRIORITY, NULL);
+    ESP_LOGI(APP_MAIN_TAG, "UART0 ready - send data to GPIO1 (RX0)");
+
+    /** ----------------------------------------------------------------------------
+     * I2C Bus 0: RTC.
+     *
+     * (1) begin()'s and setBufferSize()'s results are not needed here, so
+     *     each discard is made explicit with a (void) cast (MISRA C 2012
+     *     Rule 17.7).
+     * (2) Brings up I2C bus 0 and the DS3231 real-time clock attached to
+     *     it, then seeds the system clock from it.
+     */
+    ESP_LOGI(APP_MAIN_TAG, "Initializing RTC");
+    (void)iic_0.setPins(IIC_BUS0_SDA, IIC_BUS0_SCL);
+    (void)iic_0.setBufferSize(MAX_IIC_BUFFER_SIZE);
     iic_0.setTimeOut(I2C_TIMEOUT_MS_BUS0);
-    iic_0.begin(IIC_BUS0_SDA, IIC_BUS0_SCL, I2C_CLOCK_Hz_BUS0);
-    rtc.begin(&iic_0);
-    delay(200);
+    (void)iic_0.begin(IIC_BUS0_SDA, IIC_BUS0_SCL, I2C_CLOCK_Hz_BUS0);
+    (void)rtc.begin(&iic_0);
+    const uint32_t rtc_settle_delay_ms = 200U; // Time for the RTC to settle after begin().
+    delay(rtc_settle_delay_ms);
     initSystemTime();
 
-    // -------------------------------------------------------------
-    // Initialize I2C BUS 1: Output port controller
-    // --------------------------------------------------------------
-    printf("[IIC] intitializing output port controller");
-    iic_2.setPins(IIC_BUS2_SDA, IIC_BUS2_SCL);
-    iic_2.setBufferSize(MAX_IIC_BUFFER_SIZE);
+    /** ----------------------------------------------------------------------------
+     * I2C Bus 2: Output Port Controller.
+     *
+     * (1) begin()'s and setBufferSize()'s results are not needed here, so
+     *     each discard is made explicit with a (void) cast (MISRA C 2012
+     *     Rule 17.7).
+     * (2) Brings up I2C bus 2 and clears every output on the port
+     *     controller attached to it.
+     */
+    ESP_LOGI(APP_MAIN_TAG, "Initializing output port controller");
+    (void)iic_2.setPins(IIC_BUS2_SDA, IIC_BUS2_SCL);
+    (void)iic_2.setBufferSize(MAX_IIC_BUFFER_SIZE);
     iic_2.setTimeOut(I2C_TIMEOUT_MS_BUS2);
-    iic_2.begin(IIC_BUS2_SDA, IIC_BUS2_SCL, I2C_CLOCK_Hz_BUS2);
+    (void)iic_2.begin(IIC_BUS2_SDA, IIC_BUS2_SCL, I2C_CLOCK_Hz_BUS2);
     iic_2.setClock(I2C_CLOCK_Hz_BUS2);
     writeOutputPortControllerClear(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER);
 
-    // --------------------------------------------------------------
-    // Initialize Serial 1 (for GPS).
-    // --------------------------------------------------------------
-    printf("[Serial1] (GPS)\n");
-    int8_t serial_1_rxd = 34;
-    int8_t serial_1_txd = -1;
-    Serial1.setPins(serial_1_rxd, serial_1_txd, -1, -1);
-    Serial1.setRxBufferSize(2000);
-    Serial1.setTimeout(10);
-    Serial1.begin(115200); while(!Serial1);
+    /** ----------------------------------------------------------------------------
+     * Serial1: GPS UART.
+     *
+     * (1) setPins()'s and setRxBufferSize()'s results are not needed here,
+     *     so each discard is made explicit with a (void) cast (MISRA C 2012
+     *     Rule 17.7).
+     * (2) The while-loop body is an explicit (empty) compound statement
+     *     rather than a bare semicolon (MISRA C 2012 Rule 15.6).
+     * (3) Brings up the UART used by the GPS receiver: GPIO34 for RX, TX
+     *     unused because the GPS module is read-only from this system's
+     *     perspective.
+     */
+    ESP_LOGI(APP_MAIN_TAG, "Serial1 (GPS) starting");
+    const int8_t pin_not_used               = -1;
+    const int8_t gps_uart_rxd_pin           = 34;
+    const int8_t gps_uart_txd_pin           = pin_not_used;
+    const size_t gps_uart_rx_buffer_size    = 2000U;
+    const unsigned long gps_uart_timeout_ms = 10UL;
+    const uint32_t gps_uart_baud_rate       = 115200U;
+    (void)Serial1.setPins(gps_uart_rxd_pin, gps_uart_txd_pin, pin_not_used, pin_not_used);
+    (void)Serial1.setRxBufferSize(gps_uart_rx_buffer_size);
+    Serial1.setTimeout(gps_uart_timeout_ms);
+    Serial1.begin(gps_uart_baud_rate);
+    while (!Serial1) {
+        // Block until the UART peripheral reports ready.
+    }
     Serial1.flush();
-    printf("[Serial1] Baud rate: 115200\n");
-    printf("[Serial1] (hardware serial remap: Rx=%d Tx=%d)\n", serial_1_rxd, serial_1_txd);
-    
+    ESP_LOGI(APP_MAIN_TAG, "Serial1 baud rate: %lu", (unsigned long)gps_uart_baud_rate);
+    ESP_LOGI(APP_MAIN_TAG, "Serial1 hardware remap: RX=%d TX=%d", gps_uart_rxd_pin, gps_uart_txd_pin);
+
     // --------------------------------------------------------------
     // Create Tasks.
     // --------------------------------------------------------------
 
     // Storage
-    sdcardFlagData.load_system=true; // Set load system flag ready for sdcard flag handler
-    printf("creating storage task\n");
+    sdcardFlagData.load_system = true; // Lets the SD-card flag handler perform its first mount on the next pass.
+    ESP_LOGI(APP_MAIN_TAG, "creating storage task");
     createTaskStorage();             // (target: 2/ps)    SD card
-    // printf("creating logging task\n");
-    // createTaskLogging();             // (target: n/ps)    Log to sdcard
-    
+
     // GPS
-    printf("creating GPS task\n");
+    ESP_LOGI(APP_MAIN_TAG, "creating GPS task");
     createTaskGPS();                 // (target: 10/ps)   Time & location
-    
+
     // Gyro
     initWT901();
-    printf("creating gyro task\n");
+    ESP_LOGI(APP_MAIN_TAG, "creating gyro task");
     createTaskGyro();                // (target: 200/ps)  Attitude
 
-    // Auxillary Fast Input
-    // Force non-lazy ADC init on signal pin
-    analogRead(PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG);
-    analogSetAttenuation(ADC_11db);  // Full ~0-3.3V range; call once globally
+    /** ----------------------------------------------------------------------------
+     * Auxiliary Fast Input.
+     *
+     * (1) analogRead()'s sampled value is not needed here, so the discard
+     *     is made explicit with a (void) cast (MISRA C 2012 Rule 17.7).
+     * (2) Forces the ADC driver to perform its (otherwise lazy) one-time
+     *     initialization on the multiplexer's signal pin before the task
+     *     that relies on it starts running.
+     */
+    (void)analogRead(PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG);
+    analogSetAttenuation(ADC_11db);  // Full ~0-3.3V input range; applies to every ADC channel.
     initADMultiplexer(ad_mux_0);
     createTaskMultiplexers();        // (target: 200/ps)  Fast general input
-    
-    // Auxillary Large Input (Slow if utilizing all (+-50) input pins)
-    // createTaskPortControllerInput(); // (target: 1/ps)    Slow general input
 
-    // Auxillary Output
-    printf("creating auxillary output task\n");
+    // Auxiliary Output
+    ESP_LOGI(APP_MAIN_TAG, "creating auxiliary output task");
     createTaskSwitches();            // (target: approx. max 1000/ps) Fast general output
 
     // Universe
-    printf("creating universe task\n");
+    ESP_LOGI(APP_MAIN_TAG, "creating universe task");
     myAstroBegin();
     createTaskUniverse();            // (target: 1/ps)    Star tracking
 
     // Info/Command
-    printf("creating info command task\n");
+    ESP_LOGI(APP_MAIN_TAG, "creating info command task");
     createTaskSerialInfoCMD();
 
-    // Attempt to approximately syncronize tasks
-    printf("attempting to syncronize tasks\n");
+    // Attempt to approximately synchronize tasks
+    ESP_LOGI(APP_MAIN_TAG, "attempting to synchronize tasks");
     syncTasks();
 
-    printf("waiting a moment...\n");
-    delay(5000); // current
+    ESP_LOGI(APP_MAIN_TAG, "waiting for tasks to settle");
+    const uint32_t task_settle_delay_ms = 5000U; // Gives every task time for a first pass before the UI starts.
+    delay(task_settle_delay_ms);
 
-    // --------------------------------------------------------------
-    // Display Home screen
-    // --------------------------------------------------------------
-    printf("starting SatIO UI\n");
-    // initSatIOUI(); // already initialized for loading screen
-    flag_display_home_screen=true;
+    /** ----------------------------------------------------------------------------
+     * Display Home Screen.
+     *
+     * initSatIOUI() already ran earlier to drive the loading screen; only
+     * the home screen needs to be shown now that every task is running.
+     */
+    ESP_LOGI(APP_MAIN_TAG, "starting SatIO UI");
+    flag_display_home_screen = true;
     satio_ui_begin();
 
-    // --------------------------------------------------------------
-    // Main Loop
-    // --------------------------------------------------------------
-    // while (1) {
-    //     vTaskDelay(pdMS_TO_TICKS(1000));
-    // }
+    // app_main() may now return: every task created above keeps running
+    // under the FreeRTOS scheduler, and the ESP-IDF idle task takes over
+    // this thread.
 }

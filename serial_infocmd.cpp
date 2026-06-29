@@ -47,8 +47,9 @@ ArgParser parser;
 PlainArgParser plainparser;
 
 struct Serial0Struct serial0Data = {
-  .BUFFER = {0},   // serial buffer.
-  .checksum = {0}, // hex checksum produced by createChecksumSerial0() for the sentence currently being built.
+  .BUFFER_RX = {0}, // in buff
+  .BUFFER_TX = {0}, // out buff
+  .checksum = {0},  // hex checksum produced by createChecksumSerial0() for the sentence currently being built.
 };
 
 /* Rule 8.7: internal linkage; only validateChecksumSerial0()/createChecksumSerial0() call this. */
@@ -991,7 +992,7 @@ static void star_nav(void) {
   // Herschel test:    starnav 0 29 56.0 60 14 0.0
   // new stars test    starnav 0 02 07.2 -14 40 34
   // caldwel test:     starnav 00 13 0 72 32 0
-  simple_argparser_init_from_buffer(&plainparser, serial0Data.BUFFER, 1);
+  simple_argparser_init_from_buffer(&plainparser, serial0Data.BUFFER_RX, 1);
   if ((str_is_int8(plainparser.tokens[0])==true) &&
       (str_is_int8(plainparser.tokens[1])==true) &&
       (str_is_float(plainparser.tokens[2])==true) &&
@@ -1096,15 +1097,15 @@ static void printArgParse(void) {
 // ---------------------------------------------------------------------------------------------------------------
 
 void CmdProcess(void) {
-  if (strlen(serial0Data.BUFFER) >= 2U) {
+  if (strlen(serial0Data.BUFFER_RX) >= 2U) {
     bool proceed = true;
 
     // Debug Serial Buffer.
-    printf("[CmdProcess] Received data: %s\n", serial0Data.BUFFER);
+    printf("[CmdProcess] Received data: %s\n", serial0Data.BUFFER_RX);
 
     // Initialize argparse.
     argparser_reset(&parser);
-    if (argparser_init_from_buffer(&parser, serial0Data.BUFFER) == false) {
+    if (argparser_init_from_buffer(&parser, serial0Data.BUFFER_RX) == false) {
       printf("[cmd] Failed to initialize parser from buffer\n");
       proceed = false;
     }
@@ -1150,14 +1151,14 @@ void CmdProcess(void) {
 
         // if (argparser_has_flag(&parser, "sdcard")) {PrintSDCardInformation();}
 
-        if (strcmp(serial0Data.BUFFER, "stat --system")==0) {PrintSystemData();}
+        if (strcmp(serial0Data.BUFFER_RX, "stat --system")==0) {PrintSystemData();}
 
-        if (strncmp(serial0Data.BUFFER, "stat --matrix ", strlen("stat --matrix "))==0) {
+        if (strncmp(serial0Data.BUFFER_RX, "stat --matrix ", strlen("stat --matrix "))==0) {
           if (argparser_has_flag(&parser, "A") == true) {PrintMatrixData();}
           else {PrintMatrixNData(argparser_get_int8(&parser, "matrix", -1));}
         }
 
-        else if (strncmp(serial0Data.BUFFER, "stat -map ", strlen("stat -map "))==0) {
+        else if (strncmp(serial0Data.BUFFER_RX, "stat -map ", strlen("stat -map "))==0) {
           if (argparser_has_flag(&parser, "A") == true) {PrintMappingData();}
           else {PrintMappingNData(argparser_get_int8(&parser, "map", -1));}
         }
@@ -1434,19 +1435,19 @@ void CmdProcess(void) {
 long i_output_config_matrix = 0;
 
 /*
- * strcat() has no bound and can overflow serial0Data.BUFFER if a sentence's
+ * strcat() has no bound and can overflow serial0Data.BUFFER_TX if a sentence's
  * combined length is ever misjudged; every append below goes through this
  * helper instead, which truncates rather than overflowing if the buffer is
  * ever close to full (Rule 21.x: replaces the banned, unbounded strcat()).
  */
 static void serial0_buffer_append(const char *text)
 {
-    size_t used = strlen(serial0Data.BUFFER);
-    size_t capacity = sizeof(serial0Data.BUFFER);
+    size_t used = strlen(serial0Data.BUFFER_TX);
+    size_t capacity = sizeof(serial0Data.BUFFER_TX);
 
     if (used < (capacity - 1U))
     {
-        (void)strncat(serial0Data.BUFFER, text, (capacity - 1U) - used);
+        (void)strncat(serial0Data.BUFFER_TX, text, (capacity - 1U) - used);
     }
 }
 
@@ -1539,7 +1540,7 @@ static const OuterPlanetSentenceSpec neptune_sentence_spec = {
 
 static void buildOuterPlanetSentence(const OuterPlanetSentenceSpec *spec)
 {
-    memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+    memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
     serial0_buffer_append(spec->tag);
     serial0_buffer_append(String(siderealPlanetData.*(spec->ra) + String(",")).c_str());
     serial0_buffer_append(String(siderealPlanetData.*(spec->dec) + String(",")).c_str());
@@ -1553,10 +1554,10 @@ static void buildOuterPlanetSentence(const OuterPlanetSentenceSpec *spec)
     serial0_buffer_append(String(siderealPlanetData.*(spec->distance) + String(",")).c_str());
     serial0_buffer_append(String(siderealPlanetData.*(spec->ecliptic_lat) + String(",")).c_str());
     serial0_buffer_append(String(siderealPlanetData.*(spec->ecliptic_long) + String(",")).c_str());
-    createChecksumSerial0(serial0Data.BUFFER);
+    createChecksumSerial0(serial0Data.BUFFER_TX);
     serial0_buffer_append("*");
     serial0_buffer_append(serial0Data.checksum);
-    printf("%s\n", serial0Data.BUFFER);
+    printf("%s\n", serial0Data.BUFFER_TX);
 }
 
 void outputSentences(void) {
@@ -1570,7 +1571,7 @@ void outputSentences(void) {
     if (systemData.output_gnrmc_enabled == true) {printf("%s\n", gnrmcData.outsentence);}
     if (systemData.output_gpatt_enabled == true) {printf("%s\n", gpattData.outsentence);}
     if (systemData.output_satio_enabled == true) {
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$SATIO,");
 
       serial0_buffer_append(String(satioData.padded_rtc_time_HHMMSS).c_str());
@@ -1635,16 +1636,16 @@ void outputSentences(void) {
       serial0_buffer_append(String(insData.INS_ENABLED).c_str());
       serial0_buffer_append(",");
 
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
     }
   }
   if (systemData.interval_breach_gyro_0_output) {
     systemData.interval_breach_gyro_0_output=false;
     if (systemData.output_gyro_0_enabled == true) {
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$GYRO0,");
       serial0_buffer_append(String(gyroData.gyro_0_acc_x).c_str());
       serial0_buffer_append(",");
@@ -1670,16 +1671,16 @@ void outputSentences(void) {
       serial0_buffer_append(",");
       serial0_buffer_append(String(gyroData.gyro_0_mag_z).c_str());
       serial0_buffer_append(",");
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
     }
   }
   if (systemData.interval_breach_track_planets_output) {
     systemData.interval_breach_track_planets_output=false;
     if (systemData.output_sun_enabled == true) {
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$SUN,");
       serial0_buffer_append(String(siderealPlanetData.sun_ra + String(",")).c_str());
       serial0_buffer_append(String(siderealPlanetData.sun_dec + String(",")).c_str());
@@ -1687,24 +1688,24 @@ void outputSentences(void) {
       serial0_buffer_append(String(siderealPlanetData.sun_alt + String(",")).c_str());
       serial0_buffer_append(String(siderealPlanetData.sun_r + String(",")).c_str());
       serial0_buffer_append(String(siderealPlanetData.sun_s + String(",")).c_str());
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
     }
     if (systemData.output_earth_enabled == true) {
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$EARTH,");
       serial0_buffer_append(String(siderealPlanetData.earth_ecliptic_lat + String(",")).c_str());
       serial0_buffer_append(String(siderealPlanetData.earth_ecliptic_long + String(",")).c_str());
       serial0_buffer_append(String(satioData.altitude + String(",")).c_str()); // distance to earth sea level
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
     }
     if (systemData.output_luna_enabled == true) {
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$LUNA,");
       serial0_buffer_append(String(siderealPlanetData.luna_ra + String(",")).c_str());
       serial0_buffer_append(String(siderealPlanetData.luna_dec + String(",")).c_str());
@@ -1714,10 +1715,10 @@ void outputSentences(void) {
       serial0_buffer_append(String(siderealPlanetData.luna_s + String(",")).c_str());
       serial0_buffer_append(String(siderealPlanetData.luna_p + String(",")).c_str());
       serial0_buffer_append(String(siderealPlanetData.luna_lum + String(",")).c_str());
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
     }
     if (systemData.output_mercury_enabled == true) {buildOuterPlanetSentence(&mercury_sentence_spec);}
     if (systemData.output_venus_enabled == true) {buildOuterPlanetSentence(&venus_sentence_spec);}
@@ -1727,23 +1728,23 @@ void outputSentences(void) {
     if (systemData.output_uranus_enabled == true) {buildOuterPlanetSentence(&uranus_sentence_spec);}
     if (systemData.output_neptune_enabled == true) {buildOuterPlanetSentence(&neptune_sentence_spec);}
     if (systemData.output_meteors_enabled == true) {
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$METEOR,");
       for (int i=0; i<MAX_METEOR_SHOWERS; i++) {
         serial0_buffer_append(String(String(meteor_shower_warning_system[i][0]) + String(",")).c_str());
         serial0_buffer_append(String(String(meteor_shower_warning_system[i][1]) + String(",")).c_str());
       }
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
     }
   }
 
   // if (systemData.interval_breach_matrix_output) {
   // systemData.interval_breach_matrix_output=false;
   if (systemData.output_matrix_enabled == true) {
-    memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+    memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
     serial0_buffer_append("$MATRIX,");
     // append matrix switch state data
     for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
@@ -1752,22 +1753,22 @@ void outputSentences(void) {
       {serial0_buffer_append(String(String(matrixData.computer_intention[0][i])+",").c_str());}
     for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
       {serial0_buffer_append(String(String(matrixData.output_value[0][i])+",").c_str());}
-    createChecksumSerial0(serial0Data.BUFFER);
+    createChecksumSerial0(serial0Data.BUFFER_TX);
     serial0_buffer_append("*");
     serial0_buffer_append(serial0Data.checksum);
-    printf("%s\n", serial0Data.BUFFER);
+    printf("%s\n", serial0Data.BUFFER_TX);
   }
 
   if (systemData.output_input_portcontroller == true) {
-    memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+    memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
     serial0_buffer_append("$PCINPT,");
     // append matrix switch state data
     for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
       {serial0_buffer_append(String(String(matrixData.input_value[0][i])+",").c_str());}
-    createChecksumSerial0(serial0Data.BUFFER);
+    createChecksumSerial0(serial0Data.BUFFER_TX);
     serial0_buffer_append("*");
     serial0_buffer_append(serial0Data.checksum);
-    printf("%s\n", serial0Data.BUFFER);
+    printf("%s\n", serial0Data.BUFFER_TX);
   }
 
   /*
@@ -1775,7 +1776,7 @@ void outputSentences(void) {
   */
   if (systemData.output_config_matrix_enabled == true) {
     // for (int Mi=0; i_output_config_matrix < MAX_MATRIX_SWITCHES; Mi++) { // uncomment to dump all sentences at once
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$XMATRIX,");
       serial0_buffer_append(String(String(i_output_config_matrix)+",").c_str());
       for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
@@ -1806,10 +1807,10 @@ void outputSentences(void) {
       // serial0_buffer_append(String(String(matrixData.switch_intention[0][i_output_config_matrix])+",").c_str());
       // serial0_buffer_append(String(String(matrixData.computer_intention[0][i_output_config_matrix])+",").c_str());
       // serial0_buffer_append(String(String(matrixData.output_value[0][i_output_config_matrix])+",").c_str());
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
       i_output_config_matrix++;
       if (i_output_config_matrix>=MAX_MATRIX_SWITCHES) {i_output_config_matrix=0;}
     // }
@@ -1819,7 +1820,7 @@ void outputSentences(void) {
   */
   if (systemData.output_config_mapping_enabled == true) {
     for (int Mi=0; Mi < MAX_MAP_SLOTS; Mi++) {
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$XMAPP,");
       serial0_buffer_append(String(String(Mi)+",").c_str());
       for (int Fi=0; Fi < MAX_MAPPING_PARAMETERS; Fi++) {
@@ -1828,26 +1829,26 @@ void outputSentences(void) {
       serial0_buffer_append(String(String(mappingData.map_mode[0][Mi])+",").c_str());
       serial0_buffer_append(String(String(mappingData.mapped_value[0][Mi])+",").c_str());
 
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
     }
   }
 
   if (systemData.interval_breach_mplex_0_output) {
     systemData.interval_breach_mplex_0_output=false;
     if (systemData.output_admplex0_enabled == true) {
-      memset(serial0Data.BUFFER, 0, sizeof(serial0Data.BUFFER));
+      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$MPLEX0,");
       for (int i = 0; i < MAX_AD_MUX_CHANNELS; i++) {
         serial0_buffer_append(String(ad_mux_0.data[i]).c_str());
         serial0_buffer_append(",");
       }
-      createChecksumSerial0(serial0Data.BUFFER);
+      createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER);
+      printf("%s\n", serial0Data.BUFFER_TX);
     }
   }
 }

@@ -2,6 +2,8 @@
     INS Library. Written by Benjamin Jack Cullen.
 
     Estimate location using gyro data and or dead reckoning.
+
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include "./ins.h"
@@ -9,16 +11,23 @@
 #include "satio.h"
 
 /**
- * @struct InsData
+ * Default INS configuration and state.
+ *
+ * Rule 10.3: every member here is initialized with a literal of its own
+ * essential type, so floating members take double literals (e.g. 1.0
+ * rather than 1) and the mode/flag members take the named integer
+ * constants declared for INS_MODE and INS_INITIALIZATION_FLAG.
  */
 struct InsData insData = {
+
   .INS_ENABLED = true,
-  .INS_REQ_GPS_PRECISION = 0.5,
-  .INS_REQ_MIN_SPEED = 0.1,
-  .INS_REQ_HEADING_RANGE_DIFF=1,
-  .INS_USE_GYRO_HEADING = true,
-  .INS_FORCED_ON_FLAG = false,
-  .INS_MODE = INS_MODE_DYNAMIC,
+  .INS_REQ_GPS_PRECISION = DEFAULT_INS_REQ_GPS_PRECISION,
+  .INS_REQ_MIN_SPEED = DEFAULT_INS_REQ_MIN_SPEED,
+  .INS_REQ_HEADING_RANGE_DIFF = DEFAULT_INS_REQ_HEADING_RANGE_DIFF,
+  .INS_USE_GYRO_HEADING = DEFAULT_INS_USE_GYRO_HEADING,
+  .INS_FORCED_ON_FLAG = DEFAULT_INS_FORCED_ON_FLAG,
+  .INS_MODE = DEFAULT_INS_MODE,
+
   .char_ins_mode = {"INS OFF", "INS DYNAMIC", "INS FORCED ON"},
   .INS_INITIALIZATION_FLAG = INS_INITIALIZATION_FLAG_0,
   .ins_latitude = 0.0,
@@ -33,10 +42,9 @@ struct InsData insData = {
  * other, accounting for wraparound at the 0/360 boundary (e.g. 1 and 359
  * are 2 degrees apart, not 358).
  *
- * Rule 10.x: fmod()/fabs() (not fmodf()/fabsf()) and double literals are
- * used throughout, matching this function's double parameters; mixing in
- * the float-precision forms here would silently narrow and re-widen every
- * value, losing precision for no reason.
+ * Rule 10.4: angle1, angle2 and range are double, and every literal and
+ * function call in this body (fmod, fabs, 360.0, 180.0) is also double,
+ * so all arithmetic stays within one essential type throughout.
  * Rule 15.6: braces are used on every if/while body, including the
  * single-statement angle normalization below.
  */
@@ -173,6 +181,13 @@ void set_ins(double gps_latitude,
       }
     }
   }
+  // -------------------------------------------------------------------------------
+  // Rule 15.7: terminates the if/else-if chain above. setINSMode() restricts
+  // INS_MODE to the three values handled above before it ever reaches here,
+  // so this path leaves all INS state unchanged.
+  // -------------------------------------------------------------------------------
+  else {
+  }
 }
 
 /**
@@ -185,9 +200,9 @@ void set_ins(double gps_latitude,
  * @return true if insData was updated with a new estimate, false if the
  *         INS was not ready and nothing changed.
  *
- * Rule 8.9: temp_lat/temp_lon are declared here at block scope rather than
- * at file scope, since they are scratch values used only within this
- * function.
+ * Rule 8.9: temp_lat and temp_lon are declared at block scope, inside the
+ * if-statement that uses them, since both hold scratch values needed only
+ * for this single position estimate.
  * Rule 15.5: single point of exit via a result variable.
  * Rule 15.6: braces are used on every if/while body, including the
  * single-statement angle/latitude normalization loops below.
