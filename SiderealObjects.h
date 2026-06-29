@@ -19,6 +19,18 @@ Distributed as-is; no warranty is given.
 
 ******************************************************************************/
 
+/******************************************************************************
+ * Modified by Benjain Jack Cullen:
+ *  Constellation names
+ *  Object Types
+ *  Legacy Object Types
+ *  Star Types
+ *  More Star Names
+ *  More Distances
+ *  All new data can be accessed by index, for efficiency, to return any available
+ *  above data, for an identified object, along with original object names.
+******************************************************************************/
+
 // ensure this library description is only included once
 #ifndef __SiderealObjects_h
 #define __SiderealObjects_h

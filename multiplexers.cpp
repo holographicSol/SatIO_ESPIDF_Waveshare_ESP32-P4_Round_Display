@@ -110,6 +110,13 @@ void setADMultiplexerChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel) 
 }
 
 /**
+ * Puts multiplexer in read mode so that we can read values from it.
+ */
+void setReadModeADMultiplexer(AnalogDigitalMultiplexer &mux_id) {
+  pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], INPUT);
+}
+
+/**
  * Selects channel, then reads its analog value into mux_id.data[channel]
  * (raw ADC counts by default; customize as required).
  *
@@ -120,7 +127,6 @@ void setADMultiplexerChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel) 
 void readADMultiplexerAnalogChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel) {
   if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
     setADMultiplexerChannel(mux_id, channel);
-    pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], INPUT);
     mux_id.data[channel] = analogRead(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG]);
   }
 }
@@ -159,6 +165,13 @@ void readAllADMultiplexerDigitalChannels(AnalogDigitalMultiplexer &mux_id) {
   for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i++) {
     readADMultiplexerDigitalChannel(mux_id, i);
   }
+}
+
+/**
+ * Puts multiplexer in write mode so that we can write values out of it.
+ */
+void setWriteModeADMultiplexer(AnalogDigitalMultiplexer &mux_id) {
+  pinMode(mux_id.pins[INDEX_ANALOG_DIGITAL_MULTIPLEXER_SIG], OUTPUT);
 }
 
 /**

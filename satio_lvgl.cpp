@@ -753,6 +753,7 @@ void system_tray_grid_menu_1_event_cb(lv_event_t * e)
         uint32_t btn_index = 0;
         uint32_t child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
         for(uint32_t i = 0; i < child_cnt; i++) {
+            vTaskDelay(pdMS_TO_TICKS(1));
             if(lv_obj_get_child(system_tray.grid_menu_1, i) == btn) {
                 btn_index = i;
                 break;
@@ -793,6 +794,7 @@ void matrix_overview_grid_1_event_cb(lv_event_t * e)
         uint32_t btn_index = 0;
         uint32_t child_cnt = lv_obj_get_child_cnt(matrix_overview_grid_1);
         for(uint32_t i = 0; i < child_cnt; i++) {
+            vTaskDelay(pdMS_TO_TICKS(1));
             if(lv_obj_get_child(matrix_overview_grid_1, i) == btn) {
                 btn_index = i;
                 break;
@@ -1956,6 +1958,7 @@ system_tray_t create_system_tray(
     // Grid Menu 1 Configuration
     uint32_t grid_child_cnt = lv_obj_get_child_cnt(tray.grid_menu_1);
     for(uint32_t i = 0; i < grid_child_cnt; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         lv_obj_t * btn = lv_obj_get_child(tray.grid_menu_1, i);
         // Add callback
         lv_obj_add_event_cb(btn, system_tray_grid_menu_1_event_cb, LV_EVENT_CLICKED, NULL);
@@ -14008,6 +14011,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_switch_index_select_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < 45; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         snprintf(dd_switch_index_select_name, sizeof(dd_switch_index_select_name), "%d", i);
         lv_dropdown_add_option(result.dd_switch_index_select, dd_switch_index_select_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14049,6 +14053,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_function_index_select_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_SWITCH_FUNCTIONS; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         snprintf(dd_function_index_select_name, sizeof(dd_function_index_select_name), "%d", i);
         lv_dropdown_add_option(result.dd_function_index_select, dd_function_index_select_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14113,6 +14118,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_function_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         snprintf(dd_function_name, sizeof(dd_function_name), "%s", matrixData.matrix_function_names[i]);
         lv_dropdown_add_option(result.dd_function_name, dd_function_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14200,6 +14206,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_x_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         snprintf(dd_x_name, sizeof(dd_x_name), "%s", matrixData.matrix_function_names[i]);
         lv_dropdown_add_option(result.dd_x, dd_x_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14310,6 +14317,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_y_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         snprintf(dd_y_name, sizeof(dd_y_name), "%s", matrixData.matrix_function_names[i]);
         lv_dropdown_add_option(result.dd_y, dd_y_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14420,6 +14428,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_z_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         snprintf(dd_z_name, sizeof(dd_z_name), "%s", matrixData.matrix_function_names[i]);
         lv_dropdown_add_option(result.dd_z, dd_z_name, LV_DROPDOWN_POS_LAST);
     }
@@ -15197,6 +15206,7 @@ mapping_config_container_t create_mapping_config_container(
     );
     char dd_slot_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MAP_SLOTS; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         snprintf(dd_slot_name, sizeof(dd_slot_name), "%s", String(i).c_str()); // todo: make human map mode name array in mapping.cpp
         lv_dropdown_add_option(result.dd_slot, dd_slot_name, LV_DROPDOWN_POS_LAST);
     }
@@ -15259,6 +15269,7 @@ mapping_config_container_t create_mapping_config_container(
     );
     char dd_c0_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MAPPABLE_VALUES; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         snprintf(dd_c0_name, sizeof(dd_c0_name), "%s", mappingData.char_map_value[i]);
         lv_dropdown_add_option(result.dd_c0, dd_c0_name, LV_DROPDOWN_POS_LAST);
     }
@@ -15911,6 +15922,7 @@ uap_t create_uap(
     
     // Draw degree marks
     for (int degree = 0; degree < 360; degree += 5) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         // Convert degree to radians (0° is at top, increases clockwise)
         float angle_rad = (degree - 90) * M_PI / 180.0f;  // -90 to start from top
         
@@ -16173,6 +16185,7 @@ uap_t create_uap(
     // Only populate the tape text buffer on first run
     if (pitch_tape_text[0] == '\0') {
         for (int rep = 0; rep < 3; rep++) {
+            vTaskDelay(pdMS_TO_TICKS(1));
             for (int pitch = 90; pitch >= -90; pitch--) {
                 char tmp[16];
                 snprintf(tmp, sizeof(tmp), "%+03d\n\n", pitch);
@@ -16337,6 +16350,7 @@ uap_t create_uap(
     // Only populate the tape text buffer on first run
     if (gh_tape_text[0] == '\0') {
         for (int rep = 0; rep < 3; rep++) {
+            vTaskDelay(pdMS_TO_TICKS(1));
             for (int i = 0; i < 360; i++) {
                 char tmp[8];
                 snprintf(tmp, sizeof(tmp), "%03d  ", i);
@@ -16812,6 +16826,7 @@ void display_matrix_screen()
     // Plug in general event callback handler
     uint32_t grid_menu_x_count = lv_obj_get_child_cnt(matrix_overview_grid_1);
     for(uint32_t i = 0; i < grid_menu_x_count; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
         lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
         lv_obj_add_event_cb(btn, matrix_overview_grid_1_event_cb, LV_EVENT_CLICKED, NULL);
     }
@@ -17617,6 +17632,7 @@ void update_display()
 
             uint32_t grid_child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
             for(uint32_t i = 0; i < grid_child_cnt; i++) {
+                vTaskDelay(pdMS_TO_TICKS(1));
                 lv_obj_t * btn = lv_obj_get_child(system_tray.grid_menu_1, i);
                 lv_obj_set_style_outline_color(btn, rainbow_contrast_outline_hue, LV_PART_MAIN);
                 // Get label
@@ -17667,6 +17683,7 @@ void update_display()
 
                 uint32_t grid_child_cnt = lv_obj_get_child_cnt(matrix_overview_grid_1);
                 for(uint32_t i = 0; i < grid_child_cnt; i++) {
+                    vTaskDelay(pdMS_TO_TICKS(1));
                     lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
 
 

@@ -93,6 +93,7 @@ void setADMultiplexerChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel);
  * @param channel Specify analog/digital multiplexer channel
  * @return None
  */
+void setReadModeADMultiplexer(AnalogDigitalMultiplexer &mux_id);
 void readADMultiplexerAnalogChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel);
 void readADMultiplexerDigitalChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel);
 void readAllADMultiplexerAnalogChannels(AnalogDigitalMultiplexer &mux_id);
@@ -105,6 +106,7 @@ void readAllADMultiplexerDigitalChannels(AnalogDigitalMultiplexer &mux_id);
  * @param data Data to be written to channel
  * @return None
  */
+void setWriteModeADMultiplexer(AnalogDigitalMultiplexer &mux_id);
 void writeADMultiplexerAnalogChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel, int data);
 void writeADMultiplexerDigitalChannel(AnalogDigitalMultiplexer &mux_id, uint8_t channel, int data);
 

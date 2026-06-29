@@ -482,6 +482,7 @@ static void taskMultiplexers(void *pvParameters) {
     // ------------------------------------------------
     // Read multiplexer channels (customize as required).
     // ------------------------------------------------
+    setReadModeADMultiplexer(ad_mux_0);
     for (uint8_t i_chan = 0; i_chan < MAX_AD_MUX_CHANNELS; i_chan++) {
       readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
       vTaskDelay(1);
