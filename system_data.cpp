@@ -61,7 +61,6 @@ struct systemStruct systemData = {
   .output_matrix_enabled = false,
   .output_input_portcontroller = false,
   .output_config_matrix_enabled = false,
-  .output_config_mapping_enabled = false,
   .output_admplex0_enabled = false,
   .output_gyro_0_enabled = false,
   .output_sun_enabled = false,

@@ -19,7 +19,7 @@
     argparser_has_flag(&parser, "flagname")
     etc.
 
-    Intended to be MISRA C complient.
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef ARG_PARSER_H

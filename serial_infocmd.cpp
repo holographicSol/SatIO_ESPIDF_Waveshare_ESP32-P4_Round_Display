@@ -673,87 +673,43 @@ void setMatrixPort(int switch_idx, signed int port_n) {
 
 void setMatrixFunction(int switch_idx, int func_idx, int func_n) {
   printf("func_n %d\n", func_n);
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 &&
-      func_idx<MAX_MATRIX_SWITCH_FUNCTIONS &&
-      func_n>=0 &&
-      func_n<MAX_MATRIX_FUNCTION_NAMES) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS &&
+      func_n>=0 && func_n<MAX_MATRIX_FUNCTION_NAMES) {
     matrixData.matrix_function[0][switch_idx][func_idx]=func_n;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
   printf("matrix_function %d\n", (int)matrixData.matrix_function[0][switch_idx][func_idx]);
 }
 
-void setMatrixFunctionXComparitorMode(int switch_idx, int func_idx, int comparitor_mode) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
-      func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS)
-  {
-    if (comparitor_mode>=0 && comparitor_mode<MAX_MATRIX_FUNCTION_XYZ_MODES) {
-      matrixData.matrix_function_mode_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_X]=comparitor_mode;
-      matrixData.matrix_switch_write_required[0][switch_idx]=true;
-    }
-  }
-}
-
-void setMatrixFunctionYComparitorMode(int switch_idx, int func_idx, int comparitor_mode) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
-      func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS)
-  {
-    if (comparitor_mode>=0 && comparitor_mode<MAX_MATRIX_FUNCTION_XYZ_MODES) {
-      matrixData.matrix_function_mode_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_Y]=comparitor_mode;
-      matrixData.matrix_switch_write_required[0][switch_idx]=true;
-    }
-  }
-}
-
-void setMatrixFunctionZComparitorMode(int switch_idx, int func_idx, int comparitor_mode) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
-      func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS)
-  {
-    if (comparitor_mode>=0 && comparitor_mode<MAX_MATRIX_FUNCTION_XYZ_MODES) {
-      matrixData.matrix_function_mode_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_Z]=comparitor_mode;
-      matrixData.matrix_switch_write_required[0][switch_idx]=true;
-    }
-  }
-}
-
-void setMatrixX(int switch_idx, int func_idx, double func_x) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
-      func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS &&
-      func_x>=-DBL_MAX &&
-      func_x<DBL_MAX) {
-    matrixData.matrix_function_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_X]=func_x;
+/* X/Y/Z comparitor-mode setters only ever differed by which xyz axis index
+   they wrote; collapsed into one axis-parameterized function. */
+void setMatrixFunctionComparitorMode(int switch_idx, int func_idx, int axis, int comparitor_mode) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS &&
+      comparitor_mode>=0 && comparitor_mode<MAX_MATRIX_FUNCTION_XYZ_MODES) {
+    matrixData.matrix_function_mode_xyz[0][switch_idx][func_idx][axis]=comparitor_mode;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
 }
 
-void setMatrixY(int switch_idx, int func_idx, double func_y) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 &&
-      func_idx<MAX_MATRIX_SWITCH_FUNCTIONS && func_y>=-DBL_MAX &&
-      func_y<DBL_MAX) {
-    matrixData.matrix_function_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_Y]=func_y;
-    matrixData.matrix_switch_write_required[0][switch_idx]=true;
-  }
-}
-
-void setMatrixZ(int switch_idx, int func_idx, double func_z) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 &&
-      func_idx<MAX_MATRIX_SWITCH_FUNCTIONS && func_z>=-DBL_MAX && func_z<DBL_MAX) {
-    matrixData.matrix_function_xyz[0][switch_idx][func_idx][INDEX_MATRIX_FUNTION_Z]=func_z;
+/* setMatrixX/Y/Z only ever differed by which xyz axis index they wrote;
+   collapsed into one axis-parameterized function. */
+void setMatrixXYZ(int switch_idx, int func_idx, int axis, double value) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS &&
+      value>=-DBL_MAX && value<DBL_MAX) {
+    matrixData.matrix_function_xyz[0][switch_idx][func_idx][axis]=value;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
 }
 
 void setMatrixInverted(int switch_idx, int func_idx, int func_i) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 &&
-      func_idx<MAX_MATRIX_SWITCH_FUNCTIONS && func_i>=0 && func_i<=1) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS && func_i>=0 && func_i<=1) {
     matrixData.matrix_switch_inverted_logic[0][switch_idx][func_idx]=func_i;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
 }
 
 void setMatrixOperator(int switch_idx, int func_idx, int func_o) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 &&
-      func_idx<MAX_MATRIX_SWITCH_FUNCTIONS && func_o>=0 && func_o<MAX_MATRIX_OPERATORS) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && func_idx>=0 && func_idx<MAX_MATRIX_SWITCH_FUNCTIONS && func_o>=0 && func_o<MAX_MATRIX_OPERATORS) {
     matrixData.matrix_switch_operator_index[0][switch_idx][func_idx]=func_o;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
@@ -762,8 +718,7 @@ void setMatrixOperator(int switch_idx, int func_idx, int func_o) {
 void setMatrixModulation(int switch_idx, uint32_t pwm0, uint32_t pwm1) {
   /* pwm0/pwm1 are unsigned: only the upper bound is a real check (Rule 14.3,
      an unsigned value is never < 0). */
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
-      pwm0<UINT32_MAX && pwm1<UINT32_MAX) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && pwm0<UINT32_MAX && pwm1<UINT32_MAX) {
     matrixData.output_pwm[0][switch_idx][0]=pwm0;
     matrixData.output_pwm[0][switch_idx][1]=pwm1;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
@@ -778,10 +733,24 @@ void setFlux(int switch_idx, uint32_t flux) {
 }
 
 void setOutputMode(int switch_idx, int output_mode) {
-  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES &&
-      output_mode>=0 && output_mode<MAX_MATRIX_OUTPUT_MODES) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && output_mode>=0 && output_mode<MAX_MATRIX_OUTPUT_MODES) {
     matrixData.output_mode[0][switch_idx]=output_mode;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
+  }
+}
+
+/* Retries assigning value to field until it reads back as set, up to
+   MAX_MATRIX_OVERRIDE_TIME attempts; used by setOverrideOutputValue() to
+   force a write against any concurrent writer of the same field. */
+template <typename T>
+static void forceAssign(T &field, T value, const char *what) {
+  long i_retry = 0;
+  field = value;
+  while (field != value) {
+    field = value;
+    i_retry += 1;
+    if (i_retry == MAX_MATRIX_OVERRIDE_TIME) {printf("WARNING! Could not override %s!\n", what); break;}
+    delayMicroseconds(1);
   }
 }
 
@@ -794,27 +763,8 @@ void setOverrideOutputValue(int switch_idx, uint32_t override_value) {
   else if (switch_idx >= MAX_MATRIX_SWITCHES) {printf("[setOverrideOutputValue] switch_idx must be < %d.\n", MAX_MATRIX_SWITCHES);}
   else if (override_value > LONG_MAX) {printf("[setOverrideOutputValue] override_value must be <= %ld.\n", LONG_MAX);}
   else {
-    long i_retry;
-
-    matrixData.computer_assist[0][switch_idx]=false;
-    matrixData.override_output_value[0][switch_idx]=override_value;
-
-    i_retry=0;
-    while (matrixData.computer_assist[0][switch_idx]!=false) {
-      matrixData.computer_assist[0][switch_idx]=false;
-      i_retry+=1;
-      if (i_retry==MAX_MATRIX_OVERRIDE_TIME)
-        {printf("WARNING! Could not override computer_assist!\n"); break;}
-      delayMicroseconds(1);
-    }
-    i_retry=0;
-    while (matrixData.override_output_value[0][switch_idx]!=override_value) {
-      matrixData.override_output_value[0][switch_idx]=override_value;
-      i_retry+=1;
-      if (i_retry==MAX_MATRIX_OVERRIDE_TIME)
-        {printf("WARNING! Could not override override_output_value!\n"); break;}
-      delayMicroseconds(1);
-    }
+    forceAssign(matrixData.computer_assist[0][switch_idx], false, "computer_assist");
+    forceAssign(matrixData.override_output_value[0][switch_idx], (int32_t)override_value, "override_output_value");
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
     printf("[setOverrideOutputValue] computer_assist %d\n", matrixData.computer_assist[0][switch_idx]);
     printf("[setOverrideOutputValue] override_output_value %ld\n", matrixData.override_output_value[0][switch_idx]);
@@ -1145,11 +1095,6 @@ void CmdProcess(void) {
           if (enable == true) {systemData.output_stat=enable; systemData.output_stat_v=verbose; systemData.output_stat_vv=verbose_1;}
           else {systemData.output_stat=false; systemData.output_stat_v=false; systemData.output_stat_vv=false;}
         }
-        // if (argparser_has_flag(&parser, "partition-table")) {print_partition_table();}
-
-        // if (argparser_has_flag(&parser, "memory-ram")) {print_ram_info();}
-
-        // if (argparser_has_flag(&parser, "sdcard")) {PrintSDCardInformation();}
 
         if (strcmp(serial0Data.BUFFER_RX, "stat --system")==0) {PrintSystemData();}
 
@@ -1193,28 +1138,17 @@ void CmdProcess(void) {
         /* not "help"/"h"/"stat": fall through to the systemData.serial_command dispatch below */
       }
 
-      // else if (strcmp(pos[0], "ls")==0) {
-      //   const char* path_str = argparser_get_path(&parser, "/");
-      //   Serial.println("[cmd] Path: " + String(path_str));
-      //   int maxlevels=0;
-      //   if (argparser_has_flag(&parser, "R")) {maxlevels=-1;}
-      //   else {maxlevels = argparser_get_int8(&parser, "maxlevels", 1);}
-      //   memset(sdmmcArgData.buffer, 0, sizeof(sdmmcArgData.buffer));
-      //   strcpy(sdmmcArgData.buffer, path_str);
-      //   sdmmcArgData.maxlevels=maxlevels;
-      //   sdcardFlagData.no_delay_flag=true;
-      //   sdcardFlagData.list_dir_flag=true;
-      // }
-
       /*
-         Temporarily disabled for user so that system has exclusive r/w access for associated values.
+         StarNav via CLI
+         Temporarily disabled for user so that system has exclusive r/w access for associated values
+         that StarNav already uses.
          Possible update: create seperate functions & values for identification and tracking of objects
          so that this command line feature can be safely re-enabled.
       */
       // else if (strcmp(pos[0], "starnav")==0) {star_nav();}
 
       if (systemData.serial_command == true) {
-
+        // system
         if (strcmp(pos[0], "system")==0) {
           if (argparser_has_flag(&parser, "save") == true) {sdcardFlagData.save_system=true;}
           else if (argparser_has_flag(&parser, "load") == true) {sdcardFlagData.load_system=true;}
@@ -1226,6 +1160,7 @@ void CmdProcess(void) {
             /* no recognized "system" flag: nothing to do */
           }
         }
+        // mapping
         else if (strcmp(pos[0], "map")==0) {
           if (argparser_has_flag(&parser, "new") == true) {set_all_mapping_default();}
           else if (argparser_has_flag(&parser, "save") == true) {sdcardFlagData.save_mapping=true;}
@@ -1244,6 +1179,7 @@ void CmdProcess(void) {
             }
           }
         }
+        // matrix
         else if (strcmp(pos[0], "matrix")==0) {
           if (argparser_has_flag(&parser, "startup-enable") == true) {matrixData.load_matrix_on_startup=true;}
           else if (argparser_has_flag(&parser, "startup-disable") == true) {matrixData.load_matrix_on_startup=false;}
@@ -1252,57 +1188,33 @@ void CmdProcess(void) {
           else if (argparser_has_flag(&parser, "load") == true) {loadMatrix(argparser_get_int8(&parser, "load", -1));}
           else if (argparser_has_flag(&parser, "delete") == true) {deleteMatrix(argparser_get_int8(&parser, "delete", -1));}
           else {
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "p") == true) {
-            setMatrixPort(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "p", -1));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "fn") == true) {
-            setMatrixFunction(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", -1), argparser_get_int8(&parser, "fn", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "fx") == true) {
-            setMatrixX(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", 0), argparser_get_double(&parser, "fx", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "fy") == true) {
-            setMatrixY(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", 0), argparser_get_double(&parser, "fy", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "fz") == true) {
-            setMatrixZ(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", 0), argparser_get_double(&parser, "fz", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "fi") == true) {
-            setMatrixInverted(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", 0), argparser_get_int8(&parser, "fi", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "fo") == true) {
-            setMatrixOperator(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", 0), argparser_get_int8(&parser, "fo", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "pwm0") == true && argparser_has_flag(&parser, "pwm1") == true) {
-            setMatrixModulation(argparser_get_int8(&parser, "s", -1), argparser_get_uint32(&parser, "pwm0", 0), argparser_get_uint32(&parser, "pwm1", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "flux") == true) {
-            setFlux(argparser_get_int8(&parser, "s", -1), argparser_get_uint32(&parser, "flux", -1));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "oride") == true) {
-            setOverrideOutputValue(argparser_get_int8(&parser, "s", -1), argparser_get_int32(&parser, "oride", -1));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "computer-assist") == true) {
-            setComputerAssist(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "computer-assist", -1));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "omode") == true) {
-            setOutputMode(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "omode", -1));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "map-slot") == true) {
-            setMapSlot(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "map-slot", -1));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "xyz-mode-x") == true) {
-            setMatrixFunctionXComparitorMode(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", -1), argparser_get_int8(&parser, "xyz-mode-x", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "xyz-mode-y") == true) {
-            setMatrixFunctionYComparitorMode(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", -1), argparser_get_int8(&parser, "xyz-mode-y", 0));
-          }
-          if (argparser_has_flag(&parser, "s") == true && argparser_has_flag(&parser, "f") == true && argparser_has_flag(&parser, "xyz-mode-z") == true) {
-            setMatrixFunctionZComparitorMode(argparser_get_int8(&parser, "s", -1), argparser_get_int8(&parser, "f", -1), argparser_get_int8(&parser, "xyz-mode-z", 0));
-          }
+          /* "s" gates every setter below; "f" additionally gates the per-function ones.
+             Both are fetched once here since each flag's presence was already checked
+             individually per setter below, every defaulted value below is only ever used
+             when its flag is confirmed present. */
+          bool has_s = argparser_has_flag(&parser, "s") == true;
+          bool has_f = argparser_has_flag(&parser, "f") == true;
+          int s = argparser_get_int8(&parser, "s", -1);
+          int f = argparser_get_int8(&parser, "f", 0);
+          if (has_s && argparser_has_flag(&parser, "p") == true) {setMatrixPort(s, argparser_get_int8(&parser, "p", -1));}
+          if (has_s && has_f && argparser_has_flag(&parser, "fn") == true) {setMatrixFunction(s, f, argparser_get_int8(&parser, "fn", 0));}
+          if (has_s && has_f && argparser_has_flag(&parser, "fx") == true) {setMatrixXYZ(s, f, INDEX_MATRIX_FUNTION_X, argparser_get_double(&parser, "fx", 0));}
+          if (has_s && has_f && argparser_has_flag(&parser, "fy") == true) {setMatrixXYZ(s, f, INDEX_MATRIX_FUNTION_Y, argparser_get_double(&parser, "fy", 0));}
+          if (has_s && has_f && argparser_has_flag(&parser, "fz") == true) {setMatrixXYZ(s, f, INDEX_MATRIX_FUNTION_Z, argparser_get_double(&parser, "fz", 0));}
+          if (has_s && has_f && argparser_has_flag(&parser, "fi") == true) {setMatrixInverted(s, f, argparser_get_int8(&parser, "fi", 0));}
+          if (has_s && has_f && argparser_has_flag(&parser, "fo") == true) {setMatrixOperator(s, f, argparser_get_int8(&parser, "fo", 0));}
+          if (has_s && argparser_has_flag(&parser, "pwm0") == true && argparser_has_flag(&parser, "pwm1") == true) {setMatrixModulation(s, argparser_get_uint32(&parser, "pwm0", 0), argparser_get_uint32(&parser, "pwm1", 0));}
+          if (has_s && argparser_has_flag(&parser, "flux") == true) {setFlux(s, argparser_get_uint32(&parser, "flux", -1));}
+          if (has_s && argparser_has_flag(&parser, "oride") == true) {setOverrideOutputValue(s, argparser_get_int32(&parser, "oride", -1));}
+          if (has_s && argparser_has_flag(&parser, "computer-assist") == true) {setComputerAssist(s, argparser_get_int8(&parser, "computer-assist", -1));}
+          if (has_s && argparser_has_flag(&parser, "omode") == true) {setOutputMode(s, argparser_get_int8(&parser, "omode", -1));}
+          if (has_s && argparser_has_flag(&parser, "map-slot") == true) {setMapSlot(s, argparser_get_int8(&parser, "map-slot", -1));}
+          if (has_s && has_f && argparser_has_flag(&parser, "xyz-mode-x") == true) {setMatrixFunctionComparitorMode(s, f, INDEX_MATRIX_FUNTION_X, argparser_get_int8(&parser, "xyz-mode-x", 0));}
+          if (has_s && has_f && argparser_has_flag(&parser, "xyz-mode-y") == true) {setMatrixFunctionComparitorMode(s, f, INDEX_MATRIX_FUNTION_Y, argparser_get_int8(&parser, "xyz-mode-y", 0));}
+          if (has_s && has_f && argparser_has_flag(&parser, "xyz-mode-z") == true) {setMatrixFunctionComparitorMode(s, f, INDEX_MATRIX_FUNTION_Z, argparser_get_int8(&parser, "xyz-mode-z", 0));}
         }
       }
-
+      // ins
       else if (strcmp(pos[0], "ins")==0) {
         if (argparser_has_flag(&parser, "m") == true) {setINSMode(argparser_get_int8(&parser, "m", -1));}
         if (argparser_has_flag(&parser, "gyro") == true) {setINSUseGyroHeading(argparser_get_int8(&parser, "gyro", -1));}
@@ -1311,7 +1223,7 @@ void CmdProcess(void) {
         if (argparser_has_flag(&parser, "r") == true) {setINSHeadingRangeDiff(argparser_get_double(&parser, "r", -1));}
         if (argparser_has_flag(&parser, "reset-forced") == true) {insData.INS_FORCED_ON_FLAG=false;}
       }
-
+      // satio
       else if (strcmp(pos[0], "satio")==0) {
         // time
         if (argparser_has_flag(&parser, "utc-offset") == true) {setUTCSecondOffset(argparser_get_int64(&parser, "utc-offset", 0));}
@@ -1330,21 +1242,18 @@ void CmdProcess(void) {
         }
         if (argparser_has_flag(&parser, "coord-value-mode-gps") == true) {satioData.location_value_mode=SATIO_MODE_GPS;}
         if (argparser_has_flag(&parser, "coord-value-mode-user") == true) {satioData.location_value_mode=SATIO_MODE_USER;}
-
         // speed
         if (argparser_has_flag(&parser, "set-speed") == true) {
           setSpeed(argparser_get_double(&parser, "set-speed", NAN));
         }
         if (argparser_has_flag(&parser, "speed-value-mode-gps") == true) {satioData.speed_value_mode=SATIO_MODE_GPS;}
         if (argparser_has_flag(&parser, "speed-value-mode-user") == true) {satioData.speed_value_mode=SATIO_MODE_USER;}
-
         // altitude
         if (argparser_has_flag(&parser, "set-altitude") == true) {
           setAltitude(argparser_get_double(&parser, "set-altitude", NAN));
         }
         if (argparser_has_flag(&parser, "altitude-value-mode-gps") == true) {satioData.altitude_value_mode=SATIO_MODE_GPS;}
         if (argparser_has_flag(&parser, "altitude-value-mode-user") == true) {satioData.altitude_value_mode=SATIO_MODE_USER;}
-
         // ground heading
         if (argparser_has_flag(&parser, "set-ground-heading") == true) {
           setGroundHeading(argparser_get_double(&parser, "set-ground-heading", NAN));
@@ -1352,7 +1261,7 @@ void CmdProcess(void) {
         if (argparser_has_flag(&parser, "ground-heading-value-mode-gps") == true) {satioData.ground_heading_value_mode=SATIO_MODE_GPS;}
         if (argparser_has_flag(&parser, "ground-heading-value-mode-user") == true) {satioData.ground_heading_value_mode=SATIO_MODE_USER;}
       }
-
+      // gyro
       else if (strcmp(pos[0], "gyro")==0) {
         if (argparser_has_flag(&parser, "calacc") == true) {WT901CalAcc();}
         if (argparser_has_flag(&parser, "calmag-start") == true) {WT901CalMagStart();}
@@ -1573,69 +1482,32 @@ void outputSentences(void) {
     if (systemData.output_satio_enabled == true) {
       memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$SATIO,");
-
-      serial0_buffer_append(String(satioData.padded_rtc_time_HHMMSS).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(satioData.padded_rtc_date_DDMMYYYY).c_str());
-      serial0_buffer_append(",");
-
-      serial0_buffer_append(String(satioData.padded_rtc_sync_time_HHMMSS).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(satioData.padded_rtc_sync_date_DDMMYYYY).c_str());
-      serial0_buffer_append(",");
-
-      serial0_buffer_append(String(satioData.padded_local_time_HHMMSS).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(satioData.padded_local_date_DDMMYYYY).c_str());
-      serial0_buffer_append(",");
-
-      serial0_buffer_append(String(satioData.padded_LMST_time_HHMMSS).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(satioData.padded_LMST_date_DDMMYYYY).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(siderealExtraData.local_sidereal_time).c_str());
-      serial0_buffer_append(",");
-
-      serial0_buffer_append(String(siderealExtraData.local_zenith_ra_dec.padded_ra_str).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(siderealExtraData.local_zenith_ra_dec.padded_dec_str).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(siderealExtraData.gyro_0_ra_dec.padded_ra_str).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(siderealExtraData.gyro_0_ra_dec.padded_dec_str).c_str());
-      serial0_buffer_append(",");
-
-      serial0_buffer_append(String(systemData.uptime_seconds).c_str());
-      serial0_buffer_append(",");
-
-      serial0_buffer_append(String(insData.ins_latitude, 7).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.ins_longitude, 7).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.ins_altitude).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.ins_heading).c_str());
-
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.INS_INITIALIZATION_FLAG).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.INS_MODE).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.INS_FORCED_ON_FLAG).c_str());
-      serial0_buffer_append(",");
-
-      serial0_buffer_append(String(insData.INS_REQ_GPS_PRECISION).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.INS_REQ_HEADING_RANGE_DIFF).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.INS_REQ_MIN_SPEED).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(insData.INS_USE_GYRO_HEADING).c_str());
-      serial0_buffer_append(",");
-
-      serial0_buffer_append(String(insData.INS_ENABLED).c_str());
-      serial0_buffer_append(",");
-
+      serial0_buffer_append((String(systemData.uptime_seconds) + ",").c_str());
+      serial0_buffer_append((String(satioData.padded_rtc_time_HHMMSS) + ",").c_str());
+      serial0_buffer_append((String(satioData.padded_rtc_date_DDMMYYYY) + ",").c_str());
+      serial0_buffer_append((String(satioData.padded_rtc_sync_time_HHMMSS) + ",").c_str());
+      serial0_buffer_append((String(satioData.padded_rtc_sync_date_DDMMYYYY) + ",").c_str());
+      serial0_buffer_append((String(satioData.padded_local_time_HHMMSS) + ",").c_str());
+      serial0_buffer_append((String(satioData.padded_local_date_DDMMYYYY) + ",").c_str());
+      serial0_buffer_append((String(satioData.padded_LMST_time_HHMMSS) + ",").c_str());
+      serial0_buffer_append((String(satioData.padded_LMST_date_DDMMYYYY) + ",").c_str());
+      serial0_buffer_append((String(siderealExtraData.local_sidereal_time) + ",").c_str());
+      serial0_buffer_append((String(siderealExtraData.local_zenith_ra_dec.padded_ra_str) + ",").c_str());
+      serial0_buffer_append((String(siderealExtraData.local_zenith_ra_dec.padded_dec_str) + ",").c_str());
+      serial0_buffer_append((String(siderealExtraData.gyro_0_ra_dec.padded_ra_str) + ",").c_str());
+      serial0_buffer_append((String(siderealExtraData.gyro_0_ra_dec.padded_dec_str) + ",").c_str());
+      serial0_buffer_append((String(insData.ins_latitude, 7) + ",").c_str());
+      serial0_buffer_append((String(insData.ins_longitude, 7) + ",").c_str());
+      serial0_buffer_append((String(insData.ins_altitude) + ",").c_str());
+      serial0_buffer_append((String(insData.ins_heading) + ",").c_str());
+      serial0_buffer_append((String(insData.INS_INITIALIZATION_FLAG) + ",").c_str());
+      serial0_buffer_append((String(insData.INS_MODE) + ",").c_str());
+      serial0_buffer_append((String(insData.INS_FORCED_ON_FLAG) + ",").c_str());
+      serial0_buffer_append((String(insData.INS_REQ_GPS_PRECISION) + ",").c_str());
+      serial0_buffer_append((String(insData.INS_REQ_HEADING_RANGE_DIFF) + ",").c_str());
+      serial0_buffer_append((String(insData.INS_REQ_MIN_SPEED) + ",").c_str());
+      serial0_buffer_append((String(insData.INS_USE_GYRO_HEADING) + ",").c_str());
+      serial0_buffer_append((String(insData.INS_ENABLED) + ",").c_str());
       createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
@@ -1647,30 +1519,18 @@ void outputSentences(void) {
     if (systemData.output_gyro_0_enabled == true) {
       memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$GYRO0,");
-      serial0_buffer_append(String(gyroData.gyro_0_acc_x).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_acc_y).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_acc_z).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_ang_x).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_ang_y).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_ang_z).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_gyr_x).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_gyr_y).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_gyr_z).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_mag_x).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_mag_y).c_str());
-      serial0_buffer_append(",");
-      serial0_buffer_append(String(gyroData.gyro_0_mag_z).c_str());
-      serial0_buffer_append(",");
+      serial0_buffer_append((String(gyroData.gyro_0_acc_x) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_acc_y) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_acc_z) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_ang_x) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_ang_y) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_ang_z) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_gyr_x) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_gyr_y) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_gyr_z) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_mag_x) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_mag_y) + ",").c_str());
+      serial0_buffer_append((String(gyroData.gyro_0_mag_z) + ",").c_str());
       createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");
       serial0_buffer_append(serial0Data.checksum);
@@ -1842,8 +1702,7 @@ void outputSentences(void) {
       memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
       serial0_buffer_append("$MPLEX0,");
       for (int i = 0; i < MAX_AD_MUX_CHANNELS; i++) {
-        serial0_buffer_append(String(ad_mux_0.data[i]).c_str());
-        serial0_buffer_append(",");
+        serial0_buffer_append((String(ad_mux_0.data[i]) + ",").c_str());
       }
       createChecksumSerial0(serial0Data.BUFFER_TX);
       serial0_buffer_append("*");

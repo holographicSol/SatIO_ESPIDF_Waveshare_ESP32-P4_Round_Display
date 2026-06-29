@@ -19,7 +19,7 @@
     argparser_has_flag(&parser, "flagname")
     etc.
 
-    Intended to be MISRA C complient.
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include "arg_parser.h"
@@ -27,7 +27,6 @@
 #include <string.h> // strlen, strcmp, strncmp, strncpy, strchr, memcpy, memset
 #include <ctype.h>  // isalnum
 #include <errno.h>  // errno
-#include "strval.h"
 
 /* Rule 21.13: manual ASCII comparison instead of isspace(), which is
    locale-dependent and only well-defined for unsigned char or EOF. */
@@ -173,6 +172,62 @@ static void clear_buffer(char* buf, size_t max_len)
     }
 }
 
+/* Shared by long/short flag parsing: the next token is a candidate value
+   only if it exists and does not itself look like a flag. */
+static const char* peek_value_token(int32_t idx, int32_t token_count,
+                                     const char* const* tokens)
+{
+    const char* result = NULL;
+
+    if ((idx + 1) < token_count)
+    {
+        const char* const next = tokens[idx + 1]; /* array indexing (Rule 18.4) */
+
+        if ((next != NULL) && (is_long_flag(next) == false) &&
+            (is_short_flag(next) == false))
+        {
+            result = next;
+        }
+    }
+
+    return result;
+}
+
+/* Registers a flag name and clears its value slot, ready for
+   store_optional_value() below. */
+static void start_flag_entry(ArgParser* p, const char* name_start, size_t key_len)
+{
+    (void)strncpy(p->flags[p->flag_count], name_start, key_len); /* (void): Rule 17.7 */
+    p->flags[p->flag_count][key_len] = '\0';
+    clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
+}
+
+/* Stores value_start (if any) into the value slot start_flag_entry()
+   cleared. A NULL value_start is not an error. Returns false only when a
+   candidate value is present but too long, leaving the slot cleared. */
+static bool store_optional_value(ArgParser* p, const char* value_start)
+{
+    bool ok = true;
+
+    if (value_start != NULL)
+    {
+        size_t val_len = strlen(value_start);
+
+        if (val_len < (size_t)MAX_VALUE_LEN)
+        {
+            (void)strncpy(p->values[p->flag_count], value_start, val_len); /* (void): Rule 17.7 */
+            p->values[p->flag_count][val_len] = '\0';
+        }
+        else
+        {
+            clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
+            ok = false; /* value too long: reject value, caller keeps the flag */
+        }
+    }
+
+    return ok; /* Rule 15.5: single point of exit */
+}
+
 /*
  * Splits token_count tokens into flags, flag values, and positionals,
  * storing the result in *p. Recognises "--flag", "--flag=value",
@@ -260,53 +315,23 @@ static bool parse_args(ArgParser* p, int32_t token_count, const char* const * to
                         }
                         else
                         {
-                            const char* value_start = NULL;
-                            size_t val_len = 0U;
+                            /* array indexing, not pointer arithmetic (Rule 18.4) */
+                            const char* value_start = (eq != NULL) ? &eq[1] :
+                                peek_value_token(idx, token_count, tokens);
 
-                            (void)strncpy(p->flags[p->flag_count], &arg[name_offset], key_len); /* (void): Rule 17.7 */
-                            p->flags[p->flag_count][key_len] = '\0';
+                            start_flag_entry(p, &arg[name_offset], key_len);
 
-                            clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
-
-                            if (eq != NULL)
+                            if (store_optional_value(p, value_start) == false)
                             {
-                                value_start = &eq[1]; /* array indexing, not pointer arithmetic (Rule 18.4) */
-                                val_len = strlen(value_start);
+                                rejected = true; /* value too long: reject value, keep the flag */
                             }
-                            else if ((idx + 1) < token_count)
+                            else if ((eq == NULL) && (value_start != NULL))
                             {
-                                const char* const next = tokens[idx + 1];
-
-                                if ((next != NULL) &&
-                                    (is_long_flag(next) == false) &&
-                                    (is_short_flag(next) == false))
-                                {
-                                    value_start = next; /* next token is this flag's value */
-                                    val_len = strlen(next);
-                                }
+                                idx = idx + 1; /* consumed the next token as this flag's value */
                             }
                             else
                             {
-                                /* no value available for this flag */
-                            }
-
-                            if (value_start != NULL)
-                            {
-                                if (val_len < (size_t)MAX_VALUE_LEN)
-                                {
-                                    (void)strncpy(p->values[p->flag_count], value_start, val_len);
-                                    p->values[p->flag_count][val_len] = '\0';
-
-                                    if (eq == NULL)
-                                    {
-                                        idx = idx + 1; /* consumed the next token as this flag's value */
-                                    }
-                                }
-                                else
-                                {
-                                    clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
-                                    rejected = true; /* value too long: reject value, keep the flag */
-                                }
+                                /* value came from "--flag=value", or there is no value */
                             }
 
                             p->flag_count++;
@@ -347,35 +372,18 @@ static bool parse_args(ArgParser* p, int32_t token_count, const char* const * to
                         else
                         {
                             size_t key_len = arg_len - 1U;
+                            const char* value_start = peek_value_token(idx, token_count, tokens);
 
-                            (void)strncpy(p->flags[p->flag_count], &arg[1], key_len);
-                            p->flags[p->flag_count][key_len] = '\0';
+                            start_flag_entry(p, &arg[1], key_len);
 
-                            clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
-
-                            if ((idx + 1) < token_count)
+                            if (value_start != NULL)
                             {
-                                const char* const next = tokens[idx + 1];
-
-                                if ((next != NULL) &&
-                                    (is_long_flag(next) == false) &&
-                                    (is_short_flag(next) == false))
+                                if (store_optional_value(p, value_start) == false)
                                 {
-                                    size_t val_len = strlen(next);
-
-                                    if (val_len < (size_t)MAX_VALUE_LEN)
-                                    {
-                                        (void)strncpy(p->values[p->flag_count], next, val_len);
-                                        p->values[p->flag_count][val_len] = '\0';
-                                    }
-                                    else
-                                    {
-                                        clear_buffer(p->values[p->flag_count], (size_t)MAX_VALUE_LEN);
-                                        rejected = true; /* value too long: reject value, keep the flag */
-                                    }
-
-                                    idx = idx + 1; /* consumed the value token */
+                                    rejected = true; /* value too long: reject value, keep the flag */
                                 }
+
+                                idx = idx + 1; /* consumed the value token */
                             }
 
                             p->flag_count++;
@@ -662,212 +670,116 @@ const char* argparser_get_string(const ArgParser* p, const char* flag,
     return result;
 }
 
-int argparser_get_int(const ArgParser* p, const char* flag, int default_val)
+/* Shared by every argparser_get_<sized-int>() below: look up the flag's
+   string value and parse+range-check it in one step. */
+static bool get_signed_value(const ArgParser* p, const char* flag,
+                              int64_t min_val, int64_t max_val, int64_t* out_value)
 {
-    int result = default_val;
+    bool ok = false;
     const char* val_str = argparser_get_string(p, flag, NULL);
 
     if (val_str != NULL)
     {
-        if (str_is_int8(val_str) == true)
-        {
-            int64_t parsed = 0;
-
-            /* int is bound explicitly against INT32 range rather than
-               assumed to be a particular width. */
-            if (parse_signed_in_range(val_str, INT32_MIN, INT32_MAX, &parsed)
-                == true)
-            {
-                result = (int)parsed; /* safe: range already proven above */
-            }
-        }
+        ok = parse_signed_in_range(val_str, min_val, max_val, out_value);
     }
 
-    return result;
+    return ok; /* Rule 15.5: single point of exit */
+}
+
+static bool get_unsigned_value(const ArgParser* p, const char* flag,
+                                uint64_t max_val, uint64_t* out_value)
+{
+    bool ok = false;
+    const char* val_str = argparser_get_string(p, flag, NULL);
+
+    if (val_str != NULL)
+    {
+        ok = parse_unsigned_in_range(val_str, max_val, out_value);
+    }
+
+    return ok; /* Rule 15.5: single point of exit */
+}
+
+int argparser_get_int(const ArgParser* p, const char* flag, int default_val)
+{
+    int64_t parsed = 0;
+
+    return (get_signed_value(p, flag, INT32_MIN, INT32_MAX, &parsed) == true) ?
+           (int)parsed : default_val; /* narrowing only after the range check above (Rule 10.3) */
 }
 
 int8_t argparser_get_int8(const ArgParser* p, const char* flag,
                            int8_t default_val)
 {
-    int8_t result = default_val;
-    const char* val_str = argparser_get_string(p, flag, NULL);
+    int64_t parsed = 0;
 
-    if (val_str != NULL)
-    {
-        if (str_is_int8(val_str) == true)
-        {
-            int64_t parsed = 0;
-
-            if (parse_signed_in_range(val_str, INT8_MIN, INT8_MAX, &parsed)
-                == true)
-            {
-                result = (int8_t)parsed; /* narrowing only after the explicit range check above (Rule 10.3) */
-            }
-        }
-    }
-
-    return result;
+    return (get_signed_value(p, flag, INT8_MIN, INT8_MAX, &parsed) == true) ?
+           (int8_t)parsed : default_val;
 }
 
 int16_t argparser_get_int16(const ArgParser* p, const char* flag,
                              int16_t default_val)
 {
-    int16_t result = default_val;
-    const char* val_str = argparser_get_string(p, flag, NULL);
+    int64_t parsed = 0;
 
-    if (val_str != NULL)
-    {
-        if (str_is_int16(val_str) == true)
-        {
-            int64_t parsed = 0;
-
-            if (parse_signed_in_range(val_str, INT16_MIN, INT16_MAX, &parsed)
-                == true)
-            {
-                result = (int16_t)parsed;
-            }
-        }
-    }
-
-    return result;
+    return (get_signed_value(p, flag, INT16_MIN, INT16_MAX, &parsed) == true) ?
+           (int16_t)parsed : default_val;
 }
 
 int32_t argparser_get_int32(const ArgParser* p, const char* flag,
                              int32_t default_val)
 {
-    int32_t result = default_val;
-    const char* val_str = argparser_get_string(p, flag, NULL);
+    int64_t parsed = 0;
 
-    if (val_str != NULL)
-    {
-        if (str_is_int32(val_str) == true)
-        {
-            int64_t parsed = 0;
-
-            if (parse_signed_in_range(val_str, INT32_MIN, INT32_MAX, &parsed)
-                == true)
-            {
-                result = (int32_t)parsed;
-            }
-        }
-    }
-
-    return result;
+    return (get_signed_value(p, flag, INT32_MIN, INT32_MAX, &parsed) == true) ?
+           (int32_t)parsed : default_val;
 }
 
 int64_t argparser_get_int64(const ArgParser* p, const char* flag,
                              int64_t default_val)
 {
-    int64_t result = default_val;
-    const char* val_str = argparser_get_string(p, flag, NULL);
+    int64_t parsed = 0;
 
-    if (val_str != NULL)
-    {
-        if (str_is_int64(val_str) == true)
-        {
-            int64_t parsed = 0;
-
-            /* parsed is already int64_t; assigned directly with no
-               intermediate narrowing cast (Rule 10.3). */
-            if (parse_signed_in_range(val_str, INT64_MIN, INT64_MAX, &parsed)
-                == true)
-            {
-                result = parsed;
-            }
-        }
-    }
-
-    return result;
+    /* parsed is already int64_t; no intermediate narrowing cast (Rule 10.3). */
+    return (get_signed_value(p, flag, INT64_MIN, INT64_MAX, &parsed) == true) ?
+           parsed : default_val;
 }
 
 uint8_t argparser_get_uint8(const ArgParser* p, const char* flag,
                              uint8_t default_val)
 {
-    uint8_t result = default_val;
-    const char* val_str = argparser_get_string(p, flag, NULL);
+    uint64_t parsed = 0U;
 
-    if (val_str != NULL)
-    {
-        if (str_is_uint8(val_str) == true)
-        {
-            uint64_t parsed = 0U;
-
-            if (parse_unsigned_in_range(val_str, UINT8_MAX, &parsed) == true)
-            {
-                result = (uint8_t)parsed;
-            }
-        }
-    }
-
-    return result;
+    return (get_unsigned_value(p, flag, UINT8_MAX, &parsed) == true) ?
+           (uint8_t)parsed : default_val;
 }
 
 uint16_t argparser_get_uint16(const ArgParser* p, const char* flag,
                                uint16_t default_val)
 {
-    uint16_t result = default_val;
-    const char* val_str = argparser_get_string(p, flag, NULL);
+    uint64_t parsed = 0U;
 
-    if (val_str != NULL)
-    {
-        if (str_is_uint16(val_str) == true)
-        {
-            uint64_t parsed = 0U;
-
-            if (parse_unsigned_in_range(val_str, UINT16_MAX, &parsed) == true)
-            {
-                result = (uint16_t)parsed;
-            }
-        }
-    }
-
-    return result;
+    return (get_unsigned_value(p, flag, UINT16_MAX, &parsed) == true) ?
+           (uint16_t)parsed : default_val;
 }
 
 uint32_t argparser_get_uint32(const ArgParser* p, const char* flag,
                                uint32_t default_val)
 {
-    uint32_t result = default_val;
-    const char* val_str = argparser_get_string(p, flag, NULL);
+    uint64_t parsed = 0U;
 
-    if (val_str != NULL)
-    {
-        if (str_is_uint32(val_str) == true)
-        {
-            uint64_t parsed = 0U;
-
-            if (parse_unsigned_in_range(val_str, UINT32_MAX, &parsed) == true)
-            {
-                result = (uint32_t)parsed;
-            }
-        }
-    }
-
-    return result;
+    return (get_unsigned_value(p, flag, UINT32_MAX, &parsed) == true) ?
+           (uint32_t)parsed : default_val;
 }
 
 uint64_t argparser_get_uint64(const ArgParser* p, const char* flag,
                                uint64_t default_val)
 {
-    uint64_t result = default_val;
-    const char* val_str = argparser_get_string(p, flag, NULL);
+    uint64_t parsed = 0U;
 
-    if (val_str != NULL)
-    {
-        if (str_is_uint64(val_str) == true)
-        {
-            uint64_t parsed = 0U;
-
-            /* parsed is already uint64_t; assigned directly with no
-               intermediate narrowing cast (Rule 10.3). */
-            if (parse_unsigned_in_range(val_str, UINT64_MAX, &parsed) == true)
-            {
-                result = parsed;
-            }
-        }
-    }
-
-    return result;
+    /* parsed is already uint64_t; no intermediate narrowing cast (Rule 10.3). */
+    return (get_unsigned_value(p, flag, UINT64_MAX, &parsed) == true) ?
+           parsed : default_val;
 }
 
 float argparser_get_float(const ArgParser* p, const char* flag,

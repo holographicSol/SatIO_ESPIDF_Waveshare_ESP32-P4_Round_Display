@@ -3,7 +3,7 @@
 
     A small library for converting hex to digits.
 
-    Intended to be MISRA C++ complient.
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef HEX_TO_DIG_H
