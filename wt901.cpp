@@ -72,6 +72,7 @@ static void wt901_uart_init(int32_t baud_rate)
             .parity = UART_PARITY_DISABLE,
             .stop_bits = UART_STOP_BITS_1,
             .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+            .rx_flow_ctrl_thresh = 0,
             .source_clk = UART_SCLK_DEFAULT,
         };
 
@@ -155,7 +156,7 @@ bool readGyro(void)
             gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_MAG_UPDATE);
             gyroData.gyro_0_mag_x = sReg[HX];
             gyroData.gyro_0_mag_y = sReg[HY];
-            gyroData.gyro_0_mag_z = sReg[HZ];
+            gyroData.gyro_0_mag_z = sReg[REG_HZ];
             updated = true;
         }
     }
@@ -195,7 +196,7 @@ void Gyro0DataUpdata(uint32_t uiReg, uint32_t uiRegNum)
             case GZ:
                 gyroData.gyro_0_s_cDataUpdate |= GYRO_0_UPDATE;
                 break;
-            case HZ:
+            case REG_HZ:
                 gyroData.gyro_0_s_cDataUpdate |= GYRO_0_MAG_UPDATE;
                 break;
             case Yaw:

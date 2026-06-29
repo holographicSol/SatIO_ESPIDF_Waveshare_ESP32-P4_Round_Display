@@ -112,7 +112,7 @@ boolean SiderealObjects::selectStarTable(int n) {
   return true;
 }
 
-char* SiderealObjects::printStarName(int n) {
+const char* SiderealObjects::printStarName(int n) {
   int index;
   for (index=0; index < SObjectsstars_names_num; index++) {
 	if (starName[index].starNum == n) {
@@ -122,7 +122,7 @@ char* SiderealObjects::printStarName(int n) {
   return "";
 }
 
-char* SiderealObjects::printStarType(int n) {
+const char* SiderealObjects::printStarType(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectsstars_names_num; index_0++) {
@@ -149,7 +149,7 @@ double SiderealObjects::printStarDist(int n) {
   return NAN;
 }
 
-char* SiderealObjects::printMessierName(int n) {
+const char* SiderealObjects::printMessierName(int n) {
   int index;
   for (index=0; index < SObjectsmessier_names_num; index++) {
 	if (messierData[index].num == n) {
@@ -159,7 +159,7 @@ char* SiderealObjects::printMessierName(int n) {
   return "";
 }
 
-char* SiderealObjects::printMessierType(int n) {
+const char* SiderealObjects::printMessierType(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectsmessier_names_num; index_0++) {
@@ -174,7 +174,7 @@ char* SiderealObjects::printMessierType(int n) {
   return "";
 }
 
-char* SiderealObjects::printMessierCon(int n) {
+const char* SiderealObjects::printMessierCon(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectsmessier_names_num; index_0++) {
@@ -199,7 +199,7 @@ double SiderealObjects::printMessierDist(int n) {
   return NAN;
 }
 
-char* SiderealObjects::printCaldwellName(int n) {
+const char* SiderealObjects::printCaldwellName(int n) {
   int index;
   for (index=0; index < SObjectcaldwell_names_num; index++) {
 	if (caldwellData[index].num == n) {
@@ -209,7 +209,7 @@ char* SiderealObjects::printCaldwellName(int n) {
   return "";
 }
 
-char* SiderealObjects::printCaldwellType(int n) {
+const char* SiderealObjects::printCaldwellType(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectcaldwell_names_num; index_0++) {
@@ -224,7 +224,7 @@ char* SiderealObjects::printCaldwellType(int n) {
   return "";
 }
 
-char* SiderealObjects::printCaldwellCon(int n) {
+const char* SiderealObjects::printCaldwellCon(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectcaldwell_names_num; index_0++) {
@@ -249,7 +249,7 @@ double SiderealObjects::printCaldwellDist(int n) {
   return NAN;
 }
 
-char* SiderealObjects::printNGCType(int n) {
+const char* SiderealObjects::printNGCType(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectsNGC_names_num; index_0++) {
@@ -264,7 +264,7 @@ char* SiderealObjects::printNGCType(int n) {
   return "";
 }
 
-char* SiderealObjects::printNGCCon(int n) {
+const char* SiderealObjects::printNGCCon(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectsNGC_names_num; index_0++) {
@@ -279,7 +279,7 @@ char* SiderealObjects::printNGCCon(int n) {
   return "";
 }
 
-char* SiderealObjects::printICType(int n) {
+const char* SiderealObjects::printICType(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectsIC_names_num; index_0++) {
@@ -294,7 +294,7 @@ char* SiderealObjects::printICType(int n) {
   return "";
 }
 
-char* SiderealObjects::printICCon(int n) {
+const char* SiderealObjects::printICCon(int n) {
   int index_0;
   int index_1;
   for (index_0=0; index_0 < SObjectsIC_names_num; index_0++) {
@@ -309,7 +309,7 @@ char* SiderealObjects::printICCon(int n) {
   return "";
 }
 
-char* SiderealObjects::printHerschel400Type(int n) {
+const char* SiderealObjects::printHerschel400Type(int n) {
   int index_0;
   int index_1;
   int ngc_id;
@@ -332,7 +332,7 @@ char* SiderealObjects::printHerschel400Type(int n) {
   return "";
 }
 
-char* SiderealObjects::printHerschel400Con(int n) {
+const char* SiderealObjects::printHerschel400Con(int n) {
   int index_0;
   int index_1;
   int ngc_id;

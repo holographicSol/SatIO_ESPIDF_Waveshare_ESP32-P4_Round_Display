@@ -27,6 +27,7 @@ idf_component_register(
         serial_infocmd.cpp
         sidereal_helper.cpp
         SiderealObjects.cpp
+        SiderealObjectsTables.cpp
         SiderealPlanets.cpp
         strval.cpp
         system_data.cpp

@@ -104,16 +104,16 @@ typedef struct {
 // Size scale: Sun=8, Jupiter=6, Saturn/Earth=5, Venus/Mars/Uranus/Neptune=4, Mercury=3, Luna=2
 // Scaled by SIZE_UNIT to fit within orbit spacing
 // ============================================================================
-static Planet sun     = {0,              SIZE_UNIT * 8 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Largest
-static Planet mercury = {ORBIT_STEP * 1, SIZE_UNIT * 3 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Smallest planet
-static Planet venus   = {ORBIT_STEP * 2, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
-static Planet earth   = {ORBIT_STEP * 3, SIZE_UNIT * 5 / 2,  0, 0, {0}, NULL, NULL, NULL};
-static Planet luna    = {ORBIT_STEP / 2, SIZE_UNIT * 3 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Relative to Earth
-static Planet mars    = {ORBIT_STEP * 4, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
-static Planet jupiter = {ORBIT_STEP * 5, SIZE_UNIT * 6 / 2,  0, 0, {0}, NULL, NULL, NULL};  // Largest planet
-static Planet saturn  = {ORBIT_STEP * 6, SIZE_UNIT * 5 / 2,  0, 0, {0}, NULL, NULL, NULL};
-static Planet uranus  = {ORBIT_STEP * 7, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
-static Planet neptune = {ORBIT_STEP * 8, SIZE_UNIT * 4 / 2,  0, 0, {0}, NULL, NULL, NULL};
+static Planet sun     = {0,              SIZE_UNIT * 8 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};  // Largest
+static Planet mercury = {ORBIT_STEP * 1, SIZE_UNIT * 3 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};  // Smallest planet
+static Planet venus   = {ORBIT_STEP * 2, SIZE_UNIT * 4 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};
+static Planet earth   = {ORBIT_STEP * 3, SIZE_UNIT * 5 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};
+static Planet luna    = {ORBIT_STEP / 2, SIZE_UNIT * 3 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};  // Relative to Earth
+static Planet mars    = {ORBIT_STEP * 4, SIZE_UNIT * 4 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};
+static Planet jupiter = {ORBIT_STEP * 5, SIZE_UNIT * 6 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};  // Largest planet
+static Planet saturn  = {ORBIT_STEP * 6, SIZE_UNIT * 5 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};
+static Planet uranus  = {ORBIT_STEP * 7, SIZE_UNIT * 4 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};
+static Planet neptune = {ORBIT_STEP * 8, SIZE_UNIT * 4 / 2,  0, 0, {0,0,0}, NULL, NULL, NULL};
 
 typedef struct {
     int32_t size_w;
@@ -136,38 +136,9 @@ static lv_point_precise_t zodiac_points[12][2];
 static lv_obj_t * sun_altitude_line = NULL;
 lv_point_precise_t sun_altitude_points[2];
 
-static lv_obj_t * mercury_altitude_line = NULL;
-lv_point_precise_t mercury_altitude_points[2];
-
-static lv_obj_t * venus_altitude_line = NULL;
-lv_point_precise_t venus_altitude_points[2];
-
-static lv_obj_t * earth_altitude_line = NULL;
-lv_point_precise_t earth_altitude_points[2];
-
-static lv_obj_t * luna_altitude_line = NULL;
-lv_point_precise_t luna_altitude_points[2];
-
-static lv_obj_t * mars_altitude_line = NULL;
-lv_point_precise_t mars_altitude_points[2];
-
-static lv_obj_t * jupiter_altitude_line = NULL;
-lv_point_precise_t jupiter_altitude_points[2];
-
-static lv_obj_t * saturn_altitude_line = NULL;
-lv_point_precise_t saturn_altitude_points[2];
-
-static lv_obj_t * uranus_altitude_line = NULL;
-lv_point_precise_t uranus_altitude_points[2];
-
-static lv_obj_t * neptune_altitude_line = NULL;
-lv_point_precise_t neptune_altitude_points[2];
-
 static lv_obj_t * luna_shadow = NULL;  // Shadow overlay for luna phase
 static lv_obj_t * saturn_ring = NULL;  // Saturn's rings
 static lv_point_precise_t saturn_ring_points[2];
-
-
 
 // Target data display objects
 static lv_obj_t * target_data_box = NULL;       // Box to display target object data
@@ -176,20 +147,6 @@ static lv_point_precise_t connector_points[2];
 
 // Data box margin
 #define DATA_BOX_MARGIN 10
-
-// ============================================================================
-// PERIMETER CLOCK
-// ============================================================================
-
-#define CLOCK_DOT_COUNT 60
-
-static lv_obj_t * clock_dots[CLOCK_DOT_COUNT] = {NULL};
-static int32_t    clock_ring_radius = 0;
-static int32_t    clock_dot_r_small = 0;
-static int32_t    clock_dot_r_large = 0;
-
-#define COLOR_CLOCK_INACTIVE lv_color_make(  0,  48,   0)
-#define COLOR_CLOCK_ACTIVE   lv_color_make(  0, 255,   0)
 
 // ============================================================================
 // TO RADIANS
@@ -336,7 +293,6 @@ static lv_obj_t * create_target_box(lv_obj_t * parent, int size) {
     lv_obj_remove_flag(box, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(box, LV_OBJ_FLAG_CLICKABLE);
     printf("DEBUG: create_target_box created box=%p\n", (void*)box);
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     return box;
 }
 
@@ -486,297 +442,6 @@ static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle,
     
     lv_line_set_points(altitude_line, altitude_points, 2);
 }
-
-// ============================================================================
-// PERIMETER CLOCK
-// ============================================================================
-/*
-    This can be quite resource intensive, recommend disabling this feature if
-    suffering substantial performance decrease.
-*/
-
-// #define USE_PERMETER_CLOCK
-// #define USE_BOTH_PERIMETER_CLOCKS
-
-#ifdef USE_PERMETER_CLOCK
-#define PCLK_HR_COUNT      12   // 12-hour clock
-#define PCLK_TICK_COUNT    60   // tick marks in area 3
-
-// Numeral / tick colours
-#define COLOR_PCLK_NUM lv_color_make( 0,  255,  0)
-
-// Group 0: cool, more separated
-#define COLOR_PCLK_H_BG_0         lv_color_make(0, 0, 48)
-#define COLOR_PCLK_H_INDICATOR_0  lv_color_make(0, 72, 255)
-
-#define COLOR_PCLK_M_BG_0         lv_color_make(0, 32, 56)
-#define COLOR_PCLK_M_INDICATOR_0  lv_color_make(0, 200, 255)
-
-#define COLOR_PCLK_S_BG_0         lv_color_make(0, 56, 40)
-#define COLOR_PCLK_S_INDICATOR_0  lv_color_make(0, 255, 180)
-
-#ifdef USE_BOTH_PERIMETER_CLOCKS
-// Group 1: warm, more separated
-#define COLOR_PCLK_H_BG_1         lv_color_make(72, 0, 0)
-#define COLOR_PCLK_H_INDICATOR_1  lv_color_make(255, 48, 0)
-
-#define COLOR_PCLK_M_BG_1         lv_color_make(64, 16, 0)
-#define COLOR_PCLK_M_INDICATOR_1  lv_color_make(255, 140, 0)
-
-#define COLOR_PCLK_S_BG_1         lv_color_make(56, 0, 16)
-#define COLOR_PCLK_S_INDICATOR_1  lv_color_make(255, 0, 72)
-#endif
-
-// ============================================================================
-// STATE — geometry cache
-// ============================================================================
-static int32_t pclk_outer_r = 0;
-static int32_t pclk_gap     = 0;
-static int32_t pclk_cx      = 0;
-static int32_t pclk_cy      = 0;
-
-// ============================================================================
-// STATE — LVGL objects
-// ============================================================================
-// Tick lines and labels (area 3)
-static lv_obj_t *           pclk_tick_lines[PCLK_TICK_COUNT] = {};
-static lv_point_precise_t   pclk_tick_pts[PCLK_TICK_COUNT][2] = {};
-static lv_obj_t *           pclk_numeral_labels[PCLK_HR_COUNT] = {};
-
-// Time arcs (one per ring; LV_PART_MAIN = dim track, LV_PART_INDICATOR = active fill)
-static lv_obj_t * pclk_arc_sec_0 = NULL;   // Area 0 — seconds
-static lv_obj_t * pclk_arc_min_0 = NULL;   // Area 1 — minutes
-static lv_obj_t * pclk_arc_hr_0  = NULL;   // Area 5 — hours (smooth)
-
-#ifdef USE_BOTH_PERIMETER_CLOCKS
-static lv_obj_t * pclk_arc_sec_1 = NULL;   // Area 0 — seconds
-static lv_obj_t * pclk_arc_min_1 = NULL;   // Area 1 — minutes
-static lv_obj_t * pclk_arc_hr_1  = NULL;   // Area 5 — hours (smooth)
-#endif
-
-// ============================================================================
-// GEOMETRY HELPERS
-// ============================================================================
-static inline int32_t pclk_ring_r(int i) { return pclk_outer_r - i * pclk_gap; }
-static inline int32_t pclk_area_r(int n) { return (pclk_ring_r(n) + pclk_ring_r(n + 1)) / 2; }
-
-// ============================================================================
-// INTERNAL: create one time arc centred in the container
-// track_color  — dim background (LV_PART_MAIN)
-// fill_color   — initial active colour (LV_PART_INDICATOR); updated each tick
-// arc_r        — radius of the arc centre-line
-// arc_w        — stroke width (fills the gap between rings minus a 1px margin each side)
-// ============================================================================
-static lv_obj_t * pclk_make_arc(
-    lv_obj_t *   parent,
-    int32_t      arc_r,
-    int32_t      arc_w,
-    lv_color_t   indicator_color,
-    lv_color_t   bg_color)
-{
-    lv_obj_t * arc = lv_arc_create(parent);
-    lv_obj_remove_style_all(arc);
-    lv_obj_set_size(arc, arc_r * 2, arc_r * 2);
-
-    // Background track
-    lv_obj_set_style_arc_color(arc, bg_color,      LV_PART_MAIN);
-    lv_obj_set_style_arc_width(arc, arc_w,         LV_PART_MAIN);
-    lv_obj_set_style_arc_rounded(arc, false,       LV_PART_MAIN);
-
-    // Active indicator
-    lv_obj_set_style_arc_color(arc, indicator_color,   LV_PART_INDICATOR);
-    lv_obj_set_style_arc_width(arc, arc_w,             LV_PART_INDICATOR);
-    lv_obj_set_style_arc_rounded(arc, false,           LV_PART_INDICATOR);
-
-    // Hide knob
-    lv_obj_set_style_arc_opa(arc, LV_OPA_TRANSP,  LV_PART_KNOB);
-
-    lv_arc_set_rotation(arc, 270);           // 12 o'clock = 0
-    lv_arc_set_bg_angles(arc, 0, 360);       // full circle track
-    lv_arc_set_range(arc, 0, 1000);
-    lv_arc_set_value(arc, 0);
-
-    lv_obj_remove_flag(arc, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_align(arc, LV_ALIGN_CENTER, 0, 0);
-    return arc;
-}
-
-// ============================================================================
-// CREATE PERIMETER CLOCK
-// Called once from astro_clock_begin() after geometry variables are set.
-// ============================================================================
-static void create_perimeter_clock(lv_obj_t * parent)
-{
-    pclk_cx = SOLAR_CENTER_X;
-    pclk_cy = SOLAR_CENTER_Y;
-
-    // Outer boundary: just inside the outline edge
-    int32_t outline_half = (OUTLINE_WIDTH < OUTLINE_HEIGHT ? OUTLINE_WIDTH : OUTLINE_HEIGHT) / 2;
-    pclk_outer_r = outline_half - 4;
-
-    // Inner boundary: Neptune orbit + clearance
-    int32_t inner_r = neptune.orbit_radius + SIZE_UNIT + 2;
-
-    // Calculate gaps
-    int32_t band = pclk_outer_r - inner_r;
-    pclk_gap = band / 8;
-    if (pclk_gap < 4) pclk_gap = 4;
-
-    // Arc stroke width = gap minus 2px margin (1px each side)
-    int32_t arc_w = pclk_gap - 8;
-    if (arc_w < 2) arc_w = 2;
-
-    // ------------------------------------------------------------------
-    // AREA — numerals
-    // ------------------------------------------------------------------
-    int32_t r_numerals   = pclk_area_r(3);
-
-    // ------------------------------------------------------------------
-    // TIME ARCS  (created before numerals so numerals render on top)
-    // ------------------------------------------------------------------
-
-    vTaskDelay(1 / portTICK_PERIOD_MS);
-
-    // Area — seconds (outermost data ring)
-    pclk_arc_sec_0 = pclk_make_arc(parent,
-        pclk_area_r(0), arc_w,
-        COLOR_PCLK_S_INDICATOR_0, COLOR_PCLK_S_BG_0);
-
-    vTaskDelay(5 / portTICK_PERIOD_MS);
-
-    // Area — minutes
-    pclk_arc_min_0 = pclk_make_arc(parent,
-        pclk_area_r(1), arc_w,
-        COLOR_PCLK_M_INDICATOR_0, COLOR_PCLK_M_BG_0);
-
-    vTaskDelay(5 / portTICK_PERIOD_MS);
-
-    // Area — hours (smooth, innermost data ring)
-    pclk_arc_hr_0 = pclk_make_arc(parent,
-        pclk_area_r(2), arc_w,
-        COLOR_PCLK_H_INDICATOR_0, COLOR_PCLK_H_BG_0);
-
-    vTaskDelay(5 / portTICK_PERIOD_MS);
-
-    #ifdef USE_BOTH_PERIMETER_CLOCKS
-    // Area — seconds (outermost data ring)
-    pclk_arc_sec_1 = pclk_make_arc(parent,
-        pclk_area_r(4), arc_w,
-        COLOR_PCLK_S_INDICATOR_1, COLOR_PCLK_S_BG_1);
-
-    vTaskDelay(5 / portTICK_PERIOD_MS);
-
-    // Area — minutes
-    pclk_arc_min_1 = pclk_make_arc(parent,
-        pclk_area_r(5), arc_w,
-        COLOR_PCLK_M_INDICATOR_1, COLOR_PCLK_M_BG_1);
-
-    vTaskDelay(5 / portTICK_PERIOD_MS);
-
-    // Area — hours (smooth, innermost data ring)
-    pclk_arc_hr_1 = pclk_make_arc(parent,
-        pclk_area_r(6), arc_w,
-        COLOR_PCLK_H_INDICATOR_1, COLOR_PCLK_H_BG_1);
-
-    vTaskDelay(5 / portTICK_PERIOD_MS);
-    #endif
-
-    // ------------------------------------------------------------------
-    // AREA — numeral labels  (created last → render on top of arcs)
-    // ------------------------------------------------------------------
-    for (int i = 0; i < PCLK_HR_COUNT; i++) {
-        float a  = (float)(i + 1) * (2.0f * M_PI / (float)PCLK_HR_COUNT) - M_PI / 2.0f;
-        int32_t lx = pclk_cx + (int32_t)(cosf(a) * (float)r_numerals);
-        int32_t ly = pclk_cy + (int32_t)(sinf(a) * (float)r_numerals);
-
-        pclk_numeral_labels[i] = lv_label_create(parent);
-        lv_obj_set_style_text_font(pclk_numeral_labels[i],  &lv_font_unscii_8, 0);
-        lv_obj_set_style_text_color(pclk_numeral_labels[i], COLOR_PCLK_NUM, 0);
-        lv_obj_set_style_bg_color(pclk_numeral_labels[i],   lv_color_black(), 0);
-        lv_obj_set_style_bg_opa(pclk_numeral_labels[i],     LV_OPA_COVER, 0);
-        lv_obj_set_style_pad_all(pclk_numeral_labels[i],    1, 0);
-        lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_remove_flag(pclk_numeral_labels[i], LV_OBJ_FLAG_SCROLLABLE);
-
-        char buf[4];
-        snprintf(buf, sizeof(buf), "%d", i + 1);
-        lv_label_set_text(pclk_numeral_labels[i], buf);
-
-        lv_obj_set_size(pclk_numeral_labels[i], LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-        lv_obj_update_layout(pclk_numeral_labels[i]);
-        int32_t w = lv_obj_get_width(pclk_numeral_labels[i]);
-        int32_t h = lv_obj_get_height(pclk_numeral_labels[i]);
-        lv_obj_set_pos(pclk_numeral_labels[i], lx - w / 2, ly - h / 2);
-
-        vTaskDelay(5 / portTICK_PERIOD_MS);
-    }
-}
-
-// ============================================================================
-// UPDATE PERIMETER CLOCK
-// Called every timer tick (~500 ms) from astro_clock_update().
-// Only updates 3 arc values and up to 3 colour properties — very fast.
-// ============================================================================
-static void update_perimeter_clock(void)
-{
-    // rainbow_clock_numerals_hue = lv_color_hsv_to_rgb((current_astroclock_hue + 300) % 360, 100, 100);
-    // for (int i = 0; i < PCLK_HR_COUNT; i++) {
-    //     lv_obj_set_style_text_color(pclk_numeral_labels[i], rainbow_clock_numerals_hue, 0);
-    // }
-
-    if (!pclk_arc_sec_0 || !pclk_arc_min_0 || !pclk_arc_hr_0) return;
-    
-    uint8_t h24 = satioData.local_hour   % 24;
-    uint8_t m   = satioData.local_minute % 60;
-    uint8_t s   = satioData.local_second % 60;
-    bool    pm  = (h24 >= 12);
-    uint8_t h12 = h24 % PCLK_HR_COUNT;   // 0-11
-
-    // ------------------------------------------------------------------
-    // Seconds arc  — 0-59 mapped to 0-1000
-    // ------------------------------------------------------------------
-    lv_arc_set_value(pclk_arc_sec_0, (int32_t)s * 1000 / 60);
-    
-    // ------------------------------------------------------------------
-    // Minutes arc  — 0-59 mapped to 0-1000
-    // ------------------------------------------------------------------
-    lv_arc_set_value(pclk_arc_min_0, (int32_t)m * 1000 / 60);
-    
-    // ------------------------------------------------------------------
-    // Hours arc  — smooth: h12 + fractional minute progress, 0-1000
-    // e.g. 6:30 = 6.5/12 = 541
-    // ------------------------------------------------------------------
-    float hr_frac = ((float)h12 + (float)m / 60.0f) / (float)PCLK_HR_COUNT;
-    lv_arc_set_value(pclk_arc_hr_0, (int32_t)(hr_frac * 1000.0f));
-
-    #ifdef USE_BOTH_PERIMETER_CLOCKS
-    if (!pclk_arc_sec_1 || !pclk_arc_min_1 || !pclk_arc_hr_1) return;
-
-    h24 = satioData.geo_positional_hour   % 24;
-    m   = satioData.geo_positional_minute % 60;
-    s   = satioData.geo_positional_second % 60;
-    pm  = (h24 >= 12);
-    h12 = h24 % PCLK_HR_COUNT;   // 0-11
-
-    // ------------------------------------------------------------------
-    // Seconds arc  — 0-59 mapped to 0-1000
-    // ------------------------------------------------------------------
-    lv_arc_set_value(pclk_arc_sec_1, (int32_t)s * 1000 / 60);
-
-    // ------------------------------------------------------------------
-    // Minutes arc  — 0-59 mapped to 0-1000
-    // ------------------------------------------------------------------
-    lv_arc_set_value(pclk_arc_min_1, (int32_t)m * 1000 / 60);
-
-    // ------------------------------------------------------------------
-    // Hours arc  — smooth: h12 + fractional minute progress, 0-1000
-    // e.g. 6:30 = 6.5/12 = 541
-    // ------------------------------------------------------------------
-    hr_frac = ((float)h12 + (float)m / 60.0f) / (float)PCLK_HR_COUNT;
-    lv_arc_set_value(pclk_arc_hr_1, (int32_t)(hr_frac * 1000.0f));
-    #endif
-}
-#endif
 
 // ============================================================================
 // UPDATE ASTRO CLOCK
@@ -1708,7 +1373,6 @@ void astro_clock_begin(
     uranus.color = lv_color_make(0, 255, 255);
     neptune.color = lv_color_make(255, 0, 255);
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Container
     printf("DEBUG: Creating astro_container\n");
@@ -1738,7 +1402,6 @@ void astro_clock_begin(
     lv_obj_set_style_outline_color(astro_container, COLOR_ZODIAC, 0);
     lv_obj_remove_flag(astro_container, LV_OBJ_FLAG_SCROLLABLE);
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // Meteors Indicator
     meteors_indicator = create_indicator(
@@ -1754,13 +1417,6 @@ void astro_clock_begin(
 
     // Zodiac lines
     create_zodiac(astro_container);
-
-    // Perimeter clock dots
-    #ifdef USE_PERMETER_CLOCK
-    create_perimeter_clock(astro_container);
-    #endif
-
-    vTaskDelay(5 / portTICK_PERIOD_MS);   // ← feed WDT after clock creation
     
     // Orbits (outer to inner)
     printf("DEBUG: Creating neptune.orbit\n");
@@ -1768,56 +1424,48 @@ void astro_clock_begin(
     if (!neptune.orbit) { printf("ERROR: Failed to create neptune.orbit\n"); return;}
     printf("DEBUG: neptune.orbit done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     printf("DEBUG: Creating uranus.orbit\n");
     uranus.orbit = create_orbit(astro_container, uranus.orbit_radius, COLOR_ORBIT_BELOW);
     if (!uranus.orbit) { printf("ERROR: Failed to create uranus.orbit\n"); return;}
     printf("DEBUG: uranus.orbit done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     printf("DEBUG: Creating saturn.orbit\n");
     saturn.orbit = create_orbit(astro_container, saturn.orbit_radius, COLOR_ORBIT_BELOW);
     if (!saturn.orbit) { printf("ERROR: Failed to create saturn.orbit\n"); return;}
     printf("DEBUG: saturn.orbit done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     printf("DEBUG: Creating jupiter.orbit\n");
     jupiter.orbit = create_orbit(astro_container, jupiter.orbit_radius, COLOR_ORBIT_BELOW);
     if (!jupiter.orbit) { printf("ERROR: Failed to create jupiter.orbit\n"); return;}
     printf("DEBUG: jupiter.orbit done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     printf("DEBUG: Creating mars.orbit\n");
     mars.orbit = create_orbit(astro_container, mars.orbit_radius, COLOR_ORBIT_BELOW);
     if (!mars.orbit) { printf("ERROR: Failed to create mars.orbit\n"); return;}
     printf("DEBUG: mars.orbit done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     printf("DEBUG: Creating earth.orbit\n");
     earth.orbit = create_orbit(astro_container, earth.orbit_radius, COLOR_ORBIT_BELOW);
     if (!earth.orbit) { printf("ERROR: Failed to create earth.orbit\n"); return;}
     printf("DEBUG: earth.orbit done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     printf("DEBUG: Creating venus.orbit\n");
     venus.orbit = create_orbit(astro_container, venus.orbit_radius, COLOR_ORBIT_BELOW);
     if (!venus.orbit) { printf("ERROR: Failed to create venus.orbit\n"); return;}
     printf("DEBUG: venus.orbit done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     printf("DEBUG: Creating mercury.orbit\n");
     mercury.orbit = create_orbit(astro_container, mercury.orbit_radius, COLOR_ORBIT_BELOW);
     if (!mercury.orbit) { printf("ERROR: Failed to create mercury.orbit\n"); return;}
     printf("DEBUG: mercury.orbit done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // Sun altitde line (line from Earth to edge showing local altitde relative to sun)
     printf("DEBUG: Creating sun_altitude_line\n");
@@ -1833,14 +1481,12 @@ void astro_clock_begin(
     sun_altitude_points[1].x = 0;
     sun_altitude_points[1].y = 0;
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     int luna_spacing = SIZE_UNIT;  // Gap between Earth surface and Luna orbit
     luna.orbit_radius = earth.radius + luna_spacing + luna.radius;
     luna.orbit = create_orbit(astro_container, luna.orbit_radius, COLOR_ORBIT_LUNA_BELOW);
     lv_obj_add_flag(luna.orbit, LV_OBJ_FLAG_HIDDEN);  // Hide until first update positions it
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Sun
     sun.obj = create_planet(astro_container, sun.radius, sun.color);
@@ -1861,7 +1507,6 @@ void astro_clock_begin(
     mercury.obj = create_planet(astro_container, mercury.radius, mercury.color);
     luna.obj = create_planet(astro_container, luna.radius, luna.color);
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     // Luna shadow arc for phase visualization
     luna_shadow = lv_arc_create(astro_container);
@@ -1876,77 +1521,66 @@ void astro_clock_begin(
     lv_obj_set_style_bg_opa(luna_shadow, LV_OPA_TRANSP, LV_PART_KNOB);
     lv_obj_remove_flag(luna_shadow, LV_OBJ_FLAG_CLICKABLE);
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating sun.target_box\n");
     sun.target_box = create_target_box(astro_container, sun.radius * 2);
     if (!sun.target_box) { printf("ERROR: Failed to create sun.target_box\n"); return;}
     printf("DEBUG: sun.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating mercury.target_box\n");
     mercury.target_box = create_target_box(astro_container, mercury.radius * 2);
     if (!mercury.target_box) { printf("ERROR: Failed to create mercury.target_box\n"); return;}
     printf("DEBUG: mercury.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating venus.target_box\n");
     venus.target_box = create_target_box(astro_container, venus.radius * 2);
     if (!venus.target_box) { printf("ERROR: Failed to create venus.target_box\n"); return;}
     printf("DEBUG: venus.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating earth.target_box\n");
     earth.target_box = create_target_box(astro_container, earth.radius * 2);
     if (!earth.target_box) { printf("ERROR: Failed to create earth.target_box\n"); return;}
     printf("DEBUG: earth.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating luna.target_box\n");
     luna.target_box = create_target_box(astro_container, luna.radius * 2);
     if (!luna.target_box) { printf("ERROR: Failed to create luna.target_box\n"); return;}
     printf("DEBUG: luna.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating mars.target_box\n");
     mars.target_box = create_target_box(astro_container, mars.radius * 2);
     if (!mars.target_box) { printf("ERROR: Failed to create mars.target_box\n"); return;}
     printf("DEBUG: mars.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating jupiter.target_box\n");
     jupiter.target_box = create_target_box(astro_container, jupiter.radius * 2);
     if (!jupiter.target_box) { printf("ERROR: Failed to create jupiter.target_box\n"); return;}
     printf("DEBUG: jupiter.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating saturn.target_box\n");
     saturn.target_box = create_target_box(astro_container, saturn.radius * 2);
     if (!saturn.target_box) { printf("ERROR: Failed to create saturn.target_box\n"); return;}
     printf("DEBUG: saturn.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating uranus.target_box\n");
     uranus.target_box = create_target_box(astro_container, uranus.radius * 2);
     if (!uranus.target_box) { printf("ERROR: Failed to create uranus.target_box\n"); return;}
     printf("DEBUG: uranus.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
     
     printf("DEBUG: Creating neptune.target_box\n");
     neptune.target_box = create_target_box(astro_container, neptune.radius * 2);
     if (!neptune.target_box) { printf("ERROR: Failed to create neptune.target_box\n"); return;}
     printf("DEBUG: neptune.target_box done\n");
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     // -----------------------------------------------------------------
     // Target data box (displays object information when selected)
@@ -2003,49 +1637,11 @@ void astro_clock_begin(
 
 void astro_clock_end() {
 
-    // // Stop timer first
-    // if (astro_timer) {
-    //     lv_timer_pause(astro_timer);
-    //     lv_timer_del(astro_timer);
-    //     astro_timer = NULL;
-    // }
-    
-    // // Delete container (this deletes all children automatically)
-    // if (astro_container && lv_obj_is_valid(astro_container)) {
-    //     lv_obj_del(astro_container);
-    //     astro_container = NULL;
-    // }
-
     if (astro_timer) {
         lv_timer_pause(astro_timer);
         lv_timer_delete(astro_timer);
         astro_timer = NULL;
     }
-    
-    // // Reset all object pointers to prevent dangling references
-    // // Planet objects
-    // sun.obj = NULL; sun.orbit = NULL; sun.target_box = NULL;
-    // mercury.obj = NULL; mercury.orbit = NULL; mercury.target_box = NULL;
-    // venus.obj = NULL; venus.orbit = NULL; venus.target_box = NULL;
-    // earth.obj = NULL; earth.orbit = NULL; earth.target_box = NULL;
-    // luna.obj = NULL; luna.orbit = NULL; luna.target_box = NULL;
-    // mars.obj = NULL; mars.orbit = NULL; mars.target_box = NULL;
-    // jupiter.obj = NULL; jupiter.orbit = NULL; jupiter.target_box = NULL;
-    // saturn.obj = NULL; saturn.orbit = NULL; saturn.target_box = NULL;
-    // uranus.obj = NULL; uranus.orbit = NULL; uranus.target_box = NULL;
-    // neptune.obj = NULL; neptune.orbit = NULL; neptune.target_box = NULL;
-    
-    // // Other global objects
-    // altitde_line = NULL;
-    // luna_shadow = NULL;
-    // saturn_ring = NULL;
-    // target_data_box = NULL;
-    // target_connector_line = NULL;
-    
-    // // Zodiac lines
-    // for (int i = 0; i < 12; i++) {
-    //     zodiac_lines[i] = NULL;
-    // }
     
     // Reset target selection
     current_target = 0;

@@ -322,7 +322,7 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg)
  * the matching SiderealObjects::print*() method replaces ~14 duplicated
  * functions with one implementation per call site.
  */
-typedef char *(SiderealObjects::*ObjectPrintFn)(int n);
+typedef const char *(SiderealObjects::*ObjectPrintFn)(int n);
 
 static void setObjectStringField(char *dest, size_t dest_size, int num, int max_num, ObjectPrintFn print_fn)
 {

@@ -49,7 +49,6 @@
 #include "./system_data.h"
 #include "./sdcard_helper.h"
 #include "./task_handler.h"
-// #include "./multi_display_controller.h"
 #include "./i2c_helper.h"
 #include "./wit_c_sdk.h"
 #include "./astroclock.h"
@@ -837,7 +836,6 @@ void matrix_delete_event_cb(lv_event_t * e);
 void current_matrix_computer_assist_event_cb(lv_event_t * e);
 void switch_matrix_mapping_panel_event_cb(lv_event_t * e);
 void current_matrix_override_off_event_cb(lv_event_t * e);
-void switch_gps_panel_event_cb(lv_event_t * e);
 
 /** -------------------------------------------------------------------------------------
  * @brief Create System Tray.
@@ -1677,11 +1675,6 @@ void display_gyro_screen();
 void display_serial_screen();
 
 /** -------------------------------------------------------------------------------------
- * @brief Show System Settings Screen.
- */
-void display_system_screen();
-
-/** -------------------------------------------------------------------------------------
  * @brief Show UAP Screen.
  */
 void display_uap_screen();
@@ -1695,7 +1688,6 @@ extern bool flag_display_matrix_screen;
 extern bool flag_display_gps_screen;
 extern bool flag_display_gyro_screen;
 extern bool flag_display_disp_screen;
-extern bool flag_display_system_screen;
 extern bool flag_display_uap_screen;
 
 /** -------------------------------------------------------------------------------------

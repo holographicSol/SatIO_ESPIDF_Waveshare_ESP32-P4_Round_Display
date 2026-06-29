@@ -44,7 +44,6 @@
 #include "./system_data.h"
 #include "./sdcard_helper.h"
 #include "./task_handler.h"
-// #include "./multi_display_controller.h"
 #include "./i2c_helper.h"
 #include "./wit_c_sdk.h"
 #include "./astroclock.h"
@@ -381,51 +380,46 @@ void set_keyboard_context_cb(lv_event_t * e)
     // Get event code
     lv_event_code_t code = lv_event_get_code(e);
     if(code != LV_EVENT_FOCUSED && code != LV_EVENT_CLICKED) return;
-    printf("[set_keyboard_context_cb] Textarea Event Code: %d\n", code);
 
     // Get event target (Which textarea was clicked?)
     lv_obj_t * target_obj = (lv_obj_t *)lv_event_get_target(e);
-    printf("[set_keyboard_context_cb] Target Object: %p\n", (void*)target_obj);
     
     // Get context to know which keyboard to use
     kb_ctx_t * ctx = (kb_ctx_t *)lv_obj_get_user_data(target_obj);
-    printf("[set_keyboard_context_cb] Object Context Target: %d\n", ctx ? ctx->target : -1);
-    if (!ctx) {printf("[set_keyboard_context_cb] No context found for object.\n"); return;}
+    if (!ctx) { return;}
 
     // Determine which keyboard to use based on context
     keyboard_t * kb;
     switch(ctx->target) {
 
-        case KB_MATRIX_VALUE_X: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for MATRIX_VALUE_X\n"); break;
-        case KB_MATRIX_VALUE_Y: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for MATRIX_VALUE_Y\n"); break;
-        case KB_MATRIX_VALUE_Z: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for MATRIX_VALUE_Z\n"); break;
-        case KB_MATRIX_OUTPUT_PWM_0: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for MATRIX_OUTPUT_PWM_0\n"); break;
-        case KB_MATRIX_OUTPUT_PWM_1: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for MATRIX_OUTPUT_PWM_1\n"); break;
-        case KB_MATRIX_PORT_MAP: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for MATRIX_PORT_MAP\n"); break;
+        case KB_MATRIX_VALUE_X: kb = &kb_numdec; break;
+        case KB_MATRIX_VALUE_Y: kb = &kb_numdec; break;
+        case KB_MATRIX_VALUE_Z: kb = &kb_numdec; break;
+        case KB_MATRIX_OUTPUT_PWM_0: kb = &kb_numdec; break;
+        case KB_MATRIX_OUTPUT_PWM_1: kb = &kb_numdec; break;
+        case KB_MATRIX_PORT_MAP: kb = &kb_numdec; break;
 
-        case KB_MAPPING_C1: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_MAPPING_C1\n"); break;
-        case KB_MAPPING_C2: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_MAPPING_C2\n"); break;
-        case KB_MAPPING_C3: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_MAPPING_C3\n"); break;
-        case KB_MAPPING_C4: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_MAPPING_C4\n"); break;
-        case KB_MAPPING_C5: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_MAPPING_C5\n"); break;
+        case KB_MAPPING_C1: kb = &kb_numdec; break;
+        case KB_MAPPING_C2: kb = &kb_numdec; break;
+        case KB_MAPPING_C3: kb = &kb_numdec; break;
+        case KB_MAPPING_C4: kb = &kb_numdec; break;
+        case KB_MAPPING_C5: kb = &kb_numdec; break;
 
-        case KB_USER_LATITUDE: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_LATITUDE\n"); break;
-        case KB_USER_LONGITUDE: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_LONGITUDE\n"); break;
-        case KB_USER_ALTITUDE: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_ALTITUDE\n"); break;
-        case KB_USER_SPEED: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_SPEED\n"); break;
-        case KB_USER_GROUND_HEADING: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_USER_GROUND_HEADING\n"); break;
-        case KB_UTC_OFFSET_SECONDS: kb = &kb_numdec; printf("[set_keyboard_context_cb] Using numeric keyboard for KB_UTC_OFFSET_SECONDS\n"); break;
+        case KB_USER_LATITUDE: kb = &kb_numdec; break;
+        case KB_USER_LONGITUDE: kb = &kb_numdec; break;
+        case KB_USER_ALTITUDE: kb = &kb_numdec; break;
+        case KB_USER_SPEED: kb = &kb_numdec; break;
+        case KB_USER_GROUND_HEADING: kb = &kb_numdec; break;
+        case KB_UTC_OFFSET_SECONDS: kb = &kb_numdec; break;
 
         /* ... add other cases as required */
-        default: printf("[set_keyboard_context_cb] Unknown keyboard target: %d\n", ctx->target); return;
+        default: return;
     }
 
     // Link the clicked textarea to the keyboard for later retrieval in the keyboard event handler
     lv_obj_set_user_data(kb->ta, target_obj);
-    printf("[set_keyboard_context_cb] Linked keyboard TA: %p to object: %p\n", (void*)kb->ta, (void*)target_obj);
     
     // Show keyboard
-    printf("[set_keyboard_context_cb] Bringing keyboard to foreground.\n");
     lv_obj_move_foreground(kb->kb);
     lv_obj_move_foreground(kb->ta);
     lv_obj_clear_flag(kb->kb, LV_OBJ_FLAG_HIDDEN);
@@ -444,29 +438,22 @@ void keyboard_event_cb(lv_event_t * e)
 {
     // Get event code
     lv_event_code_t code = lv_event_get_code(e);
-    printf("[keyboard_event_cb] Keyboard Event Code: %d\n", code);
     if(code != LV_EVENT_VALUE_CHANGED) {
-        printf("[keyboard_event_cb] Event code is not VALUE_CHANGED, returning.\n");
         return;
     }
 
     // Get event target
     lv_obj_t * kb_target = (lv_obj_t *)lv_event_get_target(e);
-    printf("[keyboard_event_cb] Keyboard Target: %p\n", (void*)kb_target);
     keyboard_t * kb_user_data = (keyboard_t *)lv_event_get_user_data(e);
-    printf("[keyboard_event_cb] Keyboard User Data: %p\n", (void*)kb_user_data);
 
     // Ensure the event is from an expected keyboard
     if(kb_target != kb_user_data->kb) {
-        printf("[keyboard_event_cb] Event target does not match keyboard in user data, returning.\n");
         return;
     }
 
     // Get the text of the selected object
     uint32_t obj_id = lv_keyboard_get_selected_btn(kb_user_data->kb);
-    printf("[keyboard_event_cb] Selected Button ID: %lu\n", obj_id);
     const char * obj_text = lv_keyboard_get_btn_text(kb_user_data->kb, obj_id);
-    printf("[keyboard_event_cb] Selected Button Text: %s\n", obj_text);
 
     // Only proceed if "OK", "Enter", or the LV_SYMBOL_OK button was pressed
     if(strcmp(obj_text, LV_SYMBOL_OK) != 0 &&
@@ -475,19 +462,15 @@ void keyboard_event_cb(lv_event_t * e)
 
     // Get the designated textarea that triggered this keyboard
     lv_obj_t * designated_ta = (lv_obj_t *)lv_obj_get_user_data(kb_user_data->ta);
-    printf("[keyboard_event_cb] Designated Textarea from User Data: %p\n", (void*)designated_ta);
     if(!designated_ta) {
-        printf("[keyboard_event_cb] No designated textarea found in user data, returning.\n");
         return;
     }
 
     // Get context from designated textarea
     kb_ctx_t * ctx = (kb_ctx_t *)lv_obj_get_user_data(designated_ta);
-    printf("[keyboard_event_cb] Context Target from Designated Textarea: %d\n", ctx ? ctx->target : -1);
 
     // Get the input text from the keyboard's textarea
     const char * input = lv_textarea_get_text(kb_user_data->ta);
-    printf("[keyboard_event_cb] Input Text from Keyboard Textarea: %s\n", input);
 
     // Route to correct destination using context
     switch (ctx ? ctx->target : KB_TARGET_NONE) {
@@ -495,221 +478,164 @@ void keyboard_event_cb(lv_event_t * e)
         case KB_MATRIX_VALUE_X:
             if (strval_validate(ctx->strval_type, input)) {
                 double val = strtod(input, NULL);
-                printf("[keyboard_event_cb] Setting MATRIX_VALUE_X to: %f\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = val;
                 matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
             }
             break;
 
         case KB_MATRIX_VALUE_Y:
             if (strval_validate(ctx->strval_type, input)) {
                 double val = strtod(input, NULL);
-                printf("[keyboard_event_cb] Setting MATRIX_VALUE_Y to: %f\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = val;
                 matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
             }
             break;
         
         case KB_MATRIX_VALUE_Z:
             if (strval_validate(ctx->strval_type, input)) {
                 double val = strtod(input, NULL);
-                printf("[keyboard_event_cb] Setting MATRIX_VALUE_Z to: %f\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = val;
                 matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
             }
             break;
         
         case KB_MATRIX_OUTPUT_PWM_0:
             if (strval_validate(ctx->strval_type, input)) {
                 uint32_t val = strtoul(input, NULL, 10);
-                printf("[keyboard_event_cb] Setting MATRIX_OUTPUT_PWM_0 to: %lu\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF] = val;
                 matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid uint32_t: %s\n", input);
             }
             break;
         
         case KB_MATRIX_OUTPUT_PWM_1:
             if (strval_validate(ctx->strval_type, input)) {
                 uint32_t val = strtoul(input, NULL, 10);
-                printf("[keyboard_event_cb] Setting MATRIX_OUTPUT_PWM_1 to: %lu\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON] = val;
                 matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid uint32_t: %s\n", input);
             }
             break;
         
         case KB_MATRIX_PORT_MAP:
             if (strval_validate(ctx->strval_type, input)) {
                 int16_t val = atoi(input);
-                printf("[keyboard_event_cb] Setting MATRIX_PORT_MAP to: %d\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 matrixData.matrix_port_map[0][current_matrix_i] = val;
                 matrixData.matrix_switch_write_required[0][current_matrix_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid int8_t: %s\n", input);
             }
             break;
         
         case KB_MAPPING_C1:
             if (strval_validate(ctx->strval_type, input)) {
                 int32_t val = strtol(input, NULL, 10);
-                printf("[keyboard_event_cb] Setting KB_MAPPING_C1 to: %ld\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C1] = val;
-                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
             }
             break;
         
         case KB_MAPPING_C2:
             if (strval_validate(ctx->strval_type, input)) {
                 int32_t val = strtol(input, NULL, 10);
-                printf("[keyboard_event_cb] Setting KB_MAPPING_C2 to: %ld\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C2] = val;
-                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
             }
             break;
 
         case KB_MAPPING_C3:
             if (strval_validate(ctx->strval_type, input)) {
                 int32_t val = strtol(input, NULL, 10);
-                printf("[keyboard_event_cb] Setting KB_MAPPING_C3 to: %ld\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C3] = val;
-                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
             }
             break;
 
         case KB_MAPPING_C4:
             if (strval_validate(ctx->strval_type, input)) {
                 int32_t val = strtol(input, NULL, 10);
-                printf("[keyboard_event_cb] Setting KB_MAPPING_C4 to: %ld\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C4] = val;
-                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
             }
             break;
 
         case KB_MAPPING_C5:
             if (strval_validate(ctx->strval_type, input)) {
                 int32_t val = strtol(input, NULL, 10);
-                printf("[keyboard_event_cb] Setting KB_MAPPING_C5 to: %ld\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C5] = val;
-                // matrixData.matrix_switch_write_required[0][current_mapping_i]=true;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid int32_t: %s\n", input);
             }
             break;
 
         case KB_USER_LATITUDE:
             if (strval_validate(ctx->strval_type, input)) {
                 double val = strtod(input, NULL);
-                printf("[keyboard_event_cb] Setting KB_USER_LATITUDE to: %f\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 satioData.user_degrees_latitude = val;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
             }
             break;
 
         case KB_USER_LONGITUDE:
             if (strval_validate(ctx->strval_type, input)) {
                 double val = strtod(input, NULL);
-                printf("[keyboard_event_cb] Setting KB_USER_LONGITUDE to: %f\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 satioData.user_degrees_longitude = val;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
             }
             break;
 
         case KB_USER_ALTITUDE:
             if (strval_validate(ctx->strval_type, input)) {
                 double val = strtod(input, NULL);
-                printf("[keyboard_event_cb] Setting KB_USER_ALTITUDE to: %f\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 satioData.user_altitude = val;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
             }
             break;
 
         case KB_USER_SPEED:
             if (strval_validate(ctx->strval_type, input)) {
                 double val = strtod(input, NULL);
-                printf("[keyboard_event_cb] Setting KB_USER_SPEED to: %f\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 satioData.user_speed= val;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
             }
             break;
 
         case KB_USER_GROUND_HEADING:
             if (strval_validate(ctx->strval_type, input)) {
                 double val = strtod(input, NULL);
-                printf("[keyboard_event_cb] Setting KB_USER_GROUND_HEADING to: %f\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 satioData.user_ground_heading= val;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid double: %s\n", input);
             }
             break;
 
         case KB_UTC_OFFSET_SECONDS:
             if (strval_validate(ctx->strval_type, input)) {
                 int64_t val = atoll(input);
-                printf("[keyboard_event_cb] Setting KB_UTC_OFFSET_SECONDS to: %lld\n", val);
-                // lv_textarea_set_text(...); // Update relevant object if needed
                 satioData.utc_second_offset = val;
             }
             else {
-                printf("[keyboard_event_cb] Input is not a valid int64_t: %s\n", input);
             }
             break;
         
         // DEFAULT
         default:
-            printf("[keyboard_event_cb] No case for context target: %d\n", ctx->target);
             break;
     }
 
@@ -734,30 +660,12 @@ void screen_swipe_cb(lv_event_t * e)
     // Get gesture start position
     lv_point_t gesture_point;
     lv_indev_get_point(lv_indev_get_act(), &gesture_point);
-    printf("[screen_swipe_cb] x=%lu, y=%lu\n", gesture_point.x, gesture_point.y);
-
-    // ---- Handle special cases first ----
-
-    // Hide keyboard if gesture outside keyboard area
-    // if (
-    //         target != kb_alnumsym.kb &&
-    //         target != kb_alnumsym.ta &&
-    //         target != kb_numdec.kb   &&
-    //         target != kb_numdec.ta
-    //     ) {
-    //     printf("[screen_swipe_cb] attempting to hide keyboard(s)\n");
-    //     lv_obj_add_flag(kb_alnumsym.kb, LV_OBJ_FLAG_HIDDEN);
-    //     lv_obj_add_flag(kb_alnumsym.ta, LV_OBJ_FLAG_HIDDEN);
-    //     lv_obj_add_flag(kb_numdec.kb, LV_OBJ_FLAG_HIDDEN);
-    //     lv_obj_add_flag(kb_numdec.ta, LV_OBJ_FLAG_HIDDEN);
-    // }
 
     // ---- Handle gestures ----
     
     // Gesture: Swipe down from top of screen
     if(dir == LV_DIR_BOTTOM && gesture_point.y < 200) {
         if(!system_tray.is_open) {
-            printf("[screen_swipe_cb] Swipe down detected, opening system tray.\n");
             lv_obj_clear_flag(system_tray.panel, LV_OBJ_FLAG_HIDDEN);
             lv_obj_move_foreground(system_tray.panel);  // Ensure on top of all objects
             lv_obj_set_y(system_tray.panel, -290);
@@ -775,7 +683,6 @@ void screen_swipe_cb(lv_event_t * e)
     // Gesture: Swipe up from anywhere on screen
     else if(dir == LV_DIR_TOP && system_tray.is_open) {
         // Animate slide up
-        printf("[screen_swipe_cb] Swipe up detected, closing system tray.\n");
         lv_anim_t a;
         lv_anim_init(&a);
         lv_anim_set_var(&a, system_tray.panel);
@@ -803,30 +710,6 @@ void screen_tap_cb(lv_event_t * e)
     // Get gesture start position
     lv_point_t gesture_point;
     lv_indev_get_point(lv_indev_get_act(), &gesture_point);
-    printf("[screen_tap_cb] x=%lu, y=%lu\n", gesture_point.x, gesture_point.y);
-    
-    // ---- Handle special cases first ----
-
-    // Hide keyboard if gesture outside keyboard area
-    // if (
-    //         target != kb_alnumsym.kb &&
-    //         target != kb_alnumsym.ta &&
-    //         target != kb_numdec.kb   &&
-    //         target != kb_numdec.ta
-    //     ) {
-    //     printf("[screen_tap_cb] attempting to hide keyboard(s)\n");
-    //     lv_obj_add_flag(kb_alnumsym.kb, LV_OBJ_FLAG_HIDDEN);
-    //     lv_obj_add_flag(kb_alnumsym.ta, LV_OBJ_FLAG_HIDDEN);
-    //     lv_obj_add_flag(kb_numdec.kb, LV_OBJ_FLAG_HIDDEN);
-    //     lv_obj_add_flag(kb_numdec.ta, LV_OBJ_FLAG_HIDDEN);
-    // }
-
-    // // Hide system tray if gesture outside system tray
-    // if (system_tray.is_open && target != system_tray.panel) {
-    //     printf("[screen_tap_cb] attempting to hide system tray\n");
-    //     lv_obj_add_flag(system_tray.panel, LV_OBJ_FLAG_HIDDEN);
-    //     system_tray.is_open = false;
-    // }
 }
 
 /** ---------------------------------------------------------------------------------------
@@ -838,7 +721,6 @@ void slider_brightness_event_cb(lv_event_t * e)
 {
     lv_obj_t * slider = (lv_obj_t *)lv_event_get_target(e);
     slider_brightness_value = lv_slider_get_value(slider);
-    printf("Brightness set to: %lu\n", slider_brightness_value);
     bsp_display_brightness_set(slider_brightness_value);
 }
 
@@ -878,7 +760,6 @@ void system_tray_grid_menu_1_event_cb(lv_event_t * e)
         }
         
         const char * text = lv_label_get_text(label);
-        printf("System Tray Grid Menu 1: Button %lu (%s) clicked!\n", btn_index, text);
         
         // Switch logic
         switch(btn_index) {
@@ -919,7 +800,6 @@ void matrix_overview_grid_1_event_cb(lv_event_t * e)
         }
         
         const char * text = lv_label_get_text(label);
-        printf("Matrix Overview Grid 1: Button %lu (%s) clicked!\n", btn_index, text);
         
         if (btn_index < MAX_MATRIX_SWITCHES) {
             current_matrix_i = btn_index;
@@ -940,7 +820,6 @@ void dd_function_index_select_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         current_matrix_function_i = (int)sel;
-        printf("[dd_function_index_select_event_cb] Function index set to: %lu\n", sel);
     }
 }
 
@@ -956,7 +835,6 @@ void dd_switch_index_select_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         current_matrix_i = (int)sel;
-        printf("[dd_switch_index_select_event_cb] Switch index set to: %lu\n", sel);
     }
 }
 
@@ -972,7 +850,6 @@ void dd_current_map_slot_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         current_mapping_i = (int)sel;
-        printf("[dd_current_map_slot_event_cb] Map slot index set to: %ld\n", sel);
     }
 }
 
@@ -988,7 +865,6 @@ void dd_function_name_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i] = (int)sel;
-        printf("[dd_function_name_event_cb] Function set to: %lu\n", sel);
     }
 }
 
@@ -1004,7 +880,6 @@ void dd_c0_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0] = (int)sel;
-        printf("[dd_c0_event_cb] Set map function: %lu\n", sel);
     }
 }
 
@@ -1020,7 +895,6 @@ void dd_mode_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         mappingData.map_mode[0][current_mapping_i] = (int)sel;
-        printf("[dd_mode_event_cb] Set map mode: %lu\n", sel);
     }
 }
 
@@ -1039,7 +913,6 @@ void dd_mode_x_event_cb(lv_event_t * e)
         matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]=0;
         // Set mode
         matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = (int)sel;
-        printf("[dd_mode_x_event_cb] Set mode x: %lu\n", sel);
     }
 }
 
@@ -1058,7 +931,6 @@ void dd_mode_y_event_cb(lv_event_t * e)
         matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]=0;
         // Set mode
         matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = (int)sel;
-        printf("[dd_mode_y_event_cb] Set mode y: %lu\n", sel);
     }
 }
 
@@ -1077,7 +949,6 @@ void dd_mode_z_event_cb(lv_event_t * e)
         matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]=0;
         // Set mode
         matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
-        printf("[dd_mode_z_event_cb] Set mode z: %lu\n", sel);
     }
 }
 
@@ -1094,7 +965,6 @@ void dd_inverted_logic_event_cb(lv_event_t * e)
         uint32_t sel = lv_dropdown_get_selected(dd);
         // Set mode
         matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i] = (int)sel;
-        printf("[dd_inverted_logic_event_cb] Set switch standard/inverted: %lu\n", sel);
     }
 }
 
@@ -1110,7 +980,6 @@ void dd_x_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X] = (int)sel;
-        printf("[dd_x_event_cb] Function X set to value index: %lu\n", sel);
     }
 }
 
@@ -1126,7 +995,6 @@ void dd_y_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y] = (int)sel;
-        printf("[dd_y_event_cb] Function Y set to value index: %lu\n", sel);
     }
 }
 
@@ -1142,7 +1010,6 @@ void dd_z_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z] = (int)sel;
-        printf("[dd_z_event_cb] Function Z set to value index: %lu\n", sel);
     }
 }
 
@@ -1158,7 +1025,6 @@ void dd_operator_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i] = (int)sel;
-        printf("[dd_operator_event_cb] Operator set to: %lu\n", sel);
     }
 }
 
@@ -1174,7 +1040,6 @@ void dd_output_mode_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         matrixData.output_mode[0][current_matrix_i] = (int)sel;
-        printf("[dd_output_mode_event_cb] Output mode set to: %lu\n", sel);
     }
 }
 
@@ -1190,7 +1055,6 @@ void dd_matrix_file_slot_select_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         satioFileData.i_current_matrix_file_path = (int)sel;
-        printf("[dd_matrix_file_slot_select_event_cb] Matrix slot set to: %d\n", satioFileData.i_current_matrix_file_path);
     }
 }
 
@@ -1207,7 +1071,6 @@ void dd_link_map_slot_event_cb(lv_event_t * e)
         lv_obj_t * dd = (lv_obj_t *)lv_event_get_target(e);
         uint32_t sel = lv_dropdown_get_selected(dd);
         matrixData.index_mapped_value[0][current_matrix_i] = (int)sel;
-        printf("[dd_link_map_slot_event_cb] Matrix %d will use map slot: %ld\n", current_matrix_i, sel);
     }
 }
 
@@ -1221,7 +1084,6 @@ void matrix_new_event_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        printf("[matrix_new_event_cb] Setting new matrix.\n");
         override_all_computer_assists();
         set_all_matrix_default();
     }
@@ -1238,13 +1100,10 @@ void matrix_save_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         if (sdcardData.sdcard_mounted==true) {
-            printf("[matrix_save_event_cb] Saving matrix to slot: %d\n", satioFileData.i_current_matrix_file_path);
             sdcardFlagData.save_matrix=true;
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
             sdcardFlagData.save_mapping=true;
         }
         else {
-            printf("[matrix_save_event_cb] sdcard is not mounted.");
         }
     }
 }
@@ -1260,13 +1119,10 @@ void matrix_load_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         if (sdcardData.sdcard_mounted==true) {
-            printf("[matrix_load_event_cb] Loading matrix from slot: %d\n", satioFileData.i_current_matrix_file_path);
             sdcardFlagData.load_mapping=true;
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
             sdcardFlagData.load_matrix=true;
         }
         else {
-            printf("[matrix_load_event_cb] sdcard is not mounted.");
         }
     }
 }
@@ -1282,11 +1138,9 @@ void matrix_delete_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         if (sdcardData.sdcard_mounted==true) {
-            printf("[matrix_delete_event_cb] Deleting matrix in slot: %d\n", satioFileData.i_current_matrix_file_path);
             sdcardFlagData.delete_matrix=true;
         }
         else {
-            printf("[matrix_delete_event_cb] sdcard is not mounted.");
         }
     }
 }
@@ -1303,7 +1157,6 @@ void current_matrix_computer_assist_event_cb(lv_event_t * e)
     if(code == LV_EVENT_CLICKED) {
         bool toggle = !matrixData.computer_assist[0][current_matrix_i];
         matrixData.computer_assist[0][current_matrix_i] = toggle;
-        printf("[current_matrix_computer_assist_event_cb] Setting computer assist for matrix switch %d to: %s\n", current_matrix_i, toggle ? "true" : "false");
     }
 }
 
@@ -1318,7 +1171,6 @@ void switch_matrix_overview_panel_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         current_matrix_panel_view=MATRIX_SWITCH_PANEL_NUMBER_OVERVIEW;
-        printf("[switch_matrix_overview_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
     }
 }
 
@@ -1333,7 +1185,6 @@ void switch_matrix_matrix_panel_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         current_matrix_panel_view=MATRIX_SWITCH_PANEL_NUMBER_MATRIX;
-        printf("[switch_matrix_matrix_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
     }
 }
 
@@ -1348,7 +1199,6 @@ void switch_matrix_mapping_panel_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         current_matrix_panel_view=MATRIX_SWITCH_PANEL_NUMBER_MAPPING;
-        printf("[switch_matrix_mapping_panel_event_cb] Switching matrix panel: %d\n", current_matrix_panel_view);
     }
 }
 
@@ -1363,7 +1213,6 @@ void switch_satio_panel_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         current_gps_panel=0;
-        printf("[switch_satio_panel_event_cb] Switching to SatIO panel.\n");
     }
 }
 
@@ -1378,7 +1227,6 @@ void switch_gngga_panel_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         current_gps_panel=1;
-        printf("[switch_gngga_panel_event_cb] Switching to GNGGA panel.\n");
     }
 }
 
@@ -1393,7 +1241,6 @@ void switch_gnrmc_panel_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         current_gps_panel=2;
-        printf("[switch_gnrmc_panel_event_cb] Switching to GNRMC panel.\n");
     }
 }
 
@@ -1408,7 +1255,6 @@ void switch_gpatt_panel_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         current_gps_panel=3;
-        printf("[switch_gpatt_panel_event_cb] Switching to GPATT panel.\n");
     }
 }
 
@@ -1422,7 +1268,6 @@ void current_matrix_override_off_event_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
 
     if(code == LV_EVENT_CLICKED) {
-        printf("[current_matrix_override_off_event_cb] OVERRIDING matrix switch %d\n", current_matrix_i);
         setOverrideOutputValue((int)current_matrix_i, (uint32_t)0);
     }
 }
@@ -1438,7 +1283,6 @@ void btn_location_mode_gps_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.location_value_mode = SATIO_MODE_GPS;
-        printf("[btn_location_mode_gps_event_cb] Setting location value mode SATIO_MODE_GPS");
     }
 }
 /** -------------------------------------------------------------------------------------
@@ -1452,7 +1296,6 @@ void btn_location_mode_user_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.location_value_mode = SATIO_MODE_USER;
-        printf("[btn_location_mode_user_event_cb] Setting location value mode SATIO_MODE_USER");
     }
 }
 
@@ -1467,7 +1310,6 @@ void btn_altitude_mode_gps_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.altitude_value_mode = SATIO_MODE_GPS;
-        printf("[btn_altitude_mode_gps_event_cb] Setting altitude value mode SATIO_MODE_GPS");
     }
 }
 /** -------------------------------------------------------------------------------------
@@ -1481,7 +1323,6 @@ void btn_altitude_mode_user_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.altitude_value_mode = SATIO_MODE_USER;
-        printf("[btn_altitude_mode_user_event_cb] Setting altitude value mode SATIO_MODE_USER");
     }
 }
 
@@ -1496,7 +1337,6 @@ void btn_speed_mode_gps_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.speed_value_mode = SATIO_MODE_GPS;
-        printf("[btn_speed_mode_gps_event_cb] Setting speed value mode SATIO_MODE_GPS");
     }
 }
 /** -------------------------------------------------------------------------------------
@@ -1510,7 +1350,6 @@ void btn_speed_mode_user_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.speed_value_mode = SATIO_MODE_USER;
-        printf("[btn_speed_mode_user_event_cb] Setting speed value mode SATIO_MODE_USER");
     }
 }
 
@@ -1525,7 +1364,6 @@ void btn_ground_heading_mode_gps_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.ground_heading_value_mode = SATIO_MODE_GPS;
-        printf("[btn_ground_heading_mode_gps_event_cb] Setting ground heading value mode SATIO_MODE_GPS");
     }
 }
 /** -------------------------------------------------------------------------------------
@@ -1539,7 +1377,6 @@ void btn_ground_heading_mode_user_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.ground_heading_value_mode = SATIO_MODE_USER;
-        printf("[btn_ground_heading_mode_user_event_cb] Setting ground heading value mode SATIO_MODE_USER");
     }
 }
 
@@ -1554,7 +1391,6 @@ void btn_auto_set_user_lat_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_degrees_latitude = satioData.degrees_latitude;
-        printf("[btn_auto_set_user_lat_event_cb] Auto set data.");
     }
 }
 
@@ -1569,7 +1405,6 @@ void btn_auto_set_user_lon_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_degrees_longitude = satioData.degrees_longitude;
-        printf("[btn_auto_set_user_lon_event_cb] Auto set data.");
     }
 }
 
@@ -1584,7 +1419,6 @@ void btn_auto_set_user_altitude_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_altitude = satioData.altitude;
-        printf("[btn_auto_set_user_altitude_event_cb] Auto set data.");
     }
 }
 
@@ -1599,7 +1433,6 @@ void btn_auto_set_user_speed_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_speed = satioData.speed;
-        printf("[btn_auto_set_user_speed_event_cb] Auto set data.");
     }
 }
 
@@ -1614,7 +1447,6 @@ void btn_auto_set_user_ground_heading_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
         satioData.user_ground_heading = satioData.ground_heading;
-        printf("[btn_auto_set_user_ground_heading_event_cb] Auto set data.");
     }
 }
 
@@ -1635,87 +1467,87 @@ void sw_output_event_cb(lv_event_t * e)
 
         if (sw == serial_c.sw_output_all) {
             setAllSentenceOutput(is_enabled);
-            printf("[OUTPUT ALL] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_satio) {
             systemData.output_satio_enabled = is_enabled;
-            printf("[OUTPUT SATIO] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_gngga) {
             systemData.output_gngga_enabled = is_enabled;
-            printf("[OUTPUT GNGGA] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_gnrmc) {
             systemData.output_gnrmc_enabled = is_enabled;
-            printf("[OUTPUT GNRMC] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_gpatt) {
             systemData.output_gpatt_enabled = is_enabled;
-            printf("[OUTPUT GPATT] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_ins) {
             systemData.output_ins_enabled = is_enabled;
-            printf("[OUTPUT INS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_matrix) {
             systemData.output_matrix_enabled = is_enabled;
-            printf("[OUTPUT MATRIX] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_input_controller) {
             systemData.output_input_portcontroller = is_enabled;
-            printf("[OUTPUT INPUT CONTROLLER] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_admplex_0) {
             systemData.output_admplex0_enabled = is_enabled;
-            printf("[OUTPUT ADMplex 0] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_gyro_0) {
             systemData.output_gyro_0_enabled = is_enabled;
-            printf("[OUTPUT GYRO 0] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_sun) {
             systemData.output_sun_enabled = is_enabled;
-            printf("[OUTPUT SUN] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_mercury) {
             systemData.output_mercury_enabled = is_enabled;
-            printf("[OUTPUT MERCURY] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_venus) {
             systemData.output_venus_enabled = is_enabled;
-            printf("[OUTPUT VENUS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_earth) {
             systemData.output_earth_enabled = is_enabled;
-            printf("[OUTPUT EARTH] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_luna) {
             systemData.output_luna_enabled = is_enabled;
-            printf("[OUTPUT LUNA] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_mars) {
             systemData.output_mars_enabled = is_enabled;
-            printf("[OUTPUT MARS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_jupiter) {
             systemData.output_jupiter_enabled = is_enabled;
-            printf("[OUTPUT JUPITER] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_saturn) {
             systemData.output_saturn_enabled = is_enabled;
-            printf("[OUTPUT SATURN] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_uranus) {
             systemData.output_uranus_enabled = is_enabled;
-            printf("[OUTPUT URANUS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_neptune) {
             systemData.output_neptune_enabled = is_enabled;
-            printf("[OUTPUT NEPTUNE] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
 
         else if (sw == serial_c.sw_output_meteors) {
             systemData.output_meteors_enabled = is_enabled;
-            printf("[OUTPUT METEORS] %s\n", is_enabled ? "Enabled" : "Disabled");}
+            }
     }
 }
 
@@ -2250,7 +2082,6 @@ lv_obj_t * create_slider(
     lv_obj_set_style_shadow_width(slider, shadow_width, LV_PART_KNOB);
     lv_obj_set_style_shadow_color(slider, default_shadow_hue, LV_PART_KNOB);
 
-
     return slider;   
 }
 
@@ -2746,7 +2577,6 @@ lv_obj_t * create_menu_grid(
     // Main style: radius
     lv_obj_set_style_radius(grid_menu, general_radius, LV_PART_MAIN);
 
-
     // Main style: outline
     lv_obj_set_style_outline_width(grid_menu, outline_width, LV_PART_MAIN);
     lv_obj_set_style_outline_color(grid_menu, default_outline_hue, LV_PART_MAIN);
@@ -2782,7 +2612,6 @@ lv_obj_t * create_menu_grid(
 
     // Add buttons to grid
     for(int i = 0; i < GRID_MENU_X_TOTAL_CELLS; i++) {
-        vTaskDelay(2 / portTICK_PERIOD_MS);
 
         /* ---- CELL BUTTON ----------------------------------------------------------------- */
 
@@ -2870,7 +2699,6 @@ lv_obj_t * create_dropdown_menu(
 
     // Create dropdown
     lv_obj_t * ddlist = lv_dropdown_create(parent);
-
 
     // Add options if provided
     if (options != NULL && option_count > 0) {
@@ -7363,7 +7191,6 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.lbl_sys_altitude, obj_w_0, obj_height);
     lv_obj_set_size(result.val_sys_altitude, obj_w_1, obj_height);
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     /* ---------------------------------------------------------- */
     /* Row Altitude Mode                                          */
@@ -7445,7 +7272,6 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.btn_altitude_mode_gps.panel, obj_w_1, obj_height);
     lv_obj_set_size(result.btn_altitude_mode_user.panel, obj_w_2, obj_height);
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
     /* ---------------------------------------------------------- */
     /* Title Speed                                                */
@@ -10343,7 +10169,6 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.lbl_LMST_sunset, obj_w_0, obj_height);
     lv_obj_set_size(result.val_LMST_sunset, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row LMST Civil Twilight Dusk                                */
     /* ---------------------------------------------------------- */
@@ -10405,7 +10230,6 @@ satio_container_t create_satio_panel(
     lv_obj_set_size(result.lbl_LMST_civil_twilight_dusk, obj_w_0, obj_height);
     lv_obj_set_size(result.val_LMST_civil_twilight_dusk, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row LMST Nautical Twilight Dusk                             */
     /* ---------------------------------------------------------- */
@@ -10466,7 +10290,6 @@ satio_container_t create_satio_panel(
 
     lv_obj_set_size(result.lbl_LMST_nautical_twilight_dusk, obj_w_0, obj_height);
     lv_obj_set_size(result.val_LMST_nautical_twilight_dusk, obj_w_1, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Row LMST Astronomical Twilight Dusk                         */
@@ -10802,7 +10625,6 @@ gyro_0_container_t create_gyro_panel(
     lv_obj_set_size(result.val_gyro_0_ang_x, obj_w_0, obj_height);
     lv_obj_set_size(result.val_gyro_0_ang_y, obj_w_0, obj_height);
     lv_obj_set_size(result.val_gyro_0_ang_z, obj_w_0, obj_height);
-  
 
     /* ---------------------------------------------------------- */
     /* Row 3: Acc                                                 */
@@ -10915,7 +10737,6 @@ gyro_0_container_t create_gyro_panel(
     lv_obj_set_size(result.val_gyro_0_acc_x, obj_w_0, obj_height);
     lv_obj_set_size(result.val_gyro_0_acc_y, obj_w_0, obj_height);
     lv_obj_set_size(result.val_gyro_0_acc_z, obj_w_0, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Row 6: Gyro                                                */
@@ -11450,7 +11271,6 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_title_chan_1, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_1, obj_w_0, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row Channel 2                                              */
     /* ---------------------------------------------------------- */
@@ -11589,7 +11409,6 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_title_chan_3, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_3, obj_w_0, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row Channel 4                                              */
     /* ---------------------------------------------------------- */
@@ -11658,7 +11477,6 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_title_chan_4, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_4, obj_w_0, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row Channel 5                                              */
     /* ---------------------------------------------------------- */
@@ -11726,7 +11544,6 @@ admplex0_container_t create_admplex0_panel(
 
     lv_obj_set_size(result.lbl_title_chan_5, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_5, obj_w_0, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Row Channel 6                                              */
@@ -11934,7 +11751,6 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_title_chan_8, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_8, obj_w_0, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row Channel 9                                              */
     /* ---------------------------------------------------------- */
@@ -12002,7 +11818,6 @@ admplex0_container_t create_admplex0_panel(
 
     lv_obj_set_size(result.lbl_title_chan_9, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_9, obj_w_0, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Row Channel 10                                             */
@@ -12072,7 +11887,6 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_title_chan_10, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_10, obj_w_0, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row Channel 11                                             */
     /* ---------------------------------------------------------- */
@@ -12140,7 +11954,6 @@ admplex0_container_t create_admplex0_panel(
 
     lv_obj_set_size(result.lbl_title_chan_11, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_11, obj_w_0, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Row Channel 12                                             */
@@ -12210,7 +12023,6 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_title_chan_12, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_12, obj_w_0, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row Channel 13                                             */
     /* ---------------------------------------------------------- */
@@ -12279,7 +12091,6 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_title_chan_13, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_13, obj_w_0, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Row Channel 14                                             */
     /* ---------------------------------------------------------- */
@@ -12347,7 +12158,6 @@ admplex0_container_t create_admplex0_panel(
 
     lv_obj_set_size(result.lbl_title_chan_14, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan_14, obj_w_0, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Row Channel 15                                             */
@@ -12887,7 +12697,6 @@ serial_container_t create_serial_panel(
     lv_obj_set_size(result.lbl_output_gpatt, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_gpatt, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Output INS                                                 */
     /* ---------------------------------------------------------- */
@@ -13218,7 +13027,6 @@ serial_container_t create_serial_panel(
     lv_obj_set_size(result.lbl_output_input_controller, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_input_controller, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Output ADMplex 0                                           */
     /* ---------------------------------------------------------- */
@@ -13324,7 +13132,6 @@ serial_container_t create_serial_panel(
     );
 
     lv_obj_set_size(result.lbl_title_output_uni, title_width, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Output SUN                                                 */
@@ -13444,7 +13251,6 @@ serial_container_t create_serial_panel(
     lv_obj_set_size(result.lbl_output_mercury, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_mercury, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Output VENUS                                               */
     /* ---------------------------------------------------------- */
@@ -13503,7 +13309,6 @@ serial_container_t create_serial_panel(
 
     lv_obj_set_size(result.lbl_output_venus, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_venus, obj_w_1, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Output EARTH                                               */
@@ -13564,7 +13369,6 @@ serial_container_t create_serial_panel(
     lv_obj_set_size(result.lbl_output_earth, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_earth, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Output LUNA                                                */
     /* ---------------------------------------------------------- */
@@ -13623,7 +13427,6 @@ serial_container_t create_serial_panel(
 
     lv_obj_set_size(result.lbl_output_luna, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_luna, obj_w_1, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Output MARS                                                */
@@ -13743,7 +13546,6 @@ serial_container_t create_serial_panel(
     lv_obj_set_size(result.lbl_output_jupiter, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_jupiter, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Output SATURN                                              */
     /* ---------------------------------------------------------- */
@@ -13802,7 +13604,6 @@ serial_container_t create_serial_panel(
 
     lv_obj_set_size(result.lbl_output_saturn, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_saturn, obj_w_1, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Output URANUS                                              */
@@ -13863,7 +13664,6 @@ serial_container_t create_serial_panel(
     lv_obj_set_size(result.lbl_output_uranus, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_uranus, obj_w_1, obj_height);
 
-
     /* ---------------------------------------------------------- */
     /* Output NEPTUNE                                             */
     /* ---------------------------------------------------------- */
@@ -13922,7 +13722,6 @@ serial_container_t create_serial_panel(
 
     lv_obj_set_size(result.lbl_output_neptune, obj_w_0, obj_height);
     lv_obj_set_size(result.sw_output_neptune, obj_w_1, obj_height);
-
 
     /* ---------------------------------------------------------- */
     /* Output METEORS                                             */
@@ -16059,7 +15858,6 @@ uap_t create_uap(
     /* This panel is a circle intended to be static and centered */
 
     // Radial Panel
-    // int32_t radial_size_w = (size_w_px / 8)*6;
     int32_t radial_size_w = (size_w_px / 32)*14;
     int32_t radial_size_h = (size_w_px / 32)*14;
 
@@ -16345,10 +16143,6 @@ uap_t create_uap(
     lv_obj_set_scroll_dir(pitch_label, LV_DIR_NONE);
     lv_obj_clear_flag(pitch_label, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Vertical centering: calculate Y position to center the text (monospace is required for this object)
-    // int32_t pitch_font_line_height = lv_font_get_line_height(&Mono_Bold_14) * 1;
-    // int32_t pitch_center_y = (pitch_tape_height_px - pitch_font_line_height) / 2;
-
     // Size label to content width not container width
     lv_obj_set_size(pitch_label, pitch_tape_width_px, LV_SIZE_CONTENT);
     lv_obj_set_pos(pitch_label, 0, 0);
@@ -16386,7 +16180,6 @@ uap_t create_uap(
             }
         }
     }
-    // lv_obj_set_style_text_align(pitch_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(pitch_label, &Mono_Bold_14, LV_PART_MAIN);
     lv_obj_set_style_text_color(pitch_label, lv_color_make(0, 255, 0), LV_PART_MAIN);
     lv_label_set_text(pitch_label, pitch_tape_text);
@@ -16551,7 +16344,6 @@ uap_t create_uap(
             }
         }
     }
-    // lv_obj_set_style_text_align(gh_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_style_text_font(gh_label, &Mono_Bold_14, LV_PART_MAIN);
     lv_obj_set_style_text_color(gh_label, lv_color_make(0, 255, 0), LV_PART_MAIN);
     lv_label_set_text(gh_label, gh_tape_text);
@@ -16677,69 +16469,8 @@ uap_t create_uap(
         default_value_hue
     );
 
-    // result.roll_label = create_label(
-    //     result.panel,         // parent
-    //     100,                  // width
-    //     20,                   // height
-    //     LV_ALIGN_BOTTOM_RIGHT, // parent alignment
-    //     0,                    // pos x
-    //     -40,                  // pos y
-    //     "Roll: ",             // initial text
-    //     LV_TEXT_ALIGN_RIGHT,  // font alignment
-    //     &Mono_Bold_14,     // font
-    //     true,                 // transparent background
-    //     false,                // show scrollbar
-    //     false,                // enable scrolling
-    //     0,                    // outline width
-    //     general_radius,       // outline radius
-    //     1,
-    //     default_bg_hue,
-    //     default_value_hue
-    // );
-
-    // result.pitch_label = create_label(
-    //     result.panel,         // parent
-    //     100,                  // width
-    //     20,                   // height
-    //     LV_ALIGN_BOTTOM_RIGHT, // parent alignment
-    //     0,                    // pos x
-    //     -20,                  // pos y
-    //     "PIT ",               // initial text
-    //     LV_TEXT_ALIGN_RIGHT,  // font alignment
-    //     &Mono_Bold_14,     // font
-    //     true,                 // transparent background
-    //     false,                // show scrollbar
-    //     false,                // enable scrolling
-    //     0,                    // outline width
-    //     general_radius,       // outline radius
-    //     1,
-    //     default_bg_hue,
-    //     default_value_hue
-    // );
-
-    // result.yaw_label = create_label(
-    //     result.panel,         // parent
-    //     100,                  // width
-    //     20,                   // height
-    //     LV_ALIGN_BOTTOM_RIGHT, // parent alignment
-    //     0,                    // pos x
-    //     0,                    // pos y
-    //     "YAW ",               // initial text
-    //     LV_TEXT_ALIGN_RIGHT,  // font alignment
-    //     &Mono_Bold_14,     // font
-    //     true,                 // transparent background
-    //     false,                // show scrollbar
-    //     false,                // enable scrolling
-    //     0,                    // outline width
-    //     general_radius,       // outline radius
-    //     1,
-    //     default_bg_hue,
-    //     default_value_hue
-    // );
-
     return result;
 }
-
 
 /** -------------------------------------------------------------------------------------
  * @brief Create Image Loaded from SD Card.
@@ -16770,14 +16501,12 @@ sdcard_image_t * create_image_from_sdcard(
     // Allocate sdcard_image_t structure
     sdcard_image_t * sdcard_image = (sdcard_image_t *)heap_caps_malloc(sizeof(sdcard_image_t), MALLOC_CAP_SPIRAM);
     if (!sdcard_image) {
-        printf("ERROR: PSRAM allocation for sdcard_image_t failed\n");
         return NULL;
     }
 
     // Get file size
     sdcard_image->f_size = get_file_size(filename);
     if (sdcard_image->f_size == 0) {
-        printf("ERROR: Cannot get size of %s\n", filename);
         heap_caps_free(sdcard_image);
         return NULL;
     }
@@ -16785,7 +16514,6 @@ sdcard_image_t * create_image_from_sdcard(
     // Load image to PSRAM
     sdcard_image->bytes_in_psram = load_file_bytes_to_psram(filename, sdcard_image->f_size);
     if (!sdcard_image->bytes_in_psram) {
-        printf("ERROR: Failed to load %s to PSRAM\n", filename);
         heap_caps_free(sdcard_image);
         return NULL;
     }
@@ -16797,13 +16525,9 @@ sdcard_image_t * create_image_from_sdcard(
     sdcard_image->dsc.data_size = sdcard_image->f_size;
     sdcard_image->dsc.data = sdcard_image->bytes_in_psram; // Pointer to PSRAM data
 
-    printf("Created image descriptor: cf=%d %ldx%ld size=%ld\n", 
-           sdcard_image->dsc.header.cf, width_px, height_px, sdcard_image->f_size);
-
     // Create LVGL image object
     sdcard_image->lv_image_obj = lv_img_create(parent);
     if (!sdcard_image->lv_image_obj) {
-        printf("ERROR: Failed to create LVGL image\n");
         heap_caps_free(sdcard_image->bytes_in_psram);
         heap_caps_free(sdcard_image);
         return NULL;
@@ -16823,10 +16547,8 @@ sdcard_image_t * create_image_from_sdcard(
     if (discard_after_display) {
         heap_caps_free(sdcard_image->bytes_in_psram);
         heap_caps_free(sdcard_image);
-        printf("Discarded image data from PSRAM\n");
         return NULL;  // Return NULL when discarding
     }
-    printf("Image created successfully at %p\n", sdcard_image);
     return sdcard_image;  // Return full structure
 }
 
@@ -16846,7 +16568,6 @@ void cleanup_loading_image() {
         // Free the struct itself
         heap_caps_free(loading_image);
         loading_image = NULL;
-        printf("Loading screen image cleaned up\n");
     }
 }
 
@@ -16995,41 +16716,31 @@ void display_loading_screen() {
 void display_home_screen()
 {
     // Set Display Flag
-    printf("[display_home_screen] setting display flag\n");
     flag_display_home_screen = false;
 
     // Check Current Screen
-    printf("[display_home_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == home_screen) {
-        printf("[display_home_screen] screen already active, returning\n");
         return;
     }
-    printf("[display_home_screen] selected new screen, attempting to load new screen\n");
 
     current_screen_number = HOME_SCREEN;
 
     // Always create a fresh screen
-    printf("[display_home_screen] creating screen object\n");
     home_screen = lv_obj_create(NULL);
     
     // Load screen before creating more objects (smoother, faster load)
-    printf("[display_home_screen] loading screen\n");
     lv_scr_load_anim(home_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
-    printf("[display_home_screen] creating default screen objects\n");
     create_default_screen_objects(home_screen);
 
-    printf("[display_home_screen] invalidating display\n");
     lv_obj_invalidate(home_screen);  // Force redraw
-    printf("[display_home_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // -------------------------------- Astro Clock ----------------------------------- //
 
     // Initialize astro clock on main screen
-    printf("[display_home_screen] starting astro clocks\n");
     astro_clock_begin(
         home_screen,
         550,             // outline width (total available width)
@@ -17042,9 +16753,7 @@ void display_home_screen()
         90               // angle offset
     );
 
-    printf("[display_home_screen] invalidating display\n");
     lv_obj_invalidate(home_screen);  // Force redraw
-    printf("[display_home_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -17054,35 +16763,26 @@ void display_home_screen()
 void display_matrix_screen()
 {
     // Set Display Flag
-    printf("[display_matrix_screen] setting display flag\n");
     flag_display_matrix_screen = false;
 
     // Check Current Screen
-    printf("[display_matrix_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == matrix_screen) {
-        printf("[display_matrix_screen] screen already active, returning\n");
         return;
     }
-    printf("[display_matrix_screen] selected new screen, attempting to load new screen\n");
 
     current_screen_number = MATRIX_SCREEN;
 
     // Always create a fresh screen
-    printf("[display_matrix_screen] creating screen object\n");
     matrix_screen = lv_obj_create(NULL);
     
     // Load screen before creating more objects (smoother, faster load)
-    printf("[display_matrix_screen] loading screen\n");
     lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
-    printf("[display_matrix_screen] creating default screen objects\n");
     create_default_screen_objects(matrix_screen);
 
-    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
-    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     current_mapping_i = 0;
@@ -17116,9 +16816,7 @@ void display_matrix_screen()
         lv_obj_add_event_cb(btn, matrix_overview_grid_1_event_cb, LV_EVENT_CLICKED, NULL);
     }
 
-    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
-    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Create Function Panel
@@ -17145,9 +16843,7 @@ void display_matrix_screen()
     );
     lv_obj_add_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
 
-    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
-    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Create Mapping Panel
@@ -17174,9 +16870,7 @@ void display_matrix_screen()
     );
     lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
 
-    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
-    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Switch Panel View
@@ -17202,9 +16896,7 @@ void display_matrix_screen()
         &cobalt_alien_17  // font for text,
     );
 
-    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
-    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Select Matrix File Slot
@@ -17222,9 +16914,7 @@ void display_matrix_screen()
     lv_dropdown_set_selected(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
     lv_obj_add_event_cb(dd_matrix_file_slot_select, dd_matrix_file_slot_select_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
-    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
-    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // New Matrix
@@ -17303,9 +16993,7 @@ void display_matrix_screen()
     );
     lv_obj_add_event_cb(matrix_delete.button, matrix_delete_event_cb, LV_EVENT_CLICKED, NULL);
 
-    printf("[display_matrix_screen] invalidating display\n");
     lv_obj_invalidate(matrix_screen);  // Force redraw
-    printf("[display_matrix_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -17315,37 +17003,27 @@ void display_matrix_screen()
 void display_gps_screen()
 {
     // Set Display Flag
-    printf("[display_gps_screen] setting display flag\n");
     flag_display_gps_screen = false;
 
     // Check Current Screen
-    printf("[display_gps_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == gps_screen) {
-        printf("[display_gps_screen] screen already active, returning\n");
         return;
     }
-    printf("[display_gps_screen] selected new screen, attempting to load new screen\n");
 
     current_screen_number = GPS_SCREEN;
 
     // Always create a fresh screen
-    printf("[display_gps_screen] creating screen object\n");
     gps_screen = lv_obj_create(NULL);
     
     // Load screen before creating more objects (smoother, faster load)
-    printf("[display_gps_screen] loading screen\n");
     lv_scr_load_anim(gps_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
-    printf("[display_gps_screen] creating default screen objects\n");
     create_default_screen_objects(gps_screen);
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    printf("[display_gps_screen] invalidating display\n");
     lv_obj_invalidate(gps_screen);  // Force redraw
-    printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     current_gps_panel=0;
@@ -17396,11 +17074,8 @@ void display_gps_screen()
         &cobalt_alien_17   // font for text,
     );
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    printf("[display_gps_screen] invalidating display\n");
     lv_obj_invalidate(gps_screen);  // Force redraw
-    printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // GNGGA
@@ -17426,11 +17101,8 @@ void display_gps_screen()
         &cobalt_alien_17   // font for text,
     );
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    printf("[display_gps_screen] invalidating display\n");
     lv_obj_invalidate(gps_screen);  // Force redraw
-    printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // GNRMC
@@ -17456,11 +17128,8 @@ void display_gps_screen()
         &cobalt_alien_17   // font for text,
     );
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    printf("[display_gps_screen] invalidating display\n");
     lv_obj_invalidate(gps_screen);  // Force redraw
-    printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // GPATT
@@ -17486,18 +17155,12 @@ void display_gps_screen()
         &cobalt_alien_17   // font for text,
     );
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    printf("[display_gps_screen] invalidating display\n");
     lv_obj_invalidate(gps_screen);  // Force redraw
-    printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
-    vTaskDelay(5 / portTICK_PERIOD_MS);
 
-    printf("[display_gps_screen] invalidating display\n");
     lv_obj_invalidate(gps_screen);  // Force redraw
-    printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -17507,35 +17170,26 @@ void display_gps_screen()
 void display_gyro_screen()
 {
     // Set Display Flag
-    printf("[display_gyro_screen] setting display flag\n");
     flag_display_gyro_screen = false;
 
     // Check Current Screen
-    printf("[display_gyro_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == gyro_screen) {
-        printf("[display_gyro_screen] screen already active, returning\n");
         return;
     }
-    printf("[display_gyro_screen] selected new screen, attempting to load new screen\n");
 
     current_screen_number = GYRO_SCREEN;
 
     // Always create a fresh screen
-    printf("[display_gyro_screen] creating screen object\n");
     gyro_screen = lv_obj_create(NULL);
     
     // Load screen before creating more objects (smoother, faster load)
-    printf("[display_gyro_screen] loading screen\n");
     lv_scr_load_anim(gyro_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
-    printf("[display_gyro_screen] creating default screen objects\n");
     create_default_screen_objects(gyro_screen);
 
-    printf("[display_gyro_screen] invalidating display\n");
     lv_obj_invalidate(gyro_screen);  // Force redraw
-    printf("[display_gyro_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Gyro
@@ -17565,9 +17219,7 @@ void display_gyro_screen()
 
     // Calibrate Magnetic Field -> Button starts timer -> calibration ends on timeout.
 
-    printf("[display_gps_screen] invalidating display\n");
     lv_obj_invalidate(gyro_screen);  // Force redraw
-    printf("[display_gps_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -17577,35 +17229,26 @@ void display_gyro_screen()
 void display_mplex0_screen()
 {
     // Set Display Flag
-    printf("[display_mplex0_screen] setting display flag\n");
     flag_display_mplex0_screen = false;
 
     // Check Current Screen
-    printf("[display_mplex0_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == mplex0_screen) {
-        printf("[display_mplex0_screen] screen already active, returning\n");
         return;
     }
-    printf("[display_mplex0_screen] selected new screen, attempting to load new screen\n");
 
     current_screen_number = MPLEX0_SCREEN;
 
     // Always create a fresh screen
-    printf("[display_mplex0_screen] creating screen object\n");
     mplex0_screen = lv_obj_create(NULL);
     
     // Load screen before creating more objects (smoother, faster load)
-    printf("[display_mplex0_screen] loading screen\n");
     lv_scr_load_anim(mplex0_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
-    printf("[display_mplex0_screen] creating default screen objects\n");
     create_default_screen_objects(mplex0_screen);
 
-    printf("[display_mplex0_screen] invalidating display\n");
     lv_obj_invalidate(mplex0_screen);  // Force redraw
-    printf("[display_mplex0_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Admplex 0
@@ -17631,9 +17274,7 @@ void display_mplex0_screen()
         &cobalt_alien_17   // font for text,
     );
 
-    printf("[display_mplex0_screen] invalidating display\n");
     lv_obj_invalidate(mplex0_screen);  // Force redraw
-    printf("[display_mplex0_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -17643,35 +17284,26 @@ void display_mplex0_screen()
 void display_serial_screen()
 {
     // Set Display Flag
-    printf("[display_serial_screen] setting serial flag\n");
     flag_display_serial_screen = false;
 
     // Check Current Screen
-    printf("[display_serial_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == serial_screen) {
-        printf("[display_serial_screen] screen already active, returning\n");
         return;
     }
-    printf("[display_serial_screen] selected new screen, attempting to load new screen\n");
 
     current_screen_number = SERIAL_SCREEN;
 
     // Always create a fresh screen
-    printf("[display_serial_screen] creating screen object\n");
     serial_screen = lv_obj_create(NULL);
     
     // Load screen before creating more objects (smoother, faster load)
-    printf("[display_serial_screen] loading screen\n");
     lv_scr_load_anim(serial_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
-    printf("[display_serial_screen] creating default screen objects\n");
     create_default_screen_objects(serial_screen);
 
-    printf("[display_serial_screen] invalidating display\n");
     lv_obj_invalidate(serial_screen);  // Force redraw
-    printf("[display_serial_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // Serial
@@ -17697,9 +17329,7 @@ void display_serial_screen()
         &cobalt_alien_17   // font for text,
     );
 
-    printf("[display_serial_screen] invalidating display\n");
     lv_obj_invalidate(serial_screen);  // Force redraw
-    printf("[display_serial_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -17709,35 +17339,26 @@ void display_serial_screen()
 void display_uap_screen()
 {
     // Set Display Flag
-    printf("[display_uap_screen] setting display flag\n");
     flag_display_uap_screen = false;
 
     // Check Current Screen
-    printf("[display_uap_screen] checking sctive screen\n");
     lv_obj_t * current_screen = lv_scr_act();
     if (current_screen == uap_screen) {
-        printf("[display_uap_screen] screen already active, returning\n");
         return;
     }
-    printf("[display_uap_screen] selected new screen, attempting to load new screen\n");
 
     current_screen_number = UAP_SCREEN;
 
     // Always create a fresh screen
-    printf("[display_uap_screen] creating screen object\n");
     uap_screen = lv_obj_create(NULL);
     
     // Load screen before creating more objects (smoother, faster load)
-    printf("[display_uap_screen] loading screen\n");
     lv_scr_load_anim(uap_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
-    printf("[display_uap_screen] creating default screen objects\n");
     create_default_screen_objects(uap_screen);
 
-    printf("[display_uap_screen] invalidating display\n");
     lv_obj_invalidate(uap_screen);  // Force redraw
-    printf("[display_uap_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 
     // create UAP
@@ -17751,9 +17372,7 @@ void display_uap_screen()
         general_radius
     );
 
-    printf("[display_serial_screen] invalidating display\n");
     lv_obj_invalidate(serial_screen);  // Force redraw
-    printf("[display_serial_screen] calling timer handler\n");
     lv_timer_handler();  // Process events/render
 }
 
@@ -17821,13 +17440,13 @@ void update_display()
     // ---------------------
     // Check Load Screen Flags
     // ---------------------
-    if (flag_display_home_screen==true) {display_home_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
-    else if (flag_display_matrix_screen==true) {display_matrix_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
-    else if (flag_display_gps_screen==true) {display_gps_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
-    else if (flag_display_gyro_screen==true) {display_gyro_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
-    else if (flag_display_mplex0_screen==true) {display_mplex0_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
-    else if (flag_display_serial_screen==true) {display_serial_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
-    else if (flag_display_uap_screen==true) {display_uap_screen(); vTaskDelay(5 / portTICK_PERIOD_MS);}
+    if (flag_display_home_screen==true) {display_home_screen();}
+    else if (flag_display_matrix_screen==true) {display_matrix_screen();}
+    else if (flag_display_gps_screen==true) {display_gps_screen();}
+    else if (flag_display_gyro_screen==true) {display_gyro_screen();}
+    else if (flag_display_mplex0_screen==true) {display_mplex0_screen();}
+    else if (flag_display_serial_screen==true) {display_serial_screen();}
+    else if (flag_display_uap_screen==true) {display_uap_screen();}
     
     // ---------------------
     // KB Alnumsym
@@ -17868,7 +17487,6 @@ void update_display()
     // Title Bar
     // ---------------------
     if (main_title_bar.panel) {
-        vTaskDelay(5 / portTICK_PERIOD_MS);
 
         // Title Bar Outline
         lv_obj_set_style_outline_color(main_title_bar.panel, rainbow_outline_hue, LV_PART_MAIN);
@@ -17927,7 +17545,6 @@ void update_display()
     // System Tray
     // ---------------------
     if (system_tray.is_open) {
-        vTaskDelay(5 / portTICK_PERIOD_MS);
 
         // Rainbow System Tray Outline
         lv_obj_set_style_outline_color(system_tray.panel, rainbow_outline_hue, LV_PART_MAIN);
@@ -17951,7 +17568,6 @@ void update_display()
 
         // System Tray Human Date
         String human_date = String(satioData.local_wday_name) + " " + String(satioData.local_mday) + " " + String(satioData.local_month_name);
-        // printf("human date: %s\n", human_date.c_str());
         lv_label_set_text(system_tray.human_date, human_date.c_str());
         lv_obj_set_style_text_color(system_tray.human_date, rainbow_title_hue, LV_PART_MAIN);
 
@@ -17998,7 +17614,6 @@ void update_display()
 
         // Grid Menu 1
         if (system_tray.grid_menu_1) {
-            vTaskDelay(5 / portTICK_PERIOD_MS);
 
             uint32_t grid_child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
             for(uint32_t i = 0; i < grid_child_cnt; i++) {
@@ -18034,7 +17649,6 @@ void update_display()
         // Matrix Save Slot
         lv_dropdown_set_selected(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
 
-        
         if (current_matrix_panel_view==MATRIX_SWITCH_PANEL_NUMBER_OVERVIEW) {
 
             // Switch Panel
@@ -18055,7 +17669,6 @@ void update_display()
                 for(uint32_t i = 0; i < grid_child_cnt; i++) {
                     lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
 
-                    vTaskDelay(1 / portTICK_PERIOD_MS); // yield
 
                     /* Computer Assist (yellow outline) */
                     if (matrixData.computer_assist[0][i]==true) {lv_obj_set_style_outline_color(btn, lv_color_make(255, 255, 0), LV_PART_MAIN);}
@@ -18087,7 +17700,6 @@ void update_display()
             lv_obj_set_style_text_color(matrix_switch_panel.switch_mapping_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
             lv_obj_set_style_bg_color(matrix_switch_panel.switch_mapping_panel.panel, default_btn_off_bg, LV_PART_MAIN);
 
-            
             if (mfc.panel) {
                 lv_obj_set_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN, true);
                 lv_obj_set_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN, false);
@@ -18233,7 +17845,6 @@ void update_display()
                     lv_obj_set_style_text_color(mfc.indicator_switch_intent, lv_color_make(58, 58, 58), LV_PART_MAIN);
                 }
 
-
                 // ----------------------------------------------------------------------------------------------------------------------------
 
                 // Computer Assist
@@ -18280,7 +17891,6 @@ void update_display()
             lv_obj_set_style_text_color(matrix_switch_panel.switch_mapping_panel.label, rainbow_contrast_value_hue, LV_PART_MAIN);
             lv_obj_set_style_bg_color(matrix_switch_panel.switch_mapping_panel.panel, default_btn_on_bg, LV_PART_MAIN);
 
-            
             if (mcc.panel) {
                 lv_obj_set_flag(matrix_overview_grid_1, LV_OBJ_FLAG_HIDDEN, true);
                 lv_obj_set_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN, true);
@@ -18394,7 +18004,6 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_location_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
-                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // ────────────────────────────────────────────────
                 // Local Year Day
@@ -18411,7 +18020,6 @@ void update_display()
                 // ────────────────────────────────────────────────
                 lv_label_set_text(satio_c.val_local_month_name, String(satioData.local_month_name).c_str());
 
-                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // ────────────────────────────────────────────────
                 // Formatted Local Time
@@ -18468,7 +18076,6 @@ void update_display()
                 // ────────────────────────────────────────────────
                 lv_label_set_text(satio_c.val_rtc_unixtime, String(satioData.rtc_unixtime).c_str());
 
-                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // ────────────────────────────────────────────────
                 // UTC Second Offset
@@ -18607,7 +18214,6 @@ void update_display()
                     lv_obj_set_style_text_color(satio_c.btn_ground_heading_mode_user.label, rainbow_contrast_value_hue, LV_PART_MAIN);
                 }
 
-                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // ────────────────────────────────────────────────
                 // Mileage
@@ -18787,21 +18393,6 @@ void update_display()
                         String(satioData.LMST_photo_period_schedule.dawn_end[AstronomicalNight])
                     ).c_str()
                 );
-
-                // // ────────────────────────────────────────────────
-                // // LMST Sunrise
-                // // ────────────────────────────────────────────────
-                // lv_label_set_text(satio_c.val_LMST_sunrise, String(satioData.LMST_photo_period_schedule.dawn_start[SunriseSunset]).c_str());
-
-                // // ────────────────────────────────────────────────
-                // // LMST Sunset
-                // // ────────────────────────────────────────────────
-                // lv_label_set_text(satio_c.val_LMST_sunset, String(satioData.LMST_photo_period_schedule.dusk_start[SunriseSunset]).c_str());
-
-                // // ────────────────────────────────────────────────
-                // // LMST Golden Hour Dawn
-                // // ────────────────────────────────────────────────
-                // // lv_label_set_text(satio_c.val_LMST_golden_hour_dawn, String(satioData.LMST_photo_period_schedule.golden_hour_dawn[SunriseSunset]).c_str());
             }
         }
 
@@ -18813,7 +18404,6 @@ void update_display()
                 lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
                 // Show
                 lv_obj_remove_flag(gngga_c.panel, LV_OBJ_FLAG_HIDDEN);
-                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
                 lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
@@ -18858,7 +18448,6 @@ void update_display()
                 lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
                 // Show
                 lv_obj_remove_flag(gnrmc_c.panel, LV_OBJ_FLAG_HIDDEN);
-                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
                 lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
@@ -18910,7 +18499,6 @@ void update_display()
                 lv_obj_add_flag(satio_c.panel, LV_OBJ_FLAG_HIDDEN);
                 // Show
                 lv_obj_remove_flag(gpatt_c.panel, LV_OBJ_FLAG_HIDDEN);
-                vTaskDelay(5 / portTICK_PERIOD_MS);
 
                 // Switch Panel
                 lv_obj_set_style_text_color(gps_switch_panel.switch_satio_panel.label, default_btn_off_value_hue, LV_PART_MAIN);
@@ -19084,10 +18672,6 @@ void update_display()
         lv_label_set_text(uap_c.longitude_label, String("LON " + String(satioData.degrees_longitude, 7)).c_str());
         lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
         lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
-
-        // lv_label_set_text(uap_c.roll_label, String("ROL " + String(gyroData.gyro_0_ang_x, 2)).c_str());
-        // lv_label_set_text(uap_c.pitch_label, String("PIT " + String(gyroData.gyro_0_ang_y, 2)).c_str());
-        // lv_label_set_text(uap_c.yaw_label, String("YAW " + String(gyroData.gyro_0_ang_z, 2)).c_str());
     }
 
     lv_timer_resume(display_timer);
@@ -19122,6 +18706,7 @@ void setColorsCustom()
 /** -------------------------------------------------------------------------------------
  * @brief Initialize LVGL for this device.
  */
+#define LVGL_DISPLAY_TIMING 50 // higher: gives other tasks higher priority / lower: give lvgl higher priority
 void initSatIOUI() {
     // --------------------------------------------------------------
     // LVGL Initialization
@@ -19139,12 +18724,12 @@ void initSatIOUI() {
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     // Set LVGL tick period
-    lv_timer_set_period(lv_timer_get_next(NULL), 10);  // ms
+    lv_timer_set_period(lv_timer_get_next(NULL), LVGL_DISPLAY_TIMING);  // ms
     
     // Initialize display brightness and backlight
     bsp_display_brightness_init();
     bsp_display_backlight_on();
-    slider_brightness_value = 80;
+    slider_brightness_value = 100;
     bsp_display_brightness_set(slider_brightness_value);
 
     // Create Screen Objects
@@ -19240,5 +18825,5 @@ void initSatIOUI() {
  * @brief Start's Update Display Timer.
  */
 void satio_ui_begin() {
-    display_timer = lv_timer_create(update_display_on_timer, 10, NULL);
+    display_timer = lv_timer_create(update_display_on_timer, LVGL_DISPLAY_TIMING, NULL);
 }

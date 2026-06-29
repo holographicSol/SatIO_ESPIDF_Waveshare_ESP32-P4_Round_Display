@@ -64,22 +64,22 @@ class SiderealObjects {
 	float getStarMagnitude(void);
 	boolean selectStarTable(int n);
 
-	char* printStarName(int n);
-	char* printMessierName(int n);
-	char* printCaldwellName(int n);
+	const char* printStarName(int n);
+	const char* printMessierName(int n);
+	const char* printCaldwellName(int n);
 
-	char* printStarType(int n);
-	char* printNGCType(int n);
-	char* printICType(int n);
-	char* printMessierType(int n);
-	char* printCaldwellType(int n);
-	char* printHerschel400Type(int n);
+	const char* printStarType(int n);
+	const char* printNGCType(int n);
+	const char* printICType(int n);
+	const char* printMessierType(int n);
+	const char* printCaldwellType(int n);
+	const char* printHerschel400Type(int n);
 
-	char* printNGCCon(int n);
-	char* printICCon(int n);
-	char* printMessierCon(int n);
-	char* printCaldwellCon(int n);
-	char* printHerschel400Con(int n);
+	const char* printNGCCon(int n);
+	const char* printICCon(int n);
+	const char* printMessierCon(int n);
+	const char* printCaldwellCon(int n);
+	const char* printHerschel400Con(int n);
 
 	double printStarDist(int n);
 	double printMessierDist(int n);
