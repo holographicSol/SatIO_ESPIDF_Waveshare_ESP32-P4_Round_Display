@@ -588,7 +588,7 @@ static void PrintMappingNData(int map_slot) {
     printf("-----------------------------------------------------\n");
     printf("[slot] %d\n", map_slot);
     printf("[map_mode] %d\n", mappingData.map_mode[0][map_slot]);
-    printf("[map slot idx] %d\n", matrixData.index_mapped_value[0][map_slot]);
+    printf("[map slot idx] %d\n", (int)matrixData.index_mapped_value[0][map_slot]);
     printf("[map config 0] %ld\n", mappingData.mapping_config[0][map_slot][0]);
     printf("[map config 1] %ld\n", mappingData.mapping_config[0][map_slot][1]);
     printf("[map config 2] %ld\n", mappingData.mapping_config[0][map_slot][2]);
@@ -608,7 +608,7 @@ static void PrintMatrixNData(int matrix_index) {
     printf("-----------------------------------------------------\n");
     printf("[matrix switch] %d\n", matrix_index);
     printf("[computer assist] %d\n", matrixData.computer_assist[0][matrix_index]);
-    printf("[output mode] %d\n", matrixData.output_mode[0][matrix_index]);
+    printf("[output mode] %d\n", (int)matrixData.output_mode[0][matrix_index]);
     printf("[flux] %lu\n", matrixData.flux_value[0][matrix_index]);
     printf("[pwm] 0: %lu 1: %lu\n",
       matrixData.output_pwm[0][matrix_index][0],
@@ -621,7 +621,7 @@ static void PrintMatrixNData(int matrix_index) {
       printf("[function %d name] %s\n",
         Fi, matrixData.matrix_function_names[ matrixData.matrix_function[0][matrix_index][Fi] ]);
       printf("[function %d matrix_function_operator_name] %d\n",
-        Fi, matrixData.matrix_switch_operator_index[0][matrix_index][Fi]);
+        Fi, (int)matrixData.matrix_switch_operator_index[0][matrix_index][Fi]);
       printf("[function %d inverted] %d\n",
         Fi, matrixData.matrix_switch_inverted_logic[0][matrix_index][Fi]);
       printf("[function %d x] %f\n",
@@ -679,7 +679,7 @@ void setMatrixFunction(int switch_idx, int func_idx, int func_n) {
     matrixData.matrix_function[0][switch_idx][func_idx]=func_n;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
-  printf("matrix_function %d\n", matrixData.matrix_function[0][switch_idx][func_idx]);
+  printf("matrix_function %d\n", (int)matrixData.matrix_function[0][switch_idx][func_idx]);
 }
 
 void setMatrixFunctionXComparitorMode(int switch_idx, int func_idx, int comparitor_mode) {

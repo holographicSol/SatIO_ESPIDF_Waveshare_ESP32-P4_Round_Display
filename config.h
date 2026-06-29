@@ -462,4 +462,4 @@ extern bool ISR_Bool_MultiDisplayController_0;
 #define INDEX_SIDEREAL_HERSHEL400_TABLE 5    
 #define INDEX_SIDEREAL_OTHER_OBJECTS_TABLE 6
 
-#endif // CONFIG_H
+#endif /* CONFIG_H */

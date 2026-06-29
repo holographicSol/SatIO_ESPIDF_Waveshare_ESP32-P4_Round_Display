@@ -1,6 +1,28 @@
 /*
   Matrix Library. Written by Benjamin Jack Cullen.
 
+  Evaluates a configurable bank of switches. Each switch combines up to
+  MAX_MATRIX_SWITCH_FUNCTIONS named functions (time of day, GNSS fields,
+  IMU axes, planetary positions, etc.) into a single high/low intention,
+  which is then translated into an output value for a port controller.
+
+  MISRA-relevant conventions used throughout this module:
+  - Every numeric field uses a fixed-width type from <stdint.h>, so the
+    size and signedness of every value is explicit and does not depend on
+    the target platform.
+  - Comparator text is rendered into a caller-owned, fixed-size buffer
+    (get_matrix_function_comparitor) rather than into a dynamically
+    allocated String, so no heap allocation occurs while evaluating
+    switches.
+  - Every per-switch and per-function array carries a leading dimension of
+    size 1. A C array cannot grow within an existing dimension, so this
+    reserved dimension lets a future revision add a second bank of
+    switches by widening that dimension, without changing every array's
+    rank or every call site that indexes into it.
+  - Every switch statement has an explicit default clause, and every
+    switch-clause is terminated by an explicit break or return.
+
+  Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #ifndef MATRIX_H
@@ -8,115 +30,126 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include "config.h"
 #include "i2c_helper.h"
 
 /**
  * @struct MatrixStruct
+ * @brief Configuration and live state for every matrix switch.
  */
 struct MatrixStruct {
-  // Count matrix executions per second.
+  // Number of times matrixSwitch() has completed, sampled once per second.
   int64_t i_count_matrix;
   // Load matrix file automatically every time the system starts.
   bool load_matrix_on_startup;
-  // Count computer assist enabled.
-  int i_computer_assist_enabled;
-  // Count computer assist disabled.
-  int i_computer_assist_disabled;
-  // Count intention high
-  int i_switch_intention_high;
-  // Count intention low
-  int i_switch_intention_low;
-  // Count intention high
-  int i_computer_intention_high;
-  // Count intention low
-  int i_computer_intention_low;
-  // Checksummed sentence
+  // Number of switches with computer_assist currently enabled.
+  int32_t i_computer_assist_enabled;
+  // Number of switches with computer_assist currently disabled.
+  int32_t i_computer_assist_disabled;
+  // Number of switches with switch_intention currently true.
+  int32_t i_switch_intention_high;
+  // Number of switches with switch_intention currently false.
+  int32_t i_switch_intention_low;
+  // Number of switches with computer_intention currently true.
+  int32_t i_computer_intention_high;
+  // Number of switches with computer_intention currently false.
+  int32_t i_computer_intention_low;
+  // Checksummed sentence describing the current matrix configuration.
   char matrix_sentence[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
 
-  // Enable/disable computer assist.
+  // Enable/disable computer assist per switch. See struct-level note on the
+  // leading dimension.
   bool computer_assist[1][MAX_MATRIX_SWITCHES];
 
-  // Final switch high/low intention (true/false).
+  // Final switch high/low intention (true/false) per switch.
   bool switch_intention[1][MAX_MATRIX_SWITCHES];
   bool prev_switch_intention[1][MAX_MATRIX_SWITCHES];
 
-  // Computer high/low intention (true/false). Is switch logic true or false.
+  // Computer-evaluated high/low intention per switch: the result of the
+  // switch's function logic before computer_assist gates whether it
+  // reaches switch_intention. This provides opportunities that can be derived from
+  // the ability here to observe computer intention, with and without computer actually
+  // switching.
   bool computer_intention[1][MAX_MATRIX_SWITCHES];
 
-  // Matrix switch ports. Values should correspond to pins on the port controller.
+  // Matrix switch port per switch. Values correspond to pins on the port
+  // controller; -1 marks a switch as unmapped.
   int16_t matrix_port_map[1][MAX_MATRIX_SWITCHES];
 
-  // Output values. Values that will be sent to the port controller (digital/mapped).
+  // Output value per switch: the value sent to the port controller
+  // (digital/mapped).
   int32_t output_value[1][MAX_MATRIX_SWITCHES];
   int32_t prev_output_value[1][MAX_MATRIX_SWITCHES];
 
-  // Fluctuation threshold. No output unless threshold breached+- beyond previous output value.
-  uint32_t flux_value[1][MAX_MATRIX_SWITCHES]={};
+  // Fluctuation threshold per switch. No output write unless the new
+  // output value differs from prev_output_value by more than this amount.
+  uint32_t flux_value[1][MAX_MATRIX_SWITCHES];
 
-  // Override output values (computer assist should never ammend these values).
-  signed long override_output_value[1][MAX_MATRIX_SWITCHES];
-  signed long override_prev_output_value[1][MAX_MATRIX_SWITCHES];
-
-  /**
-   * Output mode.
-   * 
-   * 0 : matrix logic (digital) sets output_value as switch_intention value.
-   * 1 : mapped value (analog/digital) sets output_value as mapped value.
-   */
-  int output_mode[1][MAX_MATRIX_SWITCHES];
+  // Override output value per switch (computer assist never amends these).
+  int32_t override_output_value[1][MAX_MATRIX_SWITCHES];
+  int32_t override_prev_output_value[1][MAX_MATRIX_SWITCHES];
 
   /**
-   * Output mode names.
-   * 
-   * 0 : matrix logic (digital) sets output_value as switch_intention value.
-   * 1 : mapped value (analog/digital) sets output_value as mapped value.
-   */
-  char output_mode_names[MAX_MATRIX_OUTPUT_MODES][MAX_GLOBAL_ELEMENT_SIZE]={};
-
-  /**
-   * Map slot index.
+   * Output mode per switch.
    *
-   * Map slot index order is aligned with matrix slot order.
-   * 
-   * Each slot contains an index number to access any map slot (for potential shareing).
-   * 
+   * 0 : matrix logic (digital) sets output_value as switch_intention value.
+   * 1 : mapped value (analog/digital) sets output_value as mapped value.
    */
-  int index_mapped_value[1][MAX_MAP_SLOTS];
+  int32_t output_mode[1][MAX_MATRIX_SWITCHES];
 
-  // Matrix switch write required.
+  /**
+   * Output mode names, indexed by the output_mode values above.
+   */
+  char output_mode_names[MAX_MATRIX_OUTPUT_MODES][MAX_GLOBAL_ELEMENT_SIZE];
+
+  /**
+   * Map slot index per switch.
+   *
+   * Map slot index order is aligned with matrix switch order. Each switch
+   * holds an index number used to read any map slot (so map slots can be
+   * shared between switches).
+   */
+  uint32_t index_mapped_value[1][MAX_MAP_SLOTS];
+
+  // True when a switch's output value has changed and still needs to be
+  // written to the output port controller.
   bool matrix_switch_write_required[1][MAX_MATRIX_SWITCHES];
 
   /**
-   * Output Pulse Width Modulation.
-   * 
+   * Output Pulse Width Modulation per switch.
+   *
    * 0 : uS time off period (0uS = remain on).
    * 1 : uS time on period  (0uS = remain off).
    */
   uint32_t output_pwm[1][MAX_MATRIX_SWITCHES][2];
 
   /**
-   * Inverted logic Names.
-   * 
+   * Inverted logic names, indexed by the matrix_switch_inverted_logic
+   * values below.
+   *
    * 0: Standard
    * 1: Inverted
    */
-  char inverted_logic_names[MAX_MATRIX_FUNCTION_INVERTED_LOGIC_MODES][MAX_GLOBAL_ELEMENT_SIZE]={};
+  char inverted_logic_names[MAX_MATRIX_FUNCTION_INVERTED_LOGIC_MODES][MAX_GLOBAL_ELEMENT_SIZE];
 
   /**
-   * Inverted logic.
-   * 
-   * If true then matrix switch function logic return true if false, false if true. 
+   * Inverted logic per switch function.
+   *
+   * When true, the named function's comparison result is logically
+   * negated before it is combined into the switch's intention.
+   * 'if' / 'if not'
    */
   bool matrix_switch_inverted_logic[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
-  
 
-  // Matrix switch function name index (default off = 0).
-  int matrix_function[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
+  // Function name index per switch function slot (default off = 0). One of
+  // the INDEX_MATRIX_SWITCH_FUNCTION_* / INDEX_MATRIX_* constants in
+  // config.h; see matrix_function_names below for the full list.
+  int32_t matrix_function[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
 
   /**
-   * Matrix function values.
-   * 
+   * Matrix function comparison values, per switch function slot.
+   *
    * 0 : Value X
    * 1 : Value Y
    * 2 : Value Z
@@ -124,47 +157,44 @@ struct MatrixStruct {
   double matrix_function_xyz[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS][3];
 
   /**
-   * Matrix function value mode.
-   * 
+   * Matrix function value mode per switch function slot.
+   *
    * 0 : Value X : Mode=0 User Value  Mode=1 System Value
    * 1 : Value Y : Mode=0 User Value  Mode=1 System Value
    * 2 : Value Z : Mode=0 User Value  Mode=1 System Value
    */
-  int matrix_function_mode_xyz[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS][3];
+  int32_t matrix_function_mode_xyz[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS][3];
 
   /**
-   * Matrix Comparator Modes
-   * 
+   * Matrix function value mode names, indexed by the
+   * matrix_function_mode_xyz values above.
+   *
    * 0: User
    * 1: System
    */
-  char matrix_function_mode_xyz_name[MAX_MATRIX_FUNCTION_XYZ_MODES][MAX_GLOBAL_ELEMENT_SIZE]={};
+  char matrix_function_mode_xyz_name[MAX_MATRIX_FUNCTION_XYZ_MODES][MAX_GLOBAL_ELEMENT_SIZE];
 
   /**
-   * Matrix switch function operators.
-   * 
+   * Matrix switch function operator index per switch function slot.
+   *
    * 0 : None
    * 1 : Equal
    * 2 : Over
    * 3 : Under
    * 4 : In Range
    */
-  int matrix_switch_operator_index[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
+  int32_t matrix_switch_operator_index[1][MAX_MATRIX_SWITCHES][MAX_MATRIX_SWITCH_FUNCTIONS];
 
   /**
-   * Matrix switch function operator names.
-   * 
-   * 0 : None
-   * 1 : Equal
-   * 2 : Over
-   * 3 : Under
-   * 4 : In Range
+   * Matrix switch function operator names, indexed by the
+   * matrix_switch_operator_index values above.
    */
-  char matrix_function_operator_name[MAX_MATRIX_OPERATORS][MAX_GLOBAL_ELEMENT_SIZE]={};
+  char matrix_function_operator_name[MAX_MATRIX_OPERATORS][MAX_GLOBAL_ELEMENT_SIZE];
 
   /**
-   * Matrix switch function names.
-   * 
+   * Matrix switch function names, indexed by the matrix_function values
+   * above.
+   *
     [0] NONE
     [1] ON
     [2] Switch Link
@@ -278,75 +308,110 @@ struct MatrixStruct {
     [110] SD Card Inserted
     [111] SD Card Mounted
     [112] Port Con 0
+    [113] Local Mean Solar Time
+    [114] Local Mean Solar Date
+    [115] Local Sidereal Time
+    [116] Local Zenith RA
+    [117] Local Zenith Dec
+    [118] Gyro 0 RA
+    [119] Gyro 0 Dec
    */
-  char matrix_function_names[MAX_MATRIX_FUNCTION_NAMES][MAX_GLOBAL_ELEMENT_SIZE]={};
-  
+  char matrix_function_names[MAX_MATRIX_FUNCTION_NAMES][MAX_GLOBAL_ELEMENT_SIZE];
+
+  // Raw input value read from the input port controller, per input pin.
   double input_value[1][MAX_MATRIX_SWITCHES];
-  signed int input_port_map[1][MAX_MATRIX_SWITCHES];
+  // Input port map: input port controller pin index, per input pin.
+  int32_t input_port_map[1][MAX_MATRIX_SWITCHES];
 };
 extern struct MatrixStruct matrixData;
 
 /**
- * Matrix switch calculates all logic accross all switches.
- * @return Returns true each completion
+ * @brief Evaluate every matrix switch's function logic and update its
+ *        intention.
+ *
+ * For each switch, evaluates its configured functions in order, combines
+ * them into computer_intention, and (when computer_assist is enabled for
+ * that switch) copies the result into switch_intention.
+ *
+ * @return Always true; the return value exists so callers can use the
+ *         same call-and-check pattern used by other periodic update
+ *         functions in this codebase.
  */
 bool matrixSwitch(void);
 
 /**
- * @brief Get Matrix Switch Funstion Comparator.
- * 
- * @param index Specify target matrix value comparitor.
+ * @brief Render the textual form of a System-mode comparator value.
+ *
+ * When a switch function's X/Y/Z value mode is System rather than User,
+ * the function name index itself selects which system value to compare
+ * against; this renders that value as text so the caller can parse it
+ * back into a double alongside the user-supplied values.
+ *
+ * @param index_matrix_value_comparitor One of the
+ *        INDEX_MATRIX_SWITCH_FUNCTION_* constants (config.h) identifying
+ *        which system value to render. Any value with no matching system
+ *        value renders as "NAN".
+ * @param out Caller-owned buffer that receives the rendered,
+ *        null-terminated text.
+ * @param out_size Size of out, in bytes.
  */
-String get_matrix_function_comparitor(int index_matrix_value_comparitor);
+void get_matrix_function_comparitor(int32_t index_matrix_value_comparitor, char *out, size_t out_size);
 
 /**
- * Count switch related stats.
- * @return Returns None
+ * @brief Recompute the computer-assist and intention counters.
+ * @return None.
  */
 void SwitchStat(void);
 
 /**
- * Clear all matrix switch logic.
- * @return Returns None
+ * @brief Reset every matrix switch to its default (unmapped, all
+ *        functions cleared) state.
+ * @return None.
  */
 void set_all_matrix_default(void);
 
 /**
- * Determines which output values will be set according to output_mode.
- * @return Returns None
+ * @brief Recompute every switch's output_value from its output_mode, and
+ *        flag switches whose output value moved by more than flux_value.
+ * @return None.
  */
-void setOutputValues();
+void setOutputValues(void);
 
 /**
- * Override all computer assist.
- * This can be csequentially different from disabling all computer assist. 
- * @return Returns None
+ * @brief Disable computer assist for every switch, zero its override
+ *        value, and flag it for an output write.
+ *
+ * This can leave switches in a different state than disabling
+ * computer_assist alone would, because it also resets the override value.
+ *
+ * @return None.
  */
-void override_all_computer_assists();
+void override_all_computer_assists(void);
 
 /**
- * Instruct portcontroller to clear all stored instructions.
+ * @brief Instruct the output port controller to clear all stored
+ *        instructions.
  * @param wire I2C bus instance.
- * @param address I2C address of output portcontroller.
- * @return Returns None
+ * @param address I2C address of the output port controller.
+ * @return None.
  */
 void writeOutputPortControllerClear(TwoWire &wire, int address);
 
 /**
- * @brief Write all stored instructions to output portcontroller.
+ * @brief Write every switch flagged by matrix_switch_write_required to
+ *        the output port controller.
  * @param wire I2C bus instance.
- * @param address I2C address of output portcontroller.
- * @return Returns None
+ * @param address I2C address of the output port controller.
+ * @return None.
  */
 void writeOutputPortControllerSetPins(TwoWire &wire, int address);
 
 /**
- * @brief Read all input states from input portcontroller.
+ * @brief Read every input pin state from the input port controller.
  * @param wire I2C bus instance.
- * @param address I2C address of input portcontroller.
- * @return Returns true if successful.
+ * @param address I2C address of the input port controller.
+ * @return true if the request/response sequence completed.
  */
-bool readInputPortControllerReadPins(TwoWire &wire,
-                                 int address);
+bool readInputPortControllerReadPins(TwoWire &wire, int address);
 
-#endif
+#endif /* MATRIX_H */
