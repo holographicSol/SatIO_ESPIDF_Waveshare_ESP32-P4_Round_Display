@@ -1696,11 +1696,6 @@ extern bool flag_display_uap_screen;
 void update_display();
 
 /** -------------------------------------------------------------------------------------
- * @brief Timer runs update_display function.
- */
-void update_display_on_timer(lv_timer_t * timer);
-
-/** -------------------------------------------------------------------------------------
  * @brief Initialize LVGL for this device.
  */
 void initSatIOUI();

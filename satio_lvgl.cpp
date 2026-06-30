@@ -71,8 +71,6 @@
  * @brief Screens
  */
 
-lv_timer_t * display_timer=NULL;
-
 lv_obj_t * loading_screen;
 lv_obj_t * home_screen;
 lv_obj_t * matrix_screen;
@@ -753,7 +751,7 @@ void system_tray_grid_menu_1_event_cb(lv_event_t * e)
         uint32_t btn_index = 0;
         uint32_t child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
         for(uint32_t i = 0; i < child_cnt; i++) {
-            vTaskDelay(pdMS_TO_TICKS(5));
+            // vTaskDelay(pdMS_TO_TICKS(5));
             if(lv_obj_get_child(system_tray.grid_menu_1, i) == btn) {
                 btn_index = i;
                 break;
@@ -794,7 +792,7 @@ void matrix_overview_grid_1_event_cb(lv_event_t * e)
         uint32_t btn_index = 0;
         uint32_t child_cnt = lv_obj_get_child_cnt(matrix_overview_grid_1);
         for(uint32_t i = 0; i < child_cnt; i++) {
-            vTaskDelay(pdMS_TO_TICKS(5));
+            // vTaskDelay(pdMS_TO_TICKS(5));
             if(lv_obj_get_child(matrix_overview_grid_1, i) == btn) {
                 btn_index = i;
                 break;
@@ -1958,7 +1956,7 @@ system_tray_t create_system_tray(
     // Grid Menu 1 Configuration
     uint32_t grid_child_cnt = lv_obj_get_child_cnt(tray.grid_menu_1);
     for(uint32_t i = 0; i < grid_child_cnt; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         lv_obj_t * btn = lv_obj_get_child(tray.grid_menu_1, i);
         // Add callback
         lv_obj_add_event_cb(btn, system_tray_grid_menu_1_event_cb, LV_EVENT_CLICKED, NULL);
@@ -14011,7 +14009,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_switch_index_select_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < 45; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         snprintf(dd_switch_index_select_name, sizeof(dd_switch_index_select_name), "%d", i);
         lv_dropdown_add_option(result.dd_switch_index_select, dd_switch_index_select_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14053,7 +14051,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_function_index_select_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_SWITCH_FUNCTIONS; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         snprintf(dd_function_index_select_name, sizeof(dd_function_index_select_name), "%d", i);
         lv_dropdown_add_option(result.dd_function_index_select, dd_function_index_select_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14118,7 +14116,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_function_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         snprintf(dd_function_name, sizeof(dd_function_name), "%s", matrixData.matrix_function_names[i]);
         lv_dropdown_add_option(result.dd_function_name, dd_function_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14206,7 +14204,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_x_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         snprintf(dd_x_name, sizeof(dd_x_name), "%s", matrixData.matrix_function_names[i]);
         lv_dropdown_add_option(result.dd_x, dd_x_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14317,7 +14315,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_y_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         snprintf(dd_y_name, sizeof(dd_y_name), "%s", matrixData.matrix_function_names[i]);
         lv_dropdown_add_option(result.dd_y, dd_y_name, LV_DROPDOWN_POS_LAST);
     }
@@ -14428,7 +14426,7 @@ matrix_function_container_t create_matrix_function_container(
     );
     char dd_z_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MATRIX_FUNCTION_NAMES; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         snprintf(dd_z_name, sizeof(dd_z_name), "%s", matrixData.matrix_function_names[i]);
         lv_dropdown_add_option(result.dd_z, dd_z_name, LV_DROPDOWN_POS_LAST);
     }
@@ -15206,7 +15204,7 @@ mapping_config_container_t create_mapping_config_container(
     );
     char dd_slot_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MAP_SLOTS; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         snprintf(dd_slot_name, sizeof(dd_slot_name), "%s", String(i).c_str()); // todo: make human map mode name array in mapping.cpp
         lv_dropdown_add_option(result.dd_slot, dd_slot_name, LV_DROPDOWN_POS_LAST);
     }
@@ -15269,7 +15267,7 @@ mapping_config_container_t create_mapping_config_container(
     );
     char dd_c0_name[MAX_GLOBAL_ELEMENT_SIZE];
     for (int i = 0; i < MAX_MAPPABLE_VALUES; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         snprintf(dd_c0_name, sizeof(dd_c0_name), "%s", mappingData.char_map_value[i]);
         lv_dropdown_add_option(result.dd_c0, dd_c0_name, LV_DROPDOWN_POS_LAST);
     }
@@ -15922,7 +15920,7 @@ uap_t create_uap(
     
     // Draw degree marks
     for (int degree = 0; degree < 360; degree += 5) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         // Convert degree to radians (0° is at top, increases clockwise)
         float angle_rad = (degree - 90) * M_PI / 180.0f;  // -90 to start from top
         
@@ -16186,7 +16184,7 @@ uap_t create_uap(
     if (pitch_tape_text[0] == '\0') {
         for (int rep = 0; rep < 3; rep++) {
             for (int pitch = 90; pitch >= -90; pitch--) {
-                vTaskDelay(pdMS_TO_TICKS(5));
+                // vTaskDelay(pdMS_TO_TICKS(5));
                 char tmp[16];
                 snprintf(tmp, sizeof(tmp), "%+03d\n\n", pitch);
                 strcat(pitch_tape_text, tmp);
@@ -16351,7 +16349,7 @@ uap_t create_uap(
     if (gh_tape_text[0] == '\0') {
         for (int rep = 0; rep < 3; rep++) {
             for (int i = 0; i < 360; i++) {
-                vTaskDelay(pdMS_TO_TICKS(5));
+                // vTaskDelay(pdMS_TO_TICKS(5));
                 char tmp[8];
                 snprintf(tmp, sizeof(tmp), "%03d  ", i);
                 strcat(gh_tape_text, tmp);
@@ -16749,9 +16747,6 @@ void display_home_screen()
     // Defaults
     create_default_screen_objects(home_screen);
 
-    lv_obj_invalidate(home_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // -------------------------------- Astro Clock ----------------------------------- //
 
     // Initialize astro clock on main screen
@@ -16766,9 +16761,6 @@ void display_home_screen()
         0,               // pos y
         90               // angle offset
     );
-
-    lv_obj_invalidate(home_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 }
 
 /** -------------------------------------------------------------------------------------
@@ -16795,9 +16787,6 @@ void display_matrix_screen()
 
     // Defaults
     create_default_screen_objects(matrix_screen);
-
-    lv_obj_invalidate(matrix_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 
     current_mapping_i = 0;
     current_matrix_i = 0;
@@ -16826,13 +16815,10 @@ void display_matrix_screen()
     // Plug in general event callback handler
     uint32_t grid_menu_x_count = lv_obj_get_child_cnt(matrix_overview_grid_1);
     for(uint32_t i = 0; i < grid_menu_x_count; i++) {
-        vTaskDelay(pdMS_TO_TICKS(5));
+        // vTaskDelay(pdMS_TO_TICKS(5));
         lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
         lv_obj_add_event_cb(btn, matrix_overview_grid_1_event_cb, LV_EVENT_CLICKED, NULL);
     }
-
-    lv_obj_invalidate(matrix_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 
     // Create Function Panel
     mfc = create_matrix_function_container(
@@ -16858,9 +16844,6 @@ void display_matrix_screen()
     );
     lv_obj_add_flag(mfc.panel, LV_OBJ_FLAG_HIDDEN);
 
-    lv_obj_invalidate(matrix_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // Create Mapping Panel
     mcc = create_mapping_config_container(
         matrix_screen,    // parent
@@ -16885,9 +16868,6 @@ void display_matrix_screen()
     );
     lv_obj_add_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN);
 
-    lv_obj_invalidate(matrix_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // Switch Panel View
     matrix_switch_panel = create_matrix_switch_panel(
         matrix_screen,    // parent
@@ -16911,9 +16891,6 @@ void display_matrix_screen()
         &cobalt_alien_17  // font for text,
     );
 
-    lv_obj_invalidate(matrix_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // Select Matrix File Slot
     dd_matrix_file_slot_select = create_dropdown_menu(
         matrix_screen,     // parent
@@ -16928,9 +16905,6 @@ void display_matrix_screen()
     );
     lv_dropdown_set_selected(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
     lv_obj_add_event_cb(dd_matrix_file_slot_select, dd_matrix_file_slot_select_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
-
-    lv_obj_invalidate(matrix_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 
     // New Matrix
     matrix_new = create_button(
@@ -17007,9 +16981,6 @@ void display_matrix_screen()
         default_btn_on_value_hue
     );
     lv_obj_add_event_cb(matrix_delete.button, matrix_delete_event_cb, LV_EVENT_CLICKED, NULL);
-
-    lv_obj_invalidate(matrix_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 }
 
 /** -------------------------------------------------------------------------------------
@@ -17036,10 +17007,6 @@ void display_gps_screen()
 
     // Defaults
     create_default_screen_objects(gps_screen);
-
-
-    lv_obj_invalidate(gps_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 
     current_gps_panel=0;
 
@@ -17089,10 +17056,6 @@ void display_gps_screen()
         &cobalt_alien_17   // font for text,
     );
 
-
-    lv_obj_invalidate(gps_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // GNGGA
     gngga_c = create_gngga_panel(
         gps_screen,        // parent
@@ -17115,10 +17078,6 @@ void display_gps_screen()
         &cobalt_alien_25,  // font for titles,
         &cobalt_alien_17   // font for text,
     );
-
-
-    lv_obj_invalidate(gps_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 
     // GNRMC
     gnrmc_c = create_gnrmc_panel(
@@ -17143,10 +17102,6 @@ void display_gps_screen()
         &cobalt_alien_17   // font for text,
     );
 
-
-    lv_obj_invalidate(gps_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // GPATT
     gpatt_c = create_gpatt_panel(
         gps_screen,        // parent
@@ -17169,14 +17124,6 @@ void display_gps_screen()
         &cobalt_alien_25,  // font for titles,
         &cobalt_alien_17   // font for text,
     );
-
-
-    lv_obj_invalidate(gps_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
-
-    lv_obj_invalidate(gps_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 }
 
 /** -------------------------------------------------------------------------------------
@@ -17204,9 +17151,6 @@ void display_gyro_screen()
     // Defaults
     create_default_screen_objects(gyro_screen);
 
-    lv_obj_invalidate(gyro_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // Gyro
     gyro_0_c = create_gyro_panel(
         gyro_screen,      // parent
@@ -17233,9 +17177,6 @@ void display_gyro_screen()
     // Calibrate Gyro -> Button starts timer -> calibration ends on timeout.
 
     // Calibrate Magnetic Field -> Button starts timer -> calibration ends on timeout.
-
-    lv_obj_invalidate(gyro_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 }
 
 /** -------------------------------------------------------------------------------------
@@ -17263,9 +17204,6 @@ void display_mplex0_screen()
     // Defaults
     create_default_screen_objects(mplex0_screen);
 
-    lv_obj_invalidate(mplex0_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // Admplex 0
     admlpex0_c = create_admplex0_panel(
         mplex0_screen,     // parent
@@ -17288,9 +17226,6 @@ void display_mplex0_screen()
         &cobalt_alien_25,  // font for titles,
         &cobalt_alien_17   // font for text,
     );
-
-    lv_obj_invalidate(mplex0_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 }
 
 /** -------------------------------------------------------------------------------------
@@ -17318,9 +17253,6 @@ void display_serial_screen()
     // Defaults
     create_default_screen_objects(serial_screen);
 
-    lv_obj_invalidate(serial_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // Serial
     serial_c = create_serial_panel(
         serial_screen,     // parent
@@ -17343,9 +17275,6 @@ void display_serial_screen()
         &cobalt_alien_25,  // font for titles,
         &cobalt_alien_17   // font for text,
     );
-
-    lv_obj_invalidate(serial_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 }
 
 /** -------------------------------------------------------------------------------------
@@ -17373,9 +17302,6 @@ void display_uap_screen()
     // Defaults
     create_default_screen_objects(uap_screen);
 
-    lv_obj_invalidate(uap_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
-
     // create UAP
     uap_c = create_uap(
         uap_screen,
@@ -17386,58 +17312,13 @@ void display_uap_screen()
         0,
         general_radius
     );
-
-    lv_obj_invalidate(serial_screen);  // Force redraw
-    lv_timer_handler();  // Process events/render
 }
-
-/** -------------------------------------------------------------------------------------
- * @brief Timer runs update_display function.
- */
-
-int64_t ui_timing_second   = 0;
-bool ui_timing_second_flag = false;
-
-int64_t ui_timing_half_second   = 0;
-bool ui_timing_half_second_flag = false;
-
-void update_display_on_timer(lv_timer_t * timer) {
-    LV_UNUSED(timer);
-
-    ui_timing_second_flag=false;
-    if
-    (
-        satioData.local_unixtime_uS >= (ui_timing_second + 1000000) ||
-        satioData.local_unixtime_uS <= (ui_timing_second - 1000000)
-    )
-    {
-        ui_timing_second=satioData.local_unixtime_uS;
-        ui_timing_second_flag=true;
-    }
-
-    ui_timing_half_second_flag=false;
-    if
-    (
-        satioData.local_unixtime_uS >= (ui_timing_half_second + 500000) ||
-        satioData.local_unixtime_uS <= (ui_timing_half_second - 500000)
-    )
-    {
-        ui_timing_half_second=satioData.local_unixtime_uS;
-        ui_timing_half_second_flag=true;
-    }
-
-    update_display();
-    systemData.i_count_display++;
-};
 
 /** -------------------------------------------------------------------------------------
  * @brief Main function to update screen objects and load screens.
  */
 void update_display()
 {
-
-    // Pause timer
-    lv_timer_pause(display_timer);
 
     // ---------------------
     // Rainbow Effect
@@ -17632,7 +17513,7 @@ void update_display()
 
             uint32_t grid_child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
             for(uint32_t i = 0; i < grid_child_cnt; i++) {
-                vTaskDelay(pdMS_TO_TICKS(5));
+                // vTaskDelay(pdMS_TO_TICKS(5));
                 lv_obj_t * btn = lv_obj_get_child(system_tray.grid_menu_1, i);
                 lv_obj_set_style_outline_color(btn, rainbow_contrast_outline_hue, LV_PART_MAIN);
                 // Get label
@@ -17683,7 +17564,7 @@ void update_display()
 
                 uint32_t grid_child_cnt = lv_obj_get_child_cnt(matrix_overview_grid_1);
                 for(uint32_t i = 0; i < grid_child_cnt; i++) {
-                    vTaskDelay(pdMS_TO_TICKS(5));
+                    // vTaskDelay(pdMS_TO_TICKS(5));
                     lv_obj_t * btn = lv_obj_get_child(matrix_overview_grid_1, i);
 
 
@@ -18690,8 +18571,6 @@ void update_display()
         lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
         lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
     }
-
-    lv_timer_resume(display_timer);
 }
 
 /** -------------------------------------------------------------------------------------
@@ -18723,7 +18602,6 @@ void setColorsCustom()
 /** -------------------------------------------------------------------------------------
  * @brief Initialize LVGL for this device.
  */
-#define LVGL_DISPLAY_TIMING 50 // higher: gives other tasks higher priority / lower: give lvgl higher priority
 void initSatIOUI() {
     // --------------------------------------------------------------
     // LVGL Initialization
@@ -18741,7 +18619,7 @@ void initSatIOUI() {
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     // Set LVGL tick period
-    lv_timer_set_period(lv_timer_get_next(NULL), LVGL_DISPLAY_TIMING);  // ms
+    lv_timer_set_period(lv_timer_get_next(NULL), POWER_CONFIG_BALANCED_DELAY_TASK_DISPLAY);  // ms
     
     // Initialize display brightness and backlight
     bsp_display_brightness_init();
@@ -18836,11 +18714,4 @@ void initSatIOUI() {
     // Display Loading Screen
     // --------------------------------------------------------------
     display_loading_screen();
-}
-
-/** -------------------------------------------------------------------------------------
- * @brief Start's Update Display Timer.
- */
-void satio_ui_begin() {
-    display_timer = lv_timer_create(update_display_on_timer, LVGL_DISPLAY_TIMING, NULL);
 }

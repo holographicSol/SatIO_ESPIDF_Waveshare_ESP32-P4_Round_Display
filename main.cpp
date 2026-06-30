@@ -423,7 +423,7 @@ extern "C" void app_main(void)
     #ifdef SATIO_DISPLAY_OPTION_LVGL
     ESP_LOGI(APP_MAIN_TAG, "starting SatIO UI");
     flag_display_home_screen = true;
-    satio_ui_begin();
+    createTaskDisplayUpdate();
     #endif
 
     // app_main() may now return: every task created above keeps running

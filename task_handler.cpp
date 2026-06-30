@@ -46,6 +46,7 @@ TaskHandle_t TaskSerialInfoCMD;
 TaskHandle_t TaskSwitches;
 TaskHandle_t TaskStorage;
 TaskHandle_t TaskUniverse;
+TaskHandle_t TaskDisplayUpdate;
 
 // PRIORITY
 #define TASK_GPS_PRIORITY                   5    // High: Time/location sync critical
@@ -53,8 +54,8 @@ TaskHandle_t TaskUniverse;
 #define TASK_MULTIPLEXERS_PRIORITY          4    // High: Analog multiplexing
 #define TASK_SWITCHES_PRIORITY              4    // High: Logic processing
 #define TASK_SERIALINFOCMD_PRIORITY         3    // High: User interaction & debugging
-#define TASK_UNIVERSE_PRIORITY              2    // LOW: Computational, non-critical delay
-#define TASK_STORAGE_PRIORITY               2    // LOW: I/O operations, can wait
+#define TASK_UNIVERSE_PRIORITY              3    // LOW: Computational, non-critical delay
+#define TASK_STORAGE_PRIORITY               3    // LOW: I/O operations, can wait
 
 // CORE ASSIGNMENT
 #define TASK_SERIALINFOCMD_CORE             0    // Core 0: Keep on main (timing-sensitive)
@@ -74,6 +75,12 @@ TaskHandle_t TaskUniverse;
 #define TASK_SWITCHES_STACK_SIZE            5120    // +25%: Matrix calculations, mappings
 #define TASK_UNIVERSE_STACK_SIZE            20480   // +25%: Expensive float math (planets, etc.)
 
+/* Display task configuration — defined here so satio_lvgl.cpp can reference them
+   alongside the other task constants in task_handler.cpp. */
+#define TASK_DISPLAY_PRIORITY    2       // LOWEST: preempted by every other user task
+#define TASK_DISPLAY_CORE        0       // Core 1: isolated from Core 0 time-critical tasks
+#define TASK_DISPLAY_STACK_SIZE  32768   // Large: LVGL screen building + snprintf buffers
+
 /** ----------------------------------------------------------------------------
  * 
  * @brief Notify all Tasks.
@@ -91,6 +98,7 @@ static void notifyAllTasks(void) {
   xTaskNotifyGive(TaskGPS);
   xTaskNotifyGive(TaskUniverse);
   xTaskNotifyGive(TaskSwitches);
+  if (TaskDisplayUpdate != nullptr) { xTaskNotifyGive(TaskDisplayUpdate); }
 }
 
 void setTasksDelayLowPower() {
@@ -530,6 +538,7 @@ static void taskMultiplexers(void *pvParameters) {
       readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
       vTaskDelay(1);
     }
+    esp_task_wdt_reset();
     // ------------------------------------------------
     // Counters
     // ------------------------------------------------
@@ -682,11 +691,13 @@ static void taskUniverse(void *pvParameters) {
     siderealExtraData.local_zenith_ra_dec = myAstro.getRADecFromLSTLat(
       siderealExtraData.local_sidereal_time,
       satioData.system_degrees_latitude);
+    esp_task_wdt_reset();
 
     // ------------------------------------------------
     // Set RA & Dec for system zenith +- Gyro. (add to matrix)
     // ------------------------------------------------
     siderealExtraData.gyro_0_ra_dec = gyroOffsetZenithRADec(gyroData.gyro_0_ang_z, gyroData.gyro_0_ang_y);
+    esp_task_wdt_reset();
 
     // ------------------------------------------------
     // StarNav Dynamic Test Zenith Every Interval
@@ -699,6 +710,7 @@ static void taskUniverse(void *pvParameters) {
       siderealExtraData.local_zenith_ra_dec.dec_m,
       siderealExtraData.local_zenith_ra_dec.dec_s
     );
+    esp_task_wdt_reset();
 
     // ------------------------------------------------
     // StarNav Dynamic Test Zenith+-Gyro Offset
@@ -744,4 +756,55 @@ void createTaskUniverse() {
     TASK_UNIVERSE_PRIORITY,   /* Priority of the task */
     &TaskUniverse,            /* Task handle. */
     TASK_UNIVERSE_CORE);      /* Core where the task should run */
+}
+
+/** ----------------------------------------------------------------------------
+ * Display Update Task.
+ *
+ * @brief Drives LVGL screen updates at the lowest user-task priority so it is
+ *        preempted by every other task regardless of how long a frame takes.
+ *
+ *        Acquires the BSP display lock before calling update_display() so all
+ *        LVGL API calls are thread-safe.  The lock is released between frames
+ *        so the BSP LVGL task can service touch events and DMA completions
+ *        during the idle window.
+ */
+static void taskDisplayUpdate(void *pvParameters) {
+  bool locked = false;
+  (void)pvParameters;
+  for (;;) {
+    locked = bsp_display_lock(portMAX_DELAY);
+    if (locked) {
+      update_display();
+      bsp_display_unlock();
+    }
+    // ------------------------------------------------
+    // Set counters and flags
+    // ------------------------------------------------
+    systemData.i_count_display++;
+    // i_count_track_planets is int32_t, so the wrap check uses the signed
+    // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
+    if (systemData.i_count_display >= INT32_MAX - 2) {
+      systemData.i_count_display = 0;
+    }
+    // ------------------------------------------------
+    // Delay next iteration of task.
+    // ------------------------------------------------
+    if (!pwrConfigCurrent.TASK_USE_TICKS_DISPLAY) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_DISPLAY / portTICK_PERIOD_MS);
+    } else {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_DISPLAY);
+    }
+  }
+}
+
+void createTaskDisplayUpdate() {
+  (void)xTaskCreatePinnedToCore(
+    taskDisplayUpdate,          /* Function to implement the task */
+    "TaskDisplayUpdate",        /* Name of the task */
+    TASK_DISPLAY_STACK_SIZE,    /* Stack size in words */
+    nullptr,                    /* Task input parameter */
+    TASK_DISPLAY_PRIORITY,      /* Priority of the task */
+    &TaskDisplayUpdate,         /* Task handle. */
+    TASK_DISPLAY_CORE);         /* Core where the task should run */
 }

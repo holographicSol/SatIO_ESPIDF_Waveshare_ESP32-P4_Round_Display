@@ -52,6 +52,9 @@ typedef struct PwrConfig {
 
     uint32_t TASK_DELAY_STORAGE;
     bool     TASK_USE_TICKS_STORAGE;
+
+    uint32_t TASK_DELAY_DISPLAY;
+    bool     TASK_USE_TICKS_DISPLAY;
 };
 
 // ----------------------------------------------------------------------------------------
@@ -81,6 +84,9 @@ typedef struct PwrConfig {
 #define POWER_CONFIG_LOW_POWER_DELAY_TASK_STORAGE                     1000
 #define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_STORAGE                false
 
+#define POWER_CONFIG_LOW_POWER_DELAY_TASK_DISPLAY                     500
+#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_DISPLAY                false
+
 // ----------------------------------------------------------------------------------------
 // Balanced (Recommended)
 // ----------------------------------------------------------------------------------------
@@ -108,6 +114,9 @@ typedef struct PwrConfig {
 #define POWER_CONFIG_BALANCED_DELAY_TASK_STORAGE                     500
 #define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_STORAGE                false
 
+#define POWER_CONFIG_BALANCED_DELAY_TASK_DISPLAY                     1
+#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_DISPLAY                false
+
 // ----------------------------------------------------------------------------------------
 // Perfromance: Ultimate Perfromance
 // ----------------------------------------------------------------------------------------
@@ -134,6 +143,10 @@ typedef struct PwrConfig {
 
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_STORAGE                     500
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_STORAGE                false
+
+#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_DISPLAY                     10
+#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_DISPLAY                false
+
 
 extern struct PwrConfig pwrConfigLowPower;
 extern struct PwrConfig pwrConfigBalanced;

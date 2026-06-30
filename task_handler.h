@@ -39,6 +39,7 @@ void createTaskGyro();
 void createTaskGPS();
 void createTaskUniverse();
 void createTaskSwitches();
+void createTaskDisplayUpdate();
 
 /**
  * @brief Time syncronize tasks.
