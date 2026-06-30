@@ -423,7 +423,7 @@ static void taskGPS(void *pvParameters) {
       if (systemData.i_count_read_gps >= INT32_MAX - 2) {
         systemData.i_count_read_gps = 0;
       }
-      esp_task_wdt_reset();
+      // esp_task_wdt_reset();
     }
     esp_task_wdt_reset();
     // ------------------------------------------------
@@ -461,7 +461,7 @@ static void taskGyro(void *pvParameters) {
     vTaskDelay(1);
   }
   for (;;) {
-    esp_task_wdt_reset();
+
     if (readGyro()) {
       esp_task_wdt_reset();
       systemData.i_count_read_gyro_0++;
@@ -471,29 +471,26 @@ static void taskGyro(void *pvParameters) {
       if (systemData.i_count_read_gyro_0 >= INT32_MAX - 2) {
         systemData.i_count_read_gyro_0 = 0;
       }
-      esp_task_wdt_reset();
       // ----------------------------------------------
       // Estimate INS data. (Can be used without GPS)
       // INS data is fed back into INS.
       // ----------------------------------------------
-      if (systemData.interval_breach_gyro_0_output) {
-        if (ins_estimate_position(gyroData.gyro_0_ang_y,
-                                   gyroData.gyro_0_ang_z,
-                                   satioData.system_ground_heading,
-                                   satioData.system_speed,
-                                   satioData.local_unixtime_uS)) {
-          systemData.i_count_read_ins++;
-          systemData.interval_breach_ins_output = true;
-          // i_count_read_ins is int32_t, so the wrap check uses the signed
-          // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
-          if (systemData.i_count_read_ins >= INT32_MAX - 2) {
-            systemData.i_count_read_ins = 0;
-          }
+      if (ins_estimate_position(gyroData.gyro_0_ang_y,
+                                  gyroData.gyro_0_ang_z,
+                                  satioData.system_ground_heading,
+                                  satioData.system_speed,
+                                  satioData.local_unixtime_uS)) {
+        systemData.i_count_read_ins++;
+        systemData.interval_breach_ins_output = true;
+        // i_count_read_ins is int32_t, so the wrap check uses the signed
+        // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
+        if (systemData.i_count_read_ins >= INT32_MAX - 2) {
+          systemData.i_count_read_ins = 0;
         }
         esp_task_wdt_reset();
       }
     }
-    esp_task_wdt_reset();
+
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------

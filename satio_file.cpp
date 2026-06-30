@@ -89,7 +89,7 @@ static void yieldForTasks(void) {
         yield_counter++;
         if (yield_counter >= yield_every_n_lines) {
             // // Perform the actual yield
-            // vTaskDelay(1);
+            vTaskDelay(1);
             yield_counter = 0; // Reset counter after yielding
         }
         // Otherwise, just pass through
@@ -400,7 +400,7 @@ static void printLogLine(const char* line_str) {
        available or no valid (un-truncated) log filename could be resolved. */
 
     // Critical! This may take a moment, yield for other tasks!
-    yieldForTasks();
+    // yieldForTasks();
 
     size_t line_len = strlen(line_str);
     if (isAvailableBytes(line_len + 1) == false) {
@@ -532,7 +532,7 @@ static void printLine(FILE* f, const char* line) {
         fputs(line, f);
         fputc('\n', f);
         // Critical! This may take a moment, yield for other tasks!
-        yieldForTasks();
+        // yieldForTasks();
         }
     }
 }
@@ -609,7 +609,7 @@ bool loadMappingFile(const char *filepath) {
     char lineBuffer[1024];
     int currentTag = 0;
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
-        yieldForTasks();
+        // yieldForTasks();
 
         size_t len = strlen(lineBuffer);
         while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) { lineBuffer[--len] = '\0'; }
@@ -857,7 +857,7 @@ bool loadMatrixFile() {
     char lineBuffer[1024];
     int currentTag = 0;
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
-        yieldForTasks();
+        // yieldForTasks();
 
         size_t len = strlen(lineBuffer);
         while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) { lineBuffer[--len] = '\0'; }
@@ -1110,7 +1110,7 @@ bool loadSystemFile(const char *filepath) {
 
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
 
-        yieldForTasks();
+        // yieldForTasks();
 
         size_t len = strlen(lineBuffer);
         while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) lineBuffer[--len] = '\0';

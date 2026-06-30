@@ -105,7 +105,7 @@ typedef struct PwrConfig {
 #define POWER_CONFIG_BALANCED_DELAY_TASK_UNIVERSE                    1
 #define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_UNIVERSE               false
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_SWITCHES                    2
+#define POWER_CONFIG_BALANCED_DELAY_TASK_SWITCHES                    1
 #define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_SWITCHES               false
 
 #define POWER_CONFIG_BALANCED_DELAY_TASK_PORTCONTROLLER_INPUT        1000
@@ -115,7 +115,7 @@ typedef struct PwrConfig {
 #define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_STORAGE                false
 
 #define POWER_CONFIG_BALANCED_DELAY_TASK_DISPLAY                     1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_DISPLAY                true
+#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_DISPLAY                false
 
 // ----------------------------------------------------------------------------------------
 // Perfromance: Ultimate Perfromance
