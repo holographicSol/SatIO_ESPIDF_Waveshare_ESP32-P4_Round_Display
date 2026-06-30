@@ -1,6 +1,6 @@
 ![plot](./SDCARD/UnidentifiedStudios.png)
 
-  SatIO - Written by Benjamin Jack Cullen.
+  SatIO - Written by Benjamin Jack Cullen. Project may be renamed to Stargate.
 
 -----
 
