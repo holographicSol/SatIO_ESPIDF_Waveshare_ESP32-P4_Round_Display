@@ -751,33 +751,21 @@ typedef struct {
 typedef struct {
     lv_obj_t * panel;
 
-    lv_obj_t * radial_panel;
-
     lv_obj_t * roll_panel;
+    int32_t roll_panel_base_y;
 
     lv_obj_t * pitch_panel;
-    lv_obj_t * pitch_tape;
-    int32_t pitch_tape_height_px;
-    int32_t pitch_tape_content_height_px;
-    lv_obj_t * pitch_center_marker_0;
-    lv_obj_t * pitch_center_marker_1;
+    int32_t pitch_panel_height_px;
+    int32_t pitch_panel_width_px;
 
-    lv_obj_t * gh_panel;
-    lv_obj_t * gh_tape;
-    int32_t gh_tape_width_px;
-    int32_t gh_tape_content_width_px;
-    lv_obj_t * gh_center_marker_0;
-    lv_obj_t * gh_center_marker_1;
-    
+    lv_obj_t * yaw_panel;
+    int32_t yaw_panel_width_px;
+    int32_t yaw_panel_height_px;
+
     lv_obj_t * latitude_label;
     lv_obj_t * longitude_label;
-
     lv_obj_t * speed_label;
     lv_obj_t * altitude_label;
-
-    lv_obj_t * roll_label;
-    lv_obj_t * pitch_label;
-    lv_obj_t * yaw_label;
 
 } uap_t;
 
