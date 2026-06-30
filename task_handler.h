@@ -73,6 +73,6 @@ void setTick(TaskHandle_t task_handle, bool *tick_delay, bool use_tick);
 /**
  * @brief Set Delay. Manually override delay milliseconds/ticks.
  */
-void setDelay(TaskHandle_t task_handle, long *task_delay, long time_delay);
+void setDelay(TaskHandle_t task_handle, uint32_t *task_delay, uint32_t time_delay);
 
 #endif // TASK_HANDLER_H

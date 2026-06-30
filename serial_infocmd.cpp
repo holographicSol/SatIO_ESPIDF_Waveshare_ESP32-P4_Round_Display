@@ -479,14 +479,16 @@ static void PrintHelp(void) {
       powercfg --power-saving          Sets power configuration to low power consumption mode.
       powercfg --power-balanced        Sets power configuration to balanced.
       powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
+
       settick -e                       Enable tick delay for specified args.
       settick -d                       Disable tick delay for specified args (enables millisecond delay).
       settick --admplex0               Takes arguments -e, -d.
       settick --gyro0                  Takes arguments -e, -d.
       settick --universe               Takes arguments -e, -d.
       settick --gps                    Takes arguments -e, -d.
-      settick --matrix                 Takes arguments -e, -d.
-      settick --pcinput                Takes arguments -e, -d.
+      settick --switch                 Takes arguments -e, -d.
+      settick --storage                Takes arguments -e, -d.
+      settick --infocmd                Takes arguments -e, -d.
 
       example: settick -e --admplex0 --gyro0 --gps
 
@@ -494,8 +496,9 @@ static void PrintHelp(void) {
       setdelay --gyro0                  Specify ticks/milliseconds delay.
       setdelay --universe               Specify ticks/milliseconds delay.
       setdelay --gps                    Specify ticks/milliseconds delay.
-      setdelay --matrix                 Specify ticks/milliseconds delay.
-      setdelay --pcinput                Specify ticks/milliseconds delay.
+      setdelay --switch                 Specify ticks/milliseconds delay.
+      setdelay --storage                Specify ticks/milliseconds delay.
+      setdelay --infocmd                Specify ticks/milliseconds delay.
 
       example: setdelay --admplex0 1 --gyro0 1 --gps 1
 
@@ -1213,128 +1216,127 @@ void CmdProcess(void) {
           if (has_s && has_f && argparser_has_flag(&parser, "xyz-mode-x") == true) {setMatrixFunctionComparitorMode(s, f, INDEX_MATRIX_FUNTION_X, argparser_get_int8(&parser, "xyz-mode-x", 0));}
           if (has_s && has_f && argparser_has_flag(&parser, "xyz-mode-y") == true) {setMatrixFunctionComparitorMode(s, f, INDEX_MATRIX_FUNTION_Y, argparser_get_int8(&parser, "xyz-mode-y", 0));}
           if (has_s && has_f && argparser_has_flag(&parser, "xyz-mode-z") == true) {setMatrixFunctionComparitorMode(s, f, INDEX_MATRIX_FUNTION_Z, argparser_get_int8(&parser, "xyz-mode-z", 0));}
+          }
         }
-      }
-      // ins
-      else if (strcmp(pos[0], "ins")==0) {
-        if (argparser_has_flag(&parser, "m") == true) {setINSMode(argparser_get_int8(&parser, "m", -1));}
-        if (argparser_has_flag(&parser, "gyro") == true) {setINSUseGyroHeading(argparser_get_int8(&parser, "gyro", -1));}
-        if (argparser_has_flag(&parser, "p") == true) {setINSGPSPrecision(argparser_get_double(&parser, "p", -1));}
-        if (argparser_has_flag(&parser, "s") == true) {setINSMinSpeed(argparser_get_double(&parser, "s", -1));}
-        if (argparser_has_flag(&parser, "r") == true) {setINSHeadingRangeDiff(argparser_get_double(&parser, "r", -1));}
-        if (argparser_has_flag(&parser, "reset-forced") == true) {insData.INS_FORCED_ON_FLAG=false;}
-      }
-      // satio
-      else if (strcmp(pos[0], "satio")==0) {
-        // time
-        if (argparser_has_flag(&parser, "utc-offset") == true) {setUTCSecondOffset(argparser_get_int64(&parser, "utc-offset", 0));}
-        if (argparser_has_flag(&parser, "auto-datetime-on") == true) {datetimeSetDTAuto(true);}
-        if (argparser_has_flag(&parser, "auto-datetime-off") == true) {datetimeSetDTAuto(false);}
-        if (argparser_has_flag(&parser, "set-datetime") == true) {
-          datetimeSetRTC(argparser_get_uint16(&parser, "year", -1),
-                                 argparser_get_uint8(&parser,  "month", -1),
-                                 argparser_get_uint8(&parser,  "mday", -1),
-                                 argparser_get_uint8(&parser,  "hour", -1),
-                                 argparser_get_uint8(&parser,  "minute", -1),
-                                 argparser_get_uint8(&parser,  "second", -1));}
-        // location
-        if (argparser_has_flag(&parser, "set-coord") == true && argparser_has_flag(&parser, "lat") == true && argparser_has_flag(&parser, "lon") == true) {
-          setCoordinatesDegrees(argparser_get_double(&parser, "lat", NAN), argparser_get_double(&parser, "lon", NAN));
+        // ins
+        else if (strcmp(pos[0], "ins")==0) {
+          if (argparser_has_flag(&parser, "m") == true) {setINSMode(argparser_get_int8(&parser, "m", -1));}
+          if (argparser_has_flag(&parser, "gyro") == true) {setINSUseGyroHeading(argparser_get_int8(&parser, "gyro", -1));}
+          if (argparser_has_flag(&parser, "p") == true) {setINSGPSPrecision(argparser_get_double(&parser, "p", -1));}
+          if (argparser_has_flag(&parser, "s") == true) {setINSMinSpeed(argparser_get_double(&parser, "s", -1));}
+          if (argparser_has_flag(&parser, "r") == true) {setINSHeadingRangeDiff(argparser_get_double(&parser, "r", -1));}
+          if (argparser_has_flag(&parser, "reset-forced") == true) {insData.INS_FORCED_ON_FLAG=false;}
         }
-        if (argparser_has_flag(&parser, "coord-value-mode-gps") == true) {satioData.location_value_mode=SATIO_MODE_GPS;}
-        if (argparser_has_flag(&parser, "coord-value-mode-user") == true) {satioData.location_value_mode=SATIO_MODE_USER;}
-        // speed
-        if (argparser_has_flag(&parser, "set-speed") == true) {
-          setSpeed(argparser_get_double(&parser, "set-speed", NAN));
+        // satio
+        else if (strcmp(pos[0], "satio")==0) {
+          // time
+          if (argparser_has_flag(&parser, "utc-offset") == true) {setUTCSecondOffset(argparser_get_int64(&parser, "utc-offset", 0));}
+          if (argparser_has_flag(&parser, "auto-datetime-on") == true) {datetimeSetDTAuto(true);}
+          if (argparser_has_flag(&parser, "auto-datetime-off") == true) {datetimeSetDTAuto(false);}
+          if (argparser_has_flag(&parser, "set-datetime") == true) {
+            datetimeSetRTC(argparser_get_uint16(&parser, "year", -1),
+                                  argparser_get_uint8(&parser,  "month", -1),
+                                  argparser_get_uint8(&parser,  "mday", -1),
+                                  argparser_get_uint8(&parser,  "hour", -1),
+                                  argparser_get_uint8(&parser,  "minute", -1),
+                                  argparser_get_uint8(&parser,  "second", -1));}
+          // location
+          if (argparser_has_flag(&parser, "set-coord") == true && argparser_has_flag(&parser, "lat") == true && argparser_has_flag(&parser, "lon") == true) {
+            setCoordinatesDegrees(argparser_get_double(&parser, "lat", NAN), argparser_get_double(&parser, "lon", NAN));
+          }
+          if (argparser_has_flag(&parser, "coord-value-mode-gps") == true) {satioData.location_value_mode=SATIO_MODE_GPS;}
+          if (argparser_has_flag(&parser, "coord-value-mode-user") == true) {satioData.location_value_mode=SATIO_MODE_USER;}
+          // speed
+          if (argparser_has_flag(&parser, "set-speed") == true) {
+            setSpeed(argparser_get_double(&parser, "set-speed", NAN));
+          }
+          if (argparser_has_flag(&parser, "speed-value-mode-gps") == true) {satioData.speed_value_mode=SATIO_MODE_GPS;}
+          if (argparser_has_flag(&parser, "speed-value-mode-user") == true) {satioData.speed_value_mode=SATIO_MODE_USER;}
+          // altitude
+          if (argparser_has_flag(&parser, "set-altitude") == true) {
+            setAltitude(argparser_get_double(&parser, "set-altitude", NAN));
+          }
+          if (argparser_has_flag(&parser, "altitude-value-mode-gps") == true) {satioData.altitude_value_mode=SATIO_MODE_GPS;}
+          if (argparser_has_flag(&parser, "altitude-value-mode-user") == true) {satioData.altitude_value_mode=SATIO_MODE_USER;}
+          // ground heading
+          if (argparser_has_flag(&parser, "set-ground-heading") == true) {
+            setGroundHeading(argparser_get_double(&parser, "set-ground-heading", NAN));
+          }
+          if (argparser_has_flag(&parser, "ground-heading-value-mode-gps") == true) {satioData.ground_heading_value_mode=SATIO_MODE_GPS;}
+          if (argparser_has_flag(&parser, "ground-heading-value-mode-user") == true) {satioData.ground_heading_value_mode=SATIO_MODE_USER;}
         }
-        if (argparser_has_flag(&parser, "speed-value-mode-gps") == true) {satioData.speed_value_mode=SATIO_MODE_GPS;}
-        if (argparser_has_flag(&parser, "speed-value-mode-user") == true) {satioData.speed_value_mode=SATIO_MODE_USER;}
-        // altitude
-        if (argparser_has_flag(&parser, "set-altitude") == true) {
-          setAltitude(argparser_get_double(&parser, "set-altitude", NAN));
+        // gyro
+        else if (strcmp(pos[0], "gyro")==0) {
+          if (argparser_has_flag(&parser, "calacc") == true) {WT901CalAcc();}
+          if (argparser_has_flag(&parser, "calmag-start") == true) {WT901CalMagStart();}
+          else if (argparser_has_flag(&parser, "calmag-stop") == true) {WT901CalMagEnd();}
+          else { /* no more options */ }
         }
-        if (argparser_has_flag(&parser, "altitude-value-mode-gps") == true) {satioData.altitude_value_mode=SATIO_MODE_GPS;}
-        if (argparser_has_flag(&parser, "altitude-value-mode-user") == true) {satioData.altitude_value_mode=SATIO_MODE_USER;}
-        // ground heading
-        if (argparser_has_flag(&parser, "set-ground-heading") == true) {
-          setGroundHeading(argparser_get_double(&parser, "set-ground-heading", NAN));
+
+        // else if (strcmp(pos[0], "sdcard")==0) {
+        //   if (argparser_has_flag(&parser, "mount")) {mountSDCard();}
+        //   else if (argparser_has_flag(&parser, "unmount")) {unmountSDCard();}
+        // }
+
+        else if (strcmp(pos[0], "powercfg")==0) {
+          // powercfg --power-saving
+          if (argparser_has_flag(&parser, "power-saving")) {setTasksDelayLowPower();}
+          // powercfg --power-balanced
+          else if (argparser_has_flag(&parser, "power-balanced")) {setTasksDelayBalanced();}
+          // powercfg --ultimate-performance
+          else if (argparser_has_flag(&parser, "ultimate-performance")) {setTasksDelayUltimatePerformance();}
+          
+          else {
+            // settick
+            if (argparser_has_flag(&parser, "settick")) {
+
+              if (argparser_has_flag(&parser, "infocmd"))
+                {setTick(TaskSerialInfoCMD, &pwrConfigCurrent.TASK_USE_TICKS_INFOCMD, enable);}
+
+              if (argparser_has_flag(&parser, "admplex0"))
+                {setTick(TaskMultiplexers, &pwrConfigCurrent.TASK_USE_TICKS_MULTIPLEXERS, enable);}
+
+              if (argparser_has_flag(&parser, "gyro0"))
+                {setTick(TaskGyro, &pwrConfigCurrent.TASK_USE_TICKS_GYRO, enable);}
+
+              if (argparser_has_flag(&parser, "universe"))
+                {setTick(TaskUniverse, &pwrConfigCurrent.TASK_USE_TICKS_UNIVERSE, enable);}
+
+              if (argparser_has_flag(&parser, "gps"))
+                {setTick(TaskGPS, &pwrConfigCurrent.TASK_USE_TICKS_GPS, enable);}
+
+              if (argparser_has_flag(&parser, "switch"))
+                {setTick(TaskSwitches, &pwrConfigCurrent.TASK_USE_TICKS_SWITCHES, enable);}
+                
+              if (argparser_has_flag(&parser, "storage"))
+                {setTick(TaskStorage, &pwrConfigCurrent.TASK_USE_TICKS_STORAGE, enable);}
+            }
+            // setdelay
+            else if (argparser_has_flag(&parser, "setdelay")) {
+              
+              if (argparser_has_flag(&parser, "infocmd"))
+                {setDelay(TaskSerialInfoCMD, &pwrConfigCurrent.TASK_DELAY_INFOCMD, argparser_get_uint32(&parser, "infocmd", pwrConfigCurrent.TASK_DELAY_INFOCMD));}
+      
+              if (argparser_has_flag(&parser, "admplex0"))
+                {setDelay(TaskMultiplexers, &pwrConfigCurrent.TASK_DELAY_MULTIPLEXERS, argparser_get_uint32(&parser, "admplex0", pwrConfigCurrent.TASK_DELAY_MULTIPLEXERS));}
+      
+              if (argparser_has_flag(&parser, "gyro0"))
+                {setDelay(TaskGyro, &pwrConfigCurrent.TASK_DELAY_GYRO, argparser_get_uint32(&parser, "gyro0", pwrConfigCurrent.TASK_DELAY_GYRO));}
+      
+              if (argparser_has_flag(&parser, "universe"))
+                {setDelay(TaskUniverse, &pwrConfigCurrent.TASK_DELAY_UNIVERSE, argparser_get_uint32(&parser, "universe", pwrConfigCurrent.TASK_DELAY_UNIVERSE));}
+      
+              if (argparser_has_flag(&parser, "gps"))
+                {setDelay(TaskGPS, &pwrConfigCurrent.TASK_DELAY_GPS, argparser_get_uint32(&parser, "gps", pwrConfigCurrent.TASK_DELAY_GPS));}
+
+              if (argparser_has_flag(&parser, "switch"))
+                {setDelay(TaskSwitches, &pwrConfigCurrent.TASK_DELAY_SWITCHES, argparser_get_uint32(&parser, "switch", pwrConfigCurrent.TASK_DELAY_SWITCHES));}
+      
+              if (argparser_has_flag(&parser, "storage"))
+                {setDelay(TaskStorage, &pwrConfigCurrent.TASK_DELAY_STORAGE, argparser_get_uint32(&parser, "storage", pwrConfigCurrent.TASK_DELAY_STORAGE));}
+            }
+          }
         }
-        if (argparser_has_flag(&parser, "ground-heading-value-mode-gps") == true) {satioData.ground_heading_value_mode=SATIO_MODE_GPS;}
-        if (argparser_has_flag(&parser, "ground-heading-value-mode-user") == true) {satioData.ground_heading_value_mode=SATIO_MODE_USER;}
-      }
-      // gyro
-      else if (strcmp(pos[0], "gyro")==0) {
-        if (argparser_has_flag(&parser, "calacc") == true) {WT901CalAcc();}
-        if (argparser_has_flag(&parser, "calmag-start") == true) {WT901CalMagStart();}
-        else if (argparser_has_flag(&parser, "calmag-stop") == true) {WT901CalMagEnd();}
-        else { /* no more options */ }
-      }
-
-      // else if (strcmp(pos[0], "sdcard")==0) {
-      //   if (argparser_has_flag(&parser, "mount")) {mountSDCard();}
-      //   else if (argparser_has_flag(&parser, "unmount")) {unmountSDCard();}
-      // }
-
-      else if (strcmp(pos[0], "powercfg")==0) {
-        // powercfg --power-saving
-        if (argparser_has_flag(&parser, "power-saving")) {setTasksDelayLowPower();}
-        // powercfg --power-balanced
-        else if (argparser_has_flag(&parser, "power-balanced")) {setTasksDelayBalanced();}
-        // powercfg --ultimate-performance
-        else if (argparser_has_flag(&parser, "ultimate-performance")) {setTasksDelayUltimatePerformance();}
-        else { /* no more options */ }
-      }
-
-      // else if (strcmp(pos[0], "settick")==0) {
-      //   // if (argparser_has_flag(&parser, "infocmd"))
-      //   //   {setTick(TaskSerialInfoCMD, &TICK_DELAY_TASK_SERIAL_INFOCMD, enable);}
-
-      //   if (argparser_has_flag(&parser, "admplex0"))
-      //     {setTick(TaskMultiplexers, &TICK_DELAY_TASK_MULTIPLEXERS, enable);}
-
-      //   if (argparser_has_flag(&parser, "gyro0"))
-      //     {setTick(TaskGyro, &TICK_DELAY_TASK_GYRO0, enable);}
-
-      //   if (argparser_has_flag(&parser, "universe"))
-      //     {setTick(TaskUniverse, &TICK_DELAY_TASK_UNIVERSE, enable);}
-
-      //   if (argparser_has_flag(&parser, "gps"))
-      //     {setTick(TaskGPS, &TICK_DELAY_TASK_GPS, enable);}
-
-      //   if (argparser_has_flag(&parser, "matrix"))
-      //     {setTick(TaskSwitches, &TICK_DELAY_TASK_SWITCHES, enable);}
-
-      //   if (argparser_has_flag(&parser, "pcinput"))
-      //     {setTick(TaskPortControllerInput, &TICK_DELAY_TASK_PORTCONTROLLER_INPUT, enable);}
-
-      //   // if (argparser_has_flag(&parser, "storage"))
-      //   //   {setTick(TaskStorage, &TICK_DELAY_TASK_STORAGE, enable);}
-      // }
-      // else if (strcmp(pos[0], "setdelay")==0) {
-      //   // if (argparser_has_flag(&parser, "infocmd"))
-      //   //   setDelay(TaskSerialInfoCMD, &DELAY_TASK_SERIAL_INFOCMD, argparser_get_int32(&parser, "infocmd", DELAY_TASK_SERIAL_INFOCMD));
-
-      //   if (argparser_has_flag(&parser, "admplex0"))
-      //     {setDelay(TaskMultiplexers, &DELAY_TASK_MULTIPLEXERS, argparser_get_int32(&parser, "admplex0", DELAY_TASK_MULTIPLEXERS));}
-
-      //   if (argparser_has_flag(&parser, "gyro0"))
-      //     {setDelay(TaskGyro, &DELAY_TASK_GYRO0, argparser_get_int32(&parser, "gyro0", DELAY_TASK_GYRO0));}
-
-      //   if (argparser_has_flag(&parser, "universe"))
-      //     {setDelay(TaskUniverse, &DELAY_TASK_UNIVERSE, argparser_get_int32(&parser, "universe", DELAY_TASK_UNIVERSE));}
-
-      //   if (argparser_has_flag(&parser, "gps"))
-      //     {setDelay(TaskGPS, &DELAY_TASK_GPS, argparser_get_int32(&parser, "gps", DELAY_TASK_GPS));}
-
-      //   if (argparser_has_flag(&parser, "matrix"))
-      //     {setDelay(TaskSwitches, &DELAY_TASK_SWITCHES, argparser_get_int32(&parser, "matrix", DELAY_TASK_SWITCHES));}
-
-      //   if (argparser_has_flag(&parser, "pcinput"))
-      //     {setDelay(TaskPortControllerInput, &DELAY_TASK_PORTCONTROLLER_INPUT, argparser_get_int32(&parser, "pcinput", DELAY_TASK_PORTCONTROLLER_INPUT));}
-
-        // if (argparser_has_flag(&parser, "storage"))
-        //   setDelay(TaskStorage, &DELAY_TASK_STORAGE, argparser_get_int32(&parser, "storage", DELAY_TASK_STORAGE));
-      // }
       }
     }
   }

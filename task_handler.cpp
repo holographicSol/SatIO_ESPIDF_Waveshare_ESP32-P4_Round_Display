@@ -113,7 +113,7 @@ void setTick(TaskHandle_t task_handle, bool *tick_delay, bool use_tick) {
   xTaskNotifyGive(task_handle);
 }
 
-void setDelay(TaskHandle_t task_handle, long *task_delay, long time_delay) {
+void setDelay(TaskHandle_t task_handle, uint32_t *task_delay, uint32_t time_delay) {
   *task_delay = time_delay;
   xTaskNotifyGive(task_handle);
 }
@@ -300,9 +300,9 @@ static void taskStorage(void *pvParameters) {
     // Delay next iteration of task.
     // ------------------------------------------------
     if (!pwrConfigCurrent.TASK_USE_TICKS_STORAGE) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_STORAGE / portTICK_PERIOD_MS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_STORAGE / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_STORAGE);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_STORAGE);
     }
   }
 }
@@ -342,9 +342,9 @@ static void taskSerialInfoCMD(void *pvParameters) {
     // Delay next iteration of task.
     // ------------------------------------------------
     if (!pwrConfigCurrent.TASK_USE_TICKS_INFOCMD) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_INFOCMD / portTICK_PERIOD_MS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_INFOCMD / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_INFOCMD);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_INFOCMD);
     }
   }
 }
@@ -423,9 +423,9 @@ static void taskGPS(void *pvParameters) {
     // Delay next iteration of task.
     // ------------------------------------------------
     if (!pwrConfigCurrent.TASK_USE_TICKS_GPS) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_GPS / portTICK_PERIOD_MS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_GPS / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_GPS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_GPS);
     }
   }
 }
@@ -491,9 +491,9 @@ static void taskGyro(void *pvParameters) {
     // Delay next iteration of task.
     // ------------------------------------------------
     if (!pwrConfigCurrent.TASK_USE_TICKS_GYRO) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_GYRO / portTICK_PERIOD_MS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_GYRO / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_GYRO);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_GYRO);
     }
   }
 }
@@ -545,9 +545,9 @@ static void taskMultiplexers(void *pvParameters) {
     // Delay next iteration of task.
     // ------------------------------------------------
     if (!pwrConfigCurrent.TASK_USE_TICKS_MULTIPLEXERS) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_MULTIPLEXERS / portTICK_PERIOD_MS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_MULTIPLEXERS / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_MULTIPLEXERS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_MULTIPLEXERS);
     }
   }
 }
@@ -610,9 +610,9 @@ static void taskSwitches(void *pvParameters) {
     // Delay next iteration of task.
     // ------------------------------------------------
     if (!pwrConfigCurrent.TASK_USE_TICKS_SWITCHES) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_SWITCHES / portTICK_PERIOD_MS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_SWITCHES / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_SWITCHES);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_SWITCHES);
     }
   }
 }
@@ -729,9 +729,9 @@ static void taskUniverse(void *pvParameters) {
     // Delay next iteration of task.
     // ------------------------------------------------
     if (!pwrConfigCurrent.TASK_USE_TICKS_UNIVERSE) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_UNIVERSE / portTICK_PERIOD_MS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_UNIVERSE / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_UNIVERSE);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_DELAY_UNIVERSE);
     }
   }
 }

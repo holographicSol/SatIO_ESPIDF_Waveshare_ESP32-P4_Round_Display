@@ -29,28 +29,28 @@ extern bool ISR_Bool_MultiDisplayController_0;
 typedef struct PwrConfig {
     char name[56];
 
-    uint32_t TASK_TICKS_GPS;
+    uint32_t TASK_DELAY_GPS;
     bool     TASK_USE_TICKS_GPS;
 
-    uint32_t TASK_TICKS_INFOCMD;
+    uint32_t TASK_DELAY_INFOCMD;
     bool     TASK_USE_TICKS_INFOCMD;
 
-    uint32_t TASK_TICKS_MULTIPLEXERS;
+    uint32_t TASK_DELAY_MULTIPLEXERS;
     bool     TASK_USE_TICKS_MULTIPLEXERS;
 
-    uint32_t TASK_TICKS_GYRO;
+    uint32_t TASK_DELAY_GYRO;
     bool     TASK_USE_TICKS_GYRO;
 
-    uint32_t TASK_TICKS_UNIVERSE;
+    uint32_t TASK_DELAY_UNIVERSE;
     bool     TASK_USE_TICKS_UNIVERSE;
 
-    uint32_t TASK_TICKS_SWITCHES;
+    uint32_t TASK_DELAY_SWITCHES;
     bool     TASK_USE_TICKS_SWITCHES;
 
-    uint32_t TASK_TICKS_PORTCONTROLLER_INPUT;
+    uint32_t TASK_DELAY_PORTCONTROLLER_INPUT;
     bool     TASK_USE_TICKS_PORTCONTROLLER_INPUT;
 
-    uint32_t TASK_TICKS_STORAGE;
+    uint32_t TASK_DELAY_STORAGE;
     bool     TASK_USE_TICKS_STORAGE;
 };
 
