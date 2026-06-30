@@ -30,6 +30,7 @@ extern TaskHandle_t TaskGyro;
 extern TaskHandle_t TaskGPS;
 extern TaskHandle_t TaskUniverse;
 extern TaskHandle_t TaskSwitches;
+extern TaskHandle_t TaskDisplayUpdate;
 
 void createTaskSerialInfoCMD();
 void createTaskStorage();

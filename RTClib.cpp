@@ -458,7 +458,8 @@ char *DateTime::toString(char *buffer) const {
     }
   }
 
-  for (size_t i = 0; i < strlen(buffer) - 1; i++) {
+  const size_t buf_len = strlen(buffer);
+  for (size_t i = 0; i < buf_len - 1; i++) {
     if (buffer[i] == 'h' && buffer[i + 1] == 'h') {
       if (!apTag) { // 24 Hour Mode
         buffer[i] = '0' + hh / 10;

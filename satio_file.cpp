@@ -578,15 +578,15 @@ bool saveMappingFile(const char *filepath) {
     
     char lineBuf[256];
     for (int i_tag=0; i_tag<MAX_MAPPING_TAGS; i_tag++) {
-
+        const char *tag = getMapTag(i_tag);
         for (int i_map=0; i_map<MAX_MAP_SLOTS; i_map++) {
-            if      (i_tag==MAP_MODE)     { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d",  getMapTag(MAP_MODE), i_map, (int)mappingData.map_mode[0][i_map]); printLine(f, lineBuf);}
-            else if (i_tag==FUNCTION_N)   { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(FUNCTION_N), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C0]); printLine(f, lineBuf);}
-            else if (i_tag==MAP_CONFIG_1) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_1), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C1]); printLine(f, lineBuf);}
-            else if (i_tag==MAP_CONFIG_2) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_2), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C2]); printLine(f, lineBuf);}
-            else if (i_tag==MAP_CONFIG_3) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_3), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C3]); printLine(f, lineBuf);}
-            else if (i_tag==MAP_CONFIG_4) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_4), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C4]); printLine(f, lineBuf);}
-            else if (i_tag==MAP_CONFIG_5) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMapTag(MAP_CONFIG_5), i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C5]); printLine(f, lineBuf);}
+            if      (i_tag==MAP_MODE)     { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d",  tag, i_map, (int)mappingData.map_mode[0][i_map]); printLine(f, lineBuf);}
+            else if (i_tag==FUNCTION_N)   { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", tag, i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C0]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_1) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", tag, i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C1]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_2) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", tag, i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C2]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_3) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", tag, i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C3]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_4) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", tag, i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C4]); printLine(f, lineBuf);}
+            else if (i_tag==MAP_CONFIG_5) { snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", tag, i_map, (long)mappingData.mapping_config[0][i_map][INDEX_MAP_C5]); printLine(f, lineBuf);}
         }
     }
     
@@ -706,17 +706,33 @@ bool saveMatrixFile() {
     if (f == NULL) {printf("[saveMatrixFile] Failed to open matrix file.\n"); return false;}
     
     char lineBuf[256];
+    const char *tag_switch_port = getMatrixTag(SWITCH_PORT);
+    const char *tag_switch_func = getMatrixTag(SWITCH_FUNCTION);
+    const char *tag_func_x      = getMatrixTag(FUNCTION_X);
+    const char *tag_func_y      = getMatrixTag(FUNCTION_Y);
+    const char *tag_func_z      = getMatrixTag(FUNCTION_Z);
+    const char *tag_func_op     = getMatrixTag(FUNCTION_OPERATOR);
+    const char *tag_func_inv    = getMatrixTag(FUNCTION_INVERT);
+    const char *tag_out_mode    = getMatrixTag(SWITCH_OUTPUT_MODE);
+    const char *tag_pwm_0       = getMatrixTag(SWITCH_PWM_VALUE_0);
+    const char *tag_pwm_1       = getMatrixTag(SWITCH_PWM_VALUE_1);
+    const char *tag_flux        = getMatrixTag(SWITCH_FLUX);
+    const char *tag_comp_assist = getMatrixTag(COMPUTER_ASSIST);
+    const char *tag_map_slot    = getMatrixTag(MAP_SLOT);
+    const char *tag_xyz_mode_x  = getMatrixTag(XYZ_MODE_X);
+    const char *tag_xyz_mode_y  = getMatrixTag(XYZ_MODE_Y);
+    const char *tag_xyz_mode_z  = getMatrixTag(XYZ_MODE_Z);
 
     // SWITCH_PORT
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", getMatrixTag(SWITCH_PORT), i_switch, (int)matrixData.matrix_port_map[0][i_switch]);
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", tag_switch_port, i_switch, (int)matrixData.matrix_port_map[0][i_switch]);
         printLine(f, lineBuf);
     }
 
     // SWITCH_FUNCTION
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(SWITCH_FUNCTION), i_switch, i_func, (int)matrixData.matrix_function[0][i_switch][i_func]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", tag_switch_func, i_switch, i_func, (int)matrixData.matrix_function[0][i_switch][i_func]);
             printLine(f, lineBuf);
         }
     }
@@ -724,7 +740,7 @@ bool saveMatrixFile() {
     // FUNCTION_X
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", getMatrixTag(FUNCTION_X), i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", tag_func_x, i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
             printLine(f, lineBuf);
         }
     }
@@ -732,7 +748,7 @@ bool saveMatrixFile() {
     // FUNCTION_Y
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", getMatrixTag(FUNCTION_Y), i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", tag_func_y, i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
             printLine(f, lineBuf);
         }
     }
@@ -740,7 +756,7 @@ bool saveMatrixFile() {
     // FUNCTION_Z
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", getMatrixTag(FUNCTION_Z), i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%.10f", tag_func_z, i_switch, i_func, matrixData.matrix_function_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
             printLine(f, lineBuf);
         }
     }
@@ -748,7 +764,7 @@ bool saveMatrixFile() {
     // FUNCTION_OPERATOR
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(FUNCTION_OPERATOR), i_switch, i_func, (int)matrixData.matrix_switch_operator_index[0][i_switch][i_func]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", tag_func_op, i_switch, i_func, (int)matrixData.matrix_switch_operator_index[0][i_switch][i_func]);
             printLine(f, lineBuf);
         }
     }
@@ -756,51 +772,51 @@ bool saveMatrixFile() {
     // FUNCTION_INVERT
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(FUNCTION_INVERT), i_switch, i_func, (int)matrixData.matrix_switch_inverted_logic[0][i_switch][i_func]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", tag_func_inv, i_switch, i_func, (int)matrixData.matrix_switch_inverted_logic[0][i_switch][i_func]);
             printLine(f, lineBuf);
         }
     }
 
     // SWITCH_OUTPUT_MODE
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", getMatrixTag(SWITCH_OUTPUT_MODE), i_switch, (int)matrixData.output_mode[0][i_switch]);
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", tag_out_mode, i_switch, (int)matrixData.output_mode[0][i_switch]);
         printLine(f, lineBuf);
     }
 
     // SWITCH_PWM_VALUE_0
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%lu", getMatrixTag(SWITCH_PWM_VALUE_0), i_switch, (unsigned long)matrixData.output_pwm[0][i_switch][0]);
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%lu", tag_pwm_0, i_switch, (unsigned long)matrixData.output_pwm[0][i_switch][0]);
         printLine(f, lineBuf);
     }
 
     // SWITCH_PWM_VALUE_1
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%lu", getMatrixTag(SWITCH_PWM_VALUE_1), i_switch, (unsigned long)matrixData.output_pwm[0][i_switch][1]);
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%lu", tag_pwm_1, i_switch, (unsigned long)matrixData.output_pwm[0][i_switch][1]);
         printLine(f, lineBuf);
     }
 
     // SWITCH_FLUX
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", getMatrixTag(SWITCH_FLUX), i_switch, (long)matrixData.flux_value[0][i_switch]);
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%ld", tag_flux, i_switch, (long)matrixData.flux_value[0][i_switch]);
         printLine(f, lineBuf);
     }
 
     // COMPUTER_ASSIST
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", getMatrixTag(COMPUTER_ASSIST), i_switch, (int)matrixData.computer_assist[0][i_switch]);
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", tag_comp_assist, i_switch, (int)matrixData.computer_assist[0][i_switch]);
         printLine(f, lineBuf);
     }
 
     // MAP_SLOT
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", getMatrixTag(MAP_SLOT), i_switch, (int)matrixData.index_mapped_value[0][i_switch]);
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", tag_map_slot, i_switch, (int)matrixData.index_mapped_value[0][i_switch]);
         printLine(f, lineBuf);
     }
 
     // XYZ_MODE_X
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(XYZ_MODE_X), i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", tag_xyz_mode_x, i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_X]);
             printLine(f, lineBuf);
         }
     }
@@ -808,7 +824,7 @@ bool saveMatrixFile() {
     // XYZ_MODE_Y
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(XYZ_MODE_Y), i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", tag_xyz_mode_y, i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Y]);
             printLine(f, lineBuf);
         }
     }
@@ -816,7 +832,7 @@ bool saveMatrixFile() {
     // XYZ_MODE_Z
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         for (int i_func=0; i_func<MAX_MATRIX_SWITCH_FUNCTIONS; i_func++) {
-            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", getMatrixTag(XYZ_MODE_Z), i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
+            snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d,%d", tag_xyz_mode_z, i_switch, i_func, (int)matrixData.matrix_function_mode_xyz[0][i_switch][i_func][INDEX_MATRIX_FUNTION_Z]);
             printLine(f, lineBuf);
         }
     }

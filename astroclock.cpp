@@ -302,8 +302,10 @@ static lv_obj_t * create_target_box(lv_obj_t * parent, int size) {
 static void update_planet_pos(Planet * p, float angle_deg, int cx, int cy) {
     if (!p->obj) return;
     float rad = deg2rad(angle_deg + ANGLE_OFFSET);
-    p->x = cx + (int)(p->orbit_radius * sinf(rad)) - p->radius;
-    p->y = cy + (int)(p->orbit_radius * cosf(rad)) - p->radius;
+    float s = sinf(rad);
+    float c = cosf(rad);
+    p->x = cx + (int)(p->orbit_radius * s) - p->radius;
+    p->y = cy + (int)(p->orbit_radius * c) - p->radius;
     lv_obj_set_pos(p->obj, p->x, p->y);
     if (p->target_box) {
         lv_obj_set_pos(p->target_box, p->x - 4, p->y - 4);
@@ -465,10 +467,9 @@ void astro_clock_update(void) {
     if (siderealPlanetData.track_mercury) {
         update_planet_pos(&mercury, siderealPlanetData.mercury_helio_ecliptic_long, SOLAR_CENTER_X, SOLAR_CENTER_Y);
         if (mercury.orbit) {
-            lv_color_t color = (siderealPlanetData.mercury_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
-            lv_obj_set_style_arc_color(mercury.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.mercury_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(mercury.orbit, width, LV_PART_MAIN);
+            bool below = (siderealPlanetData.mercury_alt <= 0);
+            lv_obj_set_style_arc_color(mercury.orbit, below ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(mercury.orbit, below ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE, LV_PART_MAIN);
         }
         lv_obj_clear_flag(mercury.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(mercury.obj, LV_OBJ_FLAG_HIDDEN);
@@ -485,10 +486,9 @@ void astro_clock_update(void) {
     if (siderealPlanetData.track_venus) {
         update_planet_pos(&venus, siderealPlanetData.venus_helio_ecliptic_long, SOLAR_CENTER_X, SOLAR_CENTER_Y);
         if (venus.orbit) {
-            lv_color_t color = (siderealPlanetData.venus_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
-            lv_obj_set_style_arc_color(venus.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.venus_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(venus.orbit, width, LV_PART_MAIN);
+            bool below = (siderealPlanetData.venus_alt <= 0);
+            lv_obj_set_style_arc_color(venus.orbit, below ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(venus.orbit, below ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE, LV_PART_MAIN);
         }
         lv_obj_clear_flag(venus.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(venus.obj, LV_OBJ_FLAG_HIDDEN); 
@@ -504,8 +504,10 @@ void astro_clock_update(void) {
 
     if (siderealPlanetData.track_earth) {
         float rad = deg2rad(siderealPlanetData.earth_ecliptic_long - ANGLE_OFFSET);
-        earth.x = SOLAR_CENTER_X + (int)(earth.orbit_radius * sinf(rad)) - earth.radius;
-        earth.y = SOLAR_CENTER_Y + (int)(earth.orbit_radius * cosf(rad)) - earth.radius;
+        float s = sinf(rad);
+        float c = cosf(rad);
+        earth.x = SOLAR_CENTER_X + (int)(earth.orbit_radius * s) - earth.radius;
+        earth.y = SOLAR_CENTER_Y + (int)(earth.orbit_radius * c) - earth.radius;
         lv_obj_set_pos(earth.obj, earth.x, earth.y);
         if (earth.target_box) {
             lv_obj_set_pos(earth.target_box, earth.x - 4, earth.y - 4);
@@ -545,10 +547,12 @@ void astro_clock_update(void) {
         // Luna uses RA mapped from 0-24 hours to 0-360 degrees
         float luna_angle = (siderealPlanetData.luna_ra / 24.0f) * 360.0f;
         float luna_rad = deg2rad(luna_angle + ANGLE_OFFSET);
-        
+        float ls = sinf(luna_rad);
+        float lc = cosf(luna_rad);
+
         // Position luna relative to Earth's center
-        luna.x = (earth.x + earth.radius) + (int)(luna.orbit_radius * sinf(luna_rad)) - luna.radius;
-        luna.y = (earth.y + earth.radius) + (int)(luna.orbit_radius * cosf(luna_rad)) - luna.radius;
+        luna.x = (earth.x + earth.radius) + (int)(luna.orbit_radius * ls) - luna.radius;
+        luna.y = (earth.y + earth.radius) + (int)(luna.orbit_radius * lc) - luna.radius;
         
         lv_obj_set_pos(luna.obj, luna.x, luna.y);
         if (luna.target_box) {
@@ -605,10 +609,9 @@ void astro_clock_update(void) {
         // Position luna orbit arc centered on Earth
         if (luna.orbit) {
             lv_obj_align_to(luna.orbit, earth.obj, LV_ALIGN_CENTER, 0, 0);
-            lv_color_t color = (siderealPlanetData.luna_alt <= 0) ? COLOR_ORBIT_LUNA_BELOW : COLOR_ORBIT_LUNA_ABOVE;
-            lv_obj_set_style_arc_color(luna.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.luna_alt <= 0) ? LUNA_ORBIT_ARC_WIDTH_BELOW : LUNA_ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(luna.orbit, width, LV_PART_MAIN);
+            bool below = (siderealPlanetData.luna_alt <= 0);
+            lv_obj_set_style_arc_color(luna.orbit, below ? COLOR_ORBIT_LUNA_BELOW : COLOR_ORBIT_LUNA_ABOVE, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(luna.orbit, below ? LUNA_ORBIT_ARC_WIDTH_BELOW : LUNA_ORBIT_ARC_WIDTH_ABOVE, LV_PART_MAIN);
         }
         lv_obj_clear_flag(luna.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(luna.obj, LV_OBJ_FLAG_HIDDEN);
@@ -628,10 +631,9 @@ void astro_clock_update(void) {
     if (siderealPlanetData.track_mars) {
         update_planet_pos(&mars, siderealPlanetData.mars_helio_ecliptic_long, SOLAR_CENTER_X, SOLAR_CENTER_Y);
         if (mars.orbit) {
-            lv_color_t color = (siderealPlanetData.mars_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
-            lv_obj_set_style_arc_color(mars.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.mars_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(mars.orbit, width, LV_PART_MAIN);
+            bool below = (siderealPlanetData.mars_alt <= 0);
+            lv_obj_set_style_arc_color(mars.orbit, below ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(mars.orbit, below ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE, LV_PART_MAIN);
         }
         lv_obj_clear_flag(mars.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(mars.obj, LV_OBJ_FLAG_HIDDEN);
@@ -649,10 +651,9 @@ void astro_clock_update(void) {
     if (siderealPlanetData.track_jupiter) {
         update_planet_pos(&jupiter, siderealPlanetData.jupiter_helio_ecliptic_long, SOLAR_CENTER_X, SOLAR_CENTER_Y);
         if (jupiter.orbit) {
-            lv_color_t color = (siderealPlanetData.jupiter_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
-            lv_obj_set_style_arc_color(jupiter.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.jupiter_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(jupiter.orbit, width, LV_PART_MAIN);
+            bool below = (siderealPlanetData.jupiter_alt <= 0);
+            lv_obj_set_style_arc_color(jupiter.orbit, below ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(jupiter.orbit, below ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE, LV_PART_MAIN);
         }
         lv_obj_clear_flag(jupiter.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(jupiter.obj, LV_OBJ_FLAG_HIDDEN);
@@ -670,10 +671,9 @@ void astro_clock_update(void) {
     if (siderealPlanetData.track_saturn) {
         update_planet_pos(&saturn, siderealPlanetData.saturn_helio_ecliptic_long, SOLAR_CENTER_X, SOLAR_CENTER_Y);
         if (saturn.orbit) {
-            lv_color_t color = (siderealPlanetData.saturn_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
-            lv_obj_set_style_arc_color(saturn.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.saturn_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(saturn.orbit, width, LV_PART_MAIN);
+            bool below = (siderealPlanetData.saturn_alt <= 0);
+            lv_obj_set_style_arc_color(saturn.orbit, below ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(saturn.orbit, below ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE, LV_PART_MAIN);
         }
         // Update Saturn rings position
         if (saturn_ring) {
@@ -702,10 +702,9 @@ void astro_clock_update(void) {
     if (siderealPlanetData.track_uranus) {
         update_planet_pos(&uranus, siderealPlanetData.uranus_helio_ecliptic_long, SOLAR_CENTER_X, SOLAR_CENTER_Y);
         if (uranus.orbit) {
-            lv_color_t color = (siderealPlanetData.uranus_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
-            lv_obj_set_style_arc_color(uranus.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.uranus_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(uranus.orbit, width, LV_PART_MAIN);
+            bool below = (siderealPlanetData.uranus_alt <= 0);
+            lv_obj_set_style_arc_color(uranus.orbit, below ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(uranus.orbit, below ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE, LV_PART_MAIN);
         }
         lv_obj_clear_flag(uranus.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(uranus.obj, LV_OBJ_FLAG_HIDDEN);
@@ -723,10 +722,9 @@ void astro_clock_update(void) {
     if (siderealPlanetData.track_neptune) {
         update_planet_pos(&neptune, siderealPlanetData.neptune_helio_ecliptic_long, SOLAR_CENTER_X, SOLAR_CENTER_Y);
         if (neptune.orbit) {
-            lv_color_t color = (siderealPlanetData.neptune_alt <= 0) ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE;
-            lv_obj_set_style_arc_color(neptune.orbit, color, LV_PART_MAIN);
-            int32_t width = (siderealPlanetData.neptune_alt <= 0) ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE;
-            lv_obj_set_style_arc_width(neptune.orbit, width, LV_PART_MAIN);
+            bool below = (siderealPlanetData.neptune_alt <= 0);
+            lv_obj_set_style_arc_color(neptune.orbit, below ? COLOR_ORBIT_BELOW : COLOR_ORBIT_ABOVE, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(neptune.orbit, below ? ORBIT_ARC_WIDTH_BELOW : ORBIT_ARC_WIDTH_ABOVE, LV_PART_MAIN);
         }
         lv_obj_clear_flag(neptune.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(neptune.obj, LV_OBJ_FLAG_HIDDEN);

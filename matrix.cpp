@@ -1070,11 +1070,10 @@ bool matrixSwitch(void) {
       }
 
       else if (handle_char) {
-        size_t compare_len = strlen(temp_string_x);
         bool inverted = matrixData.matrix_switch_inverted_logic[0][Mi][Fi];
         tmp_matrix[Fi] = inverted
-          ? check_strncmp_false(temp_string_x, temp_string_y, compare_len)
-          : check_strncmp_true(temp_string_x, temp_string_y, compare_len);
+          ? check_strncmp_false(temp_string_x, temp_string_y, 1U)
+          : check_strncmp_true(temp_string_x, temp_string_y, 1U);
       }
     } // End function iteration for this switch.
 

@@ -160,12 +160,21 @@ bool val_element_size(const char *data)
     return (data != NULL) && (strlen(data) < (size_t)MAX_GLOBAL_ELEMENT_SIZE);
 }
 
+/* Returns true when data is non-NULL and its length is exactly val_len.
+   Caller is responsible for ensuring val_len < MAX_GLOBAL_ELEMENT_SIZE. */
+static bool val_elem_len(const char *data, size_t val_len)
+{
+    bool result = false;
+    if (data != NULL) { result = (strlen(data) == val_len); }
+    return result;
+}
+
 bool val_utc_time(const char *data)
 {
     bool result = false;
 
     /* Format: hhmmss.sss */
-    if ((val_element_size(data) == true) && (strlen(data) == 9U))
+    if (val_elem_len(data, 9U))
     {
         /* Cast to unsigned char before widening to int: avoids sign-extension
            on negative plain-char values passed to isdigit (Rule 10.1/10.3). */
@@ -188,7 +197,7 @@ bool val_utc_date(const char *data)
     bool result = false;
 
     /* Format: ddmmyy */
-    if ((val_element_size(data) == true) && (strlen(data) == 6U))
+    if (val_elem_len(data, 6U))
     {
         result = (isdigit((int)(unsigned char)data[0]) != 0) &&
                  (isdigit((int)(unsigned char)data[1]) != 0) &&
@@ -213,19 +222,19 @@ bool val_longitude(const char *data)
 
 bool val_latitude_H(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == 'N') || (data[0] == 'S'));
 }
 
 bool val_longitude_H(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == 'E') || (data[0] == 'W'));
 }
 
 bool val_positioning_status_gngga(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == '0') || (data[0] == '1') || (data[0] == '2') || (data[0] == '6'));
 }
 
@@ -246,7 +255,7 @@ bool val_altitude(const char *data)
 
 bool val_altitude_units(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U);
+    return (val_elem_len(data, 1U));
 }
 
 bool val_geoidal(const char *data)
@@ -256,7 +265,7 @@ bool val_geoidal(const char *data)
 
 bool val_geoidal_units(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U);
+    return (val_elem_len(data, 1U));
 }
 
 bool val_differential_delay(const char *data)
@@ -271,7 +280,7 @@ bool val_basestation_id(const char *data)
 
 bool val_positioning_status_gnrmc(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == 'A') || (data[0] == 'V'));
 }
 
@@ -292,13 +301,13 @@ bool val_installation_angle(const char *data)
 
 bool val_installation_angle_direction(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == 'E') || (data[0] == 'W'));
 }
 
 bool val_mode_indication(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == 'A') || (data[0] == 'D') || (data[0] == 'E') || (data[0] == 'N'));
 }
 
@@ -319,17 +328,17 @@ bool val_yaw_gpatt(const char *data)
 
 bool val_angle_channle_p_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) && (data[0] == 'p');
+    return (val_elem_len(data, 1U)) && (data[0] == 'p');
 }
 
 bool val_angle_channle_r_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) && (data[0] == 'r');
+    return (val_elem_len(data, 1U)) && (data[0] == 'r');
 }
 
 bool val_angle_channle_y_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) && (data[0] == 'y');
+    return (val_elem_len(data, 1U)) && (data[0] == 'y');
 }
 
 bool val_software_version_gpatt(const char *data)
@@ -339,7 +348,7 @@ bool val_software_version_gpatt(const char *data)
 
 bool val_version_channel_s_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) && (data[0] == 'S');
+    return (val_elem_len(data, 1U)) && (data[0] == 'S');
 }
 
 bool val_product_id_gpatt(const char *data)
@@ -349,18 +358,18 @@ bool val_product_id_gpatt(const char *data)
 
 bool val_id_channel_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 2U) && (strcmp(data, "ID") == 0);
+    return (val_elem_len(data, 2U)) && (strcmp(data, "ID") == 0);
 }
 
 bool val_ins_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == '0') || (data[0] == '1'));
 }
 
 bool val_ins_channel_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 3U) && (strcmp(data, "INS") == 0);
+    return (val_elem_len(data, 3U)) && (strcmp(data, "INS") == 0);
 }
 
 bool val_hardware_version_gpatt(const char *data)
@@ -370,7 +379,7 @@ bool val_hardware_version_gpatt(const char *data)
 
 bool val_run_state_flag_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 2U) &&
+    return (val_elem_len(data, 2U)) &&
            ((strcmp(data, "00") == 0) || (strcmp(data, "01") == 0) ||
             (strcmp(data, "02") == 0) || (strcmp(data, "03") == 0) ||
             (strcmp(data, "04") == 0));
@@ -383,7 +392,7 @@ bool val_mis_angle_num_gpatt(const char *data)
 
 bool val_static_flag_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 2U) &&
+    return (val_elem_len(data, 2U)) &&
            ((strcmp(data, "00") == 0) || (strcmp(data, "01") == 0));
 }
 
@@ -399,26 +408,26 @@ bool val_gst_data_gpatt(const char *data)
 
 bool val_line_flag_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == '0') || (data[0] == '1'));
 }
 
 bool val_mis_att_flag_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 2U) &&
+    return (val_elem_len(data, 2U)) &&
            ((strcmp(data, "00") == 0) || (strcmp(data, "01") == 0));
 }
 
 bool val_imu_kind_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == '0') || (data[0] == '1') || (data[0] == '2') ||
             (data[0] == '7') || (data[0] == '8'));
 }
 
 bool val_ubi_car_kind_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == '1') || (data[0] == '2') || (data[0] == '4'));
 }
 
@@ -429,7 +438,7 @@ bool val_mileage_gpatt(const char *data)
 
 bool val_run_inetial_flag_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 2U) &&
+    return (val_elem_len(data, 2U)) &&
            ((strcmp(data, "00") == 0) || (strcmp(data, "01") == 0) ||
             (strcmp(data, "02") == 0) || (strcmp(data, "03") == 0) ||
             (strcmp(data, "04") == 0));
@@ -437,7 +446,7 @@ bool val_run_inetial_flag_gpatt(const char *data)
 
 bool val_speed_enable_gpatt(const char *data)
 {
-    return (val_element_size(data) == true) && (strlen(data) == 1U) &&
+    return (val_elem_len(data, 1U)) &&
            ((data[0] == '0') || (data[0] == '1'));
 }
 
