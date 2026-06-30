@@ -39,45 +39,39 @@ void createTaskGPS();
 void createTaskUniverse();
 void createTaskSwitches();
 
-/** ----------------------------------------------------------------------------
- * Syncronize Tasks.
- *
+/**
  * @brief Time syncronize tasks.
  */
 void syncTasks();
 
-/** ----------------------------------------------------------------------------
- * Is Task Delayed.
- *
- * @brief Returns bool for task delayed.
+/**
+ * @brief Is Task Delayed.
+ * @return Returns bool for task delayed.
  */
 bool isTaskDelayed(TaskHandle_t taskHandle);
 
-/** ----------------------------------------------------------------------------
- * PowerCfg: Ultimate Performance.
- *
- * @brief Sets all task delay timings to optimum performance.
+/**
+ * @brief Power Saving. Sets all task delay timings to a default low power mode.
+ */
+void setTasksDelayLowPower();
+
+/**
+ * @brief Balanced. Sets all task delay timings to a default balanced mode.
+ */
+void setTasksDelayBalanced();
+
+/**
+ * @brief Ultimate Performance. Sets all task delay timings to optimum performance.
  */
 void setTasksDelayUltimatePerformance();
 
-/** ----------------------------------------------------------------------------
- * PowerCfg: Power Saving.
- *
- * @brief Sets all task delay timings to power saving.
- */
-void setTasksDelayPowerSaving();
-
-/** ----------------------------------------------------------------------------
- * Set Tick.
- *
- * @brief Manually override use of millisecond or ticks for delays.
+/**
+ * @brief Set Tick. Manually override use of millisecond or ticks for delays.
  */
 void setTick(TaskHandle_t task_handle, bool *tick_delay, bool use_tick);
 
-/** ----------------------------------------------------------------------------
- * Set Delay.
- *
- * @brief Manually override delay timing.
+/**
+ * @brief Set Delay. Manually override delay milliseconds/ticks.
  */
 void setDelay(TaskHandle_t task_handle, long *task_delay, long time_delay);
 

@@ -348,8 +348,9 @@ SDCard
 
 Performance
 
-    powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
     powercfg --power-saving          Sets power configuration to low power consumption mode.
+    powercfg --power-balanced        Sets power configuration to balanced.
+    powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
     settick -e                       Enable tick delay for specified args.
     settick -d                       Disable tick delay for specified args (enables millisecond delay).
     settick --admplex0               Takes arguments -e, -d.

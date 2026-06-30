@@ -75,6 +75,63 @@ TaskHandle_t TaskUniverse;
 #define TASK_UNIVERSE_STACK_SIZE            20480   // +25%: Expensive float math (planets, etc.)
 
 /** ----------------------------------------------------------------------------
+ * 
+ * @brief Notify all Tasks.
+ * 
+ * Macro for notifying all tasks.
+ * 
+ * Tasks delayed by xTaskNotifyWait, can receive notifications while waiting.
+ * 
+ */
+static void notifyAllTasks(void) {
+  xTaskNotifyGive(TaskSerialInfoCMD);
+  xTaskNotifyGive(TaskStorage);
+  xTaskNotifyGive(TaskMultiplexers);
+  xTaskNotifyGive(TaskGyro);
+  xTaskNotifyGive(TaskGPS);
+  xTaskNotifyGive(TaskUniverse);
+  xTaskNotifyGive(TaskSwitches);
+}
+
+void setTasksDelayLowPower() {
+  pwrConfigCurrent = pwrConfigLowPower;
+  notifyAllTasks();
+}
+
+void setTasksDelayBalanced() {
+  pwrConfigCurrent = pwrConfigBalanced;
+  notifyAllTasks();
+}
+
+void setTasksDelayUltimatePerformance() {
+  pwrConfigCurrent = pwrConfigUltimatePerformance;
+  notifyAllTasks();
+}
+
+void setTick(TaskHandle_t task_handle, bool *tick_delay, bool use_tick) {
+  *tick_delay = use_tick;
+  xTaskNotifyGive(task_handle);
+}
+
+void setDelay(TaskHandle_t task_handle, long *task_delay, long time_delay) {
+  *task_delay = time_delay;
+  xTaskNotifyGive(task_handle);
+}
+
+bool isTaskDelayed(TaskHandle_t taskHandle) {
+  // Compound statement required for the if-body (MISRA C 2012 Rule 15.6).
+  bool res = false;
+  if (taskHandle == nullptr) {
+    res = false;
+  }
+  else {
+    eTaskState state = eTaskGetState(taskHandle);
+    res = (state == eBlocked) || (state == eSuspended);
+  }
+  return res;
+}
+
+/** ----------------------------------------------------------------------------
  * Syncronize Tasks.
  *
  * @brief Time syncronize tasks. Main loop and some tasks will not begin until
@@ -99,20 +156,6 @@ void syncTasks() {
     delayMicroseconds(1);
   }
   global_task_sync = true;
-}
-
-/** ----------------------------------------------------------------------------
- * Is Task Delayed.
- *
- * @brief Returns bool for task delayed.
- */
-bool isTaskDelayed(TaskHandle_t taskHandle) {
-  // Compound statement required for the if-body (MISRA C 2012 Rule 15.6).
-  if (taskHandle == nullptr) {
-    return false;
-  }
-  eTaskState state = eTaskGetState(taskHandle);
-  return (state == eBlocked) || (state == eSuspended);
 }
 
 /** ----------------------------------------------------------------------------------------
@@ -256,10 +299,10 @@ static void taskStorage(void *pvParameters) {
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (!TICK_DELAY_TASK_STORAGE) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_STORAGE / portTICK_PERIOD_MS);
+    if (!pwrConfigCurrent.TASK_USE_TICKS_STORAGE) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_STORAGE / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_STORAGE);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_STORAGE);
     }
   }
 }
@@ -298,10 +341,10 @@ static void taskSerialInfoCMD(void *pvParameters) {
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (!TICK_DELAY_TASK_SERIAL_INFOCMD) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_SERIAL_INFOCMD / portTICK_PERIOD_MS);
+    if (!pwrConfigCurrent.TASK_USE_TICKS_INFOCMD) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_INFOCMD / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_SERIAL_INFOCMD);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_INFOCMD);
     }
   }
 }
@@ -379,10 +422,10 @@ static void taskGPS(void *pvParameters) {
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (!TICK_DELAY_TASK_GPS) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_GPS / portTICK_PERIOD_MS);
+    if (!pwrConfigCurrent.TASK_USE_TICKS_GPS) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_GPS / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_GPS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_GPS);
     }
   }
 }
@@ -447,10 +490,10 @@ static void taskGyro(void *pvParameters) {
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (!TICK_DELAY_TASK_GYRO0) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_GYRO0 / portTICK_PERIOD_MS);
+    if (!pwrConfigCurrent.TASK_USE_TICKS_GYRO) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_GYRO / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_GYRO0);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_GYRO);
     }
   }
 }
@@ -501,10 +544,10 @@ static void taskMultiplexers(void *pvParameters) {
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (!TICK_DELAY_TASK_MULTIPLEXERS) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_MULTIPLEXERS / portTICK_PERIOD_MS);
+    if (!pwrConfigCurrent.TASK_USE_TICKS_MULTIPLEXERS) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_MULTIPLEXERS / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_MULTIPLEXERS);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_MULTIPLEXERS);
     }
   }
 }
@@ -566,10 +609,10 @@ static void taskSwitches(void *pvParameters) {
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (!TICK_DELAY_TASK_SWITCHES) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_SWITCHES / portTICK_PERIOD_MS);
+    if (!pwrConfigCurrent.TASK_USE_TICKS_SWITCHES) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_SWITCHES / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_SWITCHES);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_SWITCHES);
     }
   }
 }
@@ -685,10 +728,10 @@ static void taskUniverse(void *pvParameters) {
     // ------------------------------------------------
     // Delay next iteration of task.
     // ------------------------------------------------
-    if (!TICK_DELAY_TASK_UNIVERSE) {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_UNIVERSE / portTICK_PERIOD_MS);
+    if (!pwrConfigCurrent.TASK_USE_TICKS_UNIVERSE) {
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_UNIVERSE / portTICK_PERIOD_MS);
     } else {
-      xTaskNotifyWait(0x00, 0x00, nullptr, DELAY_TASK_UNIVERSE);
+      xTaskNotifyWait(0x00, 0x00, nullptr, pwrConfigCurrent.TASK_TICKS_UNIVERSE);
     }
   }
 }
@@ -701,84 +744,4 @@ void createTaskUniverse() {
     TASK_UNIVERSE_PRIORITY,   /* Priority of the task */
     &TaskUniverse,            /* Task handle. */
     TASK_UNIVERSE_CORE);      /* Core where the task should run */
-}
-
-/** ----------------------------------------------------------------------------
- * PowerCfg: Ultimate Performance.
- *
- * @brief Sets all task delay timings to optimum performance.
- *
- *        The serial command task and storage task keep their own timings in
- *        every power profile, so they are left untouched here.
- */
-void setTasksDelayUltimatePerformance() {
-  DELAY_TASK_MULTIPLEXERS = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_MULTIPLEXERS;
-  TICK_DELAY_TASK_MULTIPLEXERS = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_MULTIPLEXERS;
-  xTaskNotifyGive(TaskMultiplexers);
-
-  DELAY_TASK_GYRO0 = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GYRO;
-  TICK_DELAY_TASK_GYRO0 = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GYRO;
-  xTaskNotifyGive(TaskGyro);
-
-  DELAY_TASK_UNIVERSE = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_UNIVERSE;
-  TICK_DELAY_TASK_UNIVERSE = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_UNIVERSE;
-  xTaskNotifyGive(TaskUniverse);
-
-  DELAY_TASK_GPS = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GPS;
-  TICK_DELAY_TASK_GPS = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GPS;
-  xTaskNotifyGive(TaskGPS);
-
-  DELAY_TASK_SWITCHES = POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SWITCHES;
-  TICK_DELAY_TASK_SWITCHES = POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SWITCHES;
-  xTaskNotifyGive(TaskSwitches);
-}
-
-/** ----------------------------------------------------------------------------
- * PowerCfg: Power Saving.
- *
- * @brief Sets all task delay timings to power saving.
- *
- *        The serial command task and storage task keep their own timings in
- *        every power profile, so they are left untouched here.
- */
-void setTasksDelayPowerSaving() {
-  DELAY_TASK_MULTIPLEXERS = POWER_CONFIG_1_SECOND_DELAY_TASK_MULTIPLEXERS;
-  TICK_DELAY_TASK_MULTIPLEXERS = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_MULTIPLEXERS;
-  xTaskNotifyGive(TaskMultiplexers);
-
-  DELAY_TASK_GYRO0 = POWER_CONFIG_1_SECOND_DELAY_TASK_GYRO;
-  TICK_DELAY_TASK_GYRO0 = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_GYRO;
-  xTaskNotifyGive(TaskGyro);
-
-  DELAY_TASK_UNIVERSE = POWER_CONFIG_1_SECOND_DELAY_TASK_UNIVERSE;
-  TICK_DELAY_TASK_UNIVERSE = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_UNIVERSE;
-  xTaskNotifyGive(TaskUniverse);
-
-  DELAY_TASK_GPS = POWER_CONFIG_1_SECOND_DELAY_TASK_GPS;
-  TICK_DELAY_TASK_GPS = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_GPS;
-  xTaskNotifyGive(TaskGPS);
-
-  DELAY_TASK_SWITCHES = POWER_CONFIG_1_SECOND_DELAY_TASK_SWITCHES;
-  TICK_DELAY_TASK_SWITCHES = POWER_CONFIG_1_SECOND_TICK_DELAY_TASK_SWITCHES;
-  xTaskNotifyGive(TaskSwitches);
-}
-
-/** ----------------------------------------------------------------------------
- * Set Tick.
- *
- * @brief Manually override use of millisecond or ticks for delays.
- */
-void setTick(TaskHandle_t task_handle, bool *tick_delay, bool use_tick) {
-  *tick_delay = use_tick;
-  xTaskNotifyGive(task_handle);
-}
-
-/** ----------------------------------------------------------------------------
- * Set Delay.
- *
- * @brief Manually override delay timing.
- */
-void setDelay(TaskHandle_t task_handle, long *task_delay, long time_delay) {
-  *task_delay = time_delay;
-  xTaskNotifyGive(task_handle);
 }

@@ -476,8 +476,9 @@ static void PrintHelp(void) {
 
   [ PERFORMANCE ]
 
-      powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
       powercfg --power-saving          Sets power configuration to low power consumption mode.
+      powercfg --power-balanced        Sets power configuration to balanced.
+      powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
       settick -e                       Enable tick delay for specified args.
       settick -d                       Disable tick delay for specified args (enables millisecond delay).
       settick --admplex0               Takes arguments -e, -d.
@@ -1266,6 +1267,7 @@ void CmdProcess(void) {
         if (argparser_has_flag(&parser, "calacc") == true) {WT901CalAcc();}
         if (argparser_has_flag(&parser, "calmag-start") == true) {WT901CalMagStart();}
         else if (argparser_has_flag(&parser, "calmag-stop") == true) {WT901CalMagEnd();}
+        else { /* no more options */ }
       }
 
       // else if (strcmp(pos[0], "sdcard")==0) {
@@ -1273,13 +1275,15 @@ void CmdProcess(void) {
       //   else if (argparser_has_flag(&parser, "unmount")) {unmountSDCard();}
       // }
 
-      // else if (strcmp(pos[0], "powercfg")==0) {
-      //   // The intention is to further develop powercfg in regards to sleep modes.
-      //   // powercfg --ultimate-performance
-      //   if (argparser_has_flag(&parser, "ultimate-performance")) {setTasksDelayUltimatePerformance();}
-      //   // powercfg --power-saving 
-      //   else if (argparser_has_flag(&parser, "power-saving")) {setTasksDelayPowerSaving();}
-      // }
+      else if (strcmp(pos[0], "powercfg")==0) {
+        // powercfg --power-saving
+        if (argparser_has_flag(&parser, "power-saving")) {setTasksDelayLowPower();}
+        // powercfg --power-balanced
+        else if (argparser_has_flag(&parser, "power-balanced")) {setTasksDelayBalanced();}
+        // powercfg --ultimate-performance
+        else if (argparser_has_flag(&parser, "ultimate-performance")) {setTasksDelayUltimatePerformance();}
+        else { /* no more options */ }
+      }
 
       // else if (strcmp(pos[0], "settick")==0) {
       //   // if (argparser_has_flag(&parser, "infocmd"))
@@ -1802,7 +1806,9 @@ void outputStat(void) {
           "acc_z=%.2f "
           "mag_x=%d "
           "mag_y=%d "
-          "mag_z=%d\n",
+          "mag_z=%d  "
+
+          "PowerConfig=%s\n",
           
           satioData.local_unixtime_uS,
           gnrmcData.utc_time,
@@ -1853,7 +1859,9 @@ void outputStat(void) {
           gyroData.gyro_0_acc_z,
           gyroData.gyro_0_mag_x,
           gyroData.gyro_0_mag_y,
-          gyroData.gyro_0_mag_z
+          gyroData.gyro_0_mag_z,
+
+          pwrConfigCurrent.name
       );
     // }
     // ----------------------------------------------------------------------------------------------------------------------------
