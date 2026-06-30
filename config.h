@@ -115,7 +115,7 @@ typedef struct PwrConfig {
 #define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_STORAGE                false
 
 #define POWER_CONFIG_BALANCED_DELAY_TASK_DISPLAY                     1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_DISPLAY                false
+#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_DISPLAY                true
 
 // ----------------------------------------------------------------------------------------
 // Perfromance: Ultimate Perfromance
@@ -144,7 +144,7 @@ typedef struct PwrConfig {
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_STORAGE                     500
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_STORAGE                false
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_DISPLAY                     10
+#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_DISPLAY                     1
 #define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_DISPLAY                false
 
 

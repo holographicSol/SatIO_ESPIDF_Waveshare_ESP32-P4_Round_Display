@@ -80,6 +80,8 @@
 //     #define LV_DRAW_SW_ASM          LV_DRAW_SW_ASM_NONE
 // #endif
 
+LV_FONT_DECLARE(unscii_12);
+// LV_FONT_DECLARE(lv_font_unscii_16);
 LV_FONT_DECLARE(Mono_Bold_14);
 LV_FONT_DECLARE(cobalt_alien_17);
 LV_FONT_DECLARE(cobalt_alien_25);
@@ -117,6 +119,7 @@ typedef struct {
     lv_obj_t * gps_signal_strength;
     lv_obj_t * sdcard_mounted;
     lv_obj_t * grid_menu_1;
+    lv_obj_t * grid_menu_2;
 } system_tray_t;
 
 /** ---------------------------------------------------------------------------------------
@@ -1680,6 +1683,12 @@ void display_serial_screen();
 void display_uap_screen();
 
 /** -------------------------------------------------------------------------------------
+ * @brief Show Baseline Screen (title bar + system tray only; no content).
+ *        Navigate here to measure FPS with minimal rendering overhead.
+ */
+void display_baseline_screen();
+
+/** -------------------------------------------------------------------------------------
  * @brief Flags to trigger screen loading.
  */
 extern bool flag_display_loading_screen;
@@ -1689,6 +1698,7 @@ extern bool flag_display_gps_screen;
 extern bool flag_display_gyro_screen;
 extern bool flag_display_disp_screen;
 extern bool flag_display_uap_screen;
+extern bool flag_display_baseline_screen;
 
 /** -------------------------------------------------------------------------------------
  * @brief Main function to update screen objects and load screens.

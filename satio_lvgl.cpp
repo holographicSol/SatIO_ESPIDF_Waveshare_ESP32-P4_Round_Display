@@ -79,6 +79,7 @@ lv_obj_t * gyro_screen;
 lv_obj_t * serial_screen;
 lv_obj_t * mplex0_screen;
 lv_obj_t * uap_screen;
+lv_obj_t * baseline_screen;
 
 int32_t current_screen_number = -1;
 #define LOAD_SCREEN    -1
@@ -90,14 +91,23 @@ int32_t current_screen_number = -1;
 #define SERIAL_SCREEN  5
 #define UAP_SCREEN     6
 
+#define BASELINE_SCREEN 600
+#define DEV_SCREEN_1 601
+#define DEV_SCREEN_2 602
+#define DEV_SCREEN_3 603
+#define DEV_SCREEN_4 604
+#define DEV_SCREEN_5 605
+#define DEV_SCREEN_6 606
+
 bool flag_display_loading_screen = false;
 bool flag_display_home_screen = false;
 bool flag_display_matrix_screen = false;
 bool flag_display_gps_screen = false;
 bool flag_display_gyro_screen = false;
-bool flag_display_mplex0_screen = false; 
+bool flag_display_mplex0_screen = false;
 bool flag_display_serial_screen = false;
 bool flag_display_uap_screen = false;
+bool flag_display_baseline_screen = false;
 
 /** ---------------------------------------------------------------------------------------
  * @brief Global Objects
@@ -762,13 +772,48 @@ void system_tray_grid_menu_1_event_cb(lv_event_t * e)
         
         // Switch logic
         switch(btn_index) {
-            case HOME_SCREEN:    flag_display_home_screen=true; break;
-            case MATRIX_SCREEN:  flag_display_matrix_screen=true; break;
-            case GPS_SCREEN:     flag_display_gps_screen=true; break;
-            case GYRO_SCREEN:    flag_display_gyro_screen=true; break;
-            case MPLEX0_SCREEN:  flag_display_mplex0_screen=true; break;
-            case SERIAL_SCREEN:  flag_display_serial_screen=true; break;
-            case UAP_SCREEN:     flag_display_uap_screen=true; break;
+            case HOME_SCREEN:     flag_display_home_screen=true; break;
+            case MATRIX_SCREEN:   flag_display_matrix_screen=true; break;
+            case GPS_SCREEN:      flag_display_gps_screen=true; break;
+            case GYRO_SCREEN:     flag_display_gyro_screen=true; break;
+            case MPLEX0_SCREEN:   flag_display_mplex0_screen=true; break;
+            case SERIAL_SCREEN:   flag_display_serial_screen=true; break;
+            case UAP_SCREEN:      flag_display_uap_screen=true; break;
+            default: break;
+        }
+    }
+}
+
+/** ---------------------------------------------------------------------------------------
+ * @brief Event callback.
+ * 
+ * @param e Pointer to the LVGL event structure.
+ */
+void system_tray_grid_menu_2_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if(code == LV_EVENT_CLICKED) {
+
+        lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);     // Get clicked button
+        lv_obj_t * grid = (lv_obj_t *)lv_event_get_user_data(e); // Get grid container (if passed)
+        lv_obj_t * label = lv_obj_get_child(btn, 0); // Get button's label
+        
+        uint32_t btn_index = 0;
+        uint32_t child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_2);
+        for(uint32_t i = 0; i < child_cnt; i++) {
+            // vTaskDelay(pdMS_TO_TICKS(5));
+            if(lv_obj_get_child(system_tray.grid_menu_2, i) == btn) {
+                btn_index = i;
+                break;
+            }
+        }
+        
+        const char * text = lv_label_get_text(label);
+        
+        // Switch logic
+        switch(btn_index+600) {
+            case BASELINE_SCREEN: flag_display_baseline_screen=true; break;
             default: break;
         }
     }
@@ -1973,6 +2018,52 @@ system_tray_t create_system_tray(
                 case MPLEX0_SCREEN: lv_label_set_text(label, "PLX"); break;
                 case SERIAL_SCREEN: lv_label_set_text(label, "SRL"); break; 
                 case UAP_SCREEN:    lv_label_set_text(label, "UAP"); break;
+                default: break;
+            }
+        }
+    }
+
+    // Grid Menu 2
+    tray.grid_menu_2 = create_menu_grid(
+        tray.panel,           // lv_obj_t
+        7,                    // cols
+        1,                    // rows
+        56,                   // cell size px
+        12,                   // outer padding
+        12,                   // inner padding
+        0,                    // pos x
+        70,                   // pos y
+        LV_ALIGN_CENTER,      // alignment
+        radius_rounded,       // item radius
+        7,                    // Max visbilble columns. Equal or less than cols
+        1,                    // Max visible rows. Equal or less than rows
+        false,                // show scrollbar
+        false,                // enable scrolling
+        LV_TEXT_ALIGN_CENTER, // font alignment
+        font_sub,             // font
+        true,
+        true
+    );
+    // Grid Menu 1 Configuration
+    uint32_t grid_child_cnt_2 = lv_obj_get_child_cnt(tray.grid_menu_2);
+    for(uint32_t i = 0; i < grid_child_cnt_2; i++) {
+        // vTaskDelay(pdMS_TO_TICKS(5));
+        lv_obj_t * btn = lv_obj_get_child(tray.grid_menu_2, i);
+        // Add callback
+        lv_obj_add_event_cb(btn, system_tray_grid_menu_2_event_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_set_style_outline_color(btn, default_outline_hue, LV_PART_MAIN);
+        // Get label
+        lv_obj_t * label = lv_obj_get_child(btn, 0);
+        if(label && lv_obj_has_class(label, &lv_label_class)) {
+            // Set label text
+            switch (i+600) {
+                case BASELINE_SCREEN:   lv_label_set_text(label, "BAS"); break;
+                case DEV_SCREEN_1:      lv_label_set_text(label, ""); break;
+                case DEV_SCREEN_2:      lv_label_set_text(label, ""); break;
+                case DEV_SCREEN_3:      lv_label_set_text(label, ""); break;
+                case DEV_SCREEN_4:      lv_label_set_text(label, ""); break; 
+                case DEV_SCREEN_5:      lv_label_set_text(label, ""); break;
+                case DEV_SCREEN_6:      lv_label_set_text(label, ""); break;
                 default: break;
             }
         }
@@ -16741,7 +16832,7 @@ void display_home_screen()
     // Always create a fresh screen
     home_screen = lv_obj_create(NULL);
     
-    // Load screen before creating more objects (smoother, faster load)
+    // Load screen
     lv_scr_load_anim(home_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
@@ -16782,7 +16873,7 @@ void display_matrix_screen()
     // Always create a fresh screen
     matrix_screen = lv_obj_create(NULL);
     
-    // Load screen before creating more objects (smoother, faster load)
+    // Load screen
     lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
@@ -17002,7 +17093,7 @@ void display_gps_screen()
     // Always create a fresh screen
     gps_screen = lv_obj_create(NULL);
     
-    // Load screen before creating more objects (smoother, faster load)
+    // Load screen
     lv_scr_load_anim(gps_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
@@ -17145,7 +17236,7 @@ void display_gyro_screen()
     // Always create a fresh screen
     gyro_screen = lv_obj_create(NULL);
     
-    // Load screen before creating more objects (smoother, faster load)
+    // Load screen
     lv_scr_load_anim(gyro_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
@@ -17198,7 +17289,7 @@ void display_mplex0_screen()
     // Always create a fresh screen
     mplex0_screen = lv_obj_create(NULL);
     
-    // Load screen before creating more objects (smoother, faster load)
+    // Load screen
     lv_scr_load_anim(mplex0_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
@@ -17247,7 +17338,7 @@ void display_serial_screen()
     // Always create a fresh screen
     serial_screen = lv_obj_create(NULL);
     
-    // Load screen before creating more objects (smoother, faster load)
+    // Load screen
     lv_scr_load_anim(serial_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
@@ -17296,7 +17387,7 @@ void display_uap_screen()
     // Always create a fresh screen
     uap_screen = lv_obj_create(NULL);
     
-    // Load screen before creating more objects (smoother, faster load)
+    // Load screen
     lv_scr_load_anim(uap_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
 
     // Defaults
@@ -17315,6 +17406,46 @@ void display_uap_screen()
 }
 
 /** -------------------------------------------------------------------------------------
+ * @brief Blank diagnostic screen: title bar + system tray only, no other content.
+ *        Use this screen to measure baseline FPS with minimal rendering overhead.
+ */
+void display_baseline_screen() {
+
+    // Set Display Flag
+    flag_display_baseline_screen = false;
+
+    // Check Current Screen
+    lv_obj_t * current_screen = lv_scr_act();
+    if (current_screen == baseline_screen) {
+        return;
+    }
+
+    current_screen_number = BASELINE_SCREEN;
+
+    // Always create a fresh screen
+    baseline_screen = lv_obj_create(NULL);
+
+    // Load screen
+    lv_scr_load_anim(baseline_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    create_default_screen_objects(baseline_screen);
+}
+
+/** -------------------------------------------------------------------------------------
+ * @brief Wrapper around lv_dropdown_set_selected that reads the current selection
+ *        first and skips the call when the index is already correct.  Each
+ *        lv_dropdown_set_selected() unconditionally invalidates the widget and
+ *        queues a re-render; avoiding redundant calls is the primary lever for
+ *        keeping FPS high on screens with many static dropdown widgets.
+ */
+static void dd_select(lv_obj_t *dd, uint32_t idx) {
+    bool result = false;
+    if (dd != NULL) {
+        result = (lv_dropdown_get_selected(dd) != (uint16_t)idx);
+    }
+    if (result) { lv_dropdown_set_selected(dd, idx); }
+}
+
+/** -------------------------------------------------------------------------------------
  * @brief Main function to update screen objects and load screens.
  */
 void update_display()
@@ -17323,7 +17454,13 @@ void update_display()
     // ---------------------
     // Rainbow Effect
     // ---------------------
-    current_hue = (current_hue + 1) % 360;
+    // Advance hue every 3 frames.  When the hue is unchanged, the 6 rainbow
+    // colors below stay the same; lv_obj_set_style_* calls with an identical
+    // color are a no-op in LVGL 9, so rainbow-coloured widgets are not
+    // re-rendered in the intervening frames.
+    static uint8_t rainbow_frame_ctr = 0U;
+    if (rainbow_frame_ctr == 0U) { current_hue = (current_hue + 1) % 360; }
+    rainbow_frame_ctr = (rainbow_frame_ctr + 1U) % 3U;
     // Rainbow Major
     rainbow_outline_hue = lv_color_hsv_to_rgb((current_hue + 300) % 360, 100, 100);
     rainbow_title_hue   = lv_color_hsv_to_rgb((current_hue + 250) % 360, 100, 100);
@@ -17343,6 +17480,7 @@ void update_display()
     else if (flag_display_mplex0_screen==true) {display_mplex0_screen();}
     else if (flag_display_serial_screen==true) {display_serial_screen();}
     else if (flag_display_uap_screen==true) {display_uap_screen();}
+    else if (flag_display_baseline_screen==true) {display_baseline_screen();}
     
     // ---------------------
     // KB Alnumsym
@@ -17406,10 +17544,9 @@ void update_display()
         else {
             lv_obj_add_flag(main_title_bar.datetime_sync, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_flag(main_title_bar.gps_signal_strength, LV_OBJ_FLAG_HIDDEN);
-            String gps_signal_text = "" + String(gnggaData.satellite_count) + ":" + String(gnggaData.gps_precision_factor) + "";
+            { char gps_sig[MAX_GLOBAL_ELEMENT_SIZE*3]; snprintf(gps_sig, sizeof(gps_sig), "%d:%.1f", atoi(gnggaData.satellite_count), atof(gnggaData.gps_precision_factor)); lv_label_set_text(main_title_bar.gps_signal_strength, gps_sig); }
             lv_obj_set_style_outline_color(main_title_bar.gps_signal_strength, rainbow_contrast_outline_hue, LV_PART_MAIN);
             lv_obj_set_style_text_color(main_title_bar.gps_signal_strength, rainbow_contrast_title_hue, LV_PART_MAIN);
-            lv_label_set_text(main_title_bar.gps_signal_strength, gps_signal_text.c_str());
         }
 
         // SD Card Mounted / Success Flag
@@ -17463,8 +17600,7 @@ void update_display()
         lv_obj_set_style_text_color(system_tray.local_date, rainbow_title_hue, LV_PART_MAIN);
 
         // System Tray Human Date
-        String human_date = String(satioData.local_wday_name) + " " + String(satioData.local_mday) + " " + String(satioData.local_month_name);
-        lv_label_set_text(system_tray.human_date, human_date.c_str());
+        { char human_date[MAX_GLOBAL_ELEMENT_SIZE*3]; snprintf(human_date, sizeof(human_date), "%s %d %s", satioData.local_wday_name, satioData.local_mday, satioData.local_month_name); lv_label_set_text(system_tray.human_date, human_date); }
         lv_obj_set_style_text_color(system_tray.human_date, rainbow_title_hue, LV_PART_MAIN);
 
         // GPS Sync
@@ -17478,10 +17614,9 @@ void update_display()
         else {
             lv_obj_add_flag(system_tray.datetime_sync, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_flag(system_tray.gps_signal_strength, LV_OBJ_FLAG_HIDDEN);
-            String gps_signal_text = "" + String(gnggaData.satellite_count) + ":" + String(gnggaData.gps_precision_factor) + "";
+            { char gps_sig[MAX_GLOBAL_ELEMENT_SIZE*3]; snprintf(gps_sig, sizeof(gps_sig), "%d:%.1f", atoi(gnggaData.satellite_count), atof(gnggaData.gps_precision_factor)); lv_label_set_text(system_tray.gps_signal_strength, gps_sig); }
             lv_obj_set_style_outline_color(system_tray.gps_signal_strength, main_outline_hue, LV_PART_MAIN);
             lv_obj_set_style_text_color(system_tray.gps_signal_strength, rainbow_contrast_title_hue, LV_PART_MAIN);
-            lv_label_set_text(system_tray.gps_signal_strength, gps_signal_text.c_str());
         }
 
         // SD Card Mounted / Success Flag
@@ -17544,7 +17679,7 @@ void update_display()
     else if (current_screen_number == MATRIX_SCREEN) {
 
         // Matrix Save Slot
-        lv_dropdown_set_selected(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
+        dd_select(dd_matrix_file_slot_select, satioFileData.i_current_matrix_file_path);
 
         if (current_matrix_panel_view==MATRIX_SWITCH_PANEL_NUMBER_OVERVIEW) {
 
@@ -17604,82 +17739,82 @@ void update_display()
                 lv_obj_set_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN, true);
 
                 // Current Switch
-                lv_dropdown_set_selected(mfc.dd_switch_index_select, current_matrix_i);
+                dd_select(mfc.dd_switch_index_select, current_matrix_i);
 
                 // Current Function
-                lv_dropdown_set_selected(mfc.dd_function_index_select, current_matrix_function_i);
+                dd_select(mfc.dd_function_index_select, current_matrix_function_i);
 
                 // Value Primary Function Comparotor
-                lv_dropdown_set_selected(mfc.dd_function_name, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
+                dd_select(mfc.dd_function_name, matrixData.matrix_function[0][current_matrix_i][current_matrix_function_i]);
 
                 // X Comparitor Mode
-                lv_dropdown_set_selected(mfc.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
+                dd_select(mfc.dd_mode_x, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
                 // X Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]==0) {
                     // Mode 0: User Defined
-                    lv_label_set_text(mfc.val_x, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]).c_str());
+                    { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%f", matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]); lv_label_set_text(mfc.val_x, buf); }
                     lv_obj_set_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN, true);
                     lv_obj_set_flag(mfc.val_x, LV_OBJ_FLAG_HIDDEN, false);
                 }
                 else {
                     // Mode 1: System Defined
-                    lv_dropdown_set_selected(mfc.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
+                    dd_select(mfc.dd_x, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_X]);
                     lv_obj_set_flag(mfc.val_x, LV_OBJ_FLAG_HIDDEN, true);
                     lv_obj_set_flag(mfc.dd_x, LV_OBJ_FLAG_HIDDEN, false);
                 }
 
                 // Y Comparitor Mode
-                lv_dropdown_set_selected(mfc.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
+                dd_select(mfc.dd_mode_y, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
                 // Y Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]==0) {
                     // Mode 0: User Defined
-                    lv_label_set_text(mfc.val_y, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]).c_str());
+                    { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%f", matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]); lv_label_set_text(mfc.val_y, buf); }
                     lv_obj_set_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN, true);
                     lv_obj_set_flag(mfc.val_y, LV_OBJ_FLAG_HIDDEN, false);
                 }
                 else {
                     // Mode 1: System Defined
-                    lv_dropdown_set_selected(mfc.dd_y, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
+                    dd_select(mfc.dd_y, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Y]);
                     lv_obj_set_flag(mfc.val_y, LV_OBJ_FLAG_HIDDEN, true);
                     lv_obj_set_flag(mfc.dd_y, LV_OBJ_FLAG_HIDDEN, false);
                 }
 
                 // Z Comparitor Mode
-                lv_dropdown_set_selected(mfc.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
+                dd_select(mfc.dd_mode_z, matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
                 // Z Value
                 if (matrixData.matrix_function_mode_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]==0) {
                     // Mode 0: User Defined
-                    lv_label_set_text(mfc.val_z, String(matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]).c_str());
+                    { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%f", matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]); lv_label_set_text(mfc.val_z, buf); }
                     lv_obj_set_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN, true);
                     lv_obj_set_flag(mfc.val_z, LV_OBJ_FLAG_HIDDEN, false);
                 }
                 else {
                     // Mode 1: System Defined
-                    lv_dropdown_set_selected(mfc.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
+                    dd_select(mfc.dd_z, matrixData.matrix_function_xyz[0][current_matrix_i][current_matrix_function_i][INDEX_MATRIX_FUNTION_Z]);
                     lv_obj_set_flag(mfc.val_z, LV_OBJ_FLAG_HIDDEN, true);
                     lv_obj_set_flag(mfc.dd_z, LV_OBJ_FLAG_HIDDEN, false);
                 }
 
                 // Operator
-                lv_dropdown_set_selected(mfc.dd_operator, matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i]);
+                dd_select(mfc.dd_operator, matrixData.matrix_switch_operator_index[0][current_matrix_i][current_matrix_function_i]);
 
                 // Inverted
-                lv_dropdown_set_selected(mfc.dd_inverted_logic, matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i]);
+                dd_select(mfc.dd_inverted_logic, matrixData.matrix_switch_inverted_logic[0][current_matrix_i][current_matrix_function_i]);
 
                 // PWM Off
-                lv_label_set_text(mfc.val_pwm_0, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF]).c_str());
-                
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_OFF]); lv_label_set_text(mfc.val_pwm_0, buf); }
+
                 // PWM On
-                lv_label_set_text(mfc.val_pwm_1, String(matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON]).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)matrixData.output_pwm[0][current_matrix_i][INDEX_MATRIX_SWITCH_PWM_ON]); lv_label_set_text(mfc.val_pwm_1, buf); }
 
                 // Connected Map Slot
-                lv_dropdown_set_selected(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
+                dd_select(mfc.dd_map_slot, matrixData.index_mapped_value[0][current_matrix_i]);
 
                 // Output Mode
-                lv_dropdown_set_selected(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
+                dd_select(mfc.dd_output_mode, matrixData.output_mode[0][current_matrix_i]);
 
                 // Output Port
-                lv_label_set_text(mfc.val_port_map, String(matrixData.matrix_port_map[0][current_matrix_i]).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)matrixData.matrix_port_map[0][current_matrix_i]); lv_label_set_text(mfc.val_port_map, buf); }
 
                 // ----------------------------------------------------------------------------------------------------------------------------
 
@@ -17696,7 +17831,7 @@ void update_display()
                 // Switch Logic p/s: How many times a second switch logic is calculated
                 lv_obj_set_style_outline_color(mfc.switch_logic_per_second, lv_color_make(255, 0, 0), LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.switch_logic_per_second, lv_color_make(255, 0, 0), LV_PART_MAIN);
-                lv_label_set_text(mfc.switch_logic_per_second, String(systemData.total_matrix).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%ld", systemData.total_matrix); lv_label_set_text(mfc.switch_logic_per_second, buf); }
 
                 /**
                  * Poitential Output Value: Computer Intent / Mapped Value
@@ -17716,11 +17851,11 @@ void update_display()
                 }
                 if (matrixData.output_mode[0][current_matrix_i]==1) {
                     // Mapped Value
-                    lv_label_set_text(mfc.potential_output_value, String(mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]).c_str());
+                    { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%ld", mappingData.mapped_value[0][matrixData.index_mapped_value[0][current_matrix_i]]); lv_label_set_text(mfc.potential_output_value, buf); }
                 }
                 else {
                     // Computer Intention
-                    lv_label_set_text(mfc.potential_output_value, String(matrixData.computer_intention[0][current_matrix_i]).c_str());
+                    { char buf[8]; snprintf(buf, sizeof(buf), "%d", (int)matrixData.computer_intention[0][current_matrix_i]); lv_label_set_text(mfc.potential_output_value, buf); }
                 }
 
                 // Computer Intention: True/False. Does the computer want to attempt switching.
@@ -17766,7 +17901,7 @@ void update_display()
                     lv_obj_set_style_outline_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
                     lv_obj_set_style_text_color(mfc.matrix_switch_output_value, lv_color_make(58, 58, 58), LV_PART_MAIN);
                 }
-                if (mfc.matrix_switch_output_value) {lv_label_set_text(mfc.matrix_switch_output_value, String(matrixData.output_value[0][current_matrix_i]).c_str());}
+                if (mfc.matrix_switch_output_value) { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)matrixData.output_value[0][current_matrix_i]); lv_label_set_text(mfc.matrix_switch_output_value, buf); }
 
                 // Override
                 if (mfc.matrix_switch_override.panel) {
@@ -17795,25 +17930,25 @@ void update_display()
                 lv_obj_set_flag(mcc.panel, LV_OBJ_FLAG_HIDDEN, false);
 
                 // Map Slot
-                lv_dropdown_set_selected(mcc.dd_slot, current_mapping_i);
+                dd_select(mcc.dd_slot, current_mapping_i);
 
-                lv_dropdown_set_selected(mcc.dd_c0, (uint32_t)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
+                dd_select(mcc.dd_c0, (uint32_t)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C0]);
 
-                lv_label_set_text(mcc.val_c1, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C1]).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C1]); lv_label_set_text(mcc.val_c1, buf); }
 
-                lv_label_set_text(mcc.val_c2, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C2]).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C2]); lv_label_set_text(mcc.val_c2, buf); }
 
-                lv_label_set_text(mcc.val_c3, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C3]).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C3]); lv_label_set_text(mcc.val_c3, buf); }
 
-                lv_label_set_text(mcc.val_c4, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C4]).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C4]); lv_label_set_text(mcc.val_c4, buf); }
 
-                lv_label_set_text(mcc.val_c5, String(mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C5]).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)mappingData.mapping_config[0][current_mapping_i][INDEX_MAP_C5]); lv_label_set_text(mcc.val_c5, buf); }
 
-                lv_dropdown_set_selected(mcc.dd_mode, (uint32_t)mappingData.map_mode[0][current_mapping_i]);
+                dd_select(mcc.dd_mode, (uint32_t)mappingData.map_mode[0][current_mapping_i]);
 
-                lv_label_set_text(mcc.value_input, String(get_mapping_input_value(current_mapping_i)).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%f", get_mapping_input_value(current_mapping_i)); lv_label_set_text(mcc.value_input, buf); }
 
-                lv_label_set_text(mcc.value_map_result, String(mappingData.mapped_value[0][current_mapping_i]).c_str());
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%d", (int)mappingData.mapped_value[0][current_mapping_i]); lv_label_set_text(mcc.value_map_result, buf); }
             }
         }
     }
@@ -18571,6 +18706,12 @@ void update_display()
         lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
         lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
     }
+
+    // ---------------------
+    // baseline screen
+    // ---------------------
+    else if (current_screen_number == BASELINE_SCREEN) {
+    }
 }
 
 /** -------------------------------------------------------------------------------------
@@ -18635,7 +18776,8 @@ void initSatIOUI() {
     gyro_screen    = lv_obj_create(NULL);
     serial_screen  = lv_obj_create(NULL);
     mplex0_screen  = lv_obj_create(NULL);
-    uap_screen     = lv_obj_create(NULL);
+    uap_screen      = lv_obj_create(NULL);
+    baseline_screen = lv_obj_create(NULL);
 
     // Default
     default_bg_hue                  = lv_color_make(0,0,0);

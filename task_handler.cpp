@@ -58,13 +58,13 @@ TaskHandle_t TaskDisplayUpdate;
 #define TASK_STORAGE_PRIORITY               3    // LOW: I/O operations, can wait
 
 // CORE ASSIGNMENT
-#define TASK_SERIALINFOCMD_CORE             0    // Core 0: Keep on main (timing-sensitive)
-#define TASK_GYRO_CORE                      0    // Core 0: Sensor reading (less critical)
-#define TASK_MULTIPLEXERS_CORE              0    // Core 0: ADC/multiplexing
-#define TASK_SWITCHES_CORE                  0    // Core 0: Outputs need responsiveness
-#define TASK_UNIVERSE_CORE                  0    // Core 0: Heavy compute, can defer
+#define TASK_SERIALINFOCMD_CORE             1    // Core 0: Keep on main (timing-sensitive)
+#define TASK_GYRO_CORE                      1    // Core 0: Sensor reading (less critical)
+#define TASK_MULTIPLEXERS_CORE              1    // Core 0: ADC/multiplexing
+#define TASK_SWITCHES_CORE                  1    // Core 0: Outputs need responsiveness
+#define TASK_UNIVERSE_CORE                  1    // Core 0: Heavy compute, can defer
 #define TASK_STORAGE_CORE                   1    // Core 1: Deferred to Core 1 while Core 0 is too busy
-#define TASK_GPS_CORE                       0    // Critical for system timing regardless of gps
+#define TASK_GPS_CORE                       1    // Critical for system timing regardless of gps
 
 // STACK SIZES (Adjusted for task complexity)
 #define TASK_STORAGE_STACK_SIZE             6144    // +50%: SDMMC operations
@@ -75,11 +75,10 @@ TaskHandle_t TaskDisplayUpdate;
 #define TASK_SWITCHES_STACK_SIZE            5120    // +25%: Matrix calculations, mappings
 #define TASK_UNIVERSE_STACK_SIZE            20480   // +25%: Expensive float math (planets, etc.)
 
-/* Display task configuration — defined here so satio_lvgl.cpp can reference them
-   alongside the other task constants in task_handler.cpp. */
-#define TASK_DISPLAY_PRIORITY    2       // LOWEST: preempted by every other user task
-#define TASK_DISPLAY_CORE        0       // Core 1: isolated from Core 0 time-critical tasks
-#define TASK_DISPLAY_STACK_SIZE  32768   // Large: LVGL screen building + snprintf buffers
+/* Display task configuration */
+#define TASK_DISPLAY_PRIORITY    5       // 
+#define TASK_DISPLAY_CORE        0       // 
+#define TASK_DISPLAY_STACK_SIZE  32768   //
 
 /** ----------------------------------------------------------------------------
  * 
