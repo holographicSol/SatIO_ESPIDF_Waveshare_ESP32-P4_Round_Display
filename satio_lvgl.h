@@ -86,6 +86,18 @@
 #define SCR_LOAD_ANIM_DELAY 50
 #define SCR_LOAD_ANIM_AUTO_DEL true
 
+/**
+ * CONFIG_LV_DEF_REFR_PERIOD=8 :
+ *  Higher FPS ceiling: If max sensor input Hz is 200 and
+ *                      switch still running +-200 then this
+ *                      may make sense.
+ * 
+ * CONFIG_LV_DEF_REFR_PERIOD=16 :
+ *  Lower FPS ceiling: Prioritize other tasks, regardless of
+ *                     weather or not they would actually
+ *                     benefit.
+ */
+
 // Font
 LV_FONT_DECLARE(unscii_12);
 // LV_FONT_DECLARE(lv_font_unscii_16);

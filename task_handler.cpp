@@ -49,36 +49,36 @@ TaskHandle_t TaskUniverse;
 TaskHandle_t TaskDisplayUpdate;
 
 // PRIORITY
-#define TASK_GPS_PRIORITY                   5    // High: Time/location sync critical
-#define TASK_GYRO_PRIORITY                  4    // High: Sensor reading
-#define TASK_MULTIPLEXERS_PRIORITY          4    // High: Analog multiplexing
-#define TASK_SWITCHES_PRIORITY              4    // High: Logic processing
-#define TASK_SERIALINFOCMD_PRIORITY         3    // High: User interaction & debugging
-#define TASK_UNIVERSE_PRIORITY              3    // LOW: Computational, non-critical delay
-#define TASK_STORAGE_PRIORITY               3    // LOW: I/O operations, can wait
+#define TASK_GPS_PRIORITY                   5
+#define TASK_GYRO_PRIORITY                  4
+#define TASK_MULTIPLEXERS_PRIORITY          4
+#define TASK_SWITCHES_PRIORITY              4
+#define TASK_SERIALINFOCMD_PRIORITY         3
+#define TASK_UNIVERSE_PRIORITY              3
+#define TASK_STORAGE_PRIORITY               3
 
 // CORE ASSIGNMENT
-#define TASK_SERIALINFOCMD_CORE             1    // Core 0: Keep on main (timing-sensitive)
-#define TASK_GYRO_CORE                      1    // Core 0: Sensor reading (less critical)
-#define TASK_MULTIPLEXERS_CORE              1    // Core 0: ADC/multiplexing
-#define TASK_SWITCHES_CORE                  1    // Core 0: Outputs need responsiveness
-#define TASK_UNIVERSE_CORE                  1    // Core 0: Heavy compute, can defer
-#define TASK_STORAGE_CORE                   1    // Core 1: Deferred to Core 1 while Core 0 is too busy
-#define TASK_GPS_CORE                       1    // Critical for system timing regardless of gps
+#define TASK_SERIALINFOCMD_CORE             1
+#define TASK_GYRO_CORE                      1
+#define TASK_MULTIPLEXERS_CORE              1
+#define TASK_SWITCHES_CORE                  1
+#define TASK_UNIVERSE_CORE                  1
+#define TASK_STORAGE_CORE                   1
+#define TASK_GPS_CORE                       1
 
-// STACK SIZES (Adjusted for task complexity)
-#define TASK_STORAGE_STACK_SIZE             6144    // +50%: SDMMC operations
-#define TASK_SERIALINFOCMD_STACK_SIZE       16384   // Keep: Complex serial processing
-#define TASK_GPS_STACK_SIZE                 5120    // +25%: NMEA parsing + INS updates
-#define TASK_GYRO_STACK_SIZE                4608    // +12%: Math operations
-#define TASK_MULTIPLEXERS_STACK_SIZE        4096    // Keep: Simple ADC reading
-#define TASK_SWITCHES_STACK_SIZE            5120    // +25%: Matrix calculations, mappings
-#define TASK_UNIVERSE_STACK_SIZE            20480   // +25%: Expensive float math (planets, etc.)
+// STACK SIZES
+#define TASK_STORAGE_STACK_SIZE             6144
+#define TASK_SERIALINFOCMD_STACK_SIZE       16384
+#define TASK_GPS_STACK_SIZE                 5120
+#define TASK_GYRO_STACK_SIZE                4608
+#define TASK_MULTIPLEXERS_STACK_SIZE        4096
+#define TASK_SWITCHES_STACK_SIZE            5120
+#define TASK_UNIVERSE_STACK_SIZE            20480
 
 /* Display task configuration */
-#define TASK_DISPLAY_PRIORITY    5       // 
-#define TASK_DISPLAY_CORE        0       // 
-#define TASK_DISPLAY_STACK_SIZE  32768   //
+#define TASK_DISPLAY_PRIORITY    5
+#define TASK_DISPLAY_CORE        0
+#define TASK_DISPLAY_STACK_SIZE  32768
 
 /** ----------------------------------------------------------------------------
  * 
