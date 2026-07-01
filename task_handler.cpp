@@ -48,14 +48,14 @@ TaskHandle_t TaskStorage;
 TaskHandle_t TaskUniverse;
 TaskHandle_t TaskDisplayUpdate;
 
-// PRIORITY
+// PRIORITY (same priority so that task Hz can be tuned without triggering wdt for a starved task)
 #define TASK_GPS_PRIORITY                   5
-#define TASK_GYRO_PRIORITY                  4
-#define TASK_MULTIPLEXERS_PRIORITY          4
-#define TASK_SWITCHES_PRIORITY              4
-#define TASK_SERIALINFOCMD_PRIORITY         3
-#define TASK_UNIVERSE_PRIORITY              3
-#define TASK_STORAGE_PRIORITY               3
+#define TASK_GYRO_PRIORITY                  5
+#define TASK_MULTIPLEXERS_PRIORITY          5
+#define TASK_SWITCHES_PRIORITY              5
+#define TASK_SERIALINFOCMD_PRIORITY         5
+#define TASK_UNIVERSE_PRIORITY              5
+#define TASK_STORAGE_PRIORITY               5
 
 // CORE ASSIGNMENT
 #define TASK_SERIALINFOCMD_CORE             1
