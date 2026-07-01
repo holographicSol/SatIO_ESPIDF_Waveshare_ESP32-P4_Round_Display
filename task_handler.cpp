@@ -80,16 +80,6 @@ TaskHandle_t TaskDisplayUpdate;
 #define TASK_DISPLAY_CORE        0
 #define TASK_DISPLAY_STACK_SIZE  32768
 
-
-// #define TASK_FREQ_HZ_GPS           10  // WTGPS300p outputs data at 10Hz. This is a ceiling MAX, actual freq may vary.
-// #define TASK_FREQ_HZ_GYRO         200  // WT901 configured at RRATE_200HZ. This is a ceiling MAX, actual freq may vary.
-// #define TASK_FREQ_HZ_SWITCHES     200  // Switches need only run at the frequency of the highest frequency task, with some exceptions. This is a ceiling MAX, actual freq may vary.
-// #define TASK_FREQ_HZ_STORAGE        2  // SD card I/O bound; best-case config is 500 ms. This is a ceiling MAX, actual freq may vary.
-// #define TASK_FREQ_HZ_INFOCMD      200  // Should be quick to respond to commands and also at least as quick as the highest frequency task, with some exceptions.
-// #define TASK_FREQ_HZ_MULTIPLEXERS  20
-// #define TASK_FREQ_HZ_UNIVERSE       2
-// #define TASK_FREQ_HZ_DISPLAY       40
-
 /** ----------------------------------------------------------------------------
  * 
  * @brief Notify all Tasks.
@@ -125,9 +115,9 @@ void setTasksDelayUltimatePerformance() {
   notifyAllTasks();
 }
 
-void setHZ(TaskHandle_t task_handle, uint32_t freq_max_hz_in, uint32_t *freq_max_hz_out) {
-  if (freq_max_hz_in > 0) {
-    *freq_max_hz_out = freq_max_hz_in;
+void setDelay(TaskHandle_t task_handle, uint32_t delay_in, uint32_t *delay_out) {
+  if (delay_in > 0) {
+    *delay_out = delay_in;
     xTaskNotifyGive(task_handle);
   }
 }
@@ -296,7 +286,7 @@ void system_timing(void) {
 // notifyAllTasks) unblocks the task immediately. The loop then re-reads the
 // current Hz setting and recomputes the remaining time before the deadline.
 // When the deadline is reached, xLastWakeTime advances by exactly one period.
-#define TASK_FREQ_WAIT(hz_field)                                            \
+#define TASK_FREQ_WAIT(delay_field)                                            \
   do {                                                                      \
     static TickType_t xLastWakeTime = 0;                                    \
     static bool initialized = false;                                        \
@@ -307,7 +297,7 @@ void system_timing(void) {
     TickType_t xPeriod;                                                     \
     TickType_t xElapsed;                                                    \
     do {                                                                    \
-      xPeriod  = pdMS_TO_TICKS(1000 / pwrConfigCurrent.hz_field);          \
+      xPeriod  = pdMS_TO_TICKS(pwrConfigCurrent.delay_field);          \
       xElapsed = xTaskGetTickCount() - xLastWakeTime;                       \
       if (xElapsed < xPeriod) {                                             \
         xTaskNotifyWait(0xFFFFFFFF, 0xFFFFFFFF, nullptr, xPeriod - xElapsed); \
@@ -316,14 +306,14 @@ void system_timing(void) {
     xLastWakeTime += xPeriod;                                               \
   } while (0)
 
-bool taskFrequencyGPS()         { TASK_FREQ_WAIT(TASK_MAX_FREQ_HZ_GPS);         return true; }
-bool taskFrequencyGyro()        { TASK_FREQ_WAIT(TASK_MAX_FREQ_HZ_GYRO);        return true; }
-bool taskFrequencySwitches()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_HZ_SWITCHES);    return true; }
-bool taskFrequencyStorage()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_HZ_STORAGE);     return true; }
-bool taskFrequencyInfoCMD()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_HZ_INFOCMD);     return true; }
-bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(TASK_MAX_FREQ_HZ_MULTIPLEXERS);return true; }
-bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_HZ_UNIVERSE);    return true; }
-bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_HZ_DISPLAY);     return true; }
+bool taskFrequencyGPS()         { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_GPS);         return true; }
+bool taskFrequencyGyro()        { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_GYRO);        return true; }
+bool taskFrequencySwitches()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_SWITCHES);    return true; }
+bool taskFrequencyStorage()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_STORAGE);     return true; }
+bool taskFrequencyInfoCMD()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_INFOCMD);     return true; }
+bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_MULTIPLEXERS);return true; }
+bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_UNIVERSE);    return true; }
+bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_DISPLAY);     return true; }
 
 /** ----------------------------------------------------------------------------
  * GPS Task.

@@ -68,9 +68,9 @@ void setTasksDelayBalanced();
 void setTasksDelayUltimatePerformance();
 
 /**
- * @brief Set task max frequency in Hz.
+ * @brief Set task delay in ms.
  */
-void setHZ(TaskHandle_t task_handle, uint32_t freq_max_hz_in, uint32_t *freq_max_hz_out);
+void setDelay(TaskHandle_t task_handle, uint32_t delay_in, uint32_t *delay_out);
 
 void system_timing(void);
 

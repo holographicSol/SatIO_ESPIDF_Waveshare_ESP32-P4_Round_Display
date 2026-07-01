@@ -29,87 +29,87 @@ extern bool ISR_Bool_MultiDisplayController_0;
 typedef struct PwrConfig {
     char name[56];
 
-    uint32_t TASK_MAX_FREQ_HZ_GPS;
+    uint32_t TASK_MAX_FREQ_MS_GPS;
 
-    uint32_t TASK_MAX_FREQ_HZ_INFOCMD;
+    uint32_t TASK_MAX_FREQ_MS_INFOCMD;
 
-    uint32_t TASK_MAX_FREQ_HZ_MULTIPLEXERS;
+    uint32_t TASK_MAX_FREQ_MS_MULTIPLEXERS;
  
-    uint32_t TASK_MAX_FREQ_HZ_GYRO;
+    uint32_t TASK_MAX_FREQ_MS_GYRO;
 
-    uint32_t TASK_MAX_FREQ_HZ_UNIVERSE;
+    uint32_t TASK_MAX_FREQ_MS_UNIVERSE;
 
-    uint32_t TASK_MAX_FREQ_HZ_SWITCHES;
+    uint32_t TASK_MAX_FREQ_MS_SWITCHES;
 
-    uint32_t TASK_MAX_FREQ_HZ_PORTCONTROLLER_INPUT;
+    uint32_t TASK_MAX_FREQ_MS_PORTCONTROLLER_INPUT;
 
-    uint32_t TASK_MAX_FREQ_HZ_STORAGE;
+    uint32_t TASK_MAX_FREQ_MS_STORAGE;
 
-    uint32_t TASK_MAX_FREQ_HZ_DISPLAY;
+    uint32_t TASK_MAX_FREQ_MS_DISPLAY;
 };
 
 // ----------------------------------------------------------------------------------------
 // Low Power
 // ----------------------------------------------------------------------------------------
-#define TASK_MAX_FREQ_HZ_LOW_GPS                         10
+#define TASK_MAX_FREQ_MS_LOW_GPS                         100 // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_LOW_SERIAL_INFOCMD              200
+#define TASK_MAX_FREQ_MS_LOW_SERIAL_INFOCMD              5   // (200 Hz)
 
-#define TASK_MAX_FREQ_HZ_LOW_MULTIPLEXERS                10
+#define TASK_MAX_FREQ_MS_LOW_MULTIPLEXERS                100 // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_LOW_GYRO                        10
+#define TASK_MAX_FREQ_MS_LOW_GYRO                        100 // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_LOW_UNIVERSE                    2
+#define TASK_MAX_FREQ_MS_LOW_UNIVERSE                    500 // (2 Hz)
 
-#define TASK_MAX_FREQ_HZ_LOW_SWITCHES                    10
+#define TASK_MAX_FREQ_MS_LOW_SWITCHES                    100 // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_LOW_PORTCONTROLLER_INPUT        10
+#define TASK_MAX_FREQ_MS_LOW_PORTCONTROLLER_INPUT        100 // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_LOW_STORAGE                     2
+#define TASK_MAX_FREQ_MS_LOW_STORAGE                     500 // (2 Hz)
 
-#define TASK_MAX_FREQ_HZ_LOW_DISPLAY                     30
+#define TASK_MAX_FREQ_MS_LOW_DISPLAY                     50  // (20 Hz)
 
 // ----------------------------------------------------------------------------------------
 // Balanced (Recommended)
 // ----------------------------------------------------------------------------------------
-#define TASK_MAX_FREQ_HZ_BALANCED_GPS                         10
+#define TASK_MAX_FREQ_MS_BALANCED_GPS                    100  // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_BALANCED_SERIAL_INFOCMD              200
+#define TASK_MAX_FREQ_MS_BALANCED_SERIAL_INFOCMD         5    // (200 Hz)
 
-#define TASK_MAX_FREQ_HZ_BALANCED_MULTIPLEXERS                20
+#define TASK_MAX_FREQ_MS_BALANCED_MULTIPLEXERS           25   // (40 Hz)
 
-#define TASK_MAX_FREQ_HZ_BALANCED_GYRO                        200
+#define TASK_MAX_FREQ_MS_BALANCED_GYRO                   5    // (200 Hz)
 
-#define TASK_MAX_FREQ_HZ_BALANCED_UNIVERSE                    2
+#define TASK_MAX_FREQ_MS_BALANCED_UNIVERSE               500  // (2 Hz)
 
-#define TASK_MAX_FREQ_HZ_BALANCED_SWITCHES                    200
+#define TASK_MAX_FREQ_MS_BALANCED_SWITCHES               5    // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_BALANCED_PORTCONTROLLER_INPUT        20
+#define TASK_MAX_FREQ_MS_BALANCED_PORTCONTROLLER_INPUT   25   // (40 Hz)
 
-#define TASK_MAX_FREQ_HZ_BALANCED_STORAGE                     2
+#define TASK_MAX_FREQ_MS_BALANCED_STORAGE                500  // (2 Hz)
 
-#define TASK_MAX_FREQ_HZ_BALANCED_DISPLAY                     40
+#define TASK_MAX_FREQ_MS_BALANCED_DISPLAY                25   // (40 Hz)
 
 // ----------------------------------------------------------------------------------------
 // Perfromance: Ultimate Perfromance
 // ----------------------------------------------------------------------------------------
-#define TASK_MAX_FREQ_HZ_HIGH__GPS                         10
+#define TASK_MAX_FREQ_MS_HIGH__GPS                       100 // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_HIGH__SERIAL_INFOCMD              200
+#define TASK_MAX_FREQ_MS_HIGH__SERIAL_INFOCMD            5   // (200 Hz)
 
-#define TASK_MAX_FREQ_HZ_HIGH__MULTIPLEXERS                40
+#define TASK_MAX_FREQ_MS_HIGH__MULTIPLEXERS              25  // (40 Hz)
 
-#define TASK_MAX_FREQ_HZ_HIGH__GYRO                        200
+#define TASK_MAX_FREQ_MS_HIGH__GYRO                      5   // (200 Hz)
 
-#define TASK_MAX_FREQ_HZ_HIGH__UNIVERSE                    10
+#define TASK_MAX_FREQ_MS_HIGH__UNIVERSE                  100 // (10 Hz)
 
-#define TASK_MAX_FREQ_HZ_HIGH__SWITCHES                    500
+#define TASK_MAX_FREQ_MS_HIGH__SWITCHES                  2   // (500 Hz)
 
-#define TASK_MAX_FREQ_HZ_HIGH__PORTCONTROLLER_INPUT        40
+#define TASK_MAX_FREQ_MS_HIGH__PORTCONTROLLER_INPUT      25  // (40 Hz)
 
-#define TASK_MAX_FREQ_HZ_HIGH__STORAGE                     2
+#define TASK_MAX_FREQ_MS_HIGH__STORAGE                   500 // (2 Hz)
 
-#define TASK_MAX_FREQ_HZ_HIGH__DISPLAY                     60
+#define TASK_MAX_FREQ_MS_HIGH__DISPLAY                   20  // (50 Hz)
 
 
 extern struct PwrConfig pwrConfigLowPower;
