@@ -119,48 +119,72 @@ bool readGyro(void)
     {
         for (int i = 0; i < 3; i++)
         {
-            gyroData.gyro_0_fAcc[i] = sReg[AX + i] / 32768.0f * 16.0f;
             gyroData.gyro_0_fGyro[i] = sReg[GX + i] / 32768.0f * 2000.0f;
             gyroData.gyro_0_fAngle[i] = sReg[Roll + i] / 32768.0f * 180.0f;
-        }
+            gyroData.gyro_0_fAcc[i] = sReg[AX + i] / 32768.0f * 16.0f;
 
-        if ((gyroData.gyro_0_s_cDataUpdate & GYRO_0_ACC_UPDATE) != 0U)
-        {
-            gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_ACC_UPDATE);
-            gyroData.gyro_0_acc_x = gyroData.gyro_0_fAcc[0];
-            gyroData.gyro_0_acc_y = gyroData.gyro_0_fAcc[1];
-            gyroData.gyro_0_acc_z = gyroData.gyro_0_fAcc[2];
-            updated = true;
         }
+        // printf("acc: x=%f y=%f z=%f\n", gyroData.gyro_0_fAcc[0], gyroData.gyro_0_fAcc[1], gyroData.gyro_0_fAcc[2]);
+        // printf("ang: x=%f y=%f z=%f\n", gyroData.gyro_0_fAngle[0], gyroData.gyro_0_fAngle[1], gyroData.gyro_0_fAngle[2]);
+        // printf("gyr: x=%f y=%f z=%f\n", gyroData.gyro_0_fGyro[0], gyroData.gyro_0_fGyro[1], gyroData.gyro_0_fGyro[2]);
 
-        if ((gyroData.gyro_0_s_cDataUpdate & GYRO_0_ANGLE_UPDATE) != 0U)
-        {
-            gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_ANGLE_UPDATE);
-            gyroData.gyro_0_ang_x = gyroData.gyro_0_fAngle[0];
-            gyroData.gyro_0_ang_y = gyroData.gyro_0_fAngle[1];
-            gyroData.gyro_0_ang_z = gyroData.gyro_0_fAngle[2];
-            updated = true;
-        }
+        gyroData.gyro_0_acc_x = gyroData.gyro_0_fAcc[0];
+        gyroData.gyro_0_acc_y = gyroData.gyro_0_fAcc[1];
+        gyroData.gyro_0_acc_z = gyroData.gyro_0_fAcc[2];
 
-        if ((gyroData.gyro_0_s_cDataUpdate & GYRO_0_UPDATE) != 0U)
-        {
-            gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_UPDATE);
-            gyroData.gyro_0_gyr_x = gyroData.gyro_0_fGyro[0];
-            gyroData.gyro_0_gyr_y = gyroData.gyro_0_fGyro[1];
-            gyroData.gyro_0_gyr_z = gyroData.gyro_0_fGyro[2];
-            updated = true;
-        }
+        gyroData.gyro_0_ang_x = gyroData.gyro_0_fAngle[0];
+        gyroData.gyro_0_ang_y = gyroData.gyro_0_fAngle[1];
+        gyroData.gyro_0_ang_z = gyroData.gyro_0_fAngle[2];
 
-        if ((gyroData.gyro_0_s_cDataUpdate & GYRO_0_MAG_UPDATE) != 0U)
-        {
-            gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_MAG_UPDATE);
-            gyroData.gyro_0_mag_x = sReg[HX];
-            gyroData.gyro_0_mag_y = sReg[HY];
-            gyroData.gyro_0_mag_z = sReg[REG_HZ];
-            updated = true;
-        }
+        gyroData.gyro_0_gyr_x = gyroData.gyro_0_fGyro[0];
+        gyroData.gyro_0_gyr_y = gyroData.gyro_0_fGyro[1];
+        gyroData.gyro_0_gyr_z = gyroData.gyro_0_fGyro[2];
+
+        gyroData.gyro_0_mag_x = sReg[HX];
+        gyroData.gyro_0_mag_y = sReg[HY];
+        gyroData.gyro_0_mag_z = sReg[REG_HZ];
+
+        // ----------------------------------------------------------------------------------------------------
+        // Time consuming block. This may be useful in the future if we wish to itemize update true.
+        // ----------------------------------------------------------------------------------------------------
+        // if ((gyroData.gyro_0_s_cDataUpdate & GYRO_0_ACC_UPDATE) != 0U)
+        // {
+        //     gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_ACC_UPDATE);
+        //     gyroData.gyro_0_acc_x = gyroData.gyro_0_fAcc[0];
+        //     gyroData.gyro_0_acc_y = gyroData.gyro_0_fAcc[1];
+        //     gyroData.gyro_0_acc_z = gyroData.gyro_0_fAcc[2];
+        //     updated = true;
+        // }
+
+        // if ((gyroData.gyro_0_s_cDataUpdate & GYRO_0_ANGLE_UPDATE) != 0U)
+        // {
+        //     gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_ANGLE_UPDATE);
+        //     gyroData.gyro_0_ang_x = gyroData.gyro_0_fAngle[0];
+        //     gyroData.gyro_0_ang_y = gyroData.gyro_0_fAngle[1];
+        //     gyroData.gyro_0_ang_z = gyroData.gyro_0_fAngle[2];
+        //     updated = true;
+        // }
+
+        // if ((gyroData.gyro_0_s_cDataUpdate & GYRO_0_UPDATE) != 0U)
+        // {
+        //     gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_UPDATE);
+        //     gyroData.gyro_0_gyr_x = gyroData.gyro_0_fGyro[0];
+        //     gyroData.gyro_0_gyr_y = gyroData.gyro_0_fGyro[1];
+        //     gyroData.gyro_0_gyr_z = gyroData.gyro_0_fGyro[2];
+        //     updated = true;
+        // }
+
+        // if ((gyroData.gyro_0_s_cDataUpdate & GYRO_0_MAG_UPDATE) != 0U)
+        // {
+        //     gyroData.gyro_0_s_cDataUpdate = (uint8_t)(gyroData.gyro_0_s_cDataUpdate & ~GYRO_0_MAG_UPDATE);
+        //     gyroData.gyro_0_mag_x = sReg[HX];
+        //     gyroData.gyro_0_mag_y = sReg[HY];
+        //     gyroData.gyro_0_mag_z = sReg[REG_HZ];
+        //     updated = true;
+        // }
+        // ----------------------------------------------------------------------------------------------------
+        updated = true;
     }
-
     return updated; /* Rule 15.5: single point of exit */
 }
 
