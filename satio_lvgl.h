@@ -81,6 +81,7 @@
 // #endif
 
 // Load screen options (trade between performance/animations. default: performance.)
+#define SCR_LOAD_ANIM LV_SCR_LOAD_ANIM_NONE
 #define SCR_LOAD_ANIM_TIME 0
 #define SCR_LOAD_ANIM_DELAY 0
 #define SCR_LOAD_ANIM_AUTO_DEL true
