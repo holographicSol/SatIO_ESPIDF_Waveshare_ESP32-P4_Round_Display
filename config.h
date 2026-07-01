@@ -82,7 +82,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_MS_BALANCED_UNIVERSE               500  // (2 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_SWITCHES               5    // (10 Hz)
+#define TASK_MAX_FREQ_MS_BALANCED_SWITCHES               5    // (200 Hz)
 
 #define TASK_MAX_FREQ_MS_BALANCED_PORTCONTROLLER_INPUT   25   // (40 Hz)
 
