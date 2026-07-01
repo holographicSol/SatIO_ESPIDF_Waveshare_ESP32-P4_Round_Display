@@ -16060,8 +16060,8 @@ uap_t create_uap(
 
     // Center rectangle
     {
-        int32_t rect_width = roll_size_h-6;
-        int32_t rect_height = roll_size_h-6;
+        int32_t rect_width = roll_size_h-10;
+        int32_t rect_height = roll_size_h-10;
         lv_obj_t *center_rect = lv_obj_create(result.roll_panel);
 
         // Hide & disable scrollbar
@@ -16256,9 +16256,7 @@ uap_t create_uap(
         default_value_hue
     ); 
 
-
-
-        result.gyro_gforce_x_label = create_label(
+    result.gyro_gforce_x_label = create_label(
         result.panel,         // parent
         100,                  // width
         20,                   // height
@@ -16317,9 +16315,6 @@ uap_t create_uap(
         default_bg_hue,
         default_value_hue
     ); 
-
-
-
 
     result.latitude_label = create_label(
         result.panel,         // parent
@@ -16662,7 +16657,7 @@ void display_home_screen()
     home_screen = lv_obj_create(NULL);
     
     // Load screen
-    lv_scr_load_anim(home_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    lv_scr_load_anim(home_screen, LV_SCR_LOAD_ANIM_NONE, SCR_LOAD_ANIM_TIME, SCR_LOAD_ANIM_DELAY, SCR_LOAD_ANIM_AUTO_DEL);
 
     // Defaults
     create_default_screen_objects(home_screen);
@@ -16703,7 +16698,7 @@ void display_matrix_screen()
     matrix_screen = lv_obj_create(NULL);
     
     // Load screen
-    lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    lv_scr_load_anim(matrix_screen, LV_SCR_LOAD_ANIM_NONE, SCR_LOAD_ANIM_TIME, SCR_LOAD_ANIM_DELAY, SCR_LOAD_ANIM_AUTO_DEL);
 
     // Defaults
     create_default_screen_objects(matrix_screen);
@@ -16923,7 +16918,7 @@ void display_gps_screen()
     gps_screen = lv_obj_create(NULL);
     
     // Load screen
-    lv_scr_load_anim(gps_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    lv_scr_load_anim(gps_screen, LV_SCR_LOAD_ANIM_NONE, SCR_LOAD_ANIM_TIME, SCR_LOAD_ANIM_DELAY, SCR_LOAD_ANIM_AUTO_DEL);
 
     // Defaults
     create_default_screen_objects(gps_screen);
@@ -17066,7 +17061,7 @@ void display_gyro_screen()
     gyro_screen = lv_obj_create(NULL);
     
     // Load screen
-    lv_scr_load_anim(gyro_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    lv_scr_load_anim(gyro_screen, LV_SCR_LOAD_ANIM_NONE, SCR_LOAD_ANIM_TIME, SCR_LOAD_ANIM_DELAY, SCR_LOAD_ANIM_AUTO_DEL);
 
     // Defaults
     create_default_screen_objects(gyro_screen);
@@ -17119,7 +17114,7 @@ void display_mplex0_screen()
     mplex0_screen = lv_obj_create(NULL);
     
     // Load screen
-    lv_scr_load_anim(mplex0_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    lv_scr_load_anim(mplex0_screen, LV_SCR_LOAD_ANIM_NONE, SCR_LOAD_ANIM_TIME, SCR_LOAD_ANIM_DELAY, SCR_LOAD_ANIM_AUTO_DEL);
 
     // Defaults
     create_default_screen_objects(mplex0_screen);
@@ -17168,7 +17163,7 @@ void display_serial_screen()
     serial_screen = lv_obj_create(NULL);
     
     // Load screen
-    lv_scr_load_anim(serial_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    lv_scr_load_anim(serial_screen, LV_SCR_LOAD_ANIM_NONE, SCR_LOAD_ANIM_TIME, SCR_LOAD_ANIM_DELAY, SCR_LOAD_ANIM_AUTO_DEL);
 
     // Defaults
     create_default_screen_objects(serial_screen);
@@ -17217,7 +17212,7 @@ void display_uap_screen()
     uap_screen = lv_obj_create(NULL);
     
     // Load screen
-    lv_scr_load_anim(uap_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    lv_scr_load_anim(uap_screen, LV_SCR_LOAD_ANIM_NONE, SCR_LOAD_ANIM_TIME, SCR_LOAD_ANIM_DELAY, SCR_LOAD_ANIM_AUTO_DEL);
 
     // Defaults
     create_default_screen_objects(uap_screen);
@@ -17255,7 +17250,7 @@ void display_baseline_screen() {
     baseline_screen = lv_obj_create(NULL);
 
     // Load screen
-    lv_scr_load_anim(baseline_screen, LV_SCR_LOAD_ANIM_NONE, 300, 0, true);
+    lv_scr_load_anim(baseline_screen, LV_SCR_LOAD_ANIM_NONE, SCR_LOAD_ANIM_TIME, SCR_LOAD_ANIM_DELAY, SCR_LOAD_ANIM_AUTO_DEL);
     create_default_screen_objects(baseline_screen);
 }
 

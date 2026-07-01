@@ -80,12 +80,19 @@
 //     #define LV_DRAW_SW_ASM          LV_DRAW_SW_ASM_NONE
 // #endif
 
+// Load screen options (trade between performance/animations. default: performance.)
+#define SCR_LOAD_ANIM_TIME 0
+#define SCR_LOAD_ANIM_DELAY 0
+#define SCR_LOAD_ANIM_AUTO_DEL true
+
+// Font
 LV_FONT_DECLARE(unscii_12);
 // LV_FONT_DECLARE(lv_font_unscii_16);
 LV_FONT_DECLARE(Mono_Bold_14);
 LV_FONT_DECLARE(cobalt_alien_17);
 LV_FONT_DECLARE(cobalt_alien_25);
 
+// Keyboard/Numpad accepted chars
 #define LV_TXT_ALPHA_LC "abcdefghijklmnopqrstuvwxyz"
 #define LV_TXT_ALPHA_UC "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define LV_TXT_NUM      "0123456789"
