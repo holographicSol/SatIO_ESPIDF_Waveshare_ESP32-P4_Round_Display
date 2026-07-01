@@ -96,6 +96,9 @@
  *  Lower FPS ceiling: Prioritize other tasks, regardless of
  *                     weather or not they would actually
  *                     benefit.
+ * 
+ * CONFIG_BSP_DISPLAY_LVGL_AVOID_TEAR=y
+ * CONFIG_BSP_DISPLAY_LVGL_AVOID_TEAR=n
  */
 
 // Font

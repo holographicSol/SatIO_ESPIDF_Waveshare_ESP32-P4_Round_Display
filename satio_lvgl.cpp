@@ -16502,9 +16502,6 @@ void cleanup_loading_image() {
  * @brief  An intermediary function used with loading screens.
  */
 void lvgl_cleanup_all() {
-    // Ensure no pending events
-    lv_timer_handler();
-    
     cleanup_loading_image();
     astro_clock_end();
 }
