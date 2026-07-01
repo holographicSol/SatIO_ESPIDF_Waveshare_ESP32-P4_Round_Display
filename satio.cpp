@@ -95,6 +95,7 @@ struct SATIOStruct satioData = {
     .system_ground_heading = 0.0,
     .ground_heading_value_mode = SATIO_MODE_GPS,
     .ground_heading_name = {0},
+    .course_heading = 0.0,
     // ------------------------------------------------------------------------------------
     // MILEAGE
     // ------------------------------------------------------------------------------------

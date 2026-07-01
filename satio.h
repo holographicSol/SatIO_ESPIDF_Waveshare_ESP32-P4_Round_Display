@@ -100,6 +100,7 @@ struct SATIOStruct {
     double system_ground_heading;  // System ground heading (GPS / User)
     int ground_heading_value_mode; // GPS / User
     char   ground_heading_name[MAX_GLOBAL_ELEMENT_SIZE]; // Ground heading (e.g., N, NNE)
+    double course_heading; // Stores current course heading (default north)
     // ------------------------------------------------------------------------------------
     // MILEAGE
     // ------------------------------------------------------------------------------------

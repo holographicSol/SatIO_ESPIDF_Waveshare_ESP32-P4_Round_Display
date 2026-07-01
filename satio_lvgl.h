@@ -752,7 +752,6 @@ typedef struct {
     lv_obj_t * panel;
 
     lv_obj_t * roll_panel;
-    int32_t roll_panel_base_y;
 
     lv_obj_t * pitch_panel;
     int32_t pitch_panel_height_px;
@@ -761,6 +760,14 @@ typedef struct {
     lv_obj_t * yaw_panel;
     int32_t yaw_panel_width_px;
     int32_t yaw_panel_height_px;
+
+    lv_obj_t * gyro_angle_x_label;
+    lv_obj_t * gyro_angle_y_label;
+    lv_obj_t * gyro_angle_z_label;
+
+    lv_obj_t * gyro_gforce_x_label;
+    lv_obj_t * gyro_gforce_y_label;
+    lv_obj_t * gyro_gforce_z_label;
 
     lv_obj_t * latitude_label;
     lv_obj_t * longitude_label;

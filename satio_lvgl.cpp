@@ -16095,14 +16095,231 @@ uap_t create_uap(
     }
 
     // #############################################################################################
-    // todo: write actual values to display, roll, pitch, yaw, gforce xyz, speed, altitude, etc.
-    // todo: special labels/slots that can be connected to matrix switches to convey true/false, enable/disable, etc.
-    // monospace font between 8 and 16 px: 8 too small, 16 too big.
+    // PITCH INDICATOR  (vertical strip — left of roll symbol)
+    // pitch_panel       = sliding indicator  (moved per-frame with lv_obj_set_y)
+    // pitch_panel_height_px = track height   (determines max pixel travel at ±90°)
+    // pitch_panel_width_px  = indicator base y at 0° pitch (stored for update_display)
     // #############################################################################################
+
+    {
+        const int32_t pt_track_w = 4;
+        const int32_t pt_track_h = (size_h_px * 4) / 5;               // 400 px
+        const int32_t pt_track_x = 20;
+        const int32_t pt_track_y = (size_h_px - pt_track_h) / 2;      // 50 px
+        const int32_t pt_indic_w = 14;
+        const int32_t pt_indic_h = pt_track_w;
+
+        result.pitch_panel_height_px = pt_track_h;   // pixel range for [-90, +90]
+        result.pitch_panel_width_px  = pt_track_y;   // track top y (absolute)
+
+        // Track (static, not stored)
+        lv_obj_t *pt = lv_obj_create(result.panel);
+        lv_obj_set_scrollbar_mode(pt, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(pt, LV_DIR_NONE);
+        lv_obj_set_size(pt, pt_track_w, pt_track_h);
+        lv_obj_set_pos(pt, pt_track_x, pt_track_y);
+        lv_obj_set_style_radius(pt, 0, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(pt, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_width(pt, 1, LV_PART_MAIN);
+        lv_obj_set_style_border_color(pt, lv_color_make(0, 255, 0), LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(pt, LV_OPA_0, LV_PART_MAIN);
+        lv_obj_set_style_shadow_width(pt, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(pt, 0, LV_PART_MAIN);
+
+        // Sliding indicator
+        result.pitch_panel = lv_obj_create(result.panel);
+        lv_obj_set_scrollbar_mode(result.pitch_panel, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(result.pitch_panel, LV_DIR_NONE);
+        lv_obj_set_size(result.pitch_panel, pt_indic_w, pt_indic_h);
+        lv_obj_set_pos(result.pitch_panel,
+            pt_track_x + (pt_track_w / 2) - (pt_indic_w / 2),
+            result.pitch_panel_width_px);
+        lv_obj_set_style_radius(result.pitch_panel, 0, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(result.pitch_panel, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_width(result.pitch_panel, 0, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(result.pitch_panel, lv_color_make(0, 255, 0), LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(result.pitch_panel, LV_OPA_COVER, LV_PART_MAIN);
+        lv_obj_set_style_shadow_width(result.pitch_panel, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(result.pitch_panel, 0, LV_PART_MAIN);
+    }
+
+    // #############################################################################################
+    // YAW INDICATOR  (horizontal strip — above roll symbol)
+    // yaw_panel       = sliding indicator  (moved per-frame with lv_obj_set_x)
+    // yaw_panel_width_px  = track width    (determines full 360° travel in px)
+    // yaw_panel_height_px = track left x   (indicator x at 0° yaw — stored for update_display)
+    // #############################################################################################
+
+    {
+        const int32_t yw_track_h = 4;
+        const int32_t yw_track_w = (size_w_px * 4) / 5;
+        const int32_t yw_track_y = 20;
+        const int32_t yw_track_x = (size_w_px - yw_track_w) / 2;
+        const int32_t yw_indic_h = 14;
+        const int32_t yw_indic_w = yw_track_h;
+
+        result.yaw_panel_width_px  = yw_track_w;
+        result.yaw_panel_height_px = yw_track_x;  // base x (indicator x at 0°)
+
+        // Track (static, not stored)
+        lv_obj_t *yt = lv_obj_create(result.panel);
+        lv_obj_set_scrollbar_mode(yt, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(yt, LV_DIR_NONE);
+        lv_obj_set_size(yt, yw_track_w, yw_track_h);
+        lv_obj_set_pos(yt, yw_track_x, yw_track_y);
+        lv_obj_set_style_radius(yt, 0, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(yt, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_width(yt, 1, LV_PART_MAIN);
+        lv_obj_set_style_border_color(yt, lv_color_make(0, 255, 0), LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(yt, LV_OPA_0, LV_PART_MAIN);
+        lv_obj_set_style_shadow_width(yt, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(yt, 0, LV_PART_MAIN);
+
+        // Sliding indicator
+        result.yaw_panel = lv_obj_create(result.panel);
+        lv_obj_set_scrollbar_mode(result.yaw_panel, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(result.yaw_panel, LV_DIR_NONE);
+        lv_obj_set_size(result.yaw_panel, yw_indic_w, yw_indic_h);
+        lv_obj_set_pos(result.yaw_panel,
+            result.yaw_panel_height_px,
+            yw_track_y + (yw_track_h / 2) - (yw_indic_h / 2));
+        lv_obj_set_style_radius(result.yaw_panel, 0, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(result.yaw_panel, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_width(result.yaw_panel, 0, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(result.yaw_panel, lv_color_make(0, 255, 0), LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(result.yaw_panel, LV_OPA_COVER, LV_PART_MAIN);
+        lv_obj_set_style_shadow_width(result.yaw_panel, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(result.yaw_panel, 0, LV_PART_MAIN);
+    }
 
     // #############################################################################################
     // COORD
     // #############################################################################################
+
+    result.gyro_angle_x_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_TOP_LEFT,  // parent alignment
+        50,                    // pos x
+        50,                  // pos y
+        "ROL ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    result.gyro_angle_y_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_TOP_LEFT,  // parent alignment
+        50,                    // pos x
+        70,                  // pos y
+        "PIT ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    ); 
+    
+    result.gyro_angle_z_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_TOP_LEFT,  // parent alignment
+        50,                    // pos x
+        90,                  // pos y
+        "YAW ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    ); 
+
+
+
+        result.gyro_gforce_x_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_TOP_LEFT,  // parent alignment
+        150,                    // pos x
+        50,                  // pos y
+        "GROL ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    );
+
+    result.gyro_gforce_y_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_TOP_LEFT,  // parent alignment
+        150,                    // pos x
+        70,                  // pos y
+        "GPIT ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    ); 
+    
+    result.gyro_gforce_z_label = create_label(
+        result.panel,         // parent
+        100,                  // width
+        20,                   // height
+        LV_ALIGN_TOP_LEFT,  // parent alignment
+        150,                    // pos x
+        90,                  // pos y
+        "GYAW ",               // initial text
+        LV_TEXT_ALIGN_LEFT,   // font alignment
+        &Mono_Bold_14,     // font
+        true,                 // transparent background
+        false,                // show scrollbar
+        false,                // enable scrolling
+        0,                    // outline width
+        general_radius,       // outline radius
+        1,
+        default_bg_hue,
+        default_value_hue
+    ); 
+
+
+
 
     result.latitude_label = create_label(
         result.panel,         // parent
@@ -16151,7 +16368,7 @@ uap_t create_uap(
         LV_ALIGN_BOTTOM_MID,  // parent alignment
         0,                    // pos x
         0,                  // pos y
-        "SPD ",               // initial text
+        "SPE ",               // initial text
         LV_TEXT_ALIGN_LEFT,   // font alignment
         &Mono_Bold_14,     // font
         true,                 // transparent background
@@ -18284,20 +18501,38 @@ void update_display()
         // Pitch
         // ────────────────────────────────────────────────
         if (uap_c.pitch_panel) {
-            // move slider
+            // map [-90, +90] → [track_bottom, track_top]  (+pitch = up = smaller y)
+            float t_pitch = ((float)gyroData.gyro_0_ang_y + 90.0f) / 180.0f;
+            lv_obj_set_y(uap_c.pitch_panel,
+                uap_c.pitch_panel_width_px + (int32_t)((1.0f - t_pitch) * (float)uap_c.pitch_panel_height_px));
         }
 
         // ────────────────────────────────────────────────
         // Yaw
         // ────────────────────────────────────────────────
+        /*
+            Slider centered will be yaw aligned with course heading.
+            Currently, slider centered is yaw north. 
+        */
         if (uap_c.yaw_panel) {
-            // move slider
+            // map [0, 360] → [track_left, track_right]
+            float t_yaw = (float)(gyroData.gyro_0_ang_z + 180) / 360.0f;
+            lv_obj_set_x(uap_c.yaw_panel,
+                uap_c.yaw_panel_height_px + (int32_t)(t_yaw * (float)uap_c.yaw_panel_width_px));
         }
+
+        lv_label_set_text(uap_c.gyro_angle_x_label, String("ROL " + String(gyroData.gyro_0_ang_x, 2)).c_str());
+        lv_label_set_text(uap_c.gyro_angle_y_label, String("PIT " + String(gyroData.gyro_0_ang_y, 2)).c_str());
+        lv_label_set_text(uap_c.gyro_angle_z_label, String("YAW " + String(gyroData.gyro_0_ang_z, 2)).c_str());
+
+        lv_label_set_text(uap_c.gyro_gforce_x_label, String("GROL " + String(gyroData.gyro_0_acc_x, 2)).c_str());
+        lv_label_set_text(uap_c.gyro_gforce_y_label, String("GPIT " + String(gyroData.gyro_0_acc_y, 2)).c_str());
+        lv_label_set_text(uap_c.gyro_gforce_z_label, String("GYAW " + String(gyroData.gyro_0_acc_z, 2)).c_str());
 
         lv_label_set_text(uap_c.latitude_label, String("LAT " + String(satioData.degrees_latitude, 7)).c_str());
         lv_label_set_text(uap_c.longitude_label, String("LON " + String(satioData.degrees_longitude, 7)).c_str());
         lv_label_set_text(uap_c.altitude_label, String("ALT " + String(satioData.altitude, 2)).c_str());
-        lv_label_set_text(uap_c.speed_label, String("SPD " + String(satioData.speed, 2)).c_str());
+        lv_label_set_text(uap_c.speed_label, String("SPE " + String(satioData.speed, 2)).c_str());
     }
 
     // ---------------------
