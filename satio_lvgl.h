@@ -80,10 +80,10 @@
 //     #define LV_DRAW_SW_ASM          LV_DRAW_SW_ASM_NONE
 // #endif
 
-// Load screen options (trade between performance/animations. default: performance.)
+// Load screen options (trade between performance/animations)
 #define SCR_LOAD_ANIM LV_SCR_LOAD_ANIM_NONE
 #define SCR_LOAD_ANIM_TIME 0
-#define SCR_LOAD_ANIM_DELAY 0
+#define SCR_LOAD_ANIM_DELAY 300
 #define SCR_LOAD_ANIM_AUTO_DEL true
 
 // Font

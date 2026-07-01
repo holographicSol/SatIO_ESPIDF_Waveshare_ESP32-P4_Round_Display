@@ -16573,23 +16573,18 @@ void create_default_screen_objects(
 
     // -------------------------------- Title Bar --------------------------------- //
 
-    // uncomment if using a perimeter clock
-    // if (current_screen_number != HOME_SCREEN) {
-        main_title_bar = create_title_bar(
-            parent, // parent
-            720, // width px
-            64,  // height px
-            LV_ALIGN_TOP_MID,
-            0, // pos x
-            0, // pos y
-            false, // show scrollbar
-            false,  // enable scrollbar
-            &cobalt_alien_25,
-            &cobalt_alien_17
-        );
-    // } else {
-    //     main_title_bar.panel = NULL;
-    // }
+    main_title_bar = create_title_bar(
+        parent, // parent
+        720, // width px
+        64,  // height px
+        LV_ALIGN_TOP_MID,
+        0, // pos x
+        0, // pos y
+        false, // show scrollbar
+        false,  // enable scrollbar
+        &cobalt_alien_25,
+        &cobalt_alien_17
+    );
 
     // ------------------------------ System Tray --------------------------------- //
 
