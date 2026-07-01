@@ -95,15 +95,15 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_MS_HIGH__GPS                       100 // (10 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__SERIAL_INFOCMD            5   // (200 Hz)
+#define TASK_MAX_FREQ_MS_HIGH__SERIAL_INFOCMD            1   // (1000 Hz)
 
 #define TASK_MAX_FREQ_MS_HIGH__MULTIPLEXERS              25  // (40 Hz)
 
 #define TASK_MAX_FREQ_MS_HIGH__GYRO                      5   // (200 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__UNIVERSE                  100 // (10 Hz)
+#define TASK_MAX_FREQ_MS_HIGH__UNIVERSE                  500 // (2 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__SWITCHES                  2   // (500 Hz)
+#define TASK_MAX_FREQ_MS_HIGH__SWITCHES                  1   // (1000 Hz)
 
 #define TASK_MAX_FREQ_MS_HIGH__PORTCONTROLLER_INPUT      25  // (40 Hz)
 
