@@ -48,14 +48,14 @@ TaskHandle_t TaskStorage;
 TaskHandle_t TaskUniverse;
 TaskHandle_t TaskDisplayUpdate;
 
-// PRIORITY (same priority so that task Hz can be tuned without triggering wdt for a starved task)
+// PRIORITY (same priority so that task Hz (from delay ms) can be tuned without triggering wdt for a starved task)
 #define TASK_GPS_PRIORITY                   5
-#define TASK_GYRO_PRIORITY                  5
-#define TASK_MULTIPLEXERS_PRIORITY          5
-#define TASK_SWITCHES_PRIORITY              5
-#define TASK_SERIALINFOCMD_PRIORITY         5
-#define TASK_UNIVERSE_PRIORITY              5
-#define TASK_STORAGE_PRIORITY               5
+#define TASK_GYRO_PRIORITY                  4
+#define TASK_MULTIPLEXERS_PRIORITY          4
+#define TASK_SWITCHES_PRIORITY              4
+#define TASK_SERIALINFOCMD_PRIORITY         4
+#define TASK_UNIVERSE_PRIORITY              4
+#define TASK_STORAGE_PRIORITY               4
 
 // CORE ASSIGNMENT
 #define TASK_SERIALINFOCMD_CORE             1
@@ -306,6 +306,11 @@ void system_timing(void) {
     xLastWakeTime += xPeriod;                                               \
   } while (0)
 
+/**
+ * todo:
+ *  modify internal/external/peripheral clocks.
+ *  sleep modes.
+ */
 bool taskFrequencyGPS()         { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_GPS);         return true; }
 bool taskFrequencyGyro()        { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_GYRO);        return true; }
 bool taskFrequencySwitches()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_SWITCHES);    return true; }
