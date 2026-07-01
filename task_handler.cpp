@@ -284,7 +284,7 @@ void system_timing(void) {
 // Tracks an absolute xLastWakeTime like vTaskDelayUntil, but passes only the
 // remaining ticks to xTaskNotifyWait so a notification (e.g. Hz change via
 // notifyAllTasks) unblocks the task immediately. The loop then re-reads the
-// current Hz setting and recomputes the remaining time before the deadline.
+// current Hz/ms setting and recomputes the remaining time before the deadline.
 // When the deadline is reached, xLastWakeTime advances by exactly one period.
 #define TASK_FREQ_WAIT(delay_field)                                            \
   do {                                                                      \
@@ -502,7 +502,7 @@ static void taskGyro(void *pvParameters) {
     // Delay Task
     if (taskFrequencyGyro() == true) {
 
-      if (readGyro()) {
+      if (readGyro() == true) {
         esp_task_wdt_reset();
         systemData.i_count_read_gyro_0++;
         systemData.interval_breach_gyro_0_output = true;
@@ -511,27 +511,25 @@ static void taskGyro(void *pvParameters) {
         if (systemData.i_count_read_gyro_0 >= INT32_MAX - 2) {
           systemData.i_count_read_gyro_0 = 0;
         }
-        // ----------------------------------------------
-        // Estimate INS data. (Can be used without GPS)
-        // INS data is fed back into INS.
-        // ----------------------------------------------
-        if (ins_estimate_position(gyroData.gyro_0_ang_y,
-                                    gyroData.gyro_0_ang_z,
-                                    satioData.system_ground_heading,
-                                    satioData.system_speed,
-                                    satioData.local_unixtime_uS)) {
-          systemData.i_count_read_ins++;
-          systemData.interval_breach_ins_output = true;
-          // i_count_read_ins is int32_t, so the wrap check uses the signed
-          // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
-          if (systemData.i_count_read_ins >= INT32_MAX - 2) {
-            systemData.i_count_read_ins = 0;
-          }
-          esp_task_wdt_reset();
+        // // ----------------------------------------------
+        // // Estimate INS data. (Can be used without GPS)
+        // // INS data is fed back into INS.
+        // // ----------------------------------------------
+        // if (ins_estimate_position(gyroData.gyro_0_ang_y,
+        //                             gyroData.gyro_0_ang_z,
+        //                             satioData.system_ground_heading,
+        //                             satioData.system_speed,
+        //                             satioData.local_unixtime_uS)) {
+        //   systemData.i_count_read_ins++;
+        //   systemData.interval_breach_ins_output = true;
+        //   // i_count_read_ins is int32_t, so the wrap check uses the signed
+        //   // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
+        //   if (systemData.i_count_read_ins >= INT32_MAX - 2) {
+        //     systemData.i_count_read_ins = 0;
+        //   }
+          // esp_task_wdt_reset();
         }
       }
-    }
-
     // --------------------------------------------
     // Task Iter Counters.
     // --------------------------------------------
