@@ -575,7 +575,7 @@ static void taskMultiplexers(void *pvParameters) {
       setReadModeADMultiplexer(ad_mux_0);
       for (uint8_t i_chan = 0; i_chan < MAX_AD_MUX_CHANNELS; i_chan++) {
         readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
-        vTaskDelay(1);
+        // vTaskDelay(1); // CONFIG_FREERTOS_HZ=1000 makes delay 1ms. uncomment to delay
       }
       esp_task_wdt_reset();
       // ------------------------------------------------

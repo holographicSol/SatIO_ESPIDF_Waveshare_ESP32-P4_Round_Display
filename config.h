@@ -76,7 +76,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_MS_BALANCED_SERIAL_INFOCMD         5    // (200 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_MULTIPLEXERS           25   // (40 Hz)
+#define TASK_MAX_FREQ_MS_BALANCED_MULTIPLEXERS           5   // (200 Hz)
 
 #define TASK_MAX_FREQ_MS_BALANCED_GYRO                   5    // (200 Hz)
 
@@ -97,7 +97,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_MS_HIGH__SERIAL_INFOCMD            1   // (1000 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__MULTIPLEXERS              25  // (40 Hz)
+#define TASK_MAX_FREQ_MS_HIGH__MULTIPLEXERS              5  // (200 Hz)
 
 #define TASK_MAX_FREQ_MS_HIGH__GYRO                      5   // (200 Hz)
 
