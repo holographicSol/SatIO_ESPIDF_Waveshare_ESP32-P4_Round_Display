@@ -29,123 +29,87 @@ extern bool ISR_Bool_MultiDisplayController_0;
 typedef struct PwrConfig {
     char name[56];
 
-    uint32_t TASK_DELAY_GPS;
-    bool     TASK_USE_TICKS_GPS;
+    uint32_t TASK_MAX_FREQ_HZ_GPS;
 
-    uint32_t TASK_DELAY_INFOCMD;
-    bool     TASK_USE_TICKS_INFOCMD;
+    uint32_t TASK_MAX_FREQ_HZ_INFOCMD;
 
-    uint32_t TASK_DELAY_MULTIPLEXERS;
-    bool     TASK_USE_TICKS_MULTIPLEXERS;
+    uint32_t TASK_MAX_FREQ_HZ_MULTIPLEXERS;
+ 
+    uint32_t TASK_MAX_FREQ_HZ_GYRO;
 
-    uint32_t TASK_DELAY_GYRO;
-    bool     TASK_USE_TICKS_GYRO;
+    uint32_t TASK_MAX_FREQ_HZ_UNIVERSE;
 
-    uint32_t TASK_DELAY_UNIVERSE;
-    bool     TASK_USE_TICKS_UNIVERSE;
+    uint32_t TASK_MAX_FREQ_HZ_SWITCHES;
 
-    uint32_t TASK_DELAY_SWITCHES;
-    bool     TASK_USE_TICKS_SWITCHES;
+    uint32_t TASK_MAX_FREQ_HZ_PORTCONTROLLER_INPUT;
 
-    uint32_t TASK_DELAY_PORTCONTROLLER_INPUT;
-    bool     TASK_USE_TICKS_PORTCONTROLLER_INPUT;
+    uint32_t TASK_MAX_FREQ_HZ_STORAGE;
 
-    uint32_t TASK_DELAY_STORAGE;
-    bool     TASK_USE_TICKS_STORAGE;
-
-    uint32_t TASK_DELAY_DISPLAY;
-    bool     TASK_USE_TICKS_DISPLAY;
+    uint32_t TASK_MAX_FREQ_HZ_DISPLAY;
 };
 
 // ----------------------------------------------------------------------------------------
 // Low Power
 // ----------------------------------------------------------------------------------------
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_GPS                         1
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_GPS                    false
+#define TASK_MAX_FREQ_HZ_LOW_GPS                         10
 
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_SERIAL_INFOCMD              1
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_SERIAL_INFOCMD         false
+#define TASK_MAX_FREQ_HZ_LOW_SERIAL_INFOCMD              200
 
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_MULTIPLEXERS                500
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_MULTIPLEXERS           false
+#define TASK_MAX_FREQ_HZ_LOW_MULTIPLEXERS                10
 
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_GYRO                        500
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_GYRO                   false
+#define TASK_MAX_FREQ_HZ_LOW_GYRO                        10
 
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_UNIVERSE                    5000
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_UNIVERSE               false
+#define TASK_MAX_FREQ_HZ_LOW_UNIVERSE                    2
 
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_SWITCHES                    500
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_SWITCHES               false
+#define TASK_MAX_FREQ_HZ_LOW_SWITCHES                    10
 
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_PORTCONTROLLER_INPUT        2000
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_PORTCONTROLLER_INPUT   false
+#define TASK_MAX_FREQ_HZ_LOW_PORTCONTROLLER_INPUT        10
 
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_STORAGE                     1000
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_STORAGE                false
+#define TASK_MAX_FREQ_HZ_LOW_STORAGE                     2
 
-#define POWER_CONFIG_LOW_POWER_DELAY_TASK_DISPLAY                     500
-#define POWER_CONFIG_LOW_POWER_TICK_DELAY_TASK_DISPLAY                false
+#define TASK_MAX_FREQ_HZ_LOW_DISPLAY                     30
 
 // ----------------------------------------------------------------------------------------
 // Balanced (Recommended)
 // ----------------------------------------------------------------------------------------
-#define POWER_CONFIG_BALANCED_DELAY_TASK_GPS                         1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_GPS                    true
+#define TASK_MAX_FREQ_HZ_BALANCED_GPS                         10
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_SERIAL_INFOCMD              1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_SERIAL_INFOCMD         false
+#define TASK_MAX_FREQ_HZ_BALANCED_SERIAL_INFOCMD              200
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_MULTIPLEXERS                1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_MULTIPLEXERS           false
+#define TASK_MAX_FREQ_HZ_BALANCED_MULTIPLEXERS                20
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_GYRO                        1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_GYRO                   false
+#define TASK_MAX_FREQ_HZ_BALANCED_GYRO                        200
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_UNIVERSE                    1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_UNIVERSE               false
+#define TASK_MAX_FREQ_HZ_BALANCED_UNIVERSE                    2
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_SWITCHES                    1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_SWITCHES               false
+#define TASK_MAX_FREQ_HZ_BALANCED_SWITCHES                    200
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_PORTCONTROLLER_INPUT        1000
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_PORTCONTROLLER_INPUT   false
+#define TASK_MAX_FREQ_HZ_BALANCED_PORTCONTROLLER_INPUT        20
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_STORAGE                     500
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_STORAGE                false
+#define TASK_MAX_FREQ_HZ_BALANCED_STORAGE                     2
 
-#define POWER_CONFIG_BALANCED_DELAY_TASK_DISPLAY                     1
-#define POWER_CONFIG_BALANCED_TICK_DELAY_TASK_DISPLAY                false
+#define TASK_MAX_FREQ_HZ_BALANCED_DISPLAY                     40
 
 // ----------------------------------------------------------------------------------------
 // Perfromance: Ultimate Perfromance
 // ----------------------------------------------------------------------------------------
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GPS                         1
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GPS                    true
+#define TASK_MAX_FREQ_HZ_HIGH__GPS                         10
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SERIAL_INFOCMD              1
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SERIAL_INFOCMD         true
+#define TASK_MAX_FREQ_HZ_HIGH__SERIAL_INFOCMD              200
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_MULTIPLEXERS                1
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_MULTIPLEXERS           false
+#define TASK_MAX_FREQ_HZ_HIGH__MULTIPLEXERS                40
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_GYRO                        1
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_GYRO                   false
+#define TASK_MAX_FREQ_HZ_HIGH__GYRO                        200
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_UNIVERSE                    1
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_UNIVERSE               true
+#define TASK_MAX_FREQ_HZ_HIGH__UNIVERSE                    10
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_SWITCHES                    1
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_SWITCHES               true
+#define TASK_MAX_FREQ_HZ_HIGH__SWITCHES                    500
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_PORTCONTROLLER_INPUT        1
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_PORTCONTROLLER_INPUT   true
+#define TASK_MAX_FREQ_HZ_HIGH__PORTCONTROLLER_INPUT        40
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_STORAGE                     500
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_STORAGE                false
+#define TASK_MAX_FREQ_HZ_HIGH__STORAGE                     2
 
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_DELAY_TASK_DISPLAY                     1
-#define POWER_CONFIG_ULTIMATE_PERFORMANCE_TICK_DELAY_TASK_DISPLAY                false
+#define TASK_MAX_FREQ_HZ_HIGH__DISPLAY                     60
 
 
 extern struct PwrConfig pwrConfigLowPower;

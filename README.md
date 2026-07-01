@@ -346,33 +346,21 @@ SDCard
 
 -----
 
-Performance
+  [ PERFORMANCE ]
 
-    powercfg --power-saving          Sets power configuration to low power consumption mode.
-    powercfg --power-balanced        Sets power configuration to balanced.
-    powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
+      powercfg --power-saving          Sets power configuration to low power consumption mode.
+      powercfg --power-balanced        Sets power configuration to balanced.
+      powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
 
-    settick -e                       Enable tick delay for specified args.
-    settick -d                       Disable tick delay for specified args (enables millisecond delay).
-    settick --admplex0               Takes arguments -e, -d.
-    settick --gyro0                  Takes arguments -e, -d.
-    settick --universe               Takes arguments -e, -d.
-    settick --gps                    Takes arguments -e, -d.
-    settick --switch                 Takes arguments -e, -d.
-    settick --storage                Takes arguments -e, -d.
-    settick --infocmd                Takes arguments -e, -d.
+      sethz --admplex0               Specify max task frequency in Hz.
+      sethz --gyro0                  Specify max task frequency in Hz.
+      sethz --universe               Specify max task frequency in Hz.
+      sethz --gps                    Specify max task frequency in Hz.
+      sethz --switch                 Specify max task frequency in Hz.
+      sethz --storage                Specify max task frequency in Hz.
+      sethz --infocmd                Specify max task frequency in Hz.
 
-    example: settick -e --admplex0 --gyro0 --gps
-
-    setdelay --admplex0               Specify ticks/milliseconds delay.
-    setdelay --gyro0                  Specify ticks/milliseconds delay.
-    setdelay --universe               Specify ticks/milliseconds delay.
-    setdelay --gps                    Specify ticks/milliseconds delay.
-    setdelay --switch                 Specify ticks/milliseconds delay.
-    setdelay --storage                Specify ticks/milliseconds delay.
-    setdelay --infocmd                Specify ticks/milliseconds delay.
-
-    example: setdelay --admplex0 1 --gyro0 1 --gps 1
+      example: sethz --admplex0 20 --gyro0 200 --gps 10
 
 -----
 

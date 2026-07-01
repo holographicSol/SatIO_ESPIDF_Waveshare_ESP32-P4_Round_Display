@@ -18575,7 +18575,7 @@ void initSatIOUI() {
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     // Set LVGL tick period
-    lv_timer_set_period(lv_timer_get_next(NULL), POWER_CONFIG_BALANCED_DELAY_TASK_DISPLAY);  // ms
+    lv_timer_set_period(lv_timer_get_next(NULL), 40);  // ms
     
     // Initialize display brightness and backlight
     bsp_display_brightness_init();

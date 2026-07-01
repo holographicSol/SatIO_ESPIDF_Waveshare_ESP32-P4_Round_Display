@@ -768,14 +768,13 @@ void GPATT(void)
     }
 }
 
-void readGPS(void)
+bool readGPS(void)
 {
-    bool done;
+    bool done = false;
 
     serial1Data.gngga_bool = false;
     serial1Data.gnrmc_bool = false;
     serial1Data.gpatt_bool = false;
-    done = false;
 
     /* WTGPS300P outputs every 100ms; collect one of each sentence type
        before returning. Rule 15.4: no break statements in this loop —
@@ -836,6 +835,7 @@ void readGPS(void)
             delay(1);
         }
     }
+    return done;
 }
 
 /* Rule 8.7: internal linkage; only validateChecksumSerial1() calls this. */
@@ -911,8 +911,16 @@ static bool validateChecksumSerial1(const char *buffer)
     return result;
 }
 
-void validateGPSData(void)
+bool validateGPSData(void)
 {
+    // ------------------------------------------------
+    // Get, check and set gps data.
+    // ------------------------------------------------
+    gnggaData.valid_checksum = false;
+    gnrmcData.valid_checksum = false;
+    gpattData.valid_checksum = false;
+    bool validated = false;
+
     /* Parse data only once all three sentences have been collected. */
     if (all_gps_sentences_collected() == true)
     {
@@ -940,4 +948,10 @@ void validateGPSData(void)
             GPATT();
         }
     }
+
+    if (gnggaData.valid_checksum && gnrmcData.valid_checksum && gpattData.valid_checksum)
+    {
+        validated = true;
+    }
+    return validated;
 }

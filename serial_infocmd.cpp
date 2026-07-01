@@ -480,27 +480,15 @@ static void PrintHelp(void) {
       powercfg --power-balanced        Sets power configuration to balanced.
       powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
 
-      settick -e                       Enable tick delay for specified args.
-      settick -d                       Disable tick delay for specified args (enables millisecond delay).
-      settick --admplex0               Takes arguments -e, -d.
-      settick --gyro0                  Takes arguments -e, -d.
-      settick --universe               Takes arguments -e, -d.
-      settick --gps                    Takes arguments -e, -d.
-      settick --switch                 Takes arguments -e, -d.
-      settick --storage                Takes arguments -e, -d.
-      settick --infocmd                Takes arguments -e, -d.
+      sethz --admplex0               Specify max task frequency in Hz.
+      sethz --gyro0                  Specify max task frequency in Hz.
+      sethz --universe               Specify max task frequency in Hz.
+      sethz --gps                    Specify max task frequency in Hz.
+      sethz --switch                 Specify max task frequency in Hz.
+      sethz --storage                Specify max task frequency in Hz.
+      sethz --infocmd                Specify max task frequency in Hz.
 
-      example: settick -e --admplex0 --gyro0 --gps
-
-      setdelay --admplex0               Specify ticks/milliseconds delay.
-      setdelay --gyro0                  Specify ticks/milliseconds delay.
-      setdelay --universe               Specify ticks/milliseconds delay.
-      setdelay --gps                    Specify ticks/milliseconds delay.
-      setdelay --switch                 Specify ticks/milliseconds delay.
-      setdelay --storage                Specify ticks/milliseconds delay.
-      setdelay --infocmd                Specify ticks/milliseconds delay.
-
-      example: setdelay --admplex0 1 --gyro0 1 --gps 1
+      example: sethz --admplex0 20 --gyro0 200 --gps 10
 
   [ StarNav ]
 
@@ -1287,53 +1275,29 @@ void CmdProcess(void) {
           else if (argparser_has_flag(&parser, "ultimate-performance")) {setTasksDelayUltimatePerformance();}
           
           else {
-            // settick
-            if (argparser_has_flag(&parser, "settick")) {
+            // set max freq hz
+            if (argparser_has_flag(&parser, "sethz")) {
 
               if (argparser_has_flag(&parser, "infocmd"))
-                {setTick(TaskSerialInfoCMD, &pwrConfigCurrent.TASK_USE_TICKS_INFOCMD, enable);}
+                {setHZ(TaskSerialInfoCMD, argparser_get_uint32(&parser, "infocmd", pwrConfigCurrent.TASK_MAX_FREQ_HZ_INFOCMD), &pwrConfigCurrent.TASK_MAX_FREQ_HZ_INFOCMD );}
 
               if (argparser_has_flag(&parser, "admplex0"))
-                {setTick(TaskMultiplexers, &pwrConfigCurrent.TASK_USE_TICKS_MULTIPLEXERS, enable);}
+                {setHZ(TaskMultiplexers, argparser_get_uint32(&parser, "admplex0", pwrConfigCurrent.TASK_MAX_FREQ_HZ_MULTIPLEXERS), &pwrConfigCurrent.TASK_MAX_FREQ_HZ_MULTIPLEXERS);}
 
               if (argparser_has_flag(&parser, "gyro0"))
-                {setTick(TaskGyro, &pwrConfigCurrent.TASK_USE_TICKS_GYRO, enable);}
+                {setHZ(TaskGyro, argparser_get_uint32(&parser, "gyro0", pwrConfigCurrent.TASK_MAX_FREQ_HZ_GYRO), &pwrConfigCurrent.TASK_MAX_FREQ_HZ_GYRO);}
 
               if (argparser_has_flag(&parser, "universe"))
-                {setTick(TaskUniverse, &pwrConfigCurrent.TASK_USE_TICKS_UNIVERSE, enable);}
+                {setHZ(TaskUniverse, argparser_get_uint32(&parser, "universe", pwrConfigCurrent.TASK_MAX_FREQ_HZ_UNIVERSE), &pwrConfigCurrent.TASK_MAX_FREQ_HZ_UNIVERSE);}
 
               if (argparser_has_flag(&parser, "gps"))
-                {setTick(TaskGPS, &pwrConfigCurrent.TASK_USE_TICKS_GPS, enable);}
+                {setHZ(TaskGPS, argparser_get_uint32(&parser, "gps", pwrConfigCurrent.TASK_MAX_FREQ_HZ_GPS), &pwrConfigCurrent.TASK_MAX_FREQ_HZ_GPS);}
 
               if (argparser_has_flag(&parser, "switch"))
-                {setTick(TaskSwitches, &pwrConfigCurrent.TASK_USE_TICKS_SWITCHES, enable);}
+                {setHZ(TaskSwitches, argparser_get_uint32(&parser, "switch", pwrConfigCurrent.TASK_MAX_FREQ_HZ_SWITCHES), &pwrConfigCurrent.TASK_MAX_FREQ_HZ_SWITCHES);}
                 
               if (argparser_has_flag(&parser, "storage"))
-                {setTick(TaskStorage, &pwrConfigCurrent.TASK_USE_TICKS_STORAGE, enable);}
-            }
-            // setdelay
-            else if (argparser_has_flag(&parser, "setdelay")) {
-              
-              if (argparser_has_flag(&parser, "infocmd"))
-                {setDelay(TaskSerialInfoCMD, &pwrConfigCurrent.TASK_DELAY_INFOCMD, argparser_get_uint32(&parser, "infocmd", pwrConfigCurrent.TASK_DELAY_INFOCMD));}
-      
-              if (argparser_has_flag(&parser, "admplex0"))
-                {setDelay(TaskMultiplexers, &pwrConfigCurrent.TASK_DELAY_MULTIPLEXERS, argparser_get_uint32(&parser, "admplex0", pwrConfigCurrent.TASK_DELAY_MULTIPLEXERS));}
-      
-              if (argparser_has_flag(&parser, "gyro0"))
-                {setDelay(TaskGyro, &pwrConfigCurrent.TASK_DELAY_GYRO, argparser_get_uint32(&parser, "gyro0", pwrConfigCurrent.TASK_DELAY_GYRO));}
-      
-              if (argparser_has_flag(&parser, "universe"))
-                {setDelay(TaskUniverse, &pwrConfigCurrent.TASK_DELAY_UNIVERSE, argparser_get_uint32(&parser, "universe", pwrConfigCurrent.TASK_DELAY_UNIVERSE));}
-      
-              if (argparser_has_flag(&parser, "gps"))
-                {setDelay(TaskGPS, &pwrConfigCurrent.TASK_DELAY_GPS, argparser_get_uint32(&parser, "gps", pwrConfigCurrent.TASK_DELAY_GPS));}
-
-              if (argparser_has_flag(&parser, "switch"))
-                {setDelay(TaskSwitches, &pwrConfigCurrent.TASK_DELAY_SWITCHES, argparser_get_uint32(&parser, "switch", pwrConfigCurrent.TASK_DELAY_SWITCHES));}
-      
-              if (argparser_has_flag(&parser, "storage"))
-                {setDelay(TaskStorage, &pwrConfigCurrent.TASK_DELAY_STORAGE, argparser_get_uint32(&parser, "storage", pwrConfigCurrent.TASK_DELAY_STORAGE));}
+                {setHZ(TaskStorage, argparser_get_uint32(&parser, "storage", pwrConfigCurrent.TASK_MAX_FREQ_HZ_STORAGE), &pwrConfigCurrent.TASK_MAX_FREQ_HZ_STORAGE);}
             }
           }
         }
@@ -1770,15 +1734,16 @@ void outputStat(void) {
           "syn=%s "
 
           "t_loop=%ld "
-          "t_gps=%ld "
+          "t_gps=%ld/(%ld) "
+          
           "t_ins=%ld "
-          "t_gyr=%ld "
-          "t_mlx=%ld "
-          "t_uni=%ld "
+          "t_gyr=%ld/(%ld) "
+          "t_mlx=%ld/(%ld) "
+          "t_uni=%ld/(%ld) "
           "t_pci=%ld "
-          "t_mtx=%ld "
+          "t_mtx=%ld/(%ld) "
           "t_pco=%ld "
-          "t_dsp=%ld  "
+          "t_dsp=%ld/(%ld) "
 
           "sat=%s "
           "deg_lat=%.7f "
@@ -1822,15 +1787,23 @@ void outputStat(void) {
           satioData.padded_rtc_sync_time_HHMMSS,
 
           systemData.total_loops_a_second,
+
           systemData.total_gps,
+          systemData.total_task_freq_hz_gps,
+
           systemData.total_ins,
           systemData.total_gyro_0,
+          systemData.total_task_freq_hz_gyro,
           systemData.total_mplex_0,
+          systemData.total_task_freq_hz_mlx,
           systemData.total_universe,
+          systemData.total_task_freq_hz_uni,
           systemData.total_portcontroller_input,
           systemData.total_matrix,
+          systemData.total_task_freq_hz_switches,
           systemData.total_portcontroller_output,
           systemData.total_display,
+          systemData.total_task_freq_hz_dsp,
 
           gnggaData.satellite_count,
           satioData.degrees_latitude,

@@ -429,4 +429,9 @@ extern "C" void app_main(void)
     // app_main() may now return: every task created above keeps running
     // under the FreeRTOS scheduler, and the ESP-IDF idle task takes over
     // this thread.
+    for (;;)
+    {
+        system_timing();
+        // setSatIOData();
+    }
 }

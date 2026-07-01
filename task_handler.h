@@ -68,13 +68,24 @@ void setTasksDelayBalanced();
 void setTasksDelayUltimatePerformance();
 
 /**
- * @brief Set Tick. Manually override use of millisecond or ticks for delays.
+ * @brief Set task max frequency in Hz.
  */
-void setTick(TaskHandle_t task_handle, bool *tick_delay, bool use_tick);
+void setHZ(TaskHandle_t task_handle, uint32_t freq_max_hz_in, uint32_t *freq_max_hz_out);
+
+void system_timing(void);
 
 /**
- * @brief Set Delay. Manually override delay milliseconds/ticks.
+ * @brief GPS task timing gate. Blocks via vTaskDelayUntil until the next
+ *        100 ms slot (10 Hz), matching the wtgps300p output rate.
+ * @return Always true; false reserved for future disable logic.
  */
-void setDelay(TaskHandle_t task_handle, uint32_t *task_delay, uint32_t time_delay);
+bool taskFrequencyGPS(void);
+bool taskFrequencyGyro(void);
+bool taskFrequencySwitches(void);
+bool taskFrequencyStorage(void);
+bool taskFrequencyInfoCMD(void);
+bool taskFrequencyMultiplexers(void);
+bool taskFrequencyUniverse(void);
+bool taskFrequencyDisplay(void);
 
 #endif // TASK_HANDLER_H

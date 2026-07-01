@@ -522,11 +522,11 @@ void GPATT(void);
 /**
  * Reads GPS data from the serial port into the buffer and identifies sentences.
  */
-void readGPS(void);
+bool readGPS(void);
 
 /**
  * Validates all collected GPS sentence data, including checksums and element formats.
  */
-void validateGPSData(void);
+bool validateGPSData(void);
 
 #endif
