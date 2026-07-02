@@ -4,7 +4,7 @@
 
 *Written by Benjamin Jack Cullen — project may be renamed to Stargate.*
 
-SatIO is a value Hive & programmable calculator, for building devices with and or on top of SatIO.
+SatIO is a Value Hive & Programmable Switch, for building devices with and or on top of SatIO.
 
 ---
 
