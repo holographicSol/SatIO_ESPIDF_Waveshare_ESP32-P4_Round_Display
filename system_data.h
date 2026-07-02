@@ -36,19 +36,29 @@
  * @param task_ffreq_c Increments every task function iteration (ideally gated by success/fail).
  * @param task_ffreq_t Total task_ffreq_c increments a period (example: seconds).
  * 
- * @note - For efficiency: task_freq range should match task_ffreq range, for example if a max
+ * @param update_flag True on increment of task_ffreq_c.
+ * 
+ * @note Effiency & Performance
+ * 
+ *       - task_freq range should match task_ffreq range, for example if a max
  *       task_ffreq is known, (like say for a sensor that output at 200Hz), then task_freq may
  *       have no reason to exceed 200Hz, therefore task_freq may need to be reduced/increased.
- *       - For perfromance: comparing these frequencies is also useful, to help ascertain
- *       which task_ffreq are meeting their intended task_freq max, and weather or not task_freq
- *       has or does not have the headroom to fascilitate, in which case tweaks can be made to the
- *       task and or task function(s)/method(s), to ensure task_ffreq is meeting expectations.
+ * 
+ *       - frequency observation can help ascertain which task_ffreq are meeting their intended
+ *       task_freq max (defined in pwrConfigCurrent), and weather or not task_freq has or does
+ *       not have the headroom to fascilitate, in which case tweaks can be made to the task and
+ *       or task function(s)/method(s), to ensure task_ffreq is meeting expectations.
+ * 
+ *       - if task_freq is not meeting expected frequency defined in pwrConfigCurrent, then
+ *       when can ascertain that load balancing may be required, adjusting task timings and or
+ *       making tasks, task function(s)/method(s) more efficient.
  */
 typedef struct SystemConuters {
   int32_t task_freq_c;  // Increments every task iteration.
   int32_t task_freq_t;  // Total task_freq_c increments a period (example: seconds).
   int32_t task_ffreq_c; // Increments every task function iteration.
   int32_t task_ffreq_t; // Total task_ffreq_c increments a period (example: seconds).
+  bool    flag_c;       // True if task_ffreq_c iterated.
 };
 
 /**
@@ -57,28 +67,6 @@ typedef struct SystemConuters {
  *        loop counters, and per-second totals.
  */
 struct systemStruct {
-  // ------------------------------------------------------------------------
-  // Output interval-breach flags: true once the configured output interval
-  // has elapsed for the named subsystem, signalling this loop iteration to
-  // send that subsystem's output.
-  // ------------------------------------------------------------------------
-  bool interval_breach_gps_output;
-  bool interval_breach_ins_output;
-  bool interval_breach_gyro_0_output;
-  bool interval_breach_mplex_0_output;
-  bool interval_breach_matrix_output;
-  bool interval_breach_track_planets_output;
-  bool interval_breach_logging;
-  bool interval_breach_1_second_output;
-
-  // ------------------------------------------------------------------------
-  // Compute interval-breach flags: true once the configured recompute
-  // interval has elapsed. Distinct from the output flags above, which gate
-  // sending a result that has already been computed.
-  // ------------------------------------------------------------------------
-  bool interval_breach_track_planets;
-  bool interval_breach_star_navigation;
-
   // ------------------------------------------------------------------------
   // Diagnostics and command processing.
   // ------------------------------------------------------------------------
@@ -138,8 +126,8 @@ struct systemStruct {
   SystemConuters counters_track_planets;
   SystemConuters counters_dsp;
   SystemConuters counters_stg;
-  SystemConuters counters_infocmd;
   SystemConuters counters_log;
+  SystemConuters counters_satio_serial_tx;
 
   int32_t loops_a_second;       // Main loop iterations since the last 1-second sample.
   int32_t total_loops_a_second; // Main loop iterations per second, at the last sample.

@@ -398,9 +398,11 @@ extern "C" void app_main(void)
     myAstroBegin();
     createTaskUniverse();            // (target: 1/ps)    Star tracking
 
-    // Info/Command
-    ESP_LOGI(APP_MAIN_TAG, "creating info command task");
-    createTaskSerialInfoCMD();
+    #ifdef SATIO_SERIAL_TX_OPTION_NEW_TASK
+    // SatIO Serial Tx
+    ESP_LOGI(APP_MAIN_TAG, "creating satio serial tx task");
+    createTaskSatioSerialTx();       // (target: 1000/ps)    $SATIO / $PCINPT sentences
+    #endif
 
     // Attempt to approximately synchronize tasks
     ESP_LOGI(APP_MAIN_TAG, "attempting to synchronize tasks");

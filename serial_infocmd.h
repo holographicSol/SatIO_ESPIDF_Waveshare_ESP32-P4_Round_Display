@@ -14,17 +14,34 @@
 /**
  * @struct Serial0Struct
  *
- * Working state for the serial command line. BUFFER holds the most recent
- * raw line (filled by main.cpp, consumed by CmdProcess()/outputSentences());
- * checksum holds the hex checksum most recently produced by
- * createChecksumSerial0() for the sentence currently being built. All other
- * checksum/XOR scratch state is local to the functions that compute it.
+ * Working state for the serial command line. BUFFER_RX holds the most recent
+ * raw line (filled by main.cpp, consumed by CmdProcess()/outputSentences()).
+ * Checksum/XOR scratch state is local to the functions that compute it.
  */
+#ifdef SATIO_SERIAL_TX_OPTION_NEW_TASK
 struct Serial0Struct {
   char BUFFER_RX[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
   char BUFFER_TX[MAX_GLOBAL_SERIAL_BUFFER_SIZE]; // serial buffer.
-  char checksum[MAX_CHECKSUM_SIZE];           // hex checksum for the sentence currently being built.
 };
+#endif
+#ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+/*
+ * Under this option outputSerialXxx() runs directly on its data-source task
+ * (GPS/Gyro/Multiplexer/Universe/Switches), so several of these tasks can be
+ * building a sentence at the same time on different cores. Each source gets
+ * its own TX buffer so one task's memset()/strncat() sequence can never
+ * interleave with another's; see TXBUF_* in serial_infocmd.cpp.
+ */
+struct Serial0Struct {
+  char BUFFER_RX[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+  char BUFFER_TX_GPS[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+  char BUFFER_TX_ADMPLEX0[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+  char BUFFER_TX_GYRO0[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+  char BUFFER_TX_UNI[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+  char BUFFER_TX_SWITCHES[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+  char BUFFER_TX_PCI[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+};
+#endif
 extern struct Serial0Struct serial0Data;
 
 /**
@@ -53,5 +70,13 @@ void setOverrideOutputValue(int switch_idx, uint32_t override_value);
 void outputStat(void);
 
 void setAllSentenceOutput(bool enable);
+
+void outputSerialGPS(void);
+void outputSerialSatIO(void);
+void outputSerialGyro0(void);
+void outputSerialADMplex0(void);
+void outputSerialUniverse(void);
+void outputSerialMatrix(void);
+void outputSerialPCInput(void);
 
 #endif

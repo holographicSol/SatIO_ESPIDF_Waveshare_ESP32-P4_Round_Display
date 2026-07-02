@@ -29,20 +29,6 @@
  *        and per-second totals declared in system_data.h.
  */
 struct systemStruct systemData = {
-  // Output interval-breach flags.
-  .interval_breach_gps_output = false,
-  .interval_breach_ins_output = false,
-  .interval_breach_gyro_0_output = false,
-  .interval_breach_mplex_0_output = false,
-  .interval_breach_matrix_output = false,
-  .interval_breach_track_planets_output = false,
-  .interval_breach_logging = false,
-  .interval_breach_1_second_output = false,
-
-  // Compute interval-breach flags.
-  .interval_breach_track_planets = false,
-  .interval_breach_star_navigation = false,
-
   // Diagnostics and command processing.
   .debug = false,
   .output_stat = false,
@@ -90,8 +76,8 @@ struct systemStruct systemData = {
   .counters_track_planets = {0},
   .counters_dsp = {0},
   .counters_stg = {0},
-  .counters_infocmd = {0},
   .counters_log = {0},
+  .counters_satio_serial_tx = {0},
 
   .loops_a_second = 0,
   .total_loops_a_second = 0,

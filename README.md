@@ -352,13 +352,12 @@ SDCard
       powercfg --power-balanced        Sets power configuration to balanced.
       powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
 
-      setdelay --admplex0               Specify max task frequency in Hz.
-      setdelay --gyro0                  Specify max task frequency in Hz.
-      setdelay --universe               Specify max task frequency in Hz.
-      setdelay --gps                    Specify max task frequency in Hz.
-      setdelay --switch                 Specify max task frequency in Hz.
-      setdelay --storage                Specify max task frequency in Hz.
-      setdelay --infocmd                Specify max task frequency in Hz.
+      setdelay --admplex0               Specify max task frequency in uS.
+      setdelay --gyro0                  Specify max task frequency in uS.
+      setdelay --universe               Specify max task frequency in uS.
+      setdelay --gps                    Specify max task frequency in uS.
+      setdelay --switch                 Specify max task frequency in uS.
+      setdelay --storage                Specify max task frequency in uS.
 
       example: setdelay --admplex0 20 --gyro0 200 --gps 10
 

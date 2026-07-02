@@ -17,121 +17,147 @@ extern long system_sync_retry_max;
 
 extern bool ISR_Bool_MultiDisplayController_0;
 
+// ----------------------------------------------------------------------------------------
 /**
  * @brief SATIO_DISPLAY_OPTION_HEADLESS - SatIO Headless option.
  * @def If defined then the project will be comiled to run headless.
  * @note This option configures taks core asignment for pure, headless performance.
- * @warning Ensure only one display option is defined. 
+ * @warning Ensure only one SATIO_DISPLAY_OPTION is defined. 
  */
 // #define SATIO_DISPLAY_OPTION_HEADLESS
+
 /**
  * @brief SATIO_DISPLAY_OPTION_LVGL - LVGL display option.
  * @def If defined then the project will be comiled for use with LVGL.
  * @note If not defined then the project will be comiled for use without LVGL.
- * @warning Ensure only one display option is defined.
+ * @warning Ensure only one SATIO_DISPLAY_OPTION is defined.
  */
 #define SATIO_DISPLAY_OPTION_LVGL
+// ----------------------------------------------------------------------------------------
+/**
+ * @brief SATIO_SERIAL_TX_CURRENT_TASK
+ * @def If defined then output values/sentences will block the task until output is complete.
+ *      Provides a 1/1 execution to output ratio, at a task perfromance cost.
+ *      Requires memory for multiple output buffers.
+ * @warning Ensure only one SATIO_SERIAL_TX_OPTION is defined.
+ */
+// #define SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+
+/**
+ * @brief SATIO_SERIAL_TX_NEW_TASK
+ * @def If defined then output values/sentences will be printed from a new task.
+ * @note If defined then data origin task will not be blocked.
+ *       Not guarenteed to catch every flag, especially for origin tasks running at high
+ *       frequencies. This may still sometimes be preferrable for general output, while not
+ *       blocking task of data origin.
+ *       Requires memory for only one output buffer.
+ * @warning Ensure only one SATIO_SERIAL_TX_OPTION is defined.
+ */
+#define SATIO_SERIAL_TX_OPTION_NEW_TASK
+// ----------------------------------------------------------------------------------------
+
 
 // ----------------------------------------------------------------------------------------
 // Power Config.
 // ----------------------------------------------------------------------------------------
 /*
-    Tasks using TICK_DELAY_xxx false will use millisecond timing. 
-    Tasks DELAY_TASK_xxx can be milliseconds or ticks according to TICK_DELAY_xxx.
+    Task frequency fields below are in microseconds: task_handler.cpp's
+    TASK_FREQ_WAIT passes them straight to esp_timer to schedule the wake,
+    so values can be tuned down to microsecond resolution directly here.
+    Names are time unit agnostic.
 */
 typedef struct PwrConfig {
     char name[56];
 
-    uint32_t TASK_MAX_FREQ_MS_GPS;
+    uint32_t TASK_MAX_FREQ_GPS;
 
-    uint32_t TASK_MAX_FREQ_MS_INFOCMD;
+    uint32_t TASK_MAX_FREQ_MULTIPLEXERS;
 
-    uint32_t TASK_MAX_FREQ_MS_MULTIPLEXERS;
- 
-    uint32_t TASK_MAX_FREQ_MS_GYRO;
+    uint32_t TASK_MAX_FREQ_GYRO;
 
-    uint32_t TASK_MAX_FREQ_MS_UNIVERSE;
+    uint32_t TASK_MAX_FREQ_UNIVERSE;
 
-    uint32_t TASK_MAX_FREQ_MS_SWITCHES;
+    uint32_t TASK_MAX_FREQ_SWITCHES;
 
-    uint32_t TASK_MAX_FREQ_MS_PORTCONTROLLER_INPUT;
+    uint32_t TASK_MAX_FREQ_PORTCONTROLLER_INPUT;
 
-    uint32_t TASK_MAX_FREQ_MS_STORAGE;
+    uint32_t TASK_MAX_FREQ_STORAGE;
 
-    uint32_t TASK_MAX_FREQ_MS_DISPLAY;
+    uint32_t TASK_MAX_FREQ_DISPLAY;
 
-    uint32_t TASK_MAX_FREQ_MS_SYSTEM_TIME;
+    uint32_t TASK_MAX_FREQ_SYSTEM_TIME;
+
+    uint32_t TASK_MAX_FREQ_SATIO_SERIAL_TX;
 };
 
 // ----------------------------------------------------------------------------------------
 // Low Power
 // ----------------------------------------------------------------------------------------
-#define TASK_MAX_FREQ_MS_LOW_GPS                         100 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_GPS                         100000 // (10 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_SERIAL_INFOCMD              5   // (200 Hz)
+#define TASK_MAX_FREQ_LOW_MULTIPLEXERS                100000 // (10 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_MULTIPLEXERS                100 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_GYRO                        100000 // (10 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_GYRO                        100 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_UNIVERSE                    500000 // (2 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_UNIVERSE                    500 // (2 Hz)
+#define TASK_MAX_FREQ_LOW_SWITCHES                    100000 // (10 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_SWITCHES                    100 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_PORTCONTROLLER_INPUT        100000 // (10 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_PORTCONTROLLER_INPUT        100 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_STORAGE                     500000 // (2 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_STORAGE                     500 // (2 Hz)
+#define TASK_MAX_FREQ_LOW_DISPLAY                     50000  // (20 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_DISPLAY                     50  // (20 Hz)
+#define TASK_MAX_FREQ_LOW_SYSTEM_TIME                 50000  // (20 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_SYSTEM_TIME                 50   // (20 Hz)
+#define TASK_MAX_FREQ_LOW_SATIO_SERIAL_TX             100000 // (10 Hz)
 
 // ----------------------------------------------------------------------------------------
 // Balanced (Recommended)
 // ----------------------------------------------------------------------------------------
-#define TASK_MAX_FREQ_MS_BALANCED_GPS                    100  // (10 Hz)
+#define TASK_MAX_FREQ_BALANCED_GPS                    100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_SERIAL_INFOCMD         5    // (200 Hz)
+#define TASK_MAX_FREQ_BALANCED_MULTIPLEXERS           5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_MULTIPLEXERS           5   // (200 Hz)
+#define TASK_MAX_FREQ_BALANCED_GYRO                   5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_GYRO                   5    // (200 Hz)
+#define TASK_MAX_FREQ_BALANCED_UNIVERSE               500000  // (2 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_UNIVERSE               500  // (2 Hz)
+#define TASK_MAX_FREQ_BALANCED_SWITCHES               5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_SWITCHES               5    // (200 Hz)
+#define TASK_MAX_FREQ_BALANCED_PORTCONTROLLER_INPUT   25000   // (40 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_PORTCONTROLLER_INPUT   25   // (40 Hz)
+#define TASK_MAX_FREQ_BALANCED_STORAGE                500000  // (2 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_STORAGE                500  // (2 Hz)
+#define TASK_MAX_FREQ_BALANCED_DISPLAY                25000   // (40 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_DISPLAY                25   // (40 Hz)
+#define TASK_MAX_FREQ_BALANCED_SYSTEM_TIME            1000    // (1000 Hz)
 
-#define TASK_MAX_FREQ_MS_BALANCED_SYSTEM_TIME            1   // 
+#define TASK_MAX_FREQ_BALANCED_SATIO_SERIAL_TX        5000    // (200 Hz)
 
 // ----------------------------------------------------------------------------------------
 // Perfromance: Ultimate Perfromance
 // ----------------------------------------------------------------------------------------
-#define TASK_MAX_FREQ_MS_HIGH__GPS                       100 // (10 Hz)
+#define TASK_MAX_FREQ_HIGH_GPS                        100000 // (10 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__SERIAL_INFOCMD            1   // (1000 Hz)
+#define TASK_MAX_FREQ_HIGH_MULTIPLEXERS               5000   // (200 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__MULTIPLEXERS              5  // (200 Hz)
+#define TASK_MAX_FREQ_HIGH_GYRO                       5000   // (200 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__GYRO                      5   // (200 Hz)
+#define TASK_MAX_FREQ_HIGH_UNIVERSE                   500000 // (2 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__UNIVERSE                  500 // (2 Hz)
+#define TASK_MAX_FREQ_HIGH_SWITCHES                   1000   // (1000 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__SWITCHES                  1   // (1000 Hz)
+#define TASK_MAX_FREQ_HIGH_PORTCONTROLLER_INPUT       25000  // (40 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__PORTCONTROLLER_INPUT      25  // (40 Hz)
+#define TASK_MAX_FREQ_HIGH_STORAGE                    500000 // (2 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__STORAGE                   500 // (2 Hz)
+#define TASK_MAX_FREQ_HIGH_DISPLAY                    25000  // (40 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH__DISPLAY                   25  // (40 Hz) 
+#define TASK_MAX_FREQ_HIGH_SYSTEM_TIME                1000   // (1000 Hz)
 
-#define TASK_MAX_FREQ_MS_HIGH_SYSTEM_TIME                1   // 
-
+#define TASK_MAX_FREQ_HIGH_SATIO_SERIAL_TX            1000   // (1000 Hz)
 
 extern struct PwrConfig pwrConfigLowPower;
 extern struct PwrConfig pwrConfigBalanced;

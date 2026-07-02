@@ -16,6 +16,7 @@
 #include "freertos/semphr.h"
 #include <rtc_wdt.h>
 #include <esp_task_wdt.h>
+#include <esp_timer.h>
 #include "./config.h"
 #include "./REG.h"
 #include "./strval.h"
@@ -42,12 +43,12 @@
 TaskHandle_t TaskGPS;
 TaskHandle_t TaskGyro;
 TaskHandle_t TaskMultiplexers;
-TaskHandle_t TaskSerialInfoCMD;
 TaskHandle_t TaskSwitches;
 TaskHandle_t TaskStorage;
 TaskHandle_t TaskUniverse;
 TaskHandle_t TaskDisplayUpdate;
 TaskHandle_t TaskSystemTime;
+TaskHandle_t TaskSatioSerialTx;
 
 #ifdef SATIO_DISPLAY_OPTION_HEADLESS
 // PRIORITY (same priority so that task Hz (from delay ms) can be tuned without triggering wdt for a starved task)
@@ -56,27 +57,27 @@ TaskHandle_t TaskSystemTime;
 #define TASK_GYRO_PRIORITY                  5
 #define TASK_MULTIPLEXERS_PRIORITY          5
 #define TASK_SWITCHES_PRIORITY              5
-#define TASK_SERIALINFOCMD_PRIORITY         5
 #define TASK_UNIVERSE_PRIORITY              5
 #define TASK_STORAGE_PRIORITY               5
+#define TASK_SATIO_SERIAL_TX_PRIORITY       5
 // CORE ASSIGNMENT
 #define TASK_SYSTEM_TIME_CORE               1
 #define TASK_GPS_CORE                       1
 #define TASK_GYRO_CORE                      0
 #define TASK_MULTIPLEXERS_CORE              0
 #define TASK_SWITCHES_CORE                  0
-#define TASK_SERIALINFOCMD_CORE             0
 #define TASK_UNIVERSE_CORE                  0
 #define TASK_STORAGE_CORE                   0
+#define TASK_SATIO_SERIAL_TX_CORE           0
 // STACK SIZES
 #define TASK_SYSTEM_TIME_STACK_SIZE         5120
 #define TASK_GPS_STACK_SIZE                 5120
 #define TASK_GYRO_STACK_SIZE                4608
 #define TASK_MULTIPLEXERS_STACK_SIZE        4096
 #define TASK_SWITCHES_STACK_SIZE            5120
-#define TASK_SERIALINFOCMD_STACK_SIZE       16384
 #define TASK_UNIVERSE_STACK_SIZE            20480
 #define TASK_STORAGE_STACK_SIZE             6144
+#define TASK_SATIO_SERIAL_TX_STACK_SIZE     4096
 #endif
 
 #ifdef SATIO_DISPLAY_OPTION_LVGL
@@ -86,30 +87,30 @@ TaskHandle_t TaskSystemTime;
 #define TASK_GYRO_PRIORITY                  5
 #define TASK_MULTIPLEXERS_PRIORITY          5
 #define TASK_SWITCHES_PRIORITY              5
-#define TASK_SERIALINFOCMD_PRIORITY         5
 #define TASK_UNIVERSE_PRIORITY              5
 #define TASK_STORAGE_PRIORITY               5
 #define TASK_DISPLAY_PRIORITY               5
+#define TASK_SATIO_SERIAL_TX_PRIORITY       5
 // CORE ASSIGNMENT
 #define TASK_SYSTEM_TIME_CORE               1
 #define TASK_GPS_CORE                       1
-#define TASK_SERIALINFOCMD_CORE             1
 #define TASK_GYRO_CORE                      1
 #define TASK_MULTIPLEXERS_CORE              1
 #define TASK_SWITCHES_CORE                  1
 #define TASK_UNIVERSE_CORE                  1
 #define TASK_STORAGE_CORE                   1
 #define TASK_DISPLAY_CORE                   0
+#define TASK_SATIO_SERIAL_TX_CORE           1
 // STACK SIZES
 #define TASK_SYSTEM_TIME_STACK_SIZE         5120
 #define TASK_GPS_STACK_SIZE                 5120
 #define TASK_GYRO_STACK_SIZE                4608
 #define TASK_MULTIPLEXERS_STACK_SIZE        4096
 #define TASK_SWITCHES_STACK_SIZE            5120
-#define TASK_SERIALINFOCMD_STACK_SIZE       16384
 #define TASK_UNIVERSE_STACK_SIZE            20480
 #define TASK_STORAGE_STACK_SIZE             6144
 #define TASK_DISPLAY_STACK_SIZE             32768
+#define TASK_SATIO_SERIAL_TX_STACK_SIZE     4096
 #endif
 
 
@@ -123,13 +124,13 @@ TaskHandle_t TaskSystemTime;
  * 
  */
 static void notifyAllTasks(void) {
-  xTaskNotifyGive(TaskSerialInfoCMD);
   xTaskNotifyGive(TaskStorage);
   xTaskNotifyGive(TaskMultiplexers);
   xTaskNotifyGive(TaskGyro);
   xTaskNotifyGive(TaskGPS);
   xTaskNotifyGive(TaskUniverse);
   xTaskNotifyGive(TaskSwitches);
+  xTaskNotifyGive(TaskSatioSerialTx);
   if (TaskDisplayUpdate != nullptr) { xTaskNotifyGive(TaskDisplayUpdate); }
 }
 
@@ -215,14 +216,17 @@ static int64_t prev_tv_uS_star_navigation;
 
 static void totalCounters(SystemConuters &counters) {
   counters.task_freq_t = counters.task_freq_c;
-  counters.task_freq_c = 0;
   counters.task_ffreq_t = counters.task_ffreq_c;
+}
+
+static void clearCounters(SystemConuters &counters) {
+  counters.task_freq_c = 0;
   counters.task_ffreq_c = 0;
 }
 
-void stepCounter(int32_t *counter, int32_t steps) {
+void stepFCounter(SystemConuters &counters, int32_t steps) {
 
-  int64_t tmp_counter = *counter + steps;
+  int64_t tmp_counter = counters.task_freq_c + steps;
 
   // i_count_read_gps is int32_t, so the wrap check uses the signed 32-bit
   // limit matching its essential type (MISRA C 2012 Rule 10.4).
@@ -230,7 +234,20 @@ void stepCounter(int32_t *counter, int32_t steps) {
     tmp_counter = 0;
   }
 
-  *counter = tmp_counter;
+  counters.task_freq_c = tmp_counter;
+}
+
+void stepFFCounter(SystemConuters &counters, int32_t steps) {
+
+  int64_t tmp_counter = counters.task_ffreq_c + steps;
+
+  // i_count_read_gps is int32_t, so the wrap check uses the signed 32-bit
+  // limit matching its essential type (MISRA C 2012 Rule 10.4).
+  if (tmp_counter >= INT32_MAX - 2) {
+    tmp_counter = 0;
+  }
+
+  counters.task_ffreq_c = tmp_counter;
 }
 
 
@@ -251,10 +268,8 @@ static void intervalBreach1Second(void) {
   totalCounters(systemData.counters_track_planets);
   totalCounters(systemData.counters_dsp);
   totalCounters(systemData.counters_stg);
-  totalCounters(systemData.counters_infocmd);
   totalCounters(systemData.counters_log);
-
-  systemData.interval_breach_track_planets_output = true;
+  totalCounters(systemData.counters_satio_serial_tx);
 
   // uptime_seconds is int32_t, so the wrap check uses the signed 32-bit limit
   // matching its essential type (MISRA C 2012 Rule 10.4).
@@ -263,66 +278,67 @@ static void intervalBreach1Second(void) {
     systemData.uptime_seconds = 0;
     printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
   }
+  outputStat();
+
+  clearCounters(systemData.counters_st);
+  clearCounters(systemData.counters_gps);
+  clearCounters(systemData.counters_gyr0);
+  clearCounters(systemData.counters_ins);
+  clearCounters(systemData.counters_mplex0);
+  clearCounters(systemData.counters_mtx);
+  clearCounters(systemData.counters_pci);
+  clearCounters(systemData.counters_pco);
+  clearCounters(systemData.counters_uni);
+  clearCounters(systemData.counters_track_planets);
+  clearCounters(systemData.counters_dsp);
+  clearCounters(systemData.counters_stg);
+  clearCounters(systemData.counters_log);
+  clearCounters(systemData.counters_satio_serial_tx);
 }
 
-/** ----------------------------------------------------------------------------
- * System Timing.
- *
- * @brief Refreshes the local time-of-day, then raises interval-breach flags
- *        whenever the planet-tracking interval, the star-navigation interval,
- *        or a calendar second has elapsed since it was last raised.
- */
-void system_timing(void) {
-  gettimeofday(&tv_now, NULL);
-  timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
-  satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
-
-  // Track Planets interval breach.
-  if (satioData.local_unixtime_uS >= prev_tv_uS_track_planets + POWER_CONFIG_TRACK_PLANTETS_TIMING_uS ||
-      satioData.local_unixtime_uS <= prev_tv_uS_track_planets - POWER_CONFIG_TRACK_PLANTETS_TIMING_uS) {
-    prev_tv_uS_track_planets = satioData.local_unixtime_uS;
-    systemData.interval_breach_track_planets = true;
-  }
-
-  // StarNavigation interval breach.
-  if (satioData.local_unixtime_uS >= prev_tv_uS_star_navigation + POWER_CONFIG_STAR_NAVIGATION_TIMING_uS ||
-      satioData.local_unixtime_uS <= prev_tv_uS_star_navigation - POWER_CONFIG_STAR_NAVIGATION_TIMING_uS) {
-    prev_tv_uS_star_navigation = satioData.local_unixtime_uS;
-    systemData.interval_breach_star_navigation = true;
-  }
-
-  // 1-second interval breach.
-  if (tv_now.tv_sec != prev_tv_sec) {
-    prev_tv_sec = tv_now.tv_sec;
-    systemData.interval_breach_1_second_output = true;
-    intervalBreach1Second();
-  }
+// Callback for the one-shot esp_timer armed by TASK_FREQ_WAIT below. Runs in
+// the esp_timer service task's context (ESP_TIMER_TASK dispatch), so calling
+// FreeRTOS task-notification APIs here is safe.
+static void taskFreqWaitTimerCallback(void *arg) {
+  xTaskNotifyGive(static_cast<TaskHandle_t>(arg));
 }
 
 // Drift-free, notification-responsive task frequency gate.
-// Tracks an absolute xLastWakeTime like vTaskDelayUntil, but passes only the
-// remaining ticks to xTaskNotifyWait so a notification (e.g. Hz change via
-// notifyAllTasks) unblocks the task immediately. The loop then re-reads the
-// current Hz/ms setting and recomputes the remaining time before the deadline.
-// When the deadline is reached, xLastWakeTime advances by exactly one period.
-#define TASK_FREQ_WAIT(delay_field)                                            \
-  do {                                                                      \
-    static TickType_t xLastWakeTime = 0;                                    \
-    static bool initialized = false;                                        \
-    if (!initialized) {                                                     \
-      xLastWakeTime = xTaskGetTickCount();                                  \
-      initialized = true;                                                   \
-    }                                                                       \
-    TickType_t xPeriod;                                                     \
-    TickType_t xElapsed;                                                    \
-    do {                                                                    \
-      xPeriod  = pdMS_TO_TICKS(pwrConfigCurrent.delay_field);          \
-      xElapsed = xTaskGetTickCount() - xLastWakeTime;                       \
-      if (xElapsed < xPeriod) {                                             \
-        xTaskNotifyWait(0xFFFFFFFF, 0xFFFFFFFF, nullptr, xPeriod - xElapsed); \
-      }                                                                     \
-    } while ((xTaskGetTickCount() - xLastWakeTime) < xPeriod);             \
-    xLastWakeTime += xPeriod;                                               \
+// Tracks an absolute xLastWakeTimeUs like vTaskDelayUntil, but the actual
+// wait is a blocking xTaskNotifyWait(portMAX_DELAY): a per-call-site esp_timer
+// is armed for the remaining microseconds and notifies this task when it
+// fires, giving true microsecond resolution independent of the FreeRTOS tick
+// rate. A notification from elsewhere (e.g. Hz change via notifyAllTasks)
+// wakes the same wait immediately; the loop then re-reads the current
+// setting and re-arms the timer for whatever time remains. When the deadline
+// is reached, xLastWakeTimeUs advances by exactly one period.
+#define TASK_FREQ_WAIT(delay_field)                                             \
+  do {                                                                          \
+    static int64_t xLastWakeTimeUs = 0;                                         \
+    static esp_timer_handle_t xWakeTimer = nullptr;                             \
+    if (xWakeTimer == nullptr) {                                                \
+      xLastWakeTimeUs = esp_timer_get_time();                                   \
+      const esp_timer_create_args_t xWakeTimerArgs = {                          \
+        .callback = &taskFreqWaitTimerCallback,                                 \
+        .arg = static_cast<void *>(xTaskGetCurrentTaskHandle()),                \
+        .dispatch_method = ESP_TIMER_TASK,                                      \
+        .name = "task_freq_wait",                                               \
+      };                                                                        \
+      esp_timer_create(&xWakeTimerArgs, &xWakeTimer);                           \
+    }                                                                           \
+    int64_t xPeriodUs;                                                          \
+    int64_t xRemainingUs;                                                       \
+    do {                                                                        \
+      xPeriodUs    = static_cast<int64_t>(pwrConfigCurrent.delay_field);        \
+      xRemainingUs = (xLastWakeTimeUs + xPeriodUs) - esp_timer_get_time();      \
+      if (xRemainingUs > 0) {                                                   \
+        (void)esp_timer_stop(xWakeTimer);                                       \
+        (void)esp_timer_start_once(xWakeTimer, static_cast<uint64_t>(xRemainingUs)); \
+        xTaskNotifyWait(0xFFFFFFFF, 0xFFFFFFFF, nullptr, portMAX_DELAY);        \
+      }                                                                         \
+    } while (xRemainingUs > 0);                                                 \
+    (void)esp_timer_stop(xWakeTimer);                                           \
+    xLastWakeTimeUs += xPeriodUs;                                               \
   } while (0)
 
 /**
@@ -330,15 +346,15 @@ void system_timing(void) {
  *  modify internal/external/peripheral clocks.
  *  sleep modes.
  */
-bool taskFrequencyGPS()         { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_GPS);         return true; }
-bool taskFrequencyGyro()        { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_GYRO);        return true; }
-bool taskFrequencySwitches()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_SWITCHES);    return true; }
-bool taskFrequencyStorage()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_STORAGE);     return true; }
-bool taskFrequencyInfoCMD()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_INFOCMD);     return true; }
-bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_MULTIPLEXERS);return true; }
-bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_UNIVERSE);    return true; }
-bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_DISPLAY);     return true; }
-bool taskFrequencySystemTime()  { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_SYSTEM_TIME); return true; }
+bool taskFrequencyGPS()         { TASK_FREQ_WAIT(TASK_MAX_FREQ_GPS);         return true; }
+bool taskFrequencyGyro()        { TASK_FREQ_WAIT(TASK_MAX_FREQ_GYRO);        return true; }
+bool taskFrequencySwitches()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_SWITCHES);    return true; }
+bool taskFrequencyStorage()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_STORAGE);     return true; }
+bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(TASK_MAX_FREQ_MULTIPLEXERS);return true; }
+bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_UNIVERSE);    return true; }
+bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_DISPLAY);     return true; }
+bool taskFrequencySystemTime()  { TASK_FREQ_WAIT(TASK_MAX_FREQ_SYSTEM_TIME); return true; }
+bool taskFrequencySatioSerialTx() { TASK_FREQ_WAIT(TASK_MAX_FREQ_SATIO_SERIAL_TX); return true; }
 
 /** ----------------------------------------------------------------------------
  * System Time Task.
@@ -359,24 +375,9 @@ static void taskSystemTime(void *pvParameters) {
     timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
     satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
 
-    // Track Planets interval breach.
-    if (satioData.local_unixtime_uS >= prev_tv_uS_track_planets + POWER_CONFIG_TRACK_PLANTETS_TIMING_uS ||
-        satioData.local_unixtime_uS <= prev_tv_uS_track_planets - POWER_CONFIG_TRACK_PLANTETS_TIMING_uS) {
-      prev_tv_uS_track_planets = satioData.local_unixtime_uS;
-      systemData.interval_breach_track_planets = true;
-    }
-
-    // StarNavigation interval breach.
-    if (satioData.local_unixtime_uS >= prev_tv_uS_star_navigation + POWER_CONFIG_STAR_NAVIGATION_TIMING_uS ||
-        satioData.local_unixtime_uS <= prev_tv_uS_star_navigation - POWER_CONFIG_STAR_NAVIGATION_TIMING_uS) {
-      prev_tv_uS_star_navigation = satioData.local_unixtime_uS;
-      systemData.interval_breach_star_navigation = true;
-    }
-
     // 1-second interval breach.
     if (tv_now.tv_sec != prev_tv_sec) {
       prev_tv_sec = tv_now.tv_sec;
-      systemData.interval_breach_1_second_output = true;
       intervalBreach1Second();
     }
     esp_task_wdt_reset();
@@ -390,7 +391,7 @@ static void taskSystemTime(void *pvParameters) {
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
-    stepCounter(&systemData.counters_st.task_freq_c, 1);
+    stepFCounter(systemData.counters_st, 1);
 
     delayMicroseconds(1);
   }
@@ -439,19 +440,23 @@ static void taskGPS(void *pvParameters) {
                   satioData.system_speed,
                   atof(gnggaData.gps_precision_factor),
                   gyroData.gyro_0_ang_z);
-
+          
+                  
           // --------------------------------------------
           // Task frequency counter
           // --------------------------------------------
-          systemData.interval_breach_gps_output = true;
-          stepCounter(&systemData.counters_gps.task_ffreq_c, 1);
+          systemData.counters_gps.flag_c = true;
+          #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+          outputSerialGPS();
+          #endif
+          stepFFCounter(systemData.counters_gps, 1);
         }
       }
     }
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
-    stepCounter(&systemData.counters_gps.task_freq_c, 1);
+    stepFCounter(systemData.counters_gps, 1);
   }
 }
 void createTaskGPS() {
@@ -509,7 +514,7 @@ static void taskStorage(void *pvParameters) {
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
-    stepCounter(&systemData.counters_stg.task_freq_c, 1);
+    stepFCounter(systemData.counters_stg, 1);
     }
   }
 }
@@ -522,49 +527,6 @@ void createTaskStorage() {
     TASK_STORAGE_PRIORITY,   /* Priority of the task */
     &TaskStorage,            /* Task handle. */
     TASK_STORAGE_CORE);      /* Core where the task should run */
-}
-
-/** ----------------------------------------------------------------------------
- * Info Command Task.
- *
- * @brief Processes a serial TXD and RXD operations:
- *  (1) Information out for other system and debug.
- *  (2) Commands in.
- *
- *        System statistics are produced by the main loop; this task is
- *        responsible only for serial command input and status output.
- */
-static void taskSerialInfoCMD(void *pvParameters) {
-  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
-  esp_task_wdt_add(nullptr);
-  while (!global_task_sync) {
-    esp_task_wdt_reset();
-    vTaskDelay(1);
-  }
-  for (;;) {
-
-    // Delay Task
-    if (taskFrequencyInfoCMD() == true) {
-      esp_task_wdt_reset();
-      outputSentences();
-      esp_task_wdt_reset();
-
-    // --------------------------------------------
-    // Task frequency counter
-    // --------------------------------------------
-    stepCounter(&systemData.counters_infocmd.task_freq_c, 1);
-    }
-  }
-}
-void createTaskSerialInfoCMD() {
-  xTaskCreatePinnedToCore(
-    taskSerialInfoCMD,             /* Function to implement the task */
-    "TaskSerialInfoCMD",           /* Name of the task */
-    TASK_SERIALINFOCMD_STACK_SIZE, /* Stack size in words */
-    nullptr,                       /* Task input parameter */
-    TASK_SERIALINFOCMD_PRIORITY,   /* Priority of the task */
-    &TaskSerialInfoCMD,            /* Task handle. */
-    TASK_SERIALINFOCMD_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
@@ -587,12 +549,15 @@ static void taskGyro(void *pvParameters) {
 
       if (readGyro() == true) {
         esp_task_wdt_reset();
-
+        
         // --------------------------------------------
         // Task frequency counter
         // --------------------------------------------
-        systemData.interval_breach_gyro_0_output = true;
-        stepCounter(&systemData.counters_gyr0.task_ffreq_c, 1);
+        systemData.counters_gyr0.flag_c = true;
+        #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+        outputSerialGyro0();
+        #endif
+        stepFFCounter(systemData.counters_gyr0, 1);
 
         // ----------------------------------------------
         // Estimate INS data. (Can be used without GPS).
@@ -606,8 +571,7 @@ static void taskGyro(void *pvParameters) {
         // --------------------------------------------
         // Task frequency counter
         // --------------------------------------------
-        systemData.interval_breach_ins_output = true;
-        stepCounter(&systemData.counters_ins.task_ffreq_c, 1);
+        stepFFCounter(systemData.counters_ins, 1);
 
         esp_task_wdt_reset();
         }
@@ -616,7 +580,7 @@ static void taskGyro(void *pvParameters) {
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
-    stepCounter(&systemData.counters_gyr0.task_freq_c, 1);
+    stepFCounter(systemData.counters_gyr0, 1);
   }
 }
 void createTaskGyro() {
@@ -660,8 +624,11 @@ static void taskMultiplexers(void *pvParameters) {
       // --------------------------------------------
       // Task frequency counter
       // --------------------------------------------
-      systemData.interval_breach_mplex_0_output = true;
-      stepCounter(&systemData.counters_mplex0.task_ffreq_c, 1);
+      systemData.counters_mplex0.flag_c = true;
+      #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+      outputSerialADMplex0();
+      #endif
+      stepFFCounter(systemData.counters_mplex0, 1);
 
       esp_task_wdt_reset();
     }
@@ -669,7 +636,7 @@ static void taskMultiplexers(void *pvParameters) {
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
-    stepCounter(&systemData.counters_mplex0.task_freq_c, 1);
+    stepFCounter(systemData.counters_mplex0, 1);
   }
 }
 void createTaskMultiplexers() {
@@ -713,8 +680,11 @@ static void taskSwitches(void *pvParameters) {
         // --------------------------------------------
         // Task frequency counter
         // --------------------------------------------
-        systemData.interval_breach_matrix_output = true;
-        stepCounter(&systemData.counters_mtx.task_ffreq_c, 1);
+        systemData.counters_mtx.flag_c = true;
+        #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+        outputSerialMatrix();
+        #endif
+        stepFFCounter(systemData.counters_mtx, 1);
 
       }
       esp_task_wdt_reset();
@@ -734,13 +704,13 @@ static void taskSwitches(void *pvParameters) {
       // --------------------------------------------
       // Task frequency counter
       // --------------------------------------------
-      stepCounter(&systemData.counters_pco.task_ffreq_c, count_write);
+      stepFFCounter(systemData.counters_pco, count_write);
     }
 
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
-    stepCounter(&systemData.counters_mtx.task_freq_c, 1);
+    stepFCounter(systemData.counters_mtx, 1);
   }
 }
 void createTaskSwitches() {
@@ -794,17 +764,13 @@ static void taskUniverse(void *pvParameters) {
         satioData.system_altitude);
 
       // ------------------------------------------------
-      // Track Planets/Meteors Every Interval (see config.h)
+      // Track Planets/Meteors
       // ------------------------------------------------
-      if (systemData.interval_breach_track_planets) {
-        systemData.interval_breach_track_planets = false;
-
-        esp_task_wdt_reset();
-        trackPlanets();
-        esp_task_wdt_reset();
-        setMeteorShowerWarning(satioData.local_month, satioData.local_mday);
-        esp_task_wdt_reset();
-      }
+      esp_task_wdt_reset();
+      trackPlanets();
+      esp_task_wdt_reset();
+      setMeteorShowerWarning(satioData.local_month, satioData.local_mday);
+      esp_task_wdt_reset();
 
       // ------------------------------------------------
       // Set RA & Dec for system zenith. (add to matrix)
@@ -849,8 +815,11 @@ static void taskUniverse(void *pvParameters) {
       // --------------------------------------------
       // Task frequency counter
       // --------------------------------------------
-      systemData.interval_breach_track_planets_output = true;
-      stepCounter(&systemData.counters_uni.task_ffreq_c, 1);
+      systemData.counters_uni.flag_c = true;
+      #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+      outputSerialUniverse();
+      #endif
+      stepFFCounter(systemData.counters_uni, 1);
 
       esp_task_wdt_reset();
     }
@@ -858,7 +827,7 @@ static void taskUniverse(void *pvParameters) {
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
-    stepCounter(&systemData.counters_uni.task_freq_c, 1);
+    stepFCounter(systemData.counters_uni, 1);
   }
 }
 void createTaskUniverse() {
@@ -871,6 +840,62 @@ void createTaskUniverse() {
     &TaskUniverse,            /* Task handle. */
     TASK_UNIVERSE_CORE);      /* Core where the task should run */
 }
+
+#ifdef SATIO_SERIAL_TX_OPTION_NEW_TASK
+/** ----------------------------------------------------------------------------
+ * SatIO Serial Tx Task.
+ *
+ * @brief Transmits the aggregated SatIO ($SATIO) and port controller input
+ *        ($PCINPT) sentences over the serial port, each gated by its own
+ *        systemData output-enabled flag.
+ */
+static void taskSatioSerialTx(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  while (!global_task_sync) {
+    esp_task_wdt_reset();
+    vTaskDelay(1);
+  }
+  for (;;) {
+
+    // Delay Task
+    if (taskFrequencySatioSerialTx() == true) {
+      esp_task_wdt_reset();
+
+      // --------------------------------------------
+      // Output.
+      // --------------------------------------------
+      outputSerialGPS();
+      // outputSerialSatIO();
+      outputSerialADMplex0();
+      outputSerialGyro0();
+      outputSerialUniverse();
+      outputSerialMatrix();
+      esp_task_wdt_reset();
+
+      // --------------------------------------------
+      // Task frequency counter
+      // --------------------------------------------
+      stepFFCounter(systemData.counters_satio_serial_tx, 1);
+    }
+
+    // --------------------------------------------
+    // Task frequency counter
+    // --------------------------------------------
+    stepFCounter(systemData.counters_satio_serial_tx, 1);
+  }
+}
+void createTaskSatioSerialTx() {
+  xTaskCreatePinnedToCore(
+    taskSatioSerialTx,             /* Function to implement the task */
+    "TaskSatioSerialTx",           /* Name of the task */
+    TASK_SATIO_SERIAL_TX_STACK_SIZE, /* Stack size in words */
+    nullptr,                       /* Task input parameter */
+    TASK_SATIO_SERIAL_TX_PRIORITY, /* Priority of the task */
+    &TaskSatioSerialTx,            /* Task handle. */
+    TASK_SATIO_SERIAL_TX_CORE);    /* Core where the task should run */
+}
+#endif
 
 #ifdef SATIO_DISPLAY_OPTION_LVGL
 /** ----------------------------------------------------------------------------
@@ -899,13 +924,13 @@ static void taskDisplayUpdate(void *pvParameters) {
       // --------------------------------------------
       // Task frequency counter
       // --------------------------------------------
-      stepCounter(&systemData.counters_dsp.task_ffreq_c, 1);
+      stepFFCounter(systemData.counters_dsp, 1);
     }
 
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
-    stepCounter(&systemData.counters_dsp.task_freq_c, 1);
+    stepFCounter(systemData.counters_dsp, 1);
   }
 }
 

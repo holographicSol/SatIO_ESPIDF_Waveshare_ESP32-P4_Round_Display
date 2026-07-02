@@ -23,7 +23,6 @@
 
 /* Handles of the FreeRTOS tasks created by this library, exposed so that other
    translation units can query task state or retarget a task's delay/tick setting. */
-extern TaskHandle_t TaskSerialInfoCMD;
 extern TaskHandle_t TaskStorage;
 extern TaskHandle_t TaskMultiplexers;
 extern TaskHandle_t TaskGyro;
@@ -32,8 +31,8 @@ extern TaskHandle_t TaskUniverse;
 extern TaskHandle_t TaskSwitches;
 extern TaskHandle_t TaskDisplayUpdate;
 extern TaskHandle_t TaskSystemTime;
+extern TaskHandle_t TaskSatioSerialTx;
 
-void createTaskSerialInfoCMD();
 void createTaskStorage();
 void createTaskMultiplexers();
 void createTaskGyro();
@@ -42,6 +41,7 @@ void createTaskUniverse();
 void createTaskSwitches();
 void createTaskDisplayUpdate();
 void createTaskSystemTime();
+void createTaskSatioSerialTx();
 
 /**
  * @brief Time syncronize tasks.
@@ -74,8 +74,6 @@ void setTasksDelayUltimatePerformance();
  */
 void setDelay(TaskHandle_t task_handle, uint32_t delay_in, uint32_t *delay_out);
 
-void system_timing(void);
-
 /**
  * @brief GPS task timing gate. Blocks via vTaskDelayUntil until the next
  *        100 ms slot (10 Hz), matching the wtgps300p output rate.
@@ -89,5 +87,6 @@ bool taskFrequencyInfoCMD(void);
 bool taskFrequencyMultiplexers(void);
 bool taskFrequencyUniverse(void);
 bool taskFrequencyDisplay(void);
+bool taskFrequencySatioSerialTx(void);
 
 #endif // TASK_HANDLER_H

@@ -46,11 +46,24 @@ void debug(String debug_str) {if (debug_bool==true) {printf("%s\n", debug_str.c_
 ArgParser parser;
 PlainArgParser plainparser;
 
+#ifdef SATIO_SERIAL_TX_OPTION_NEW_TASK
 struct Serial0Struct serial0Data = {
-  .BUFFER_RX = {0}, // in buff
-  .BUFFER_TX = {0}, // out buff
-  .checksum = {0},  // hex checksum produced by createChecksumSerial0() for the sentence currently being built.
+  .BUFFER_RX = {0},
+  .BUFFER_TX = {0},
 };
+#endif
+
+#ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+struct Serial0Struct serial0Data = {
+  .BUFFER_RX = {0},
+  .BUFFER_TX_GPS = {0},
+  .BUFFER_TX_ADMPLEX0 = {0},
+  .BUFFER_TX_GYRO0 = {0},
+  .BUFFER_TX_UNI = {0},
+  .BUFFER_TX_SWITCHES = {0},
+  .BUFFER_TX_PCI = {0},
+};
+#endif
 
 /* Rule 8.7: internal linkage; only validateChecksumSerial0()/createChecksumSerial0() call this. */
 static int getCheckSumSerial0(const char *string)
@@ -124,12 +137,19 @@ static bool validateChecksumSerial0(const char *buffer)
     return result; /* Rule 15.5: single point of exit */
 }
 
-/* Rule 8.7: internal linkage; only used within this file. */
-static void createChecksumSerial0(const char *buffer)
+/* Rule 8.7: internal linkage; only used within this file.
+   Writes into a caller-supplied buffer (rather than a shared struct field)
+   so that concurrent callers on different tasks can never clobber each
+   other's checksum between computing it and appending it to their sentence. */
+static void createChecksumSerial0(const char *buffer, char *checksum_out, size_t checksum_out_size)
 {
     int checksum_of_buffer = getCheckSumSerial0(buffer);
 
-    (void)snprintf(serial0Data.checksum, sizeof(serial0Data.checksum), "%X", checksum_of_buffer);
+    /* Always exactly 2 hex digits (checksum_of_buffer is a byte-wide XOR, so
+       0x00-0xFF fits): validateChecksumSerial0() and h2d2() both assume the
+       sentence ends "*XX" and read the last 2 characters unconditionally, so
+       an unpadded single digit (e.g. "*7") would misalign that read. */
+    (void)snprintf(checksum_out, checksum_out_size, "%02X", checksum_of_buffer);
 }
 
 bool val_global_element_size(const char *data)
@@ -480,13 +500,12 @@ static void PrintHelp(void) {
       powercfg --power-balanced        Sets power configuration to balanced.
       powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
 
-      setdelay --admplex0               Specify max task frequency in Hz.
-      setdelay --gyro0                  Specify max task frequency in Hz.
-      setdelay --universe               Specify max task frequency in Hz.
-      setdelay --gps                    Specify max task frequency in Hz.
-      setdelay --switch                 Specify max task frequency in Hz.
-      setdelay --storage                Specify max task frequency in Hz.
-      setdelay --infocmd                Specify max task frequency in Hz.
+      setdelay --admplex0               Specify max task frequency in uS.
+      setdelay --gyro0                  Specify max task frequency in uS.
+      setdelay --universe               Specify max task frequency in uS.
+      setdelay --gps                    Specify max task frequency in uS.
+      setdelay --switch                 Specify max task frequency in uS.
+      setdelay --storage                Specify max task frequency in uS.
 
       example: setdelay --admplex0 20 --gyro0 200 --gps 10
 
@@ -546,7 +565,6 @@ static void PrintSystemData(void) {
     printf("[serial_command] %d\n", systemData.serial_command);
     printf("[output_satio_all] %d\n", systemData.output_satio_all);
     printf("[output_satio_enabled] %d\n", systemData.output_satio_enabled);
-    printf("[output_ins_enabled] %d\n", systemData.output_ins_enabled);
     printf("[output_gngga_enabled] %d\n", systemData.output_gngga_enabled);
     printf("[output_gnrmc_enabled] %d\n", systemData.output_gnrmc_enabled);
     printf("[output_gpatt_enabled] %d\n", systemData.output_gpatt_enabled);
@@ -638,7 +656,6 @@ void setAllSentenceOutput(bool enable) {
   systemData.output_gngga_enabled=enable;
   systemData.output_gnrmc_enabled=enable;
   systemData.output_gpatt_enabled=enable;
-  systemData.output_ins_enabled=enable;
   systemData.output_matrix_enabled=enable;
   systemData.output_input_portcontroller=enable;
   systemData.output_admplex0_enabled=enable;
@@ -1106,8 +1123,11 @@ void CmdProcess(void) {
           if (argparser_has_flag(&parser, "gngga") == true) {systemData.output_gngga_enabled=enable; printf("setting gngga output enabled: %d\n", systemData.output_gngga_enabled);}
           if (argparser_has_flag(&parser, "gnrmc") == true) {systemData.output_gnrmc_enabled=enable; printf("setting gnrmc output enabled: %d\n", systemData.output_gnrmc_enabled);}
           if (argparser_has_flag(&parser, "gpatt") == true) {systemData.output_gpatt_enabled=enable; printf("setting gpatt output enabled: %d\n", systemData.output_gpatt_enabled);}
-          if (argparser_has_flag(&parser, "ins") == true) {systemData.output_ins_enabled=enable; printf("setting ins output enabled: %d\n", systemData.output_ins_enabled);}
-          if (argparser_has_flag(&parser, "matrix") == true) {systemData.output_matrix_enabled=enable; printf("setting matrix output enabled: %d\n", systemData.output_matrix_enabled);}
+          if (argparser_has_flag(&parser, "matrix") == true)
+            {
+              systemData.output_matrix_enabled=enable;
+              printf("setting matrix output enabled: %d\n", systemData.output_matrix_enabled);
+            }
           if (argparser_has_flag(&parser, "pcinput") == true) {systemData.output_input_portcontroller=enable; printf("setting input_portcontroller output enabled: %d\n", systemData.output_input_portcontroller);}
           if (argparser_has_flag(&parser, "admplex0") == true) {systemData.output_admplex0_enabled=enable; printf("setting admplex0 output enabled: %d\n", systemData.output_admplex0_enabled);}
           if (argparser_has_flag(&parser, "gyro0") == true) {systemData.output_gyro_0_enabled=enable; printf("setting gyro_0 output enabled: %d\n", systemData.output_gyro_0_enabled);}
@@ -1278,26 +1298,23 @@ void CmdProcess(void) {
             // set max freq hz
             if (argparser_has_flag(&parser, "setdelay")) {
 
-              if (argparser_has_flag(&parser, "infocmd"))
-                {setDelay(TaskSerialInfoCMD, argparser_get_uint32(&parser, "infocmd", pwrConfigCurrent.TASK_MAX_FREQ_MS_INFOCMD), &pwrConfigCurrent.TASK_MAX_FREQ_MS_INFOCMD );}
-
               if (argparser_has_flag(&parser, "admplex0"))
-                {setDelay(TaskMultiplexers, argparser_get_uint32(&parser, "admplex0", pwrConfigCurrent.TASK_MAX_FREQ_MS_MULTIPLEXERS), &pwrConfigCurrent.TASK_MAX_FREQ_MS_MULTIPLEXERS);}
+                {setDelay(TaskMultiplexers, argparser_get_uint32(&parser, "admplex0", pwrConfigCurrent.TASK_MAX_FREQ_MULTIPLEXERS), &pwrConfigCurrent.TASK_MAX_FREQ_MULTIPLEXERS);}
 
               if (argparser_has_flag(&parser, "gyro0"))
-                {setDelay(TaskGyro, argparser_get_uint32(&parser, "gyro0", pwrConfigCurrent.TASK_MAX_FREQ_MS_GYRO), &pwrConfigCurrent.TASK_MAX_FREQ_MS_GYRO);}
+                {setDelay(TaskGyro, argparser_get_uint32(&parser, "gyro0", pwrConfigCurrent.TASK_MAX_FREQ_GYRO), &pwrConfigCurrent.TASK_MAX_FREQ_GYRO);}
 
               if (argparser_has_flag(&parser, "universe"))
-                {setDelay(TaskUniverse, argparser_get_uint32(&parser, "universe", pwrConfigCurrent.TASK_MAX_FREQ_MS_UNIVERSE), &pwrConfigCurrent.TASK_MAX_FREQ_MS_UNIVERSE);}
+                {setDelay(TaskUniverse, argparser_get_uint32(&parser, "universe", pwrConfigCurrent.TASK_MAX_FREQ_UNIVERSE), &pwrConfigCurrent.TASK_MAX_FREQ_UNIVERSE);}
 
               if (argparser_has_flag(&parser, "gps"))
-                {setDelay(TaskGPS, argparser_get_uint32(&parser, "gps", pwrConfigCurrent.TASK_MAX_FREQ_MS_GPS), &pwrConfigCurrent.TASK_MAX_FREQ_MS_GPS);}
+                {setDelay(TaskGPS, argparser_get_uint32(&parser, "gps", pwrConfigCurrent.TASK_MAX_FREQ_GPS), &pwrConfigCurrent.TASK_MAX_FREQ_GPS);}
 
               if (argparser_has_flag(&parser, "switch"))
-                {setDelay(TaskSwitches, argparser_get_uint32(&parser, "switch", pwrConfigCurrent.TASK_MAX_FREQ_MS_SWITCHES), &pwrConfigCurrent.TASK_MAX_FREQ_MS_SWITCHES);}
-                
+                {setDelay(TaskSwitches, argparser_get_uint32(&parser, "switch", pwrConfigCurrent.TASK_MAX_FREQ_SWITCHES), &pwrConfigCurrent.TASK_MAX_FREQ_SWITCHES);}
+
               if (argparser_has_flag(&parser, "storage"))
-                {setDelay(TaskStorage, argparser_get_uint32(&parser, "storage", pwrConfigCurrent.TASK_MAX_FREQ_MS_STORAGE), &pwrConfigCurrent.TASK_MAX_FREQ_MS_STORAGE);}
+                {setDelay(TaskStorage, argparser_get_uint32(&parser, "storage", pwrConfigCurrent.TASK_MAX_FREQ_STORAGE), &pwrConfigCurrent.TASK_MAX_FREQ_STORAGE);}
             }
           }
         }
@@ -1313,20 +1330,65 @@ void CmdProcess(void) {
 // ---------------------------------------------------------------------------------------------------------------
 long i_output_config_matrix = 0;
 
+#ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
 /*
- * strcat() has no bound and can overflow serial0Data.BUFFER_TX if a sentence's
- * combined length is ever misjudged; every append below goes through this
- * helper instead, which truncates rather than overflowing if the buffer is
- * ever close to full (Rule 21.x: replaces the banned, unbounded strcat()).
+ * Under this option outputSerialXxx() runs directly on its data-source task
+ * (GPS/Gyro/Multiplexer/Universe/Switches), so several of these tasks can be
+ * building a sentence at the same time on different cores. Each source gets
+ * its own TX buffer so one task's memset()/strncat() sequence can never
+ * interleave with another's.
  */
-static void serial0_buffer_append(const char *text)
-{
-    size_t used = strlen(serial0Data.BUFFER_TX);
-    size_t capacity = sizeof(serial0Data.BUFFER_TX);
+#define TXBUF_GPS      (serial0Data.BUFFER_TX_GPS)
+#define TXBUF_ADMPLEX0 (serial0Data.BUFFER_TX_ADMPLEX0)
+#define TXBUF_GYRO0    (serial0Data.BUFFER_TX_GYRO0)
+#define TXBUF_UNI      (serial0Data.BUFFER_TX_UNI)
+#define TXBUF_SWITCHES (serial0Data.BUFFER_TX_SWITCHES)
+#define TXBUF_PCI      (serial0Data.BUFFER_TX_PCI)
+#else
+/*
+ * Under SATIO_SERIAL_TX_OPTION_NEW_TASK every outputSerialXxx() call is made
+ * sequentially from the single satio-serial-tx task, so one shared buffer is
+ * safe and saves RAM.
+ */
+#define TXBUF_GPS      (serial0Data.BUFFER_TX)
+#define TXBUF_ADMPLEX0 (serial0Data.BUFFER_TX)
+#define TXBUF_GYRO0    (serial0Data.BUFFER_TX)
+#define TXBUF_UNI      (serial0Data.BUFFER_TX)
+#define TXBUF_SWITCHES (serial0Data.BUFFER_TX)
+#define TXBUF_PCI      (serial0Data.BUFFER_TX)
+#endif
 
-    if (used < (capacity - 1U))
+/*
+ * strcat() has no bound and can overflow the destination buffer if a
+ * sentence's combined length is ever misjudged; every append below goes
+ * through this helper instead, which truncates rather than overflowing if
+ * the buffer is ever close to full (Rule 21.x: replaces the banned,
+ * unbounded strcat()).
+ */
+static void serial0_buffer_append(char *buffer, size_t buffer_size, const char *text)
+{
+    size_t used = strlen(buffer);
+
+    if (used < (buffer_size - 1U))
     {
-        (void)strncat(serial0Data.BUFFER_TX, text, (capacity - 1U) - used);
+        (void)strncat(buffer, text, (buffer_size - 1U) - used);
+    }
+}
+
+/*
+ * Field-separated sentences append a trailing "," after every field
+ * (simplest for both fixed lists and loops), so this drops that last
+ * separator before the checksum is computed, guaranteeing the checksum
+ * covers the same bytes whether the field list was built by hand or by a
+ * loop.
+ */
+static void serial0_buffer_strip_trailing_comma(char *buffer)
+{
+    size_t used = strlen(buffer);
+
+    if ((used > 0U) && (buffer[used - 1U] == ','))
+    {
+        buffer[used - 1U] = '\0';
     }
 }
 
@@ -1419,136 +1481,179 @@ static const OuterPlanetSentenceSpec neptune_sentence_spec = {
 
 static void buildOuterPlanetSentence(const OuterPlanetSentenceSpec *spec)
 {
-    memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-    serial0_buffer_append(spec->tag);
-    serial0_buffer_append(String(siderealPlanetData.*(spec->ra) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->dec) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->az) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->alt) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->r) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->s) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->helio_lat) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->helio_long) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->radius_vector) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->distance) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->ecliptic_lat) + String(",")).c_str());
-    serial0_buffer_append(String(siderealPlanetData.*(spec->ecliptic_long) + String(",")).c_str());
-    createChecksumSerial0(serial0Data.BUFFER_TX);
-    serial0_buffer_append("*");
-    serial0_buffer_append(serial0Data.checksum);
-    printf("%s\n", serial0Data.BUFFER_TX);
+    char checksum[MAX_CHECKSUM_SIZE];
+
+    memset(TXBUF_UNI, 0, sizeof(TXBUF_UNI));
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), spec->tag);
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->ra) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->dec) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->az) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->alt) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->r) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->s) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->helio_lat) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->helio_long) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->radius_vector) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->distance) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->ecliptic_lat) + String(",")).c_str());
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.*(spec->ecliptic_long) + String("")).c_str());
+    serial0_buffer_strip_trailing_comma(TXBUF_UNI);
+    createChecksumSerial0(TXBUF_UNI, checksum, sizeof(checksum));
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "*");
+    serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), checksum);
+    printf("%s\n", TXBUF_UNI);
 }
 
-void outputSentences(void) {
-  if (systemData.interval_breach_1_second_output) {
-    systemData.interval_breach_1_second_output=false;
-    outputStat();
-  }
-  if (systemData.interval_breach_gps_output) {
-    systemData.interval_breach_gps_output=false;
+void outputSerialGPS(void) {
+  if (systemData.counters_gps.flag_c == true) {
+    systemData.counters_gps.flag_c = false;
     if (systemData.output_gngga_enabled == true) {printf("%s\n", gnggaData.outsentence);}
     if (systemData.output_gnrmc_enabled == true) {printf("%s\n", gnrmcData.outsentence);}
     if (systemData.output_gpatt_enabled == true) {printf("%s\n", gpattData.outsentence);}
-    if (systemData.output_satio_enabled == true) {
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$SATIO,");
-      serial0_buffer_append((String(systemData.uptime_seconds) + ",").c_str());
-      serial0_buffer_append((String(satioData.padded_rtc_time_HHMMSS) + ",").c_str());
-      serial0_buffer_append((String(satioData.padded_rtc_date_DDMMYYYY) + ",").c_str());
-      serial0_buffer_append((String(satioData.padded_rtc_sync_time_HHMMSS) + ",").c_str());
-      serial0_buffer_append((String(satioData.padded_rtc_sync_date_DDMMYYYY) + ",").c_str());
-      serial0_buffer_append((String(satioData.padded_local_time_HHMMSS) + ",").c_str());
-      serial0_buffer_append((String(satioData.padded_local_date_DDMMYYYY) + ",").c_str());
-      serial0_buffer_append((String(satioData.padded_LMST_time_HHMMSS) + ",").c_str());
-      serial0_buffer_append((String(satioData.padded_LMST_date_DDMMYYYY) + ",").c_str());
-      serial0_buffer_append((String(siderealExtraData.local_sidereal_time) + ",").c_str());
-      serial0_buffer_append((String(siderealExtraData.local_zenith_ra_dec.padded_ra_str) + ",").c_str());
-      serial0_buffer_append((String(siderealExtraData.local_zenith_ra_dec.padded_dec_str) + ",").c_str());
-      serial0_buffer_append((String(siderealExtraData.gyro_0_ra_dec.padded_ra_str) + ",").c_str());
-      serial0_buffer_append((String(siderealExtraData.gyro_0_ra_dec.padded_dec_str) + ",").c_str());
-      serial0_buffer_append((String(insData.ins_latitude, 7) + ",").c_str());
-      serial0_buffer_append((String(insData.ins_longitude, 7) + ",").c_str());
-      serial0_buffer_append((String(insData.ins_altitude) + ",").c_str());
-      serial0_buffer_append((String(insData.ins_heading) + ",").c_str());
-      serial0_buffer_append((String(insData.INS_INITIALIZATION_FLAG) + ",").c_str());
-      serial0_buffer_append((String(insData.INS_MODE) + ",").c_str());
-      serial0_buffer_append((String(insData.INS_FORCED_ON_FLAG) + ",").c_str());
-      serial0_buffer_append((String(insData.INS_REQ_GPS_PRECISION) + ",").c_str());
-      serial0_buffer_append((String(insData.INS_REQ_HEADING_RANGE_DIFF) + ",").c_str());
-      serial0_buffer_append((String(insData.INS_REQ_MIN_SPEED) + ",").c_str());
-      serial0_buffer_append((String(insData.INS_USE_GYRO_HEADING) + ",").c_str());
-      serial0_buffer_append((String(insData.INS_ENABLED) + ",").c_str());
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
-    }
   }
-  if (systemData.interval_breach_gyro_0_output) {
-    systemData.interval_breach_gyro_0_output=false;
+// }
+
+// void outputSerialSatIO(void) {
+  if (systemData.output_satio_enabled == true) {
+    char checksum[MAX_CHECKSUM_SIZE];
+
+    memset(TXBUF_GPS, 0, sizeof(TXBUF_GPS));
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), "$SATIO,");
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(systemData.uptime_seconds) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_rtc_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_rtc_date_DDMMYYYY) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_rtc_sync_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_rtc_sync_date_DDMMYYYY) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_local_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_local_date_DDMMYYYY) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_LMST_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_LMST_date_DDMMYYYY) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.local_sidereal_time) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.local_zenith_ra_dec.padded_ra_str) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.local_zenith_ra_dec.padded_dec_str) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.gyro_0_ra_dec.padded_ra_str) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.gyro_0_ra_dec.padded_dec_str) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.ins_latitude, 7) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.ins_longitude, 7) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.ins_altitude) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.ins_heading) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.INS_INITIALIZATION_FLAG) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.INS_MODE) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.INS_FORCED_ON_FLAG) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.INS_REQ_GPS_PRECISION) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.INS_REQ_HEADING_RANGE_DIFF) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.INS_REQ_MIN_SPEED) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.INS_USE_GYRO_HEADING) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(insData.INS_ENABLED) + "").c_str());
+    serial0_buffer_strip_trailing_comma(TXBUF_GPS);
+    createChecksumSerial0(TXBUF_GPS, checksum, sizeof(checksum));
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), "*");
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), checksum);
+    printf("%s\n", TXBUF_GPS);
+  }
+}
+
+void outputSerialGyro0(void) {
+  if (systemData.counters_gyr0.flag_c == true) {
+    systemData.counters_gyr0.flag_c = false;
     if (systemData.output_gyro_0_enabled == true) {
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$GYRO0,");
-      serial0_buffer_append((String(gyroData.gyro_0_acc_x) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_acc_y) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_acc_z) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_ang_x) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_ang_y) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_ang_z) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_gyr_x) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_gyr_y) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_gyr_z) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_mag_x) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_mag_y) + ",").c_str());
-      serial0_buffer_append((String(gyroData.gyro_0_mag_z) + ",").c_str());
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_GYRO0, 0, sizeof(TXBUF_GYRO0));
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), "$GYRO0,");
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_acc_x) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_acc_y) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_acc_z) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_ang_x) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_ang_y) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_ang_z) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_gyr_x) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_gyr_y) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_gyr_z) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_mag_x) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_mag_y) + ",").c_str());
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), (String(gyroData.gyro_0_mag_z) + "").c_str());
+      serial0_buffer_strip_trailing_comma(TXBUF_GYRO0);
+      createChecksumSerial0(TXBUF_GYRO0, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), "*");
+      serial0_buffer_append(TXBUF_GYRO0, sizeof(TXBUF_GYRO0), checksum);
+      printf("%s\n", TXBUF_GYRO0);
     }
   }
-  if (systemData.interval_breach_track_planets_output) {
-    systemData.interval_breach_track_planets_output=false;
+}
+
+void outputSerialADMplex0(void) {
+  if (systemData.counters_mplex0.flag_c == true) {
+    systemData.counters_mplex0.flag_c = false;
+    if (systemData.output_admplex0_enabled == true) {
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_ADMPLEX0, 0, sizeof(TXBUF_ADMPLEX0));
+      serial0_buffer_append(TXBUF_ADMPLEX0, sizeof(TXBUF_ADMPLEX0), "$MPLEX0,");
+      for (int i = 0; i < MAX_AD_MUX_CHANNELS; i++) {
+        serial0_buffer_append(TXBUF_ADMPLEX0, sizeof(TXBUF_ADMPLEX0), (String(ad_mux_0.data[i]) + ",").c_str());
+      }
+      serial0_buffer_strip_trailing_comma(TXBUF_ADMPLEX0);
+      createChecksumSerial0(TXBUF_ADMPLEX0, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_ADMPLEX0, sizeof(TXBUF_ADMPLEX0), "*");
+      serial0_buffer_append(TXBUF_ADMPLEX0, sizeof(TXBUF_ADMPLEX0), checksum);
+      printf("%s\n", TXBUF_ADMPLEX0);
+    }
+  }
+}
+
+void outputSerialUniverse(void) {
+  if (systemData.counters_uni.flag_c == true) {
+    systemData.counters_uni.flag_c = false;
     if (systemData.output_sun_enabled == true) {
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$SUN,");
-      serial0_buffer_append(String(siderealPlanetData.sun_ra + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.sun_dec + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.sun_az + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.sun_alt + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.sun_r + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.sun_s + String(",")).c_str());
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_UNI, 0, sizeof(TXBUF_UNI));
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "$SUN,");
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.sun_ra + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.sun_dec + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.sun_az + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.sun_alt + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.sun_r + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.sun_s + String("")).c_str());
+      serial0_buffer_strip_trailing_comma(TXBUF_UNI);
+      createChecksumSerial0(TXBUF_UNI, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "*");
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), checksum);
+      printf("%s\n", TXBUF_UNI);
     }
     if (systemData.output_earth_enabled == true) {
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$EARTH,");
-      serial0_buffer_append(String(siderealPlanetData.earth_ecliptic_lat + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.earth_ecliptic_long + String(",")).c_str());
-      serial0_buffer_append(String(satioData.altitude + String(",")).c_str()); // distance to earth sea level
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_UNI, 0, sizeof(TXBUF_UNI));
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "$EARTH,");
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.earth_ecliptic_lat + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.earth_ecliptic_long + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(satioData.altitude + String("")).c_str()); // distance to earth sea level
+      serial0_buffer_strip_trailing_comma(TXBUF_UNI);
+      createChecksumSerial0(TXBUF_UNI, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "*");
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), checksum);
+      printf("%s\n", TXBUF_UNI);
     }
     if (systemData.output_luna_enabled == true) {
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$LUNA,");
-      serial0_buffer_append(String(siderealPlanetData.luna_ra + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.luna_dec + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.luna_az + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.luna_alt + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.luna_r + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.luna_s + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.luna_p + String(",")).c_str());
-      serial0_buffer_append(String(siderealPlanetData.luna_lum + String(",")).c_str());
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_UNI, 0, sizeof(TXBUF_UNI));
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "$LUNA,");
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.luna_ra + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.luna_dec + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.luna_az + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.luna_alt + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.luna_r + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.luna_s + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.luna_p + String(",")).c_str());
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(siderealPlanetData.luna_lum + String("")).c_str());
+      serial0_buffer_strip_trailing_comma(TXBUF_UNI);
+      createChecksumSerial0(TXBUF_UNI, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "*");
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), checksum);
+      printf("%s\n", TXBUF_UNI);
     }
     if (systemData.output_mercury_enabled == true) {buildOuterPlanetSentence(&mercury_sentence_spec);}
     if (systemData.output_venus_enabled == true) {buildOuterPlanetSentence(&venus_sentence_spec);}
@@ -1558,126 +1663,127 @@ void outputSentences(void) {
     if (systemData.output_uranus_enabled == true) {buildOuterPlanetSentence(&uranus_sentence_spec);}
     if (systemData.output_neptune_enabled == true) {buildOuterPlanetSentence(&neptune_sentence_spec);}
     if (systemData.output_meteors_enabled == true) {
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$METEOR,");
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_UNI, 0, sizeof(TXBUF_UNI));
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "$METEOR,");
       for (int i=0; i<MAX_METEOR_SHOWERS; i++) {
-        serial0_buffer_append(String(String(meteor_shower_warning_system[i][0]) + String(",")).c_str());
-        serial0_buffer_append(String(String(meteor_shower_warning_system[i][1]) + String(",")).c_str());
+        serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(String(meteor_shower_warning_system[i][0]) + String(",")).c_str());
+        serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), String(String(meteor_shower_warning_system[i][1]) + String(",")).c_str());
       }
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
+      serial0_buffer_strip_trailing_comma(TXBUF_UNI);
+      createChecksumSerial0(TXBUF_UNI, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), "*");
+      serial0_buffer_append(TXBUF_UNI, sizeof(TXBUF_UNI), checksum);
+      printf("%s\n", TXBUF_UNI);
     }
   }
+}
 
-  // if (systemData.interval_breach_matrix_output) {
-  // systemData.interval_breach_matrix_output=false;
-  if (systemData.output_matrix_enabled == true) {
-    memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-    serial0_buffer_append("$MATRIX,");
-    // append matrix switch state data
-    for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
-      {serial0_buffer_append(String(String(matrixData.switch_intention[0][i])+",").c_str());}
-    for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
-      {serial0_buffer_append(String(String(matrixData.computer_intention[0][i])+",").c_str());}
-    for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
-      {serial0_buffer_append(String(String(matrixData.output_value[0][i])+",").c_str());}
-    createChecksumSerial0(serial0Data.BUFFER_TX);
-    serial0_buffer_append("*");
-    serial0_buffer_append(serial0Data.checksum);
-    printf("%s\n", serial0Data.BUFFER_TX);
-  }
+void outputSerialMatrix(void) {
+  if (systemData.counters_mtx.flag_c == true) {
+    systemData.counters_mtx.flag_c = false;
+    if (systemData.output_config_matrix_enabled == true) {
+      // for (int Mi=0; i_output_config_matrix < MAX_MATRIX_SWITCHES; Mi++) { // uncomment to dump all sentences at once
+        char checksum[MAX_CHECKSUM_SIZE];
 
-  if (systemData.output_input_portcontroller == true) {
-    memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-    serial0_buffer_append("$PCINPT,");
-    // append matrix switch state data
-    for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
-      {serial0_buffer_append(String(String(matrixData.input_value[0][i])+",").c_str());}
-    createChecksumSerial0(serial0Data.BUFFER_TX);
-    serial0_buffer_append("*");
-    serial0_buffer_append(serial0Data.checksum);
-    printf("%s\n", serial0Data.BUFFER_TX);
-  }
+        memset(TXBUF_SWITCHES, 0, sizeof(TXBUF_SWITCHES));
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), "$XMATRIX,");
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(i_output_config_matrix)+",").c_str());
+        for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
+          serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_function[0][i_output_config_matrix][Fi])+",").c_str());
+        }
+        for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
+          serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_switch_operator_index[0][i_output_config_matrix][Fi])+",").c_str());
+        }
+        for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
+          serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_switch_inverted_logic[0][i_output_config_matrix][Fi])+",").c_str());
+        }
+        for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
+          serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_function_xyz[0][i_output_config_matrix][Fi][INDEX_MATRIX_FUNTION_X])+",").c_str());
+        }
+        for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
+          serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_function_xyz[0][i_output_config_matrix][Fi][INDEX_MATRIX_FUNTION_Y])+",").c_str());
+        }
+        for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
+          serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_function_xyz[0][i_output_config_matrix][Fi][INDEX_MATRIX_FUNTION_Z])+",").c_str());
+        }
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.flux_value[0][i_output_config_matrix])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_pwm[0][i_output_config_matrix][0])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_pwm[0][i_output_config_matrix][1])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_mode[0][i_output_config_matrix])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.index_mapped_value[0][i_output_config_matrix])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.computer_assist[0][i_output_config_matrix])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_port_map[0][i_output_config_matrix])+",").c_str());
+        // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.switch_intention[0][i_output_config_matrix])+",").c_str());
+        // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.computer_intention[0][i_output_config_matrix])+",").c_str());
+        // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_value[0][i_output_config_matrix])+",").c_str());
+        serial0_buffer_strip_trailing_comma(TXBUF_SWITCHES);
+        createChecksumSerial0(TXBUF_SWITCHES, checksum, sizeof(checksum));
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), "*");
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), checksum);
+        printf("%s\n", TXBUF_SWITCHES);
+        i_output_config_matrix++;
+        if (i_output_config_matrix>=MAX_MATRIX_SWITCHES) {i_output_config_matrix=0;}
+      // }
+    }
+    if (systemData.output_config_mapping_enabled == true) {
+      for (int Mi=0; Mi < MAX_MAP_SLOTS; Mi++) {
+        char checksum[MAX_CHECKSUM_SIZE];
 
-  /*
-  COMPREHENSIVE MATRIX CONFIGURATION (SENTENCE PER SWITCH)
-  */
-  if (systemData.output_config_matrix_enabled == true) {
-    // for (int Mi=0; i_output_config_matrix < MAX_MATRIX_SWITCHES; Mi++) { // uncomment to dump all sentences at once
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$XMATRIX,");
-      serial0_buffer_append(String(String(i_output_config_matrix)+",").c_str());
-      for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
-        serial0_buffer_append(String(String(matrixData.matrix_function[0][i_output_config_matrix][Fi])+",").c_str());
-      }
-      for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
-        serial0_buffer_append(String(String(matrixData.matrix_switch_operator_index[0][i_output_config_matrix][Fi])+",").c_str());
-      }
-      for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
-        serial0_buffer_append(String(String(matrixData.matrix_switch_inverted_logic[0][i_output_config_matrix][Fi])+",").c_str());
-      }
-      for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
-        serial0_buffer_append(String(String(matrixData.matrix_function_xyz[0][i_output_config_matrix][Fi][INDEX_MATRIX_FUNTION_X])+",").c_str());
-      }
-      for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
-        serial0_buffer_append(String(String(matrixData.matrix_function_xyz[0][i_output_config_matrix][Fi][INDEX_MATRIX_FUNTION_Y])+",").c_str());
-      }
-      for (int Fi=0; Fi < MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
-        serial0_buffer_append(String(String(matrixData.matrix_function_xyz[0][i_output_config_matrix][Fi][INDEX_MATRIX_FUNTION_Z])+",").c_str());
-      }
-      serial0_buffer_append(String(String(matrixData.flux_value[0][i_output_config_matrix])+",").c_str());
-      serial0_buffer_append(String(String(matrixData.output_pwm[0][i_output_config_matrix][0])+",").c_str());
-      serial0_buffer_append(String(String(matrixData.output_pwm[0][i_output_config_matrix][1])+",").c_str());
-      serial0_buffer_append(String(String(matrixData.output_mode[0][i_output_config_matrix])+",").c_str());
-      serial0_buffer_append(String(String(matrixData.index_mapped_value[0][i_output_config_matrix])+",").c_str());
-      serial0_buffer_append(String(String(matrixData.computer_assist[0][i_output_config_matrix])+",").c_str());
-      serial0_buffer_append(String(String(matrixData.matrix_port_map[0][i_output_config_matrix])+",").c_str());
-      // serial0_buffer_append(String(String(matrixData.switch_intention[0][i_output_config_matrix])+",").c_str());
-      // serial0_buffer_append(String(String(matrixData.computer_intention[0][i_output_config_matrix])+",").c_str());
-      // serial0_buffer_append(String(String(matrixData.output_value[0][i_output_config_matrix])+",").c_str());
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
-      i_output_config_matrix++;
-      if (i_output_config_matrix>=MAX_MATRIX_SWITCHES) {i_output_config_matrix=0;}
-    // }
-  }
-  /*
-  COMPREHENSIVE MAPPING CONFIGURATION
-  */
-  if (systemData.output_config_mapping_enabled == true) {
-    for (int Mi=0; Mi < MAX_MAP_SLOTS; Mi++) {
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$XMAPP,");
-      serial0_buffer_append(String(String(Mi)+",").c_str());
-      for (int Fi=0; Fi < MAX_MAPPING_PARAMETERS; Fi++) {
-        serial0_buffer_append(String(String(mappingData.mapping_config[0][Mi][Fi])+",").c_str());
-      }
-      serial0_buffer_append(String(String(mappingData.map_mode[0][Mi])+",").c_str());
-      serial0_buffer_append(String(String(mappingData.mapped_value[0][Mi])+",").c_str());
+        memset(TXBUF_SWITCHES, 0, sizeof(TXBUF_SWITCHES));
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), "$XMAPP,");
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(Mi)+",").c_str());
+        for (int Fi=0; Fi < MAX_MAPPING_PARAMETERS; Fi++) {
+          serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(mappingData.mapping_config[0][Mi][Fi])+",").c_str());
+        }
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(mappingData.map_mode[0][Mi])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(mappingData.mapped_value[0][Mi])+",").c_str());
 
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
+        serial0_buffer_strip_trailing_comma(TXBUF_SWITCHES);
+        createChecksumSerial0(TXBUF_SWITCHES, checksum, sizeof(checksum));
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), "*");
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), checksum);
+        printf("%s\n", TXBUF_SWITCHES);
+      }
+    }
+    if (systemData.output_matrix_enabled == true) {
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_SWITCHES, 0, sizeof(TXBUF_SWITCHES));
+      serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), "$MATRIX,");
+      // append matrix switch state data
+      for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
+        {serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.switch_intention[0][i])+",").c_str());}
+      for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
+        {serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.computer_intention[0][i])+",").c_str());}
+      for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
+        {serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_value[0][i])+",").c_str());}
+      serial0_buffer_strip_trailing_comma(TXBUF_SWITCHES);
+      createChecksumSerial0(TXBUF_SWITCHES, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), "*");
+      serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), checksum);
+      printf("%s\n", TXBUF_SWITCHES);
     }
   }
+}
 
-  if (systemData.interval_breach_mplex_0_output) {
-    systemData.interval_breach_mplex_0_output=false;
-    if (systemData.output_admplex0_enabled == true) {
-      memset(serial0Data.BUFFER_TX, 0, sizeof(serial0Data.BUFFER_TX));
-      serial0_buffer_append("$MPLEX0,");
-      for (int i = 0; i < MAX_AD_MUX_CHANNELS; i++) {
-        serial0_buffer_append((String(ad_mux_0.data[i]) + ",").c_str());
-      }
-      createChecksumSerial0(serial0Data.BUFFER_TX);
-      serial0_buffer_append("*");
-      serial0_buffer_append(serial0Data.checksum);
-      printf("%s\n", serial0Data.BUFFER_TX);
+void outputSerialPCInput(void) {
+  if (systemData.counters_pci.flag_c == true) {
+    systemData.counters_pci.flag_c = false;
+    if (systemData.output_input_portcontroller == true) {
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_PCI, 0, sizeof(TXBUF_PCI));
+      serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), "$PCINPT,");
+      // append matrix switch state data
+      for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
+        {serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), String(String(matrixData.input_value[0][i])+",").c_str());}
+      serial0_buffer_strip_trailing_comma(TXBUF_PCI);
+      createChecksumSerial0(TXBUF_PCI, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), "*");
+      serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), checksum);
+      printf("%s\n", TXBUF_PCI);
     }
   }
 }
@@ -1745,6 +1851,7 @@ void outputStat(void) {
           "t_mtx=(%ldHz/%ldHz) "
           "t_pco=(%ldHz/%ldHz) "
           "t_dsp=(%ldHz/%ldHz) "
+          "t_satio_stx=(%ldHz/%ldHz) "
 
           "sat=%s "
           "deg_lat=%.7f "
@@ -1817,6 +1924,9 @@ void outputStat(void) {
 
           systemData.counters_dsp.task_ffreq_t,
           systemData.counters_dsp.task_freq_t,
+
+          systemData.counters_satio_serial_tx.task_ffreq_t,
+          systemData.counters_satio_serial_tx.task_freq_t,
 
           gnggaData.satellite_count,
           satioData.degrees_latitude,
