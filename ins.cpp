@@ -30,6 +30,7 @@ struct InsData insData = {
 
   .char_ins_mode = {"INS OFF", "INS DYNAMIC", "INS FORCED ON"},
   .INS_INITIALIZATION_FLAG = INS_INITIALIZATION_FLAG_0,
+  .tmp_ins_initialization_flag = 0,
   .ins_latitude = 0.0,
   .ins_longitude = 0.0,
   .ins_altitude = 0.0,

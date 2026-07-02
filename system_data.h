@@ -59,7 +59,7 @@ typedef struct SystemConuters {
   int32_t task_ffreq_c; // Increments every task function iteration.
   int32_t task_ffreq_t; // Total task_ffreq_c increments a period (example: seconds).
   bool    flag_c;       // True if task_ffreq_c iterated.
-};
+} SystemConuters;
 
 /**
  * @struct systemStruct

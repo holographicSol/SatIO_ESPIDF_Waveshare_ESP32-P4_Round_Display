@@ -44,6 +44,7 @@ struct SiderealPlantetsStruct siderealPlanetData = {
     .sun_radius_vector = NAN,
     .sun_distance = NAN,
     .sun_ecliptic_lat = NAN,
+    .sun_ecliptic_long = NAN,
     .luna_ra = NAN,
     .luna_dec = NAN,
     .luna_az = NAN,
@@ -184,7 +185,11 @@ struct SiderealExtraData siderealExtraData = {
         0.0, // ra_s
         0,   // dec_d
         0,   // dec_m
-        0.0  // dec_s
+        0.0, // dec_s
+        {0}, // formatted_ra_str
+        {0}, // formatted_dec_str
+        {0}, // padded_ra_str
+        {0}  // padded_dec_str
     },
     .gyro_0_ra_dec = {
         0,   // ra_h
@@ -192,7 +197,11 @@ struct SiderealExtraData siderealExtraData = {
         0.0, // ra_s
         0,   // dec_d
         0,   // dec_m
-        0.0  // dec_s
+        0.0, // dec_s
+        {0}, // formatted_ra_str
+        {0}, // formatted_dec_str
+        {0}, // padded_ra_str
+        {0}  // padded_dec_str
     },
 };
 
@@ -224,7 +233,9 @@ RaDecData gyroOffsetZenithRADec(double gyro_yaw_deg, double gyro_pitch_deg)
         0,   // dec_m
         0.0, // dec_s
         {0}, // formatted_ra_str
-        {0}  // formatted_dec_str
+        {0}, // formatted_dec_str
+        {0}, // padded_ra_str
+        {0}  // padded_dec_str
     };
 
     /* Convert RA and Dec to degrees to make the following conversions easier. */

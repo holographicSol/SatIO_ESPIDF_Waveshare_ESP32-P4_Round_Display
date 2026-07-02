@@ -17,7 +17,7 @@ long system_sync_retry_max = 10000;
 // TwoWire iic_1(1); // wire channel 1
 // TwoWire iic_2(2); // wire channel 2
 
-struct PwrConfig pwrConfigLowPower = {
+PwrConfig pwrConfigLowPower = {
     .name = {"Low Power"},
 
     .TASK_MAX_FREQ_GPS = TASK_MAX_FREQ_LOW_GPS,
@@ -41,7 +41,7 @@ struct PwrConfig pwrConfigLowPower = {
     .TASK_MAX_FREQ_SATIO_SERIAL_TX = TASK_MAX_FREQ_LOW_SATIO_SERIAL_TX,
 };
 
-struct PwrConfig pwrConfigBalanced = {
+PwrConfig pwrConfigBalanced = {
     .name = {"Balanced"},
 
     .TASK_MAX_FREQ_GPS = TASK_MAX_FREQ_BALANCED_GPS,
@@ -65,7 +65,7 @@ struct PwrConfig pwrConfigBalanced = {
     .TASK_MAX_FREQ_SATIO_SERIAL_TX = TASK_MAX_FREQ_BALANCED_SATIO_SERIAL_TX,
 };
 
-struct PwrConfig pwrConfigUltimatePerformance = {
+PwrConfig pwrConfigUltimatePerformance = {
     .name = {"Ultimate Performance"},
 
     .TASK_MAX_FREQ_GPS = TASK_MAX_FREQ_HIGH_GPS,
@@ -93,4 +93,4 @@ struct PwrConfig pwrConfigUltimatePerformance = {
  * @brief Current power configuration for the system.
  * @note Setup as required (default set to Balanced).
  */
-struct PwrConfig pwrConfigCurrent = pwrConfigBalanced;
+PwrConfig pwrConfigCurrent = pwrConfigBalanced;

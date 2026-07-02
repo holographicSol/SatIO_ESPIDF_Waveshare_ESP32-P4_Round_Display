@@ -74,6 +74,7 @@ static void wt901_uart_init(int32_t baud_rate)
             .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
             .rx_flow_ctrl_thresh = 0,
             .source_clk = UART_SCLK_DEFAULT,
+            .flags = {},
         };
 
         ESP_ERROR_CHECK(uart_param_config(WT901_UART_NUM, &uart_config));

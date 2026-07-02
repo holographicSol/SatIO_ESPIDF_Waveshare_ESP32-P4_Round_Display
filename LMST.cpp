@@ -173,8 +173,8 @@ struct tm makeLMST(
     double latitude_degrees,
     double longitude_degrees)
 {
-    struct tm utc_tm = {0};
-    struct tm lmst_tm = {0};
+    struct tm utc_tm = {};
+    struct tm lmst_tm = {};
     time_t utc_epoch_sec;
     time_t longitude_offset_sec;
     time_t lmst_epoch_sec;
@@ -223,7 +223,7 @@ PhotoPeriodSchedulele getPhotoPeriodData(
     };
     const int regular_twilight_zone_count = (int)(sizeof(regular_twilight_zones) / sizeof(regular_twilight_zones[0]));
 
-    PhotoPeriodSchedulele schedule = {0};
+    PhotoPeriodSchedulele schedule = {};
     int day_of_year = lmst_tm.tm_yday + 1; /* tm_yday is 0-based. */
     int i;
 

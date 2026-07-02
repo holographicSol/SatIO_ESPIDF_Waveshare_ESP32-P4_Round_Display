@@ -18,6 +18,10 @@ extern long system_sync_retry_max;
 extern bool ISR_Bool_MultiDisplayController_0;
 
 // ----------------------------------------------------------------------------------------
+// BUILD OPTIONS
+// ----------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 /**
  * @brief SATIO_DISPLAY_OPTION_HEADLESS - SatIO Headless option.
  * @def If defined then the project will be comiled to run headless.
@@ -88,7 +92,7 @@ typedef struct PwrConfig {
     uint32_t TASK_MAX_FREQ_SYSTEM_TIME;
 
     uint32_t TASK_MAX_FREQ_SATIO_SERIAL_TX;
-};
+} PwrConfig;
 
 // ----------------------------------------------------------------------------------------
 // Low Power
@@ -159,10 +163,10 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_HIGH_SATIO_SERIAL_TX            1000   // (1000 Hz)
 
-extern struct PwrConfig pwrConfigLowPower;
-extern struct PwrConfig pwrConfigBalanced;
-extern struct PwrConfig pwrConfigUltimatePerformance;
-extern struct PwrConfig pwrConfigCurrent;
+extern PwrConfig pwrConfigLowPower;
+extern PwrConfig pwrConfigBalanced;
+extern PwrConfig pwrConfigUltimatePerformance;
+extern PwrConfig pwrConfigCurrent;
 
 #define POWER_CONFIG_TRACK_PLANTETS_TIMING_uS  1000000L
 #define POWER_CONFIG_STAR_NAVIGATION_TIMING_uS 5000L

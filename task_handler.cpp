@@ -203,8 +203,6 @@ void syncTasks() {
  *        of the global symbol table (MISRA C 2012 Rule 8.7).
  */
 static int64_t prev_tv_sec;
-static int64_t prev_tv_uS_track_planets;
-static int64_t prev_tv_uS_star_navigation;
 
 /** ----------------------------------------------------------------------------
  * Interval Breach: 1 Second.
@@ -323,6 +321,7 @@ static void taskFreqWaitTimerCallback(void *arg) {
         .arg = static_cast<void *>(xTaskGetCurrentTaskHandle()),                \
         .dispatch_method = ESP_TIMER_TASK,                                      \
         .name = "task_freq_wait",                                               \
+        .skip_unhandled_events = false,                                         \
       };                                                                        \
       esp_timer_create(&xWakeTimerArgs, &xWakeTimer);                           \
     }                                                                           \

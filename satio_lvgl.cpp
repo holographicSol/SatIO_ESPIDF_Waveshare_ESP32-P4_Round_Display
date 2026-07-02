@@ -661,8 +661,6 @@ void keyboard_event_cb(lv_event_t * e)
  */
 void screen_swipe_cb(lv_event_t * e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * target = (lv_obj_t *)lv_event_get_target(e);
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
 
     // Get gesture start position
@@ -712,7 +710,6 @@ void screen_swipe_cb(lv_event_t * e)
 void screen_tap_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * target = (lv_obj_t *)lv_event_get_target(e);
     if(code != LV_EVENT_CLICKED) return;
 
     // Get gesture start position
@@ -755,9 +752,7 @@ void system_tray_grid_menu_1_event_cb(lv_event_t * e)
     if(code == LV_EVENT_CLICKED) {
 
         lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);     // Get clicked button
-        lv_obj_t * grid = (lv_obj_t *)lv_event_get_user_data(e); // Get grid container (if passed)
-        lv_obj_t * label = lv_obj_get_child(btn, 0); // Get button's label
-        
+
         uint32_t btn_index = 0;
         uint32_t child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_1);
         for(uint32_t i = 0; i < child_cnt; i++) {
@@ -767,9 +762,7 @@ void system_tray_grid_menu_1_event_cb(lv_event_t * e)
                 break;
             }
         }
-        
-        const char * text = lv_label_get_text(label);
-        
+
         // Switch logic
         switch(btn_index) {
             case HOME_SCREEN:     flag_display_home_screen=true; break;
@@ -796,9 +789,7 @@ void system_tray_grid_menu_2_event_cb(lv_event_t * e)
     if(code == LV_EVENT_CLICKED) {
 
         lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);     // Get clicked button
-        lv_obj_t * grid = (lv_obj_t *)lv_event_get_user_data(e); // Get grid container (if passed)
-        lv_obj_t * label = lv_obj_get_child(btn, 0); // Get button's label
-        
+
         uint32_t btn_index = 0;
         uint32_t child_cnt = lv_obj_get_child_cnt(system_tray.grid_menu_2);
         for(uint32_t i = 0; i < child_cnt; i++) {
@@ -808,8 +799,6 @@ void system_tray_grid_menu_2_event_cb(lv_event_t * e)
                 break;
             }
         }
-        
-        const char * text = lv_label_get_text(label);
         
         // Switch logic
         switch(btn_index+600) {
@@ -831,9 +820,7 @@ void matrix_overview_grid_1_event_cb(lv_event_t * e)
     if(code == LV_EVENT_CLICKED) {
 
         lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);     // Get clicked button
-        lv_obj_t * grid = (lv_obj_t *)lv_event_get_user_data(e); // Get grid container (if passed)
-        lv_obj_t * label = lv_obj_get_child(btn, 0); // Get button's label
-        
+
         uint32_t btn_index = 0;
         uint32_t child_cnt = lv_obj_get_child_cnt(matrix_overview_grid_1);
         for(uint32_t i = 0; i < child_cnt; i++) {
@@ -843,9 +830,7 @@ void matrix_overview_grid_1_event_cb(lv_event_t * e)
                 break;
             }
         }
-        
-        const char * text = lv_label_get_text(label);
-        
+
         if (btn_index < MAX_MATRIX_SWITCHES) {
             current_matrix_i = btn_index;
             current_matrix_panel_view = MATRIX_SWITCH_PANEL_NUMBER_MATRIX;
@@ -1625,7 +1610,7 @@ title_bar_t create_title_bar (
     )
 {
     // Initialize struct
-    title_bar_t title_bar = {0};
+    title_bar_t title_bar = {};
     
     // Create title bar
     title_bar.panel = lv_obj_create(parent);
@@ -1794,7 +1779,7 @@ system_tray_t create_system_tray(
     /* ------------------------------------ TRAY --------------------------------------- */
 
     // Initialize struct
-    system_tray_t tray = {0};
+    system_tray_t tray = {};
     
     // Create system tray
     tray.panel = lv_obj_create(parent);
@@ -2451,7 +2436,7 @@ keyboard_t create_keyboard(
     /*----------------------------------------------- KEYBOARD --------------------------------------------*/
 
     // Allocate keyboard struct
-    keyboard_t result = {0};
+    keyboard_t result = {};
     result.kb = (lv_obj_t *)malloc(sizeof(lv_obj_t *));
     result.ta = (lv_obj_t *)malloc(sizeof(lv_obj_t *));
 
@@ -2516,12 +2501,12 @@ keyboard_t create_keyboard(
     lv_obj_set_style_text_color(result.kb, default_title_hue, LV_PART_ITEMS);
     
     // Item style: background checked
-    lv_obj_set_style_bg_color(result.kb, default_border_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(result.kb, default_border_hue, (lv_style_selector_t)LV_PART_ITEMS | LV_STATE_CHECKED);
     
     // Item style: text checked
     lv_obj_set_style_text_align(result.kb, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(result.kb, font_title, LV_PART_ITEMS | LV_STATE_CHECKED);
-    lv_obj_set_style_text_color(result.kb, default_title_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_font(result.kb, font_title, (lv_style_selector_t)LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(result.kb, default_title_hue, (lv_style_selector_t)LV_PART_ITEMS | LV_STATE_CHECKED);
 
     /*---------------------------------------------- TEXTAREA -----------------------------------------------*/
 
@@ -2645,6 +2630,10 @@ lv_obj_t * create_menu_grid(
 
     // Automatically set size according to configuration (+ scrollbar offset)
     else if (show_scrollbar == true) {
+        #undef GRID_MENU_X_MAX_DYNAMIC_COLS
+        #undef GRID_MENU_X_MAX_DYNAMIC_ROWS
+        #undef DYNAMIC_GRID_WIDTH
+        #undef DYNAMIC_GRID_HEIGHT
         #define GRID_MENU_X_MAX_DYNAMIC_COLS max_cols_visible // limit displayed columns (does not limit total columns, scrollbar will appear)
         #define GRID_MENU_X_MAX_DYNAMIC_ROWS max_rows_visible // limit displayed rows (does not limit total rows, scrollbar will appear)
         #define DYNAMIC_GRID_WIDTH  (GRID_MENU_X_MAX_DYNAMIC_COLS * GRID_MENU_X_CELL_SIZE_PX + (GRID_MENU_X_MAX_DYNAMIC_COLS-1) * GRID_MENU_X_INNER_PADDING + 2*GRID_MENU_X_OUTER_PADDING) + GRID_MENU_X_SCROLLBAR_OFFSET
@@ -2867,8 +2856,8 @@ lv_obj_t * create_dropdown_menu(
     lv_obj_set_style_text_color(list, default_value_hue, LV_PART_MAIN);
 
     // List style: background checked
-    lv_obj_set_style_bg_color(list, default_border_hue, LV_PART_SELECTED | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(list, default_border_hue, LV_PART_SELECTED | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(list, default_border_hue, (lv_style_selector_t)LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(list, default_border_hue, (lv_style_selector_t)LV_PART_SELECTED | LV_STATE_DEFAULT);
 
     return ddlist;
 }
@@ -2902,11 +2891,11 @@ lv_obj_t * create_switch(
 
     // Indicator
     lv_obj_set_style_bg_color(sw, default_sw_off_bg, LV_PART_INDICATOR);
-    lv_obj_set_style_bg_color(sw, default_sw_on_bg, LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(sw, default_sw_on_bg, (lv_style_selector_t)LV_PART_INDICATOR | LV_STATE_CHECKED);
     
     // Knob
     lv_obj_set_style_bg_color(sw, default_sw_off_knob_bg, LV_PART_KNOB);
-    lv_obj_set_style_bg_color(sw, default_sw_on_knob_bg, LV_PART_KNOB | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(sw, default_sw_on_knob_bg, (lv_style_selector_t)LV_PART_KNOB | LV_STATE_CHECKED);
     
     return sw;
 }
@@ -2947,7 +2936,7 @@ button_t create_button(
     lv_color_t color_text
     )
 {
-    button_t result = {0};
+    button_t result = {};
 
     // ---- Panel Style ----
 
@@ -3155,11 +3144,6 @@ gps_switch_container_t create_gps_switch_panel(
 
     // Row Object sizes
     int32_t obj_w_0 = 0;
-    int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* --- Row Buttons ------------------------------------------------------------------ */
@@ -3377,11 +3361,6 @@ matrix_switch_container_t create_matrix_switch_panel(
 
     // Row Object sizes
     int32_t obj_w_0 = 0;
-    int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* --- Row Buttons ------------------------------------------------------------------ */
@@ -3581,10 +3560,6 @@ gngga_container_t create_gngga_panel(
     // Row Object sizes
     int32_t obj_w_0 = 0;
     int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* ---------------------------------------------------------- */
@@ -4304,10 +4279,6 @@ gnrmc_container_t create_gnrmc_panel(
     // Row Object sizes
     int32_t obj_w_0 = 0;
     int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* ---------------------------------------------------------- */
@@ -5087,10 +5058,6 @@ gpatt_container_t create_gpatt_panel(
     // Row Object sizes
     int32_t obj_w_0 = 0;
     int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* ---------------------------------------------------------- */
@@ -6491,9 +6458,6 @@ satio_container_t create_satio_panel(
     int32_t obj_w_0 = 0;
     int32_t obj_w_1 = 0;
     int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* ---------------------------------------------------------- */
@@ -10599,11 +10563,6 @@ gyro_0_container_t create_gyro_panel(
 
     // Row Object sizes
     int32_t obj_w_0 = 0;
-    int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* ---------------------------------------------------------- */
@@ -11218,11 +11177,6 @@ admplex0_container_t create_admplex0_panel(
 
     // Row Object sizes
     int32_t obj_w_0 = 0;
-    int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* ---------------------------------------------------------- */
@@ -12390,10 +12344,6 @@ serial_container_t create_serial_panel(
     // Row Object sizes
     int32_t obj_w_0 = 0;
     int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     int32_t title_width = sub_row_width - (sub_column_padding);
@@ -15238,10 +15188,6 @@ mapping_config_container_t create_mapping_config_container(
     // Row Object sizes
     int32_t obj_w_0 = 0;
     int32_t obj_w_1 = 0;
-    int32_t obj_w_2 = 0;
-    int32_t obj_w_3 = 0;
-    int32_t obj_w_4 = 0;
-    int32_t obj_w_5 = 0;
     int32_t obj_height = sub_row_height-(outline_width*2)-(sub_row_padding*2);
 
     /* --- Slot ------------------------------------------------------- */
@@ -16002,11 +15948,9 @@ uap_t create_uap(
 
     // wing line lower
     int32_t wing_line_lower_length = (roll_size_w / 100)*33;
-    int32_t wing_line_lower_pos_y =  roll_size_h-(roll_line_width);
 
     // wing line side
     int32_t wing_line_side_length = roll_size_h-(roll_line_width);
-    int32_t wing_line_side_pos_y =  0;
 
     // Left roll line
     {
@@ -17308,7 +17252,7 @@ void update_display()
             // Rainbow keyboard full keys
             lv_obj_set_style_text_color(kb_alnumsym.kb, rainbow_title_hue, LV_PART_ITEMS);
             // Rainbow keyboard full checked keys
-            lv_obj_set_style_text_color(kb_alnumsym.kb, rainbow_value_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(kb_alnumsym.kb, rainbow_value_hue, (lv_style_selector_t)LV_PART_ITEMS | LV_STATE_CHECKED);
             // Rainbow keyboard full text area outline
             lv_obj_set_style_outline_color(kb_alnumsym.ta, rainbow_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard full text area text
@@ -17325,7 +17269,7 @@ void update_display()
             // Rainbow keyboard numdec full keys
             lv_obj_set_style_text_color(kb_numdec.kb, rainbow_title_hue, LV_PART_ITEMS);
             // Rainbow keyboard numdec full checked keys
-            lv_obj_set_style_text_color(kb_numdec.kb, rainbow_value_hue, LV_PART_ITEMS | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(kb_numdec.kb, rainbow_value_hue, (lv_style_selector_t)LV_PART_ITEMS | LV_STATE_CHECKED);
             // Rainbow keyboard numdec full text area outline
             lv_obj_set_style_outline_color(kb_numdec.ta, rainbow_outline_hue, LV_PART_MAIN);
             // Rainbow keyboard numdec full text area text

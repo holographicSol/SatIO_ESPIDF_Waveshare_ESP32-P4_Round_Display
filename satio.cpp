@@ -182,7 +182,7 @@ struct SATIOStruct satioData = {
     // ------------------------------------------------------------------------------------
     // LMST Time
     // ------------------------------------------------------------------------------------
-    .LMST_tm = {0},
+    .LMST_tm = {},
 
     .LMST_hour = 0,
     .LMST_minute = 0,
@@ -203,7 +203,7 @@ struct SATIOStruct satioData = {
       schedule according to LMST time.
       { zoneName, dusk_start, dusk_end, dawn_start, dawn_end } in HH.MM format; -1.0 if N/A.
     */
-    .LMST_photo_period_schedule = {0},
+    .LMST_photo_period_schedule = {},
 
     // ------------------------------------------------------------------------------------
     // FLAGS
@@ -713,7 +713,7 @@ void setSystemTime(long usec) {
   // -----------------------------------------------------
   // System time = Local Time.
   // -----------------------------------------------------
-  struct tm tmpti = {0};
+  struct tm tmpti = {};
   tmpti.tm_year = int(rtc.now().year()) - LAST_EPOCH; // Years since 1900 (since last epoch)
   tmpti.tm_mon = rtc.now().month() - 1; // Months 0-11
   tmpti.tm_mday = rtc.now().day();

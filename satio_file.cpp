@@ -66,36 +66,6 @@ struct satioFileStruct satioFileData = {
 int yield_every_n_lines=8;
 int yield_counter=0;
 
-/* Rule 8.7: internal linkage; only used within this file.
- *
- * The watchdog reset is unconditional on every call (it only clears a
- * timer, so it is cheap) and is kept separate from the throttled
- * vTaskDelay(1) yield below: callers of this function are not necessarily
- * called often enough to hit yield_every_n_lines within a single task-
- * watchdog timeout window (e.g. writeLog() makes only 4 calls per
- * invocation), so gating the watchdog reset on that same counter could
- * starve it long enough to trip the watchdog during slow SD I/O.
- */
-static void yieldForTasks(void) {
-    esp_task_wdt_reset();
-
-    /* Rule 15.5: single point of exit via an if/else instead of an early
-       return for the "always yield" case. */
-    if (yield_every_n_lines <= 0) {
-        // Always yield if yield_every_n_lines set to 0 or negative
-        vTaskDelay(1);
-    }
-    else {
-        yield_counter++;
-        if (yield_counter >= yield_every_n_lines) {
-            // // Perform the actual yield
-            vTaskDelay(1);
-            yield_counter = 0; // Reset counter after yielding
-        }
-        // Otherwise, just pass through
-    }
-}
-
 /**
  * @brief Set Read/Write Success Flag.
  *
@@ -399,9 +369,6 @@ static void printLogLine(const char* line_str) {
        write instead of returning early when there is no disk space
        available or no valid (un-truncated) log filename could be resolved. */
 
-    // Critical! This may take a moment, yield for other tasks!
-    // yieldForTasks();
-
     size_t line_len = strlen(line_str);
     if (isAvailableBytes(line_len + 1) == false) {
       printf("[printLogLine] No more diskspace available!\n");
@@ -531,8 +498,6 @@ static void printLine(FILE* f, const char* line) {
         if (f != NULL) {
         fputs(line, f);
         fputc('\n', f);
-        // Critical! This may take a moment, yield for other tasks!
-        // yieldForTasks();
         }
     }
 }
@@ -609,8 +574,6 @@ bool loadMappingFile(const char *filepath) {
     char lineBuffer[1024];
     int currentTag = 0;
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
-        // yieldForTasks();
-
         size_t len = strlen(lineBuffer);
         while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) { lineBuffer[--len] = '\0'; }
         if (len == 0) continue;
@@ -857,8 +820,6 @@ bool loadMatrixFile() {
     char lineBuffer[1024];
     int currentTag = 0;
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
-        // yieldForTasks();
-
         size_t len = strlen(lineBuffer);
         while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) { lineBuffer[--len] = '\0'; }
         if (len == 0) continue;
@@ -1109,8 +1070,6 @@ bool loadSystemFile(const char *filepath) {
     #define READ_DBL_TAG(idx, var)  if (tag_index == idx) { if (str_is_double(val)) { var = strtod(val, NULL); } }
 
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
-
-        // yieldForTasks();
 
         size_t len = strlen(lineBuffer);
         while (len > 0 && (lineBuffer[len-1] == '\n' || lineBuffer[len-1] == '\r')) lineBuffer[--len] = '\0';
