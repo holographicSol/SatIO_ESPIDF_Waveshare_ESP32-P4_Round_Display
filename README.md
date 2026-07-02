@@ -16,8 +16,8 @@ SatIO is a Value Hive & Programmable Switch, for building devices with and or on
 
 ### Philosophy
 
-1. **Value Creation** — Safety, Stability, Accuracy. As SatIO develops, so should value creation, leading to safer, more accurate values in the hive, over time. This can create a desirable improvement curve where in contrast, building a system from scratch every new project, has the potential to reintroduce bugs and 're-solve' the same problems. As SatIO develops, so does any system built on top of SatIO. Value creation should ideally be both read and write to and from the Hive.
-2. **Value Utilization** — The Matrix utilizes the values to switch output high/low. Serial output also utilizes the values by potentially handing the values out to other devices. Value utilization should ideally only ever read from the Hive.
+1. **Value Creation** — Safety, Stability, Accuracy. As SatIO develops, so should value creation, leading to safer, more accurate values in the hive over time. This can create a desirable improvement curve where in contrast, building a system from scratch every new project, has the potential to reintroduce bugs and 're-solve' the same problems. As SatIO develops, so does any system built on top of SatIO. Value creation should ideally be both read and write to and from the Hive.
+2. **Value Utilization** — The Matrix utilizes the values to switch output high/low and or analog. Serial output also utilizes the values by handing the values out to other devices on a bus. Value utilization should ideally only ever read from the Hive.
 
 ### Matrix Philosophy
 
