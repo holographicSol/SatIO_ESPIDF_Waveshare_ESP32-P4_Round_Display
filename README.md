@@ -10,7 +10,7 @@ SatIO is a Value Hive & Programmable Switch, for building devices with and or on
 
 ## Philosophy & Architecture
 
-**The Hive** — SatIO creates and stores a lot of different values from sensors and from extrapolated sensor data, that can be used by SatIO to switch I/O via programmable compounds of logic, and or can be simply passed out over serial for another device to read.
+**The Hive** — SatIO creates and stores sensory data and extrapolated sensor data, that can be used by SatIO to switch I/O via programmable compounds of logic, and or can be simply passed out over serial for another device to read.
 
 **The Matrix** — This is a scalable, programmable switch that utilizes values from across the Hive, to perform calculations that result in either true or false. High/Low output is determined by the result. Devices built on top of SatIO can be distinguished by their matrix configurations, being different devices for different applications, and similar in that each of them are running on and or with SatIO.
 
