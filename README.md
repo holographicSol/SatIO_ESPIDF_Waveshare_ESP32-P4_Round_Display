@@ -13,7 +13,7 @@ SatIO is a Value Hive & Programmable Switch, for building devices with and or on
 **The Hive** — SatIO creates and stores sensory data and extrapolated sensor data, that can be used by SatIO to switch I/O via programmable compounds of logic, and or can be simply passed out over serial for another device to read.
 
 **The Matrix** — This is a scalable, programmable switch that utilizes values from across the Hive, to perform calculations that result in either true or false. High/Low output is determined by the result. Devices built on top of SatIO can be distinguished by their matrix configurations, being different devices for different applications, and similar in that each of them are running on and or with SatIO.
-The switches can be used for, digital output, analog output, mapped output. For driving a peripheral, providing a peripheral with event triggers, or simply lighting up an led. With an ATMEGA2560 as the output controller, there are up to +-60 programmable matrix switches available. 
+The switches can be used for, digital output, analog output, mapped output. For driving a peripheral, providing a peripheral with event triggers, or simply lighting up an led. With an ATMEGA2560 as the output controller, there are up to +-60 programmable matrix switches available, that's +-60 pins for SatIO to drive, through the matrix logic.
 
 ### Philosophy
 
