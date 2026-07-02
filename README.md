@@ -1,13 +1,12 @@
 ![plot](./SDCARD/UnidentifiedStudios.png)
 
-  SatIO - Written by Benjamin Jack Cullen. Project may be renamed to Stargate.
+SatIO - Written by Benjamin Jack Cullen. Project may be renamed to Stargate.
 
 -----
 
+SatIO is a value Hive & programmable calculator, for building devices with and or on top of SatIO.
 
-  SatIO is a value Hive & programmable calculator, for building devices with and or on top of SatIO.
-
-  [ Philosophy & Architecture ]
+[ Philosophy & Architecture ]
 
     The Hive: SatIO creates and stores a lot of different values from sensors and extrapolated from
               combinations of sensor data, that can be used by SatIO to switch I/O via programmable compounds
@@ -32,7 +31,7 @@
         The Matrix utilizes the values to switch output high/low.
         Serial output also utilizes the values by potentially handing the values out to other devices.
         Value utilization should ideally only ever read from the Hive.
-    
+
     Matrix Philosophy:
 
         (1) Elemental: Allow comparing any value from the Hive to any other value from the Hive and or to a user defined value.
@@ -44,12 +43,11 @@
         may already exist, in some combination of available logic in the Matrix.
 
         Further More:
-        Inference via Bayesian Reasoning? Moon tracking for example can be used to track the moon, it can also be used for one example; to 
+        Inference via Bayesian Reasoning? Moon tracking for example can be used to track the moon, it can also be used for one example; to
         track the tide, if the system is aware of moon/planetary positioning and datetime then marine life values may also be inferred
         relative to the inferred tide values and known datetime. There are lot of values in the Hive, that can be used with different
         reasoning, in many different combinations, with a network effect in mind for inference, if required.
         Or more simply 'SatIO is one hell of a switch'.
-
 
 -----
 
@@ -59,7 +57,7 @@ Logic may require or not require values X,Y,Z.
 
 All of the following values can be used in the matrix.
 
-Primary Comparitors:
+Primary Comparators:
 
     [0] NONE
     [1] ON
@@ -77,7 +75,7 @@ Primary Comparitors:
     [13] SatIO INS Alt
     [14] GNGGA Status
     [15] GNGGA Sat Count
-    [16] GNGGA Prescion
+    [16] GNGGA Precision
     [17] GNGGA Altitude
     [18] GNRMC Ground Speed
     [19] GNRMC Heading
@@ -146,7 +144,7 @@ Primary Comparitors:
     [82] Mars Ecliptic Lat
     [83] Mars Ecliptic Lon
     [84] Jupiter Azimuth
-    [85] jupiter Altitude
+    [85] Jupiter Altitude
     [86] Jupiter H.Ecliptic Lat
     [87] Jupiter H.Ecliptic Lon
     [88] Jupiter Ecliptic Lat
@@ -199,7 +197,7 @@ Many matrix functions accept operators, where required:
 [ Function XYZ Modes ]
 
     [0] User Value. A value that is set by the user.
-    [1] System Value. A value that is set by the system. Allows primary comparitors to be compared to other primary comparitors. 
+    [1] System Value. A value that is set by the system. Allows primary comparators to be compared to other primary comparators.
 
 -----
 
@@ -226,7 +224,7 @@ Many values can be mapped and then used in the matrix and or sent directly to th
     mapping -c2 n      Configuration map slot -s. (mode 0 : in_max)  (mode 1 : Neg_range : 0 to approximate center value)
     mapping -c3 n      Configuration map slot -s. (mode 0 : out_min) (mode 1 : Pos_range : ADC max - neg range)
     mapping -c4 n      Configuration map slot -s. (mode 0 : out_max) (mode 1 : out_max)
-    mapping -c5 n      Configuration map slot -s. (mode 1 only : DEADZONE : expected flutuation at center)
+    mapping -c5 n      Configuration map slot -s. (mode 1 only : DEADZONE : expected fluctuation at center)
 
 example map analog stick axis x0 on admplex0 channel 0 into map slot 0:
 
@@ -293,8 +291,8 @@ Customizable Inertial navigation system.
 
     ins -m n              Set INS mode n. (0 : Off) (1 : Dynamic, set by gps every 100ms) (2 : Fixed, remains on after conditions met).
     ins -gyro n           INS uses gyro for attitude. (0 : gyro heading) (1 : gps heading).
-    ins -p n              Set INS mimimum required gps precision factor to initialize.
-    ins -s n              Set INS mimimum required speed to initialize.
+    ins -p n              Set INS minimum required gps precision factor to initialize.
+    ins -s n              Set INS minimum required speed to initialize.
     ins -r n              Set INS maximum required heading range difference to initialize (difference between gps heading and gyro heading).
     ins --reset-forced n  Reset INS remains on after conditions met.
 
@@ -302,38 +300,38 @@ Customizable Inertial navigation system.
 
 Satio
 
-      satio --coord-update-mode-gps           Use GPS latitude, longitude values.
-      satio --coord-update-mode-static        Do not update latiude, longitude unless --set-coord or otherwise.
-      satio --set-coord -lat n -lon n  Set degrees latitude and longitude (ensure --coord-update-mode-static before --set-coord).
-      satio --utc-offset n             Set +-seconds offset time.
-      satio --auto-datetime-on         Enable set datetime automatically  (--auto-datetime-on overrides any datetime -set).
-      satio --auto-datetime-off        Disable set datetime automatically (ensure --auto-datetime-off before using -set time).
-      satio --set-datetime --year n --month n --mday n --hour n --minute n --second n  (must be UTC except if utc offset 0).
+    satio --coord-update-mode-gps     Use GPS latitude, longitude values.
+    satio --coord-update-mode-static  Do not update latitude, longitude unless --set-coord or otherwise.
+    satio --set-coord -lat n -lon n   Set degrees latitude and longitude (ensure --coord-update-mode-static before --set-coord).
+    satio --utc-offset n              Set +-seconds offset time.
+    satio --auto-datetime-on          Enable set datetime automatically  (--auto-datetime-on overrides any datetime -set).
+    satio --auto-datetime-off         Disable set datetime automatically (ensure --auto-datetime-off before using -set time).
+    satio --set-datetime --year n --month n --mday n --hour n --minute n --second n  (must be UTC except if utc offset 0).
 
-      satio --speed-mode-gps     Use GPS speed values.
-      satio --speed-mode-static  Do not update speed unless --set-speed or otherwise.
-      satio --set-speed n        Set speed in meters per second (ensure --speed-mode-static before --set-speed).
-      satio --speed-unit-KTS     Use default knots.
-      satio --speed-unit-KPH     Convert knots per second to K/PH.
-      satio --speed-unit-MPH     Convert knots per second to M/PH.
-      satio --speed-unit-mPS     Convert knots per second to meters per second.
+    satio --speed-mode-gps     Use GPS speed values.
+    satio --speed-mode-static  Do not update speed unless --set-speed or otherwise.
+    satio --set-speed n        Set speed in meters per second (ensure --speed-mode-static before --set-speed).
+    satio --speed-unit-KTS     Use default knots.
+    satio --speed-unit-KPH     Convert knots per second to K/PH.
+    satio --speed-unit-MPH     Convert knots per second to M/PH.
+    satio --speed-unit-mPS     Convert knots per second to meters per second.
 
-      satio --altitude-mode-gps         Use GPS altitude values.
-      satio --altitude-mode-static      Do not update speed unless --set-altitude or otherwise.
-      satio --set-altitude n            Set altitude in meters (ensure --altitude-mode-static before --set-altitude).
-      satio --altitude-unit-meters      Use default meters altitude.
-      satio --altitude-unit-kilometers  Convert meters to kilometers.
-      satio --altitude-unit-miles       Convert meters to miles.
+    satio --altitude-mode-gps         Use GPS altitude values.
+    satio --altitude-mode-static      Do not update speed unless --set-altitude or otherwise.
+    satio --set-altitude n            Set altitude in meters (ensure --altitude-mode-static before --set-altitude).
+    satio --altitude-unit-meters      Use default meters altitude.
+    satio --altitude-unit-kilometers  Convert meters to kilometers.
+    satio --altitude-unit-miles       Convert meters to miles.
 
-      satio --ground-heading-update-mode-gps     Use GPS ground heading values.
-      satio --ground-heading-update-mode-static  Do not update heading unless --set-ground-heading or otherwise.
-      satio --set-ground-heading          Set ground heading in degrees (0-360. Ensure --ground-heading-update-mode-static before --ground-heading).
+    satio --ground-heading-update-mode-gps     Use GPS ground heading values.
+    satio --ground-heading-update-mode-static  Do not update heading unless --set-ground-heading or otherwise.
+    satio --set-ground-heading                 Set ground heading in degrees (0-360. Ensure --ground-heading-update-mode-static before --ground-heading).
 
 -----
 
 Gyro
 
-    gyro --calacc        Callibrate the accelerometer.
+    gyro --calacc        Calibrate the accelerometer.
     gyro --calmag-start  Begin calibrating the magnetometer.
     gyro --calmag-end    End calibrating the magnetometer.
 
@@ -346,20 +344,20 @@ SDCard
 
 -----
 
-  [ PERFORMANCE ]
+[ PERFORMANCE ]
 
-      powercfg --power-saving          Sets power configuration to low power consumption mode.
-      powercfg --power-balanced        Sets power configuration to balanced.
-      powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
+    powercfg --power-saving          Sets power configuration to low power consumption mode.
+    powercfg --power-balanced        Sets power configuration to balanced.
+    powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
 
-      setdelay --admplex0               Specify max task frequency in uS.
-      setdelay --gyro0                  Specify max task frequency in uS.
-      setdelay --universe               Specify max task frequency in uS.
-      setdelay --gps                    Specify max task frequency in uS.
-      setdelay --switch                 Specify max task frequency in uS.
-      setdelay --storage                Specify max task frequency in uS.
+    setdelay --admplex0               Specify max task frequency in uS.
+    setdelay --gyro0                  Specify max task frequency in uS.
+    setdelay --universe               Specify max task frequency in uS.
+    setdelay --gps                    Specify max task frequency in uS.
+    setdelay --switch                 Specify max task frequency in uS.
+    setdelay --storage                Specify max task frequency in uS.
 
-      example: setdelay --admplex0 20 --gyro0 200 --gps 10
+example: setdelay --admplex0 20 --gyro0 200 --gps 10
 
 -----
 
@@ -402,44 +400,14 @@ Stat
 
 Other
 
-    -v    Enable verbosoity.
-    -vv   Enable extra verbosoity.
+    -v    Enable verbosity.
+    -vv   Enable extra verbosity.
     help
 
 -----
 
 ![plot](./Data/SatIO_Stat.png)
 
------
-
-  Wiring For Keystudio ESP32 PLUS Development Board:
-
-          ESP32: 1st ATMEGA2560 with shield as Port Controller (not on multiplexer):
-          ESP32: I2C SDA -> ATMEGA2560: I2C SDA
-          ESP32: I2C SCL -> ATMEGA2560: I2C SCL
-
-          Other ESP32 I2C Devices (not on multiplexer):
-          ESP32: SDA0 SCL0 -> DS3231 (RTC): SDA, SCL (5v)
-
-          ESP32 i2C: I2C Multiplexing (3.3v) (for peripherals):
-          ESP32: i2C -> TCA9548A: SDA, SCL
-
-          ESP32: Analog/Digital Multiplexing (3.3v) (for peripherals):
-          ESP32: io4    -> CD74HC4067: SIG
-          ESP32: io32   -> CD74HC4067: S0
-          ESP32: io33   -> CD74HC4067: S1
-          ESP32: io16   -> CD74HC4067: S2
-          ESP32: io17   -> CD74HC4067: S3
-          CD74HC4067 C0 -> DHT11: SIG
-
-          ESP32: WTGPS300P (5v) (for getting a downlink):
-          ESP32: io27 RXD -> WTGPS300P: TXD
-          ESP32: null TXD -> WTGPS300P: RXD
-
-          ESP32: WT901 9-Axis Gyro:
-          ESP32: Serial2 RXD -> WT901 TXD
-          ESP32: Serial2 TXD -> WT901 RXD
-          
 -----
 
     To Do: AI I2C modules returning int's as classifiers.
@@ -451,29 +419,6 @@ Other
 -----
 
 Zip:
-[  https://drive.google.com/drive/folders/13yynSxkKL-zxb7iLSkg0v0VXkSLgmtW-?usp=sharing](https://drive.google.com/drive/folders/13yynSxkKL-zxb7iLSkg0v0VXkSLgmtW-?usp=drive_link)
+[https://drive.google.com/drive/folders/13yynSxkKL-zxb7iLSkg0v0VXkSLgmtW-?usp=sharing](https://drive.google.com/drive/folders/13yynSxkKL-zxb7iLSkg0v0VXkSLgmtW-?usp=drive_link)
 
 -----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
