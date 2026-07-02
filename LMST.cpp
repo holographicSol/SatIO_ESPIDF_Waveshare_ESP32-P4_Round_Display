@@ -6,7 +6,7 @@
     night length, a polar anomaly factor, the sun's current twilight zone,
     and the dawn/dusk crossing times of every twilight zone.
 
-    Intended to be MISRA C++ compliant.
+    Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include "./LMST.h"

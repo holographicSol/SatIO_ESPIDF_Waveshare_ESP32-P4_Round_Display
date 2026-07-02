@@ -402,9 +402,9 @@ void writeOutputPortControllerClear(TwoWire &wire, int address);
  *        the output port controller.
  * @param wire I2C bus instance.
  * @param address I2C address of the output port controller.
- * @return None.
+ * @return int32_t.
  */
-void writeOutputPortControllerSetPins(TwoWire &wire, int address);
+int32_t writeOutputPortControllerSetPins(TwoWire &wire, int address);
 
 /**
  * @brief Read every input pin state from the input port controller.

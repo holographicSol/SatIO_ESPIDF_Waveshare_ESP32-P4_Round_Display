@@ -28,6 +28,22 @@
 #include "config.h"
 
 /**
+ * @brief SystemConuters
+ * 
+ * @param task_freq_c Increments every task iteration.
+ * @param task_freq_t Total task_freq_c increments a period (example: seconds).
+ * 
+ * @param task_ffreq_c Increments every task function iteration.
+ * @param task_ffreq_t Total task_ffreq_c increments a period (example: seconds).
+ */
+typedef struct SystemConuters {
+  int32_t task_freq_c;  // Increments every task iteration.
+  int32_t task_freq_t;  // Total task_freq_c increments a period (example: seconds).
+  int32_t task_ffreq_c; // Increments every task function iteration.
+  int32_t task_ffreq_t; // Total task_ffreq_c increments a period (example: seconds).
+};
+
+/**
  * @struct systemStruct
  * @brief Single global instance (systemData) holding system-wide flags,
  *        loop counters, and per-second totals.
@@ -101,53 +117,24 @@ struct systemStruct {
   // are sampled into the matching total_* field below once per second,
   // then reset to zero there.
   // ------------------------------------------------------------------------
-  int32_t i_count_read_gps;
-  int32_t i_task_freq_hz_gps;
 
-  int32_t i_count_read_ins;
-  int32_t i_count_read_gyro_0;
-  int32_t i_task_freq_hz_gyro;
-  int32_t i_count_read_mplex_0;
-  int32_t i_task_freq_hz_mlx;
-  int32_t i_count_matrix;
-  int32_t i_task_freq_hz_switches;
-  int32_t i_count_portcontroller_input;
-  int32_t i_count_port_controller_output;
-  int32_t i_count_track_planets;
-  int32_t i_task_freq_hz_uni;
-  int32_t i_count_read_serial_commands;
-  int32_t i_count_logging;
-  int32_t i_count_display;
-  int32_t i_task_freq_hz_dsp;
-
-  int32_t total_system_time;
-  int32_t i_count_system_time;
+  SystemConuters counters_st;
+  SystemConuters counters_gps;
+  SystemConuters counters_gyr0;
+  SystemConuters counters_ins;
+  SystemConuters counters_mplex0;
+  SystemConuters counters_pci;
+  SystemConuters counters_uni;
+  SystemConuters counters_mtx;
+  SystemConuters counters_pco;
+  SystemConuters counters_track_planets;
+  SystemConuters counters_dsp;
+  SystemConuters counters_stg;
+  SystemConuters counters_infocmd;
+  SystemConuters counters_log;
 
   int32_t loops_a_second;       // Main loop iterations since the last 1-second sample.
   int32_t total_loops_a_second; // Main loop iterations per second, at the last sample.
-
-  // ------------------------------------------------------------------------
-  // Per-second totals: each holds the matching i_count_* counter above, as
-  // sampled and reset once per second, i.e. that operation's rate per
-  // second.
-  // ------------------------------------------------------------------------
-  int32_t total_gps;
-  int32_t total_task_freq_hz_gps;
-
-  int32_t total_ins;
-  int32_t total_gyro_0;
-  int32_t total_task_freq_hz_gyro;
-  int32_t total_mplex_0;
-  int32_t total_task_freq_hz_mlx;
-  int32_t total_matrix;
-  int32_t total_task_freq_hz_switches;
-  int32_t total_universe;
-  int32_t total_task_freq_hz_uni;
-  int32_t total_task_freq_hz_dsp;
-  int32_t total_infocmd;
-  int32_t total_portcontroller_output;
-  int32_t total_portcontroller_input;
-  int32_t total_display;
 };
 extern struct systemStruct systemData;
 

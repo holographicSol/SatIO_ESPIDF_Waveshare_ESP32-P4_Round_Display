@@ -1737,12 +1737,13 @@ void outputStat(void) {
 
           "t_system_timing_resolution=%ld "
           "t_gps=(%ldHz/%ldHz) "
-          "t_ins=%ld "
-          "t_gyr=(%ldHz/%ldHz) "
-          "t_mlx=(%ldHz/%ldHz) "
+          "t_gyr0=(%ldHz/%ldHz) "
+          "t_ins=(%ldHz/%ldHz) "
+          "t_mplex0=(%ldHz/%ldHz) "
+          "t_pci=(%ldHz/%ldHz) "
           "t_uni=(%ldHz/%ldHz) "
-          "t_pci=%ld "
-          "t_switch=(%ldHz/%ldHz) "
+          "t_mtx=(%ldHz/%ldHz) "
+          "t_pco=(%ldHz/%ldHz) "
           "t_dsp=(%ldHz/%ldHz) "
 
           "sat=%s "
@@ -1788,29 +1789,34 @@ void outputStat(void) {
 
           systemData.total_loops_a_second,
 
-          systemData.total_system_time,
+          systemData.counters_st.task_freq_t,
 
-          systemData.total_gps,
-          systemData.total_task_freq_hz_gps,
+          systemData.counters_gps.task_ffreq_t,
+          systemData.counters_gps.task_freq_t,
 
-          systemData.total_ins,
+          systemData.counters_gyr0.task_ffreq_t,
+          systemData.counters_gyr0.task_freq_t,
 
-          systemData.total_gyro_0,
-          systemData.total_task_freq_hz_gyro,
+          systemData.counters_ins.task_ffreq_t,
+          systemData.counters_gyr0.task_freq_t,
 
-          systemData.total_mplex_0,
-          systemData.total_task_freq_hz_mlx,
+          systemData.counters_mplex0.task_ffreq_t,
+          systemData.counters_mplex0.task_freq_t,
 
-          systemData.total_universe,
-          systemData.total_task_freq_hz_uni,
+          systemData.counters_pci.task_ffreq_t,
+          systemData.counters_pci.task_freq_t,
 
-          systemData.total_portcontroller_input,
+          systemData.counters_uni.task_ffreq_t,
+          systemData.counters_uni.task_freq_t,
 
-          systemData.total_matrix,
-          systemData.total_task_freq_hz_switches,
+          systemData.counters_mtx.task_ffreq_t,
+          systemData.counters_mtx.task_freq_t,
 
-          systemData.total_display,
-          systemData.total_task_freq_hz_dsp,
+          systemData.counters_pco.task_ffreq_t,
+          systemData.counters_mtx.task_freq_t,
+
+          systemData.counters_dsp.task_ffreq_t,
+          systemData.counters_dsp.task_freq_t,
 
           gnggaData.satellite_count,
           satioData.degrees_latitude,

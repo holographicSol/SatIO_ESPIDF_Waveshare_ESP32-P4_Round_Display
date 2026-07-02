@@ -41,6 +41,7 @@
 #include "system_data.h"
 #include "sdcard_helper.h"
 #include "i2c_helper.h"
+#include "task_handler.h"
 
 // ----------------------------------------------------------------------------------------
 //  MATRIX
@@ -1694,10 +1695,11 @@ void writeOutputPortControllerClear(TwoWire &wire, int address) {
   clearI2CLinkOutputPacket(IICLinkPCO);
   write_uint8_ToPacket(IICLinkPCO.OUTPUT_PACKET, 0, 0x0A); // command 10
   writeI2CToSlaveBin(wire, IICLinkPCO, address, 1, 0, "writeOutputPortControllerClear");
-  systemData.i_count_port_controller_output++;
 }
 
-void writeOutputPortControllerSetPins(TwoWire &wire, int address) {
+int32_t writeOutputPortControllerSetPins(TwoWire &wire, int address) {
+  int32_t count_write=0;
+
   for (int32_t Mi = 0; Mi < MAX_MATRIX_SWITCHES; Mi++) {
     if (matrixData.matrix_switch_write_required[0][Mi]) {
       clearI2CLinkOutputPacket(IICLinkPCO);
@@ -1723,9 +1725,11 @@ void writeOutputPortControllerSetPins(TwoWire &wire, int address) {
 
       // Clear the flag now that the value has been sent.
       matrixData.matrix_switch_write_required[0][Mi] = false;
+
+      count_write++;
     }
   }
-  systemData.i_count_port_controller_output++;
+  return count_write;
 }
 
 bool readInputPortControllerReadPins(TwoWire &wire, int address) {

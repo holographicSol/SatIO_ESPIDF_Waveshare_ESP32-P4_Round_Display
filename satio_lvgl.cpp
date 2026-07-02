@@ -17647,7 +17647,7 @@ void update_display()
                 // Switch Logic p/s: How many times a second switch logic is calculated
                 lv_obj_set_style_outline_color(mfc.switch_logic_per_second, lv_color_make(255, 0, 0), LV_PART_MAIN);
                 lv_obj_set_style_text_color(mfc.switch_logic_per_second, lv_color_make(255, 0, 0), LV_PART_MAIN);
-                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%ld", systemData.total_matrix); lv_label_set_text(mfc.switch_logic_per_second, buf); }
+                { char buf[MAX_GLOBAL_ELEMENT_SIZE]; snprintf(buf, sizeof(buf), "%ld", systemData.counters_mtx.task_ffreq_t); lv_label_set_text(mfc.switch_logic_per_second, buf); }
 
                 /**
                  * Poitential Output Value: Computer Intent / Mapped Value

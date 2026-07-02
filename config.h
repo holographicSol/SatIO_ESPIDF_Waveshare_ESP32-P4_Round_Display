@@ -84,7 +84,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_MS_LOW_DISPLAY                     50  // (20 Hz)
 
-#define TASK_MAX_FREQ_MS_LOW_SYSTEM_TIME                 5   // 
+#define TASK_MAX_FREQ_MS_LOW_SYSTEM_TIME                 50   // (20 Hz)
 
 // ----------------------------------------------------------------------------------------
 // Balanced (Recommended)
@@ -130,7 +130,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_MS_HIGH__DISPLAY                   25  // (40 Hz) 
 
-#define TASK_MAX_FREQ_MS_HIGH_SYSTEM_TIME                5   // 
+#define TASK_MAX_FREQ_MS_HIGH_SYSTEM_TIME                1   // 
 
 
 extern struct PwrConfig pwrConfigLowPower;

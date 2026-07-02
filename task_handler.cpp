@@ -212,70 +212,53 @@ static int64_t prev_tv_uS_star_navigation;
  *        "total" field, resets the counter for the next second, and raises the
  *        1-second output flag.
  */
+
+static void totalCounters(SystemConuters &counters) {
+  counters.task_freq_t = counters.task_freq_c;
+  counters.task_freq_c = 0;
+  counters.task_ffreq_t = counters.task_ffreq_c;
+  counters.task_ffreq_c = 0;
+}
+
+void stepCounter(int32_t *counter, int32_t steps) {
+
+  int64_t tmp_counter = *counter + steps;
+
+  // i_count_read_gps is int32_t, so the wrap check uses the signed 32-bit
+  // limit matching its essential type (MISRA C 2012 Rule 10.4).
+  if (tmp_counter >= INT32_MAX - 2) {
+    tmp_counter = 0;
+  }
+
+  *counter = tmp_counter;
+}
+
+
 static void intervalBreach1Second(void) {
   storeLocalTime();
   storeRTCTime();
   storeLMST();
 
-  systemData.total_loops_a_second = systemData.loops_a_second;
-  systemData.loops_a_second = 0;
-
-  systemData.total_system_time = systemData.i_count_system_time;
-  systemData.i_count_system_time = 0;
-
-  systemData.total_gps = systemData.i_count_read_gps;
-  systemData.i_count_read_gps = 0;
-
-  systemData.total_task_freq_hz_gps = systemData.i_task_freq_hz_gps;
-  systemData.i_task_freq_hz_gps = 0;
-
-  systemData.total_ins = systemData.i_count_read_ins;
-  systemData.i_count_read_ins = 0;
-
-  systemData.total_gyro_0 = systemData.i_count_read_gyro_0;
-  systemData.i_count_read_gyro_0 = 0;
-
-  systemData.total_task_freq_hz_gyro = systemData.i_task_freq_hz_gyro;
-  systemData.i_task_freq_hz_gyro = 0;
-
-  systemData.total_mplex_0 = systemData.i_count_read_mplex_0;
-  systemData.i_count_read_mplex_0 = 0;
-
-  systemData.total_task_freq_hz_mlx = systemData.i_task_freq_hz_mlx;
-  systemData.i_task_freq_hz_mlx = 0;
-
-  systemData.total_matrix = systemData.i_count_matrix;
-  systemData.i_count_matrix = 0;
-
-  systemData.total_task_freq_hz_switches = systemData.i_task_freq_hz_switches;
-  systemData.i_task_freq_hz_switches = 0;
-
-  systemData.total_portcontroller_output = systemData.i_count_port_controller_output;
-  systemData.i_count_port_controller_output = 0;
-
-  systemData.total_universe = systemData.i_count_track_planets;
-  systemData.i_count_track_planets = 0;
-
-  systemData.total_task_freq_hz_uni = systemData.i_task_freq_hz_uni;
-  systemData.i_task_freq_hz_uni = 0;
-
-  systemData.total_infocmd = systemData.i_count_read_serial_commands;
-  systemData.i_count_read_serial_commands = 0;
-
-  systemData.total_portcontroller_input = systemData.i_count_portcontroller_input;
-  systemData.i_count_portcontroller_input = 0;
-
-  systemData.total_display = systemData.i_count_display;
-  systemData.i_count_display = 0;
-
-  systemData.total_task_freq_hz_dsp = systemData.i_task_freq_hz_dsp;
-  systemData.i_task_freq_hz_dsp = 0;
+  totalCounters(systemData.counters_st);
+  totalCounters(systemData.counters_gps);
+  totalCounters(systemData.counters_gyr0);
+  totalCounters(systemData.counters_ins);
+  totalCounters(systemData.counters_mplex0);
+  totalCounters(systemData.counters_mtx);
+  totalCounters(systemData.counters_pci);
+  totalCounters(systemData.counters_pco);
+  totalCounters(systemData.counters_uni);
+  totalCounters(systemData.counters_track_planets);
+  totalCounters(systemData.counters_dsp);
+  totalCounters(systemData.counters_stg);
+  totalCounters(systemData.counters_infocmd);
+  totalCounters(systemData.counters_log);
 
   systemData.interval_breach_track_planets_output = true;
 
-  systemData.uptime_seconds++;
   // uptime_seconds is int32_t, so the wrap check uses the signed 32-bit limit
   // matching its essential type (MISRA C 2012 Rule 10.4).
+  systemData.uptime_seconds++;
   if (systemData.uptime_seconds >= INT32_MAX - 2) {
     systemData.uptime_seconds = 0;
     printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
@@ -356,10 +339,12 @@ bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_MULTIPLEXERS);
 bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_UNIVERSE);    return true; }
 bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_DISPLAY);     return true; }
 bool taskFrequencySystemTime()  { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_SYSTEM_TIME); return true; }
+
 /** ----------------------------------------------------------------------------
  * System Time Task.
  *
  * @brief Creates global system time values that can be read throughout the system.
+ *        Higher frequency this task -> greater resolution of system time.
  * @note This task should also fascilitate setting time manually. 
  */
 
@@ -367,57 +352,47 @@ static void taskSystemTime(void *pvParameters) {
   (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
   esp_task_wdt_add(nullptr);
   for (;;) {
+    // --------------------------------------------
+    // System Timing.
+    // --------------------------------------------
+    gettimeofday(&tv_now, NULL);
+    timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
+    satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
 
-    // Delay Task
-    // if (taskFrequencySystemTime() == true) {
+    // Track Planets interval breach.
+    if (satioData.local_unixtime_uS >= prev_tv_uS_track_planets + POWER_CONFIG_TRACK_PLANTETS_TIMING_uS ||
+        satioData.local_unixtime_uS <= prev_tv_uS_track_planets - POWER_CONFIG_TRACK_PLANTETS_TIMING_uS) {
+      prev_tv_uS_track_planets = satioData.local_unixtime_uS;
+      systemData.interval_breach_track_planets = true;
+    }
 
-      // --------------------------------------------
-      // System Timing.
-      // --------------------------------------------
-      gettimeofday(&tv_now, NULL);
-      timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
-      satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+    // StarNavigation interval breach.
+    if (satioData.local_unixtime_uS >= prev_tv_uS_star_navigation + POWER_CONFIG_STAR_NAVIGATION_TIMING_uS ||
+        satioData.local_unixtime_uS <= prev_tv_uS_star_navigation - POWER_CONFIG_STAR_NAVIGATION_TIMING_uS) {
+      prev_tv_uS_star_navigation = satioData.local_unixtime_uS;
+      systemData.interval_breach_star_navigation = true;
+    }
 
-      // Track Planets interval breach.
-      if (satioData.local_unixtime_uS >= prev_tv_uS_track_planets + POWER_CONFIG_TRACK_PLANTETS_TIMING_uS ||
-          satioData.local_unixtime_uS <= prev_tv_uS_track_planets - POWER_CONFIG_TRACK_PLANTETS_TIMING_uS) {
-        prev_tv_uS_track_planets = satioData.local_unixtime_uS;
-        systemData.interval_breach_track_planets = true;
-      }
+    // 1-second interval breach.
+    if (tv_now.tv_sec != prev_tv_sec) {
+      prev_tv_sec = tv_now.tv_sec;
+      systemData.interval_breach_1_second_output = true;
+      intervalBreach1Second();
+    }
+    esp_task_wdt_reset();
 
-      // StarNavigation interval breach.
-      if (satioData.local_unixtime_uS >= prev_tv_uS_star_navigation + POWER_CONFIG_STAR_NAVIGATION_TIMING_uS ||
-          satioData.local_unixtime_uS <= prev_tv_uS_star_navigation - POWER_CONFIG_STAR_NAVIGATION_TIMING_uS) {
-        prev_tv_uS_star_navigation = satioData.local_unixtime_uS;
-        systemData.interval_breach_star_navigation = true;
-      }
+    // --------------------------------------------
+    // Set SatIO Data
+    // --------------------------------------------
+    setSatIOData(); // ensure sync once
+    esp_task_wdt_reset();
 
-      // 1-second interval breach.
-      if (tv_now.tv_sec != prev_tv_sec) {
-        prev_tv_sec = tv_now.tv_sec;
-        systemData.interval_breach_1_second_output = true;
-        intervalBreach1Second();
-      }
-      esp_task_wdt_reset();
+    // --------------------------------------------
+    // Task frequency counter
+    // --------------------------------------------
+    stepCounter(&systemData.counters_st.task_freq_c, 1);
 
-      // --------------------------------------------
-      // Set SatIO Data
-      // --------------------------------------------
-      setSatIOData(); // ensure sync once
-      esp_task_wdt_reset();
-
-      // --------------------------------------------
-      // Counters.
-      // --------------------------------------------
-      systemData.i_count_system_time++;
-      // i_count_read_gps is int32_t, so the wrap check uses the signed 32-bit
-      // limit matching its essential type (MISRA C 2012 Rule 10.4).
-      if (systemData.i_count_system_time >= INT32_MAX - 2) {
-        systemData.i_count_system_time = 0;
-      }
-
-      delayMicroseconds(1);
-    // }
+    delayMicroseconds(1);
   }
 }
 void createTaskSystemTime() {
@@ -466,27 +441,17 @@ static void taskGPS(void *pvParameters) {
                   gyroData.gyro_0_ang_z);
 
           // --------------------------------------------
-          // Read Counters.
+          // Task frequency counter
           // --------------------------------------------
-          systemData.i_count_read_gps++;
           systemData.interval_breach_gps_output = true;
-          // i_count_read_gps is int32_t, so the wrap check uses the signed 32-bit
-          // limit matching its essential type (MISRA C 2012 Rule 10.4).
-          if (systemData.i_count_read_gps >= INT32_MAX - 2) {
-            systemData.i_count_read_gps = 0;
-          }
+          stepCounter(&systemData.counters_gps.task_ffreq_c, 1);
         }
       }
     }
     // --------------------------------------------
-    // Task Iter Counters.
+    // Task frequency counter
     // --------------------------------------------
-    systemData.i_task_freq_hz_gps++;
-    // i_task_freq_hz_gps is int32_t, so the wrap check uses the signed 32-bit
-    // limit matching its essential type (MISRA C 2012 Rule 10.4).
-    if (systemData.i_task_freq_hz_gps >= INT32_MAX - 2) {
-      systemData.i_task_freq_hz_gps = 0;
-    }
+    stepCounter(&systemData.counters_gps.task_freq_c, 1);
   }
 }
 void createTaskGPS() {
@@ -540,6 +505,11 @@ static void taskStorage(void *pvParameters) {
       // ------------------------------------------------
       sdcard_unmount();
       esp_task_wdt_reset();
+
+    // --------------------------------------------
+    // Task frequency counter
+    // --------------------------------------------
+    stepCounter(&systemData.counters_stg.task_freq_c, 1);
     }
   }
 }
@@ -578,6 +548,11 @@ static void taskSerialInfoCMD(void *pvParameters) {
       esp_task_wdt_reset();
       outputSentences();
       esp_task_wdt_reset();
+
+    // --------------------------------------------
+    // Task frequency counter
+    // --------------------------------------------
+    stepCounter(&systemData.counters_infocmd.task_freq_c, 1);
     }
   }
 }
@@ -612,13 +587,13 @@ static void taskGyro(void *pvParameters) {
 
       if (readGyro() == true) {
         esp_task_wdt_reset();
-        systemData.i_count_read_gyro_0++;
+
+        // --------------------------------------------
+        // Task frequency counter
+        // --------------------------------------------
         systemData.interval_breach_gyro_0_output = true;
-        // i_count_read_gyro_0 is int32_t, so the wrap check uses the signed
-        // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
-        if (systemData.i_count_read_gyro_0 >= INT32_MAX - 2) {
-          systemData.i_count_read_gyro_0 = 0;
-        }
+        stepCounter(&systemData.counters_gyr0.task_ffreq_c, 1);
+
         // ----------------------------------------------
         // Estimate INS data. (Can be used without GPS).
         // INS data produced from user/gps=system is fed back into INS in loop.
@@ -628,26 +603,20 @@ static void taskGyro(void *pvParameters) {
                                     satioData.system_ground_heading,
                                     satioData.system_speed,
                                     satioData.local_unixtime_uS)) {
-          systemData.i_count_read_ins++;
-          systemData.interval_breach_ins_output = true;
-          // i_count_read_ins is int32_t, so the wrap check uses the signed
-          // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
-          if (systemData.i_count_read_ins >= INT32_MAX - 2) {
-            systemData.i_count_read_ins = 0;
-          }
-          esp_task_wdt_reset();
+        // --------------------------------------------
+        // Task frequency counter
+        // --------------------------------------------
+        systemData.interval_breach_ins_output = true;
+        stepCounter(&systemData.counters_ins.task_ffreq_c, 1);
+
+        esp_task_wdt_reset();
         }
       }
     }
     // --------------------------------------------
-    // Task Iter Counters.
+    // Task frequency counter
     // --------------------------------------------
-    systemData.i_task_freq_hz_gyro++;
-    // i_task_freq_hz_gyro is int32_t, so the wrap check uses the signed 32-bit
-    // limit matching its essential type (MISRA C 2012 Rule 10.4).
-    if (systemData.i_task_freq_hz_gyro >= INT32_MAX - 2) {
-      systemData.i_task_freq_hz_gyro = 0;
-    }
+    stepCounter(&systemData.counters_gyr0.task_freq_c, 1);
   }
 }
 void createTaskGyro() {
@@ -687,28 +656,20 @@ static void taskMultiplexers(void *pvParameters) {
         // vTaskDelay(1); // CONFIG_FREERTOS_HZ=1000 makes delay 1ms. uncomment to delay
       }
       esp_task_wdt_reset();
-      // ------------------------------------------------
-      // Counters
-      // ------------------------------------------------
-      systemData.i_count_read_mplex_0++;
+      
+      // --------------------------------------------
+      // Task frequency counter
+      // --------------------------------------------
       systemData.interval_breach_mplex_0_output = true;
-      // i_count_read_mplex_0 is int32_t, so the wrap check uses the signed
-      // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
-      if (systemData.i_count_read_mplex_0 >= INT32_MAX - 2) {
-        systemData.i_count_read_mplex_0 = 0;
-      }
+      stepCounter(&systemData.counters_mplex0.task_ffreq_c, 1);
+
       esp_task_wdt_reset();
     }
 
     // --------------------------------------------
-    // Task Iter Counters.
+    // Task frequency counter
     // --------------------------------------------
-    systemData.i_task_freq_hz_mlx++;
-    // i_task_freq_hz_mlx is int32_t, so the wrap check uses the signed 32-bit
-    // limit matching its essential type (MISRA C 2012 Rule 10.4).
-    if (systemData.i_task_freq_hz_mlx >= INT32_MAX - 2) {
-      systemData.i_task_freq_hz_mlx = 0;
-    }
+    stepCounter(&systemData.counters_mplex0.task_freq_c, 1);
   }
 }
 void createTaskMultiplexers() {
@@ -748,13 +709,13 @@ static void taskSwitches(void *pvParameters) {
       // ------------------------------------------------
       if (matrixSwitch()) {
         esp_task_wdt_reset();
-        systemData.i_count_matrix++;
+        
+        // --------------------------------------------
+        // Task frequency counter
+        // --------------------------------------------
         systemData.interval_breach_matrix_output = true;
-        // i_count_matrix is int32_t, so the wrap check uses the signed 32-bit
-        // limit matching its essential type (MISRA C 2012 Rule 10.4).
-        if (systemData.i_count_matrix >= INT32_MAX - 2) {
-          systemData.i_count_matrix = 0;
-        }
+        stepCounter(&systemData.counters_mtx.task_ffreq_c, 1);
+
       }
       esp_task_wdt_reset();
       // ------------------------------------------------
@@ -767,19 +728,19 @@ static void taskSwitches(void *pvParameters) {
       // ------------------------------------------------
       setOutputValues();
       esp_task_wdt_reset();
-      writeOutputPortControllerSetPins(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER);
+      int32_t count_write = writeOutputPortControllerSetPins(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER);
       esp_task_wdt_reset();
+
+      // --------------------------------------------
+      // Task frequency counter
+      // --------------------------------------------
+      stepCounter(&systemData.counters_pco.task_ffreq_c, count_write);
     }
 
     // --------------------------------------------
-    // Task Iter Counters.
+    // Task frequency counter
     // --------------------------------------------
-    systemData.i_task_freq_hz_switches++;
-    // i_task_freq_hz_switches is int32_t, so the wrap check uses the signed 32-bit
-    // limit matching its essential type (MISRA C 2012 Rule 10.4).
-    if (systemData.i_task_freq_hz_switches >= INT32_MAX - 2) {
-      systemData.i_task_freq_hz_switches = 0;
-    }
+    stepCounter(&systemData.counters_mtx.task_freq_c, 1);
   }
 }
 void createTaskSwitches() {
@@ -885,28 +846,19 @@ static void taskUniverse(void *pvParameters) {
       );
       esp_task_wdt_reset();
 
-      // ------------------------------------------------
-      // Set counters and flags
-      // ------------------------------------------------
-      systemData.i_count_track_planets++;
+      // --------------------------------------------
+      // Task frequency counter
+      // --------------------------------------------
       systemData.interval_breach_track_planets_output = true;
-      // i_count_track_planets is int32_t, so the wrap check uses the signed
-      // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
-      if (systemData.i_count_track_planets >= INT32_MAX - 2) {
-        systemData.i_count_track_planets = 0;
-      }
+      stepCounter(&systemData.counters_uni.task_ffreq_c, 1);
+
       esp_task_wdt_reset();
     }
 
     // --------------------------------------------
-    // Task Iter Counters.
+    // Task frequency counter
     // --------------------------------------------
-    systemData.i_task_freq_hz_uni++;
-    // i_task_freq_hz_uni is int32_t, so the wrap check uses the signed 32-bit
-    // limit matching its essential type (MISRA C 2012 Rule 10.4).
-    if (systemData.i_task_freq_hz_uni >= INT32_MAX - 2) {
-      systemData.i_task_freq_hz_uni = 0;
-    }
+    stepCounter(&systemData.counters_uni.task_freq_c, 1);
   }
 }
 void createTaskUniverse() {
@@ -944,26 +896,16 @@ static void taskDisplayUpdate(void *pvParameters) {
         update_display();
         bsp_display_unlock();
       }
-      // ------------------------------------------------
-      // Set counters and flags
-      // ------------------------------------------------
-      systemData.i_count_display++;
-      // i_count_display is int32_t, so the wrap check uses the signed
-      // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
-      if (systemData.i_count_display >= INT32_MAX - 2) {
-        systemData.i_count_display = 0;
-      }
+      // --------------------------------------------
+      // Task frequency counter
+      // --------------------------------------------
+      stepCounter(&systemData.counters_dsp.task_ffreq_c, 1);
     }
 
     // --------------------------------------------
-    // Task Iter Counters.
+    // Task frequency counter
     // --------------------------------------------
-    systemData.i_task_freq_hz_dsp++;
-    // i_task_freq_hz_dsp is int32_t, so the wrap check uses the signed 32-bit
-    // limit matching its essential type (MISRA C 2012 Rule 10.4).
-    if (systemData.i_task_freq_hz_dsp >= INT32_MAX - 2) {
-      systemData.i_task_freq_hz_dsp = 0;
-    }
+    stepCounter(&systemData.counters_dsp.task_freq_c, 1);
   }
 }
 

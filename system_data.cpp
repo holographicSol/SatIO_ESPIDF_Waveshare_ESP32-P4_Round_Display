@@ -78,49 +78,23 @@ struct systemStruct systemData = {
   // Uptime and loop counters.
   .uptime_seconds = 0,
 
-  .i_count_read_gps = 0,
-  .i_task_freq_hz_gps = 0,
-
-  .i_count_read_ins = 0,
-  .i_count_read_gyro_0 = 0,
-  .i_task_freq_hz_gyro = 0,
-  .i_count_read_mplex_0 = 0,
-  .i_task_freq_hz_mlx = 0,
-  .i_count_matrix = 0,
-  .i_task_freq_hz_switches = 0,
-  .i_count_portcontroller_input = 0,
-  .i_count_port_controller_output = 0,
-  .i_count_track_planets = 0,
-  .i_task_freq_hz_uni = 0,
-  .i_count_read_serial_commands = 0,
-  .i_count_logging = 0,
-  .i_count_display = 0,
-  .i_task_freq_hz_dsp = 0,
-  
-  .total_system_time = 0,
-  .i_count_system_time = 0,
+  .counters_st = {0},
+  .counters_gps = {0},
+  .counters_gyr0 = {0},
+  .counters_ins = {0},
+  .counters_mplex0 = {0},
+  .counters_pci = {0},
+  .counters_uni = {0},
+  .counters_mtx = {0},
+  .counters_pco = {0},
+  .counters_track_planets = {0},
+  .counters_dsp = {0},
+  .counters_stg = {0},
+  .counters_infocmd = {0},
+  .counters_log = {0},
 
   .loops_a_second = 0,
   .total_loops_a_second = 0,
-
-  // Per-second totals.
-  .total_gps = 0,
-  .total_task_freq_hz_gps = 0,
-  
-  .total_ins = 0,
-  .total_gyro_0 = 0,
-  .total_task_freq_hz_gyro = 0,
-  .total_mplex_0 = 0,
-  .total_task_freq_hz_mlx = 0,
-  .total_matrix = 0,
-  .total_task_freq_hz_switches = 0,
-  .total_universe = 0,
-  .total_task_freq_hz_uni = 0,
-  .total_task_freq_hz_dsp = 0,
-  .total_infocmd = 0,
-  .total_portcontroller_output = 0,
-  .total_portcontroller_input = 0,
-  .total_display = 0,
 };
 
 void restore_system_defaults(void) {
