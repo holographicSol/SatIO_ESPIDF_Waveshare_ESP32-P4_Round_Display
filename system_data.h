@@ -38,7 +38,7 @@
  * 
  * @note - For efficiency: task_freq range should match task_ffreq range, for example if a max
  *       task_ffreq is known, (like say for a sensor that output at 200Hz), then task_freq may
- *       have no reason to exceed 200Hz.
+ *       have no reason to exceed 200Hz, therefore task_freq may need to be reduced/increased.
  *       - For perfromance: comparing these frequencies is also useful, to help ascertain
  *       which task_ffreq are meeting their intended task_freq max, and weather or not task_freq
  *       has or does not have the headroom to fascilitate, in which case tweaks can be made to the
