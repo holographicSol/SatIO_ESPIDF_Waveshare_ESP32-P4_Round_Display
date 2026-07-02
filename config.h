@@ -17,7 +17,20 @@ extern long system_sync_retry_max;
 
 extern bool ISR_Bool_MultiDisplayController_0;
 
-#define EARTH_MEAN_RADIUS 6371000.0 // Mean Earth radius (meters)
+/**
+ * @brief SATIO_DISPLAY_OPTION_HEADLESS - SatIO Headless option.
+ * @def If defined then the project will be comiled to run headless.
+ * @note This option configures taks core asignment for pure, headless performance.
+ * @warning Ensure only one display option is defined. 
+ */
+// #define SATIO_DISPLAY_OPTION_HEADLESS
+/**
+ * @brief SATIO_DISPLAY_OPTION_LVGL - LVGL display option.
+ * @def If defined then the project will be comiled for use with LVGL.
+ * @note If not defined then the project will be comiled for use without LVGL.
+ * @warning Ensure only one display option is defined. 
+ */
+#define SATIO_DISPLAY_OPTION_LVGL
 
 // ----------------------------------------------------------------------------------------
 // Power Config.
@@ -407,12 +420,6 @@ extern struct PwrConfig pwrConfigCurrent;
 #define INDEX_ADMPLEX_0_CH_14 14
 #define INDEX_ADMPLEX_0_CH_15 15
 // ----------------------------------------------------------------------------------------
-// Volcanos.
-// ----------------------------------------------------------------------------------------
-#define MAX_VOLCANOS 435
-#define MAX_LOCATIONS 57
-#define MAX_TYPES 19
-// ----------------------------------------------------------------------------------------
 // Meteors.
 // ----------------------------------------------------------------------------------------
 #define MAX_METEOR_SHOWERS                8
@@ -461,6 +468,7 @@ extern struct PwrConfig pwrConfigCurrent;
 #define SATIO_MODE_GPS  0
 #define SATIO_MODE_USER 1
 
+#define EARTH_MEAN_RADIUS 6371000.0 // Mean Earth radius (meters)
 // ----------------------------------------------------------------------------------------
 // SIDEREAL HELPER.
 // ----------------------------------------------------------------------------------------

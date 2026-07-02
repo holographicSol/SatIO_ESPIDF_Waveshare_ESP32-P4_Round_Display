@@ -48,6 +48,7 @@ TaskHandle_t TaskStorage;
 TaskHandle_t TaskUniverse;
 TaskHandle_t TaskDisplayUpdate;
 
+#ifdef SATIO_DISPLAY_OPTION_HEADLESS
 // PRIORITY (same priority so that task Hz (from delay ms) can be tuned without triggering wdt for a starved task)
 #define TASK_GPS_PRIORITY                   5
 #define TASK_GYRO_PRIORITY                  4
@@ -56,29 +57,54 @@ TaskHandle_t TaskDisplayUpdate;
 #define TASK_SERIALINFOCMD_PRIORITY         4
 #define TASK_UNIVERSE_PRIORITY              4
 #define TASK_STORAGE_PRIORITY               4
-
 // CORE ASSIGNMENT
+#define TASK_GPS_CORE                       0
+#define TASK_GYRO_CORE                      0
+#define TASK_MULTIPLEXERS_CORE              0
+#define TASK_SWITCHES_CORE                  0
+#define TASK_SERIALINFOCMD_CORE             0
+#define TASK_UNIVERSE_CORE                  0
+#define TASK_STORAGE_CORE                   0
+// STACK SIZES
+#define TASK_GPS_STACK_SIZE                 5120
+#define TASK_GYRO_STACK_SIZE                4608
+#define TASK_MULTIPLEXERS_STACK_SIZE        4096
+#define TASK_SWITCHES_STACK_SIZE            5120
+#define TASK_SERIALINFOCMD_STACK_SIZE       16384
+#define TASK_UNIVERSE_STACK_SIZE            20480
+#define TASK_STORAGE_STACK_SIZE             6144
+#endif
+
+#ifdef SATIO_DISPLAY_OPTION_LVGL
+// PRIORITY (same priority so that task Hz (from delay ms) can be tuned without triggering wdt for a starved task)
+#define TASK_GPS_PRIORITY                   5
+#define TASK_GYRO_PRIORITY                  4
+#define TASK_MULTIPLEXERS_PRIORITY          4
+#define TASK_SWITCHES_PRIORITY              4
+#define TASK_SERIALINFOCMD_PRIORITY         4
+#define TASK_UNIVERSE_PRIORITY              4
+#define TASK_STORAGE_PRIORITY               4
+#define TASK_DISPLAY_PRIORITY               5
+// CORE ASSIGNMENT
+#define TASK_GPS_CORE                       1
 #define TASK_SERIALINFOCMD_CORE             1
 #define TASK_GYRO_CORE                      1
 #define TASK_MULTIPLEXERS_CORE              1
 #define TASK_SWITCHES_CORE                  1
 #define TASK_UNIVERSE_CORE                  1
 #define TASK_STORAGE_CORE                   1
-#define TASK_GPS_CORE                       1
-
+#define TASK_DISPLAY_CORE                   0
 // STACK SIZES
-#define TASK_STORAGE_STACK_SIZE             6144
-#define TASK_SERIALINFOCMD_STACK_SIZE       16384
 #define TASK_GPS_STACK_SIZE                 5120
 #define TASK_GYRO_STACK_SIZE                4608
 #define TASK_MULTIPLEXERS_STACK_SIZE        4096
 #define TASK_SWITCHES_STACK_SIZE            5120
+#define TASK_SERIALINFOCMD_STACK_SIZE       16384
 #define TASK_UNIVERSE_STACK_SIZE            20480
+#define TASK_STORAGE_STACK_SIZE             6144
+#define TASK_DISPLAY_STACK_SIZE             32768
+#endif
 
-/* Display task configuration */
-#define TASK_DISPLAY_PRIORITY    5
-#define TASK_DISPLAY_CORE        0
-#define TASK_DISPLAY_STACK_SIZE  32768
 
 /** ----------------------------------------------------------------------------
  * 
@@ -816,6 +842,7 @@ void createTaskUniverse() {
     TASK_UNIVERSE_CORE);      /* Core where the task should run */
 }
 
+#ifdef SATIO_DISPLAY_OPTION_LVGL
 /** ----------------------------------------------------------------------------
  * Display Update Task.
  *
@@ -872,3 +899,4 @@ void createTaskDisplayUpdate() {
     &TaskDisplayUpdate,         /* Task handle. */
     TASK_DISPLAY_CORE);         /* Core where the task should run */
 }
+#endif

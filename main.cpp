@@ -27,14 +27,6 @@
     Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
-/**
- * @brief SATIO_DISPLAY_OPTION_LVGL - LVGL display option.
- * @def If defined then the project will be comiled for use with LVGL.
- * @note If not defined then the project will be comiled for use without LVGL.
- * @warning Unless the intention is to compile headless, then ensure a display option is defined. 
- */
-#define SATIO_DISPLAY_OPTION_LVGL
-
 #include "bsp/esp32_p4_wifi6_touch_lcd_xc.h"
 #include "bsp/esp-bsp.h"
 #include "esp_log.h"
