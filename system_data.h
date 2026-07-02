@@ -33,8 +33,16 @@
  * @param task_freq_c Increments every task iteration.
  * @param task_freq_t Total task_freq_c increments a period (example: seconds).
  * 
- * @param task_ffreq_c Increments every task function iteration.
+ * @param task_ffreq_c Increments every task function iteration (ideally gated by success/fail).
  * @param task_ffreq_t Total task_ffreq_c increments a period (example: seconds).
+ * 
+ * @note - For efficiency: task_freq range should match task_ffreq range, for example if a max
+ *       task_ffreq is known, (like say for a sensor that output at 200Hz), then task_freq may
+ *       have no reason to exceed 200Hz.
+ *       - For perfromance: comparing these frequencies is also useful, to help ascertain
+ *       which task_ffreq are meeting their intended task_freq max, and weather or not task_freq
+ *       has or does not have the headroom to fascilitate, in which case tweaks can be made to the
+ *       task and or task function(s)/method(s), to ensure task_ffreq is meeting expectations.
  */
 typedef struct SystemConuters {
   int32_t task_freq_c;  // Increments every task iteration.
