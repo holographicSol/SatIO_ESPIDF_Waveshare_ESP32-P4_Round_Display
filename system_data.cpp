@@ -96,6 +96,9 @@ struct systemStruct systemData = {
   .i_count_logging = 0,
   .i_count_display = 0,
   .i_task_freq_hz_dsp = 0,
+  
+  .total_system_time = 0,
+  .i_count_system_time = 0,
 
   .loops_a_second = 0,
   .total_loops_a_second = 0,

@@ -1735,6 +1735,7 @@ void outputStat(void) {
 
           "t_loop=%ld "
 
+          "t_system_timing_resolution=%ld "
           "t_gps=(%ldHz/%ldHz) "
           "t_ins=%ld "
           "t_gyr=(%ldHz/%ldHz) "
@@ -1786,6 +1787,8 @@ void outputStat(void) {
           satioData.padded_rtc_sync_time_HHMMSS,
 
           systemData.total_loops_a_second,
+
+          systemData.total_system_time,
 
           systemData.total_gps,
           systemData.total_task_freq_hz_gps,

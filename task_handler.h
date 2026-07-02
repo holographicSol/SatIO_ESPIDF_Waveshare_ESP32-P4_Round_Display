@@ -31,6 +31,7 @@ extern TaskHandle_t TaskGPS;
 extern TaskHandle_t TaskUniverse;
 extern TaskHandle_t TaskSwitches;
 extern TaskHandle_t TaskDisplayUpdate;
+extern TaskHandle_t TaskSystemTime;
 
 void createTaskSerialInfoCMD();
 void createTaskStorage();
@@ -40,6 +41,7 @@ void createTaskGPS();
 void createTaskUniverse();
 void createTaskSwitches();
 void createTaskDisplayUpdate();
+void createTaskSystemTime();
 
 /**
  * @brief Time syncronize tasks.

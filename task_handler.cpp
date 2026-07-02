@@ -47,18 +47,21 @@ TaskHandle_t TaskSwitches;
 TaskHandle_t TaskStorage;
 TaskHandle_t TaskUniverse;
 TaskHandle_t TaskDisplayUpdate;
+TaskHandle_t TaskSystemTime;
 
 #ifdef SATIO_DISPLAY_OPTION_HEADLESS
 // PRIORITY (same priority so that task Hz (from delay ms) can be tuned without triggering wdt for a starved task)
+#define TASK_SYSTEM_TIME_PRIORITY           5
 #define TASK_GPS_PRIORITY                   5
-#define TASK_GYRO_PRIORITY                  4
-#define TASK_MULTIPLEXERS_PRIORITY          4
-#define TASK_SWITCHES_PRIORITY              4
-#define TASK_SERIALINFOCMD_PRIORITY         4
-#define TASK_UNIVERSE_PRIORITY              4
-#define TASK_STORAGE_PRIORITY               4
+#define TASK_GYRO_PRIORITY                  5
+#define TASK_MULTIPLEXERS_PRIORITY          5
+#define TASK_SWITCHES_PRIORITY              5
+#define TASK_SERIALINFOCMD_PRIORITY         5
+#define TASK_UNIVERSE_PRIORITY              5
+#define TASK_STORAGE_PRIORITY               5
 // CORE ASSIGNMENT
-#define TASK_GPS_CORE                       0
+#define TASK_SYSTEM_TIME_CORE               1
+#define TASK_GPS_CORE                       1
 #define TASK_GYRO_CORE                      0
 #define TASK_MULTIPLEXERS_CORE              0
 #define TASK_SWITCHES_CORE                  0
@@ -66,6 +69,7 @@ TaskHandle_t TaskDisplayUpdate;
 #define TASK_UNIVERSE_CORE                  0
 #define TASK_STORAGE_CORE                   0
 // STACK SIZES
+#define TASK_SYSTEM_TIME_STACK_SIZE         5120
 #define TASK_GPS_STACK_SIZE                 5120
 #define TASK_GYRO_STACK_SIZE                4608
 #define TASK_MULTIPLEXERS_STACK_SIZE        4096
@@ -77,15 +81,17 @@ TaskHandle_t TaskDisplayUpdate;
 
 #ifdef SATIO_DISPLAY_OPTION_LVGL
 // PRIORITY (same priority so that task Hz (from delay ms) can be tuned without triggering wdt for a starved task)
+#define TASK_SYSTEM_TIME_PRIORITY           5
 #define TASK_GPS_PRIORITY                   5
-#define TASK_GYRO_PRIORITY                  4
-#define TASK_MULTIPLEXERS_PRIORITY          4
-#define TASK_SWITCHES_PRIORITY              4
-#define TASK_SERIALINFOCMD_PRIORITY         4
-#define TASK_UNIVERSE_PRIORITY              4
-#define TASK_STORAGE_PRIORITY               4
+#define TASK_GYRO_PRIORITY                  5
+#define TASK_MULTIPLEXERS_PRIORITY          5
+#define TASK_SWITCHES_PRIORITY              5
+#define TASK_SERIALINFOCMD_PRIORITY         5
+#define TASK_UNIVERSE_PRIORITY              5
+#define TASK_STORAGE_PRIORITY               5
 #define TASK_DISPLAY_PRIORITY               5
 // CORE ASSIGNMENT
+#define TASK_SYSTEM_TIME_CORE               1
 #define TASK_GPS_CORE                       1
 #define TASK_SERIALINFOCMD_CORE             1
 #define TASK_GYRO_CORE                      1
@@ -95,6 +101,7 @@ TaskHandle_t TaskDisplayUpdate;
 #define TASK_STORAGE_CORE                   1
 #define TASK_DISPLAY_CORE                   0
 // STACK SIZES
+#define TASK_SYSTEM_TIME_STACK_SIZE         5120
 #define TASK_GPS_STACK_SIZE                 5120
 #define TASK_GYRO_STACK_SIZE                4608
 #define TASK_MULTIPLEXERS_STACK_SIZE        4096
@@ -212,6 +219,9 @@ static void intervalBreach1Second(void) {
 
   systemData.total_loops_a_second = systemData.loops_a_second;
   systemData.loops_a_second = 0;
+
+  systemData.total_system_time = systemData.i_count_system_time;
+  systemData.i_count_system_time = 0;
 
   systemData.total_gps = systemData.i_count_read_gps;
   systemData.i_count_read_gps = 0;
@@ -345,6 +355,81 @@ bool taskFrequencyInfoCMD()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_INFOCMD);     
 bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_MULTIPLEXERS);return true; }
 bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_UNIVERSE);    return true; }
 bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_DISPLAY);     return true; }
+bool taskFrequencySystemTime()  { TASK_FREQ_WAIT(TASK_MAX_FREQ_MS_SYSTEM_TIME); return true; }
+/** ----------------------------------------------------------------------------
+ * System Time Task.
+ *
+ * @brief Creates global system time values that can be read throughout the system.
+ * @note This task should also fascilitate setting time manually. 
+ */
+
+static void taskSystemTime(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  for (;;) {
+
+    // Delay Task
+    // if (taskFrequencySystemTime() == true) {
+
+      // --------------------------------------------
+      // System Timing.
+      // --------------------------------------------
+      gettimeofday(&tv_now, NULL);
+      timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
+      satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+
+      // Track Planets interval breach.
+      if (satioData.local_unixtime_uS >= prev_tv_uS_track_planets + POWER_CONFIG_TRACK_PLANTETS_TIMING_uS ||
+          satioData.local_unixtime_uS <= prev_tv_uS_track_planets - POWER_CONFIG_TRACK_PLANTETS_TIMING_uS) {
+        prev_tv_uS_track_planets = satioData.local_unixtime_uS;
+        systemData.interval_breach_track_planets = true;
+      }
+
+      // StarNavigation interval breach.
+      if (satioData.local_unixtime_uS >= prev_tv_uS_star_navigation + POWER_CONFIG_STAR_NAVIGATION_TIMING_uS ||
+          satioData.local_unixtime_uS <= prev_tv_uS_star_navigation - POWER_CONFIG_STAR_NAVIGATION_TIMING_uS) {
+        prev_tv_uS_star_navigation = satioData.local_unixtime_uS;
+        systemData.interval_breach_star_navigation = true;
+      }
+
+      // 1-second interval breach.
+      if (tv_now.tv_sec != prev_tv_sec) {
+        prev_tv_sec = tv_now.tv_sec;
+        systemData.interval_breach_1_second_output = true;
+        intervalBreach1Second();
+      }
+      esp_task_wdt_reset();
+
+      // --------------------------------------------
+      // Set SatIO Data
+      // --------------------------------------------
+      setSatIOData(); // ensure sync once
+      esp_task_wdt_reset();
+
+      // --------------------------------------------
+      // Counters.
+      // --------------------------------------------
+      systemData.i_count_system_time++;
+      // i_count_read_gps is int32_t, so the wrap check uses the signed 32-bit
+      // limit matching its essential type (MISRA C 2012 Rule 10.4).
+      if (systemData.i_count_system_time >= INT32_MAX - 2) {
+        systemData.i_count_system_time = 0;
+      }
+
+      delayMicroseconds(1);
+    // }
+  }
+}
+void createTaskSystemTime() {
+  xTaskCreatePinnedToCore(
+    taskSystemTime,             /* Function to implement the task */
+    "TaskSystemTime",           /* Name of the task */
+    TASK_SYSTEM_TIME_STACK_SIZE, /* Stack size in words */
+    nullptr,             /* Task input parameter */
+    TASK_SYSTEM_TIME_PRIORITY,   /* Priority of the task */
+    &TaskSystemTime,            /* Task handle. */
+    TASK_SYSTEM_TIME_CORE);      /* Core where the task should run */
+}
 
 /** ----------------------------------------------------------------------------
  * GPS Task.
@@ -363,12 +448,11 @@ static void taskGPS(void *pvParameters) {
 
       if (readGPS() == true)
       {
+        esp_task_wdt_reset();
         if (validateGPSData() == true)
         {
-          // --------------------------------------------
-          // Set SatIO Data
-          // --------------------------------------------
-          setSatIOData();
+          satioData.set_rtc_datetime_flag=true;
+          esp_task_wdt_reset();
 
           // --------------------------------------------
           // Set INS data
@@ -379,7 +463,7 @@ static void taskGPS(void *pvParameters) {
                   satioData.system_ground_heading,
                   satioData.system_speed,
                   atof(gnggaData.gps_precision_factor),
-                  gyroData.gyro_0_ang_z);;
+                  gyroData.gyro_0_ang_z);
 
           // --------------------------------------------
           // Read Counters.
@@ -393,13 +477,6 @@ static void taskGPS(void *pvParameters) {
           }
         }
       }
-      // /**
-      //  * System Timing.
-      //  * Settle for a system time resolution of TASK_FREQ_HZ_GPS, if no task is
-      //  * performance capable of providing every ms, or better uS, anyway.
-      //  * Otherwise we could move this call elsewhere.
-      //  */
-      // system_timing();
     }
     // --------------------------------------------
     // Task Iter Counters.
@@ -542,25 +619,26 @@ static void taskGyro(void *pvParameters) {
         if (systemData.i_count_read_gyro_0 >= INT32_MAX - 2) {
           systemData.i_count_read_gyro_0 = 0;
         }
-        // // ----------------------------------------------
-        // // Estimate INS data. (Can be used without GPS)
-        // // INS data is fed back into INS.
-        // // ----------------------------------------------
-        // if (ins_estimate_position(gyroData.gyro_0_ang_y,
-        //                             gyroData.gyro_0_ang_z,
-        //                             satioData.system_ground_heading,
-        //                             satioData.system_speed,
-        //                             satioData.local_unixtime_uS)) {
-        //   systemData.i_count_read_ins++;
-        //   systemData.interval_breach_ins_output = true;
-        //   // i_count_read_ins is int32_t, so the wrap check uses the signed
-        //   // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
-        //   if (systemData.i_count_read_ins >= INT32_MAX - 2) {
-        //     systemData.i_count_read_ins = 0;
-        //   }
-          // esp_task_wdt_reset();
+        // ----------------------------------------------
+        // Estimate INS data. (Can be used without GPS).
+        // INS data produced from user/gps=system is fed back into INS in loop.
+        // ----------------------------------------------
+        if (ins_estimate_position(gyroData.gyro_0_ang_y,
+                                    gyroData.gyro_0_ang_z,
+                                    satioData.system_ground_heading,
+                                    satioData.system_speed,
+                                    satioData.local_unixtime_uS)) {
+          systemData.i_count_read_ins++;
+          systemData.interval_breach_ins_output = true;
+          // i_count_read_ins is int32_t, so the wrap check uses the signed
+          // 32-bit limit matching its essential type (MISRA C 2012 Rule 10.4).
+          if (systemData.i_count_read_ins >= INT32_MAX - 2) {
+            systemData.i_count_read_ins = 0;
+          }
+          esp_task_wdt_reset();
         }
       }
+    }
     // --------------------------------------------
     // Task Iter Counters.
     // --------------------------------------------

@@ -120,6 +120,9 @@ struct systemStruct {
   int32_t i_count_display;
   int32_t i_task_freq_hz_dsp;
 
+  int32_t total_system_time;
+  int32_t i_count_system_time;
+
   int32_t loops_a_second;       // Main loop iterations since the last 1-second sample.
   int32_t total_loops_a_second; // Main loop iterations per second, at the last sample.
 

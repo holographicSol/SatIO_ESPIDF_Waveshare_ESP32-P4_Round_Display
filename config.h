@@ -28,7 +28,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
  * @brief SATIO_DISPLAY_OPTION_LVGL - LVGL display option.
  * @def If defined then the project will be comiled for use with LVGL.
  * @note If not defined then the project will be comiled for use without LVGL.
- * @warning Ensure only one display option is defined. 
+ * @warning Ensure only one display option is defined.
  */
 #define SATIO_DISPLAY_OPTION_LVGL
 
@@ -59,6 +59,8 @@ typedef struct PwrConfig {
     uint32_t TASK_MAX_FREQ_MS_STORAGE;
 
     uint32_t TASK_MAX_FREQ_MS_DISPLAY;
+
+    uint32_t TASK_MAX_FREQ_MS_SYSTEM_TIME;
 };
 
 // ----------------------------------------------------------------------------------------
@@ -82,6 +84,8 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_MS_LOW_DISPLAY                     50  // (20 Hz)
 
+#define TASK_MAX_FREQ_MS_LOW_SYSTEM_TIME                 5   // 
+
 // ----------------------------------------------------------------------------------------
 // Balanced (Recommended)
 // ----------------------------------------------------------------------------------------
@@ -103,6 +107,8 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_MS_BALANCED_DISPLAY                25   // (40 Hz)
 
+#define TASK_MAX_FREQ_MS_BALANCED_SYSTEM_TIME            1   // 
+
 // ----------------------------------------------------------------------------------------
 // Perfromance: Ultimate Perfromance
 // ----------------------------------------------------------------------------------------
@@ -123,6 +129,8 @@ typedef struct PwrConfig {
 #define TASK_MAX_FREQ_MS_HIGH__STORAGE                   500 // (2 Hz)
 
 #define TASK_MAX_FREQ_MS_HIGH__DISPLAY                   25  // (40 Hz) 
+
+#define TASK_MAX_FREQ_MS_HIGH_SYSTEM_TIME                5   // 
 
 
 extern struct PwrConfig pwrConfigLowPower;

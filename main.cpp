@@ -357,6 +357,10 @@ extern "C" void app_main(void)
     // Create Tasks.
     // --------------------------------------------------------------
 
+    // // System Time
+    ESP_LOGI(APP_MAIN_TAG, "creating system time task");
+    createTaskSystemTime();
+
     // Storage
     sdcardFlagData.load_system = true; // Lets the SD-card flag handler perform its first mount on the next pass.
     ESP_LOGI(APP_MAIN_TAG, "creating storage task");
@@ -421,9 +425,9 @@ extern "C" void app_main(void)
     // app_main() may now return: every task created above keeps running
     // under the FreeRTOS scheduler, and the ESP-IDF idle task takes over
     // this thread.
-    for (;;)
-    {
-        system_timing();
+    // for (;;)
+    // {
+        // system_timing();
         // setSatIOData();
-    }
+    // }
 }

@@ -802,6 +802,7 @@ int64_t gps_sync_timestamp = 0;
 const int64_t GPS_SYNC_TIMEOUT_uS = 1000000; // Reset gps_sync after 1 second
 
 void syncRTC(void) {
+
   // Set GPS sync flag false
   if (satioData.gps_sync == true) {
     if ((satioData.local_unixtime_uS >= gps_sync_timestamp + GPS_SYNC_TIMEOUT_uS) ||
@@ -809,6 +810,7 @@ void syncRTC(void) {
       satioData.gps_sync = false;
     }
   }
+
   /**
    * Manually set RTC datetime.
    * 
@@ -830,7 +832,8 @@ void syncRTC(void) {
   /**
    * Automatically set RTC datetime with GPS data.
    */
-  else if (satioData.set_time_automatically==true) {
+  else if (satioData.set_time_automatically==true && satioData.set_rtc_datetime_flag==true) {
+    satioData.set_rtc_datetime_flag=false;
     // ----------------------------------------------------------------------------------------------
     /*                                 SYNC RTC TIME & DATE FROM GPS                               */
     // ----------------------------------------------------------------------------------------------
@@ -883,15 +886,9 @@ void syncRTC(void) {
 // setSatIOData.
 // ----------------------------------------------------------------------------------------
 void setSatIOData(void) {
-    // Serial.println("[setSatIOData]");
-
-    // Time
     syncRTC();
-
-    // Position
     setSatioCoordinates();
     setSatIOAltitude();
-
     setSatIOSpeed();
     setSatIOGroundHeading();
     setGroundHeadingName(atof(gnrmcData.ground_heading));
