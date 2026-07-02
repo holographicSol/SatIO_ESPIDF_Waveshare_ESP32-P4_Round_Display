@@ -180,7 +180,7 @@ Many matrix functions accept operators, where required:
 
 ```
 [0] User Value.   A value that is set by the user.
-[1] System Value. A value that is set by the system. Allows primary comparators to be compared to other primary comparators.
+[1] System Value. A value that is set by the system. Allows values set by the system to be compared to other values set by the system.
 ```
 
 ---
