@@ -25,7 +25,7 @@ SatIO is a Value Hive & Programmable Switch, for building devices with and or on
 2. **Compound** — Allow stacking compounds of (1), so that multiple things can be calculated to result in a single true/false.
 3. **I/O** — Each available/required output pin can have it's own (2) Compound logic.
 
-**Why:** This means that many 'special functions' do not need to be created in order to calculate something, because the answer may already exist, in some combination of available logic in the Matrix.
+**Why:** This means that many 'special functions' do not need to be created in order to calculate something, because the answer may already exist, via some combination of available logic in the Matrix.
 
 **Further more:** Inference via Bayesian Reasoning? Moon tracking for example can be used to track the moon, it can also be used for one example; to track the tide, if the system is aware of moon/planetary positioning and datetime then marine life values may also be inferred relative to the inferred tide values and known datetime. There are lot of values in the Hive, that can be used with different reasoning, in many different combinations, with a network effect in mind for inference, if required. Or more simply — *'SatIO is one hell of a switch'*.
 
