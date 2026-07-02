@@ -6,7 +6,9 @@ SatIO - Written by Benjamin Jack Cullen. Project may be renamed to Stargate.
 
 SatIO is a value Hive & programmable calculator, for building devices with and or on top of SatIO.
 
-[ Philosophy & Architecture ]
+-----
+
+Philosophy & Architecture
 
     The Hive: SatIO creates and stores a lot of different values from sensors and extrapolated from
               combinations of sensor data, that can be used by SatIO to switch I/O via programmable compounds
@@ -51,7 +53,7 @@ SatIO is a value Hive & programmable calculator, for building devices with and o
 
 -----
 
-[ MATRIX SWITCH LOGIC ]
+Matrix Switch Logic
 
 Logic may require or not require values X,Y,Z.
 
@@ -182,7 +184,7 @@ Primary Comparators:
 
 -----
 
-[ Available Switch Function Operators ]
+Available Switch Function Operators
 
 Many matrix functions accept operators, where required:
 
@@ -194,7 +196,7 @@ Many matrix functions accept operators, where required:
 
 -----
 
-[ Function XYZ Modes ]
+Function XYZ Modes
 
     [0] User Value. A value that is set by the user.
     [1] System Value. A value that is set by the system. Allows primary comparators to be compared to other primary comparators.
