@@ -511,11 +511,21 @@ boolean SiderealObjects::selectOtherObjectsTable(int n) {
   return true;
 }
 
+// boolean SiderealObjects::identifyObject(void) {
+//   long int radiff = -1L;
+//   long int decdiff = -1L;
+//   long unsigned int totaldiff = 0x7fffffffL;
+//   long unsigned int comparediff;
+//   uint16_t targetRA = RAdec * F2to16 / 24.; //convert to integers for faster compares
+//   int16_t targetDec = DeclinationDec * F2to15minus1 / 90.;
+//   int index;
+//   uint16_t tempobjnum;
+//   alttablenum = 0;
 boolean SiderealObjects::identifyObject(void) {
-  long int radiff = -1L;
-  long int decdiff = -1L;
-  long unsigned int totaldiff = 0x7fffffffL;
-  long unsigned int comparediff;
+  int64_t radiff = -1;
+  int64_t decdiff = -1;
+  uint64_t totaldiff = UINT64_MAX;
+  uint64_t comparediff;
   uint16_t targetRA = RAdec * F2to16 / 24.; //convert to integers for faster compares
   int16_t targetDec = DeclinationDec * F2to15minus1 / 90.;
   int index;

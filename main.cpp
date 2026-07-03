@@ -140,7 +140,11 @@ static void uart0_event_task(void *pvParameters) {
 
             switch (event.type) {
                 case UART_DATA: {
-                    len = uart_read_bytes(UART0_NUM, dtmp, event.size, 1000 / portTICK_PERIOD_MS);
+                    // event.size reflects bytes queued in the driver's RX ring buffer,
+                    // which is larger than dtmp; clamp so a burst never overflows dtmp
+                    // (excess bytes stay in the ring buffer for the next event).
+                    size_t to_read = (event.size < sizeof(dtmp)) ? event.size : sizeof(dtmp);
+                    len = uart_read_bytes(UART0_NUM, dtmp, to_read, 1000 / portTICK_PERIOD_MS);
 
                     // Accumulate data into line buffer, process on newline
                     for (int i = 0; i < len; i++) {

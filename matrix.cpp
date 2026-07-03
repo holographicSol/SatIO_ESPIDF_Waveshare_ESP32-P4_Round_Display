@@ -383,10 +383,14 @@ bool matrixSwitch(void) {
         case INDEX_MATRIX_SWITCH_FUNCTION_SWITCH_LINK:
           if (Fi == 0) {
             int32_t linked_switch = (int32_t)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X];
+            bool linked_intention = false;
+            if ((linked_switch >= 0) && (linked_switch < MAX_MATRIX_SWITCHES)) {
+              linked_intention = matrixData.switch_intention[0][linked_switch];
+            }
             if (matrixData.matrix_switch_inverted_logic[0][Mi][Fi] == false) {
-              tmp_matrix[Fi] = check_equal_true(matrixData.switch_intention[0][linked_switch], true);
+              tmp_matrix[Fi] = check_equal_true(linked_intention, true);
             } else {
-              tmp_matrix[Fi] = check_equal_false(matrixData.switch_intention[0][linked_switch], true);
+              tmp_matrix[Fi] = check_equal_false(linked_intention, true);
             }
           }
           break;
@@ -614,7 +618,12 @@ bool matrixSwitch(void) {
         case INDEX_MATRIX_SWITCH_FUNCTION_METEOR: {
           int32_t meteor_shower = (int32_t)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_X];
           int32_t meteor_result = (int32_t)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Y];
-          tmp_x = (double)meteor_shower_warning_system[meteor_shower][meteor_result];
+          bool meteor_state = false;
+          if ((meteor_shower >= 0) && (meteor_shower < MAX_METEOR_SHOWERS) &&
+              (meteor_result >= 0) && (meteor_result < MAX_METEOR_RESULT_ELEMENTS)) {
+            meteor_state = meteor_shower_warning_system[meteor_shower][meteor_result];
+          }
+          tmp_x = (double)meteor_state;
           handle_digit = true;
           break;
         }
@@ -878,14 +887,20 @@ bool matrixSwitch(void) {
         // Analog/Digital Multiplexer 0
         case INDEX_MATRIX_SWITCH_FUNCTION_AD_MULTIPLEXER_0: {
           int32_t mux_channel = (int32_t)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z];
-          tmp_x = ad_mux_0.data[mux_channel];
+          tmp_x = 0.0;
+          if ((mux_channel >= 0) && (mux_channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS)) {
+            tmp_x = ad_mux_0.data[mux_channel];
+          }
           handle_digit = true;
           break;
         }
 
         case INDEX_MATRIX_SWITCH_FUNCTION_MAP_SLOT: {
           int32_t map_slot = (int32_t)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z];
-          tmp_x = (double)mappingData.mapped_value[0][map_slot];
+          tmp_x = 0.0;
+          if ((map_slot >= 0) && (map_slot < MAX_MAP_SLOTS)) {
+            tmp_x = (double)mappingData.mapped_value[0][map_slot];
+          }
           handle_digit = true;
           break;
         }
@@ -897,7 +912,10 @@ bool matrixSwitch(void) {
 
         case INDEX_MATRIX_SWITCH_FUNCTION_PORT_CON_0: {
           int32_t input_pin = (int32_t)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z];
-          tmp_x = matrixData.input_value[0][input_pin];
+          tmp_x = 0.0;
+          if ((input_pin >= 0) && (input_pin < MAX_MATRIX_SWITCHES)) {
+            tmp_x = matrixData.input_value[0][input_pin];
+          }
           handle_digit = true;
           break;
         }
@@ -1294,7 +1312,12 @@ void get_matrix_function_comparitor(int32_t index_matrix_value_comparitor, char 
     case INDEX_MATRIX_SWITCH_FUNCTION_METEOR: {
       int32_t meteor_shower = (int32_t)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_X];
       int32_t meteor_result = (int32_t)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Y];
-      snprintf(out, out_size, "%.10g", (double)meteor_shower_warning_system[meteor_shower][meteor_result]);
+      bool meteor_state = false;
+      if ((meteor_shower >= 0) && (meteor_shower < MAX_METEOR_SHOWERS) &&
+          (meteor_result >= 0) && (meteor_result < MAX_METEOR_RESULT_ELEMENTS)) {
+        meteor_state = meteor_shower_warning_system[meteor_shower][meteor_result];
+      }
+      snprintf(out, out_size, "%.10g", (double)meteor_state);
       break;
     }
 
@@ -1509,13 +1532,21 @@ void get_matrix_function_comparitor(int32_t index_matrix_value_comparitor, char 
 
     case INDEX_MATRIX_SWITCH_FUNCTION_AD_MULTIPLEXER_0: {
       int32_t mux_channel = (int32_t)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Z];
-      snprintf(out, out_size, "%.10g", ad_mux_0.data[mux_channel]);
+      double mux_value = 0.0;
+      if ((mux_channel >= 0) && (mux_channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS)) {
+        mux_value = ad_mux_0.data[mux_channel];
+      }
+      snprintf(out, out_size, "%.10g", mux_value);
       break;
     }
 
     case INDEX_MATRIX_SWITCH_FUNCTION_MAP_SLOT: {
       int32_t map_slot = (int32_t)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Z];
-      snprintf(out, out_size, "%.10g", (double)mappingData.mapped_value[0][map_slot]);
+      double map_value = 0.0;
+      if ((map_slot >= 0) && (map_slot < MAX_MAP_SLOTS)) {
+        map_value = (double)mappingData.mapped_value[0][map_slot];
+      }
+      snprintf(out, out_size, "%.10g", map_value);
       break;
     }
 
@@ -1530,7 +1561,11 @@ void get_matrix_function_comparitor(int32_t index_matrix_value_comparitor, char 
 
     case INDEX_MATRIX_SWITCH_FUNCTION_PORT_CON_0: {
       int32_t input_pin = (int32_t)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Z];
-      snprintf(out, out_size, "%.10g", matrixData.input_value[0][input_pin]);
+      double input_pin_value = 0.0;
+      if ((input_pin >= 0) && (input_pin < MAX_MATRIX_SWITCHES)) {
+        input_pin_value = matrixData.input_value[0][input_pin];
+      }
+      snprintf(out, out_size, "%.10g", input_pin_value);
       break;
     }
 
