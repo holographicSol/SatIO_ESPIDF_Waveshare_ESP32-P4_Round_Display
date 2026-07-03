@@ -52,7 +52,12 @@ TaskHandle_t TaskSatioSerialTx;
 
 #ifdef SATIO_DISPLAY_OPTION_HEADLESS
 // PRIORITY (same priority so that task Hz (from delay ms) can be tuned without triggering wdt for a starved task)
-#define TASK_SYSTEM_TIME_PRIORITY           5
+// TASK_SYSTEM_TIME_PRIORITY is deliberately one above its peers: it is idle
+// except for a brief once-a-second burst, so a higher priority costs nothing,
+// but it lets that burst preempt same-core tasks immediately on its notify
+// instead of waiting for the next FreeRTOS tick's round-robin time slice
+// (CONFIG_FREERTOS_HZ=1000, i.e. up to 1 ms of avoidable lateness otherwise).
+#define TASK_SYSTEM_TIME_PRIORITY           6
 #define TASK_GPS_PRIORITY                   5
 #define TASK_GYRO_PRIORITY                  5
 #define TASK_MULTIPLEXERS_PRIORITY          5
@@ -196,14 +201,6 @@ void syncTasks() {
   global_task_sync = true;
 }
 
-/** ----------------------------------------------------------------------------------------
- * @brief Interval breach (System counters).
- *
- *        Referenced only inside this translation unit, so internal linkage keeps them out
- *        of the global symbol table (MISRA C 2012 Rule 8.7).
- */
-static int64_t prev_tv_sec;
-
 /** ----------------------------------------------------------------------------
  * Interval Breach: 1 Second.
  *
@@ -313,7 +310,7 @@ static void taskFreqWaitTimerCallback(void *arg) {
   xTaskNotifyGive(static_cast<TaskHandle_t>(arg));
 }
 
-// Drift-free, notification-responsive task frequency gate.
+// Notification-responsive sub millisecond task frequency gate without increasing RTOS HZ over 1000.
 // Tracks an absolute xLastWakeTimeUs like vTaskDelayUntil, but the actual
 // wait is a blocking xTaskNotifyWait(portMAX_DELAY): a per-call-site esp_timer
 // is armed for the remaining microseconds and notifies this task when it
@@ -322,7 +319,10 @@ static void taskFreqWaitTimerCallback(void *arg) {
 // wakes the same wait immediately; the loop then re-reads the current
 // setting and re-arms the timer for whatever time remains. When the deadline
 // is reached, xLastWakeTimeUs advances by exactly one period.
-#define TASK_FREQ_WAIT(delay_field)                                             \
+// period_us is a full expression (re-evaluated every pass), not just a
+// PwrConfig field name, so callers can pass either pwrConfigCurrent.X for a
+// fixed Hz or a locally computed variable for a dynamic period.
+#define TASK_FREQ_WAIT(period_us)                                               \
   do {                                                                          \
     static int64_t xLastWakeTimeUs = 0;                                         \
     static esp_timer_handle_t xWakeTimer = nullptr;                             \
@@ -340,7 +340,7 @@ static void taskFreqWaitTimerCallback(void *arg) {
     int64_t xPeriodUs;                                                          \
     int64_t xRemainingUs;                                                       \
     do {                                                                        \
-      xPeriodUs    = static_cast<int64_t>(pwrConfigCurrent.delay_field);        \
+      xPeriodUs    = static_cast<int64_t>(period_us);                          \
       xRemainingUs = (xLastWakeTimeUs + xPeriodUs) - esp_timer_get_time();      \
       if (xRemainingUs > 0) {                                                   \
         (void)esp_timer_stop(xWakeTimer);                                       \
@@ -357,68 +357,63 @@ static void taskFreqWaitTimerCallback(void *arg) {
  *  modify internal/external/peripheral clocks.
  *  sleep modes.
  */
-bool taskFrequencyGPS()         { TASK_FREQ_WAIT(TASK_MAX_FREQ_GPS);         return true; }
-bool taskFrequencyGyro()        { TASK_FREQ_WAIT(TASK_MAX_FREQ_GYRO);        return true; }
-bool taskFrequencySwitches()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_SWITCHES);    return true; }
-bool taskFrequencyStorage()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_STORAGE);     return true; }
-bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(TASK_MAX_FREQ_MULTIPLEXERS);return true; }
-bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(TASK_MAX_FREQ_UNIVERSE);    return true; }
-bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(TASK_MAX_FREQ_DISPLAY);     return true; }
-bool taskFrequencySystemTime()  { TASK_FREQ_WAIT(TASK_MAX_FREQ_SYSTEM_TIME); return true; }
-bool taskFrequencySatioSerialTx() { TASK_FREQ_WAIT(TASK_MAX_FREQ_SATIO_SERIAL_TX); return true; }
+bool taskFrequencyGPS()         { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_GPS);         return true; }
+bool taskFrequencyGyro()        { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_GYRO);        return true; }
+bool taskFrequencySwitches()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_SWITCHES);    return true; }
+bool taskFrequencyStorage()     { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_STORAGE);     return true; }
+bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_MULTIPLEXERS);return true; }
+bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_UNIVERSE);    return true; }
+bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_DISPLAY);     return true; }
+bool taskFrequencySatioSerialTx() { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_SATIO_SERIAL_TX); return true; }
 
 /** ----------------------------------------------------------------------------
  * System Time Task.
  *
- * @brief Creates global system time values that can be read throughout the system.
- *        Higher frequency this task -> greater resolution of system time.
- * @note This task should also fascilitate setting time manually. 
+ * @brief 1Hz tv_now update & 1 second interval timing, syncronized with real time.
+ *        Wait time is variable, like the other tasks and is automatically adjusted.
+ *        tv_now is currently used for internal timings syncronized with real time UTC+-0.
+ *        If a greater resolution of tv_now is required then increase the frequency of this task.
  */
 bool gps_sync_ready = false;
 int64_t gps_read_done_uS = 0;
+time_t  prev_tv_sec;
 
 static void taskSystemTime(void *pvParameters) {
   (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
   esp_task_wdt_add(nullptr);
+  int64_t xNextTickUs = 1000000LL;
+
   for (;;) {
+    TASK_FREQ_WAIT(xNextTickUs);
 
-    if (taskFrequencySystemTime() == true) {
-      xSemaphoreTake(dataMutex, portMAX_DELAY);
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
 
-      // --------------------------------------------
-      // Update System Unixtime
-      // --------------------------------------------
-      /**
-       * @brief Each call to getSystemTime() updates tv_now.
-       * @note tv_now is used for internal timings.
-       * @warning If never called then tv_now will never update.
-       */
-      xSemaphoreTake(systemTimeMutex, portMAX_DELAY);
-      getSystemTime();
-      xSemaphoreGive(systemTimeMutex);
+    // --------------------------------------------
+    // Update System Unixtime
+    // --------------------------------------------
+    /**
+     * @brief Refreshed here, on demand, immediately before intervalBreach1Second()
+     *        (via applyPendingDateTimeStore()) reads tv_now. The same sample is
+     *        used below to compute the next tick's wait against the second boundary.
+     */
+    xSemaphoreTake(systemTimeMutex, portMAX_DELAY);
+    getSystemTime();
+    xNextTickUs = 1000000LL - static_cast<int64_t>(tv_now.tv_usec);
+    xSemaphoreGive(systemTimeMutex);
+    if (xNextTickUs <= 0) { xNextTickUs = 1000000LL; }
 
-      // --------------------------------------------
-      // 1 Second interval
-      // --------------------------------------------
-      /**
-       * @brief Creates a 1Hz gate for timing related calls that
-       *        do not need to run at the same Hz as this task.
-       * @warning getSystemTime must be called to update tv_now.
-       */
-      if (tv_now.tv_sec != prev_tv_sec) {
-        prev_tv_sec = tv_now.tv_sec;
-        intervalBreach1Second();
-      }
-      esp_task_wdt_reset();
-
-      // --------------------------------------------
-      // Task frequency counter
-      // --------------------------------------------
-      stepFCounter(systemData.counters_st, 1);
-      xSemaphoreGive(dataMutex);
+    // gated for >1Hz task iteration
+    if (tv_now.tv_sec != prev_tv_sec) {
+      prev_tv_sec = tv_now.tv_sec;
+      intervalBreach1Second();
     }
+    esp_task_wdt_reset();
 
-    // delayMicroseconds(1);
+    // --------------------------------------------
+    // Task frequency counter
+    // --------------------------------------------
+    stepFCounter(systemData.counters_st, 1);
+    xSemaphoreGive(dataMutex);
   }
 }
 void createTaskSystemTime() {

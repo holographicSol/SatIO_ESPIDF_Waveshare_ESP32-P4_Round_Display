@@ -110,8 +110,6 @@ typedef struct PwrConfig {
 
     uint32_t TASK_MAX_FREQ_DISPLAY;
 
-    uint32_t TASK_MAX_FREQ_SYSTEM_TIME;
-
     uint32_t TASK_MAX_FREQ_SATIO_SERIAL_TX;
 } PwrConfig;
 
@@ -134,8 +132,6 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_LOW_DISPLAY                     50000   // (20 Hz)
 
-#define TASK_MAX_FREQ_LOW_SYSTEM_TIME                 50000   // (20 Hz)
-
 #define TASK_MAX_FREQ_LOW_SATIO_SERIAL_TX             100000  // (10 Hz)
 
 // ----------------------------------------------------------------------------------------
@@ -157,8 +153,6 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_BALANCED_DISPLAY                50000   // (20 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_SYSTEM_TIME            500    // (2000 Hz)
-
 #define TASK_MAX_FREQ_BALANCED_SATIO_SERIAL_TX        5000    // (200 Hz)
 
 // ----------------------------------------------------------------------------------------
@@ -179,8 +173,6 @@ typedef struct PwrConfig {
 #define TASK_MAX_FREQ_HIGH_STORAGE                    1000000 // (1 Hz)
 
 #define TASK_MAX_FREQ_HIGH_DISPLAY                    50000   // (20 Hz)
-
-#define TASK_MAX_FREQ_HIGH_SYSTEM_TIME                500    // (2000 Hz)
 
 #define TASK_MAX_FREQ_HIGH_SATIO_SERIAL_TX            1000    // (1000 Hz)
 

@@ -18,8 +18,6 @@ idf_component_register(
         Mono_Bold_14.c
         Mono_Bold_16.c
         multiplexers.cpp
-        RTC_DS3231.cpp
-        RTCLib.cpp
         satio.cpp
         satio_file.cpp
         satio_lvgl.cpp
