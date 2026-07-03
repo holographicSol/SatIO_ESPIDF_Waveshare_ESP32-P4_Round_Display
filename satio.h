@@ -10,7 +10,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <math.h>
-#include <RTClib.h>  // https://github.com/adafruit/RTClib
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "config.h"
@@ -22,7 +21,6 @@
 extern struct tm *timeinfo;
 extern struct timeval tv_now;
 extern bool sync_rtc_bool;
-extern RTC_DS3231 rtc;
 
 /**
  * Guards every read/write of timeinfo and tv_now: they are written from both

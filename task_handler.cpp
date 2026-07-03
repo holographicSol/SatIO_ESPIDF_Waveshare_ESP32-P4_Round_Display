@@ -250,7 +250,6 @@ void stepFFCounter(SystemConuters &counters, int32_t steps) {
 
 
 static void intervalBreach1Second(void) {
-  // printf("system uS unixtime: %lld\n", satioData.systemTime.unixtime_uS);
   
   /**
    * @brief Uncomment to update every second.
@@ -258,6 +257,7 @@ static void intervalBreach1Second(void) {
    *       for system, local and LMST.
    */
   applyPendingDateTimeStore();
+  // printf("system uS unixtime: %lld\n", satioData.systemTime.unixtime_uS);
 
   totalCounters(systemData.counters_st);
   totalCounters(systemData.counters_gps);
@@ -389,9 +389,9 @@ static void taskSystemTime(void *pvParameters) {
       // Update System Unixtime
       // --------------------------------------------
       /**
-       * @brief Each call to getSystemTime() updates tv_now & unixtime_uS.
-       * @note System unixtime_uS & tv_now are used for internal timings.
-       * @warning If never called then tv_now will go stale.
+       * @brief Each call to getSystemTime() updates tv_now.
+       * @note tv_now is used for internal timings.
+       * @warning If never called then tv_now will never update.
        */
       xSemaphoreTake(systemTimeMutex, portMAX_DELAY);
       getSystemTime();

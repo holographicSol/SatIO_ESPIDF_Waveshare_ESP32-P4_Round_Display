@@ -612,13 +612,9 @@ void getSystemTime(void) {
   // This function must be called in order to update timeinfo.
   // More calls means higher resolution of system time, and can therefore decrease performance.
   // All time is derived from tv_now/timeinfo.
+  // This function may be running +-2000Hz, so keep it cheap.
   // --------------------------------------------------------
   gettimeofday(&tv_now, NULL);
-  timeinfo = localtime(&tv_now.tv_sec);
-  // --------------------------------------------------------
-  // Keep this function quick by only storing unixtime uS.
-  // --------------------------------------------------------
-  satioData.systemTime.unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
 }
 
 // ----------------------------------------------------------------------------------------
@@ -629,6 +625,8 @@ void getSystemTime(void) {
  * System time should always be UTC+-0.
  */
 void storeSystemTime(void) {
+  timeinfo = localtime(&tv_now.tv_sec);
+  satioData.systemTime.unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
   storeTimeFromTm(satioData.systemTime, *timeinfo, satioData.systemTime.unixtime_uS);
 }
 
@@ -801,7 +799,7 @@ void initSystemTime(void) {
   Serial.println("[SYNC] initializing system time");
   // No external RTC chip to seed from: read whatever the system clock
   // currently holds and populate the derived domains. syncTime() takes over
-  // once a GPS fix is available.
+  // once a GPS fix is available. (Get a battery for the system clock)
   getSystemTime();
   storeSystemTime();
   storeLocalTime();
