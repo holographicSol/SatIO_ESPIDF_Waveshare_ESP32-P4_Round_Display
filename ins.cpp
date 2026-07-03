@@ -219,14 +219,26 @@ bool ins_estimate_position(double pitch,
       insData.INS_FORCED_ON_FLAG==true) {
     double temp_lat;
     double temp_lon;
-    // -------------------------------------------------------------------------------
-    // Calculate time interval in seconds from microseconds dt.
-    // -------------------------------------------------------------------------------
-    double dt_interval = (double)(dt - insData.ins_dt_prev) / 1000000.0;
-    // -------------------------------------------------------------------------------
-    // Ensure positive time interval; fallback to 0.001s if invalid.
-    // -------------------------------------------------------------------------------
-    if (dt_interval <= 0.0) {dt_interval = 0.001;}
+    double dt_interval;
+    if (insData.ins_dt_prev == 0) {
+      // -------------------------------------------------------------------------------
+      // No prior estimate has run since (re)initialization, so there is no
+      // valid elapsed time to measure dt (a Unix-epoch microsecond timestamp)
+      // against yet. Skip integration this cycle rather than computing a
+      // bogus multi-year interval from epoch to dt.
+      // -------------------------------------------------------------------------------
+      dt_interval = 0.0;
+    }
+    else {
+      // -------------------------------------------------------------------------------
+      // Calculate time interval in seconds from microseconds dt.
+      // -------------------------------------------------------------------------------
+      dt_interval = (double)(dt - insData.ins_dt_prev) / 1000000.0;
+      // -------------------------------------------------------------------------------
+      // Ensure positive time interval; fallback to 0.001s if invalid.
+      // -------------------------------------------------------------------------------
+      if (dt_interval <= 0.0) {dt_interval = 0.001;}
+    }
     // -------------------------------------------------------------------------------
     // Normalize yaw to [0, 360°).
     // -------------------------------------------------------------------------------

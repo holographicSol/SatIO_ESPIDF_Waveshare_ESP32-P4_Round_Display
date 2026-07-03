@@ -16,6 +16,7 @@
 #include "hextodig.h"
 #include <rtc_wdt.h>
 #include <esp_task_wdt.h>
+#include <esp_timer.h>
 #include <string.h>  // strcmp, strncmp, strncpy, strlen, strtok, memset
 #include <ctype.h>   // isdigit
 #include <limits.h>  // ULONG_MAX
@@ -772,14 +773,22 @@ bool readGPS(void)
 {
     bool done = false;
 
+    /* WTGPS300P outputs every 100ms; a full set of three sentences should
+       arrive within a couple of cycles. If the module stops sending data
+       (wiring fault, reset, wrong baud, buffer desync) this loop must give
+       up rather than spin forever feeding the watchdog every iteration,
+       which would otherwise defeat the watchdog's ability to catch the
+       hang. */
+    const int64_t GPS_READ_TIMEOUT_uS = 1000000; // 1 second
+    const int64_t start_time_uS = esp_timer_get_time();
+
     serial1Data.gngga_bool = false;
     serial1Data.gnrmc_bool = false;
     serial1Data.gpatt_bool = false;
 
-    /* WTGPS300P outputs every 100ms; collect one of each sentence type
-       before returning. Rule 15.4: no break statements in this loop —
+    /* Rule 15.4: no break statements in this loop —
        `done` is the single point of control instead. */
-    while (done == false)
+    while ((done == false) && ((esp_timer_get_time() - start_time_uS) < GPS_READ_TIMEOUT_uS))
     {
         esp_task_wdt_reset();
 
@@ -880,7 +889,7 @@ static bool validateChecksumSerial1(const char *buffer)
     {
         char checksum_chars[2];
         int checksum_of_buffer;
-        uint8_t checksum_in_buffer;
+        int16_t checksum_in_buffer;
 
         /* The last 2 characters before the sentence's final byte are the
            transmitted checksum's hex digits. */

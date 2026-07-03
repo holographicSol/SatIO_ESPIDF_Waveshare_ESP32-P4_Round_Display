@@ -901,7 +901,15 @@ static void update_target_data_content(int target) {
             );
             lv_label_set_text(label, buf);
             break;
-        case ASTRO_TARGET_LUNA:
+        case ASTRO_TARGET_LUNA: {
+            // luna_p is NAN until the moon has been tracked at least once
+            // (see clearLuna()); (int)NAN is undefined behavior and would
+            // index outside the 8-entry luna_p_name table, so clamp it the
+            // same way astro_clock_update()'s phase-shadow code does.
+            int luna_phase_index = 0;
+            if (siderealPlanetData.luna_p == NAN) {luna_phase_index = 0;} // no cast if NAN
+            else {luna_phase_index = (int)siderealPlanetData.luna_p;}
+            if (luna_phase_index < 0 || luna_phase_index > 7) luna_phase_index = 0;
             snprintf(buf, sizeof(buf),
                 "Luna\n\n"
                 "Rise                      %.2f\n"
@@ -914,7 +922,7 @@ static void update_target_data_content(int target) {
                 "Altitude                  %.2f",
                 siderealPlanetData.luna_r,
                 siderealPlanetData.luna_s,
-                siderealPlanetData.luna_p_name[(int)siderealPlanetData.luna_p],
+                siderealPlanetData.luna_p_name[luna_phase_index],
                 siderealPlanetData.luna_lum,
                 siderealPlanetData.luna_ra,
                 siderealPlanetData.luna_dec,
@@ -923,6 +931,7 @@ static void update_target_data_content(int target) {
             );
             lv_label_set_text(label, buf);
             break;
+        }
         case ASTRO_TARGET_MARS:
             snprintf(buf, sizeof(buf),
                 "Mars\n\n"
@@ -1084,7 +1093,7 @@ static void update_target_data_content(int target) {
                         meteor_shower_peaks[i][0][1],
                         // month
                         satioData.abbrev_month_names[meteor_shower_peaks[i][1][0]-1],
-                        meteor_shower_peaks[i][0][2]);
+                        meteor_shower_peaks[i][1][2]);
             }
             snprintf(buf, sizeof(buf),
                 "Meteor Showers\n\n");

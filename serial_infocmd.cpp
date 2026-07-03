@@ -106,7 +106,7 @@ static bool validateChecksumSerial0(const char *buffer)
     {
         char checksum_chars[2];
         int checksum_of_buffer;
-        uint8_t checksum_in_buffer;
+        int16_t checksum_in_buffer;
 
         /* The last 2 characters before the sentence's final byte are the
            transmitted checksum's hex digits. */
@@ -854,10 +854,10 @@ void setMapConfig(int map_slot,
 void setMapSlot(int matrix_switch,
                 int map_slot) {
   // Serial.println("[setMapSlot] matrix_switch:" + String(matrix_switch) + "  map_slot:" + String(map_slot));
-  if (matrix_switch>=0 && matrix_switch<MAX_MAP_SLOTS &&
-      map_slot>=0 && map_slot<=1) {
+  if (matrix_switch>=0 && matrix_switch<MAX_MATRIX_SWITCHES &&
+      map_slot>=0 && map_slot<MAX_MAP_SLOTS) {
     matrixData.index_mapped_value[0][matrix_switch]=map_slot;
-    matrixData.matrix_switch_write_required[0][map_slot]=true;
+    matrixData.matrix_switch_write_required[0][matrix_switch]=true;
   }
 }
 
@@ -1841,7 +1841,7 @@ void outputStat(void) {
 
           "t_loop=%ld "
 
-          "t_system_timing_resolution=%ld "
+          "t_system_timing_resolution=%ldHz "
           "t_gps=(%ldHz/%ldHz) "
           "t_gyr0=(%ldHz/%ldHz) "
           "t_ins=(%ldHz/%ldHz) "

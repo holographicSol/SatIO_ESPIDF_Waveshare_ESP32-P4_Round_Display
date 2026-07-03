@@ -16416,6 +16416,10 @@ sdcard_image_t * create_image_from_sdcard(
 
     // Discard or return
     if (discard_after_display) {
+        // Delete the LVGL object first so nothing references dsc/bytes_in_psram
+        // before they are freed (LVGL keeps a live pointer into this data for
+        // every redraw, so freeing it first would be a use-after-free).
+        lv_obj_del(sdcard_image->lv_image_obj);
         heap_caps_free(sdcard_image->bytes_in_psram);
         heap_caps_free(sdcard_image);
         return NULL;  // Return NULL when discarding

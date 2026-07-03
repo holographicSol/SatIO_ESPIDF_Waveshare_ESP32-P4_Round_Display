@@ -537,17 +537,17 @@ bool matrixSwitch(void) {
           break;
 
         case INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_BAD_CD:
-          tmp_x = (double)(long)gnggaData.bad_element_count;
+          tmp_x = (double)gnggaData.total_bad_elements;
           handle_digit = true;
           break;
 
         case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_BAD_CD:
-          tmp_x = (double)(long)gnrmcData.bad_element_count;
+          tmp_x = (double)gnrmcData.total_bad_elements;
           handle_digit = true;
           break;
 
         case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_BAD_CD:
-          tmp_x = (double)(long)gnrmcData.bad_element_count;
+          tmp_x = (double)gpattData.total_bad_elements;
           handle_digit = true;
           break;
 
@@ -1232,15 +1232,15 @@ void get_matrix_function_comparitor(int32_t index_matrix_value_comparitor, char 
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_GNGGA_BAD_CD:
-      snprintf(out, out_size, "%.10g", (double)(long)gnggaData.bad_element_count);
+      snprintf(out, out_size, "%.10g", (double)gnggaData.total_bad_elements);
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_GNRMC_BAD_CD:
-      snprintf(out, out_size, "%.10g", (double)(long)gnrmcData.bad_element_count);
+      snprintf(out, out_size, "%.10g", (double)gnrmcData.total_bad_elements);
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_GPATT_BAD_CD:
-      snprintf(out, out_size, "%.10g", (double)(long)gnrmcData.bad_element_count);
+      snprintf(out, out_size, "%.10g", (double)gpattData.total_bad_elements);
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_G0_G_FORCE_X:

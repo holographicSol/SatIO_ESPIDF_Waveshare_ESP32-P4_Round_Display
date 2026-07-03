@@ -124,13 +124,13 @@ TaskHandle_t TaskSatioSerialTx;
  * 
  */
 static void notifyAllTasks(void) {
-  xTaskNotifyGive(TaskStorage);
-  xTaskNotifyGive(TaskMultiplexers);
-  xTaskNotifyGive(TaskGyro);
-  xTaskNotifyGive(TaskGPS);
-  xTaskNotifyGive(TaskUniverse);
-  xTaskNotifyGive(TaskSwitches);
-  xTaskNotifyGive(TaskSatioSerialTx);
+  if (TaskStorage != nullptr) { xTaskNotifyGive(TaskStorage); }
+  if (TaskMultiplexers != nullptr) { xTaskNotifyGive(TaskMultiplexers); }
+  if (TaskGyro != nullptr) { xTaskNotifyGive(TaskGyro); }
+  if (TaskGPS != nullptr) { xTaskNotifyGive(TaskGPS); }
+  if (TaskUniverse != nullptr) { xTaskNotifyGive(TaskUniverse); }
+  if (TaskSwitches != nullptr) { xTaskNotifyGive(TaskSwitches); }
+  if (TaskSatioSerialTx != nullptr) { xTaskNotifyGive(TaskSatioSerialTx); }
   if (TaskDisplayUpdate != nullptr) { xTaskNotifyGive(TaskDisplayUpdate); }
 }
 
@@ -367,32 +367,35 @@ static void taskSystemTime(void *pvParameters) {
   (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
   esp_task_wdt_add(nullptr);
   for (;;) {
-    // --------------------------------------------
-    // System Timing.
-    // --------------------------------------------
-    gettimeofday(&tv_now, NULL);
-    timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
-    satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
 
-    // 1-second interval breach.
-    if (tv_now.tv_sec != prev_tv_sec) {
-      prev_tv_sec = tv_now.tv_sec;
-      intervalBreach1Second();
+    if (taskFrequencySystemTime() == true) {
+      // --------------------------------------------
+      // System Timing.
+      // --------------------------------------------
+      gettimeofday(&tv_now, NULL);
+      timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
+      satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+
+      // 1-second interval breach.
+      if (tv_now.tv_sec != prev_tv_sec) {
+        prev_tv_sec = tv_now.tv_sec;
+        intervalBreach1Second();
+      }
+      esp_task_wdt_reset();
+
+      // --------------------------------------------
+      // Set SatIO Data
+      // --------------------------------------------
+      setSatIOData(); // ensure sync once
+      esp_task_wdt_reset();
+
+      // --------------------------------------------
+      // Task frequency counter
+      // --------------------------------------------
+      stepFCounter(systemData.counters_st, 1);
     }
-    esp_task_wdt_reset();
 
-    // --------------------------------------------
-    // Set SatIO Data
-    // --------------------------------------------
-    setSatIOData(); // ensure sync once
-    esp_task_wdt_reset();
-
-    // --------------------------------------------
-    // Task frequency counter
-    // --------------------------------------------
-    stepFCounter(systemData.counters_st, 1);
-
-    delayMicroseconds(1);
+    // delayMicroseconds(1);
   }
 }
 void createTaskSystemTime() {
@@ -433,7 +436,7 @@ static void taskGPS(void *pvParameters) {
           // Set INS data
           // --------------------------------------------
           set_ins(satioData.system_degrees_latitude,
-                  satioData.system_degrees_latitude,
+                  satioData.system_degrees_longitude,
                   satioData.system_altitude,
                   satioData.system_ground_heading,
                   satioData.system_speed,
@@ -797,6 +800,19 @@ static void taskUniverse(void *pvParameters) {
         siderealExtraData.local_zenith_ra_dec.dec_s
       );
       esp_task_wdt_reset();
+      // printf("---------------------------------------------\n");
+      // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+      // printf("Table:         %s\n", siderealObjectData.object_table_name);
+      // printf("Number:        %d\n", siderealObjectData.object_number);
+      // printf("Name:          %s\n", siderealObjectData.object_name);
+      // printf("Type:          %s\n", siderealObjectData.object_type);
+      // printf("Constellation: %s\n", siderealObjectData.object_con);
+      // printf("Distance:      %f\n", siderealObjectData.object_dist);
+      // printf("Azimuth:       %f\n", siderealObjectData.object_az);
+      // printf("Altitude:      %f\n", siderealObjectData.object_alt);
+      // printf("Rise:          %f\n", siderealObjectData.object_r);
+      // printf("Set:           %f\n", siderealObjectData.object_s);
+      // printf("---------------------------------------------\n");
 
       // ------------------------------------------------
       // StarNav Dynamic Test Zenith+-Gyro Offset
@@ -810,6 +826,19 @@ static void taskUniverse(void *pvParameters) {
         siderealExtraData.gyro_0_ra_dec.dec_s
       );
       esp_task_wdt_reset();
+      // printf("---------------------------------------------\n");
+      // printf("Table Index:   %d\n", siderealObjectData.object_table_i);
+      // printf("Table:         %s\n", siderealObjectData.object_table_name);
+      // printf("Number:        %d\n", siderealObjectData.object_number);
+      // printf("Name:          %s\n", siderealObjectData.object_name);
+      // printf("Type:          %s\n", siderealObjectData.object_type);
+      // printf("Constellation: %s\n", siderealObjectData.object_con);
+      // printf("Distance:      %f\n", siderealObjectData.object_dist);
+      // printf("Azimuth:       %f\n", siderealObjectData.object_az);
+      // printf("Altitude:      %f\n", siderealObjectData.object_alt);
+      // printf("Rise:          %f\n", siderealObjectData.object_r);
+      // printf("Set:           %f\n", siderealObjectData.object_s);
+      // printf("---------------------------------------------\n");
 
       // --------------------------------------------
       // Task frequency counter
