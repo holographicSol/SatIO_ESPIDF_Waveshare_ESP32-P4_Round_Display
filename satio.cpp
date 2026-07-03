@@ -472,6 +472,17 @@ static void setSatioCoordinates(void){
 // ----------------------------------------------------------------------------------------
 struct tm *timeinfo;
 struct timeval tv_now;
+SemaphoreHandle_t systemTimeMutex = nullptr;
+
+void initSystemTimeMutex(void) {
+  systemTimeMutex = xSemaphoreCreateMutex();
+}
+
+SemaphoreHandle_t dataMutex = nullptr;
+
+void initDataMutex(void) {
+  dataMutex = xSemaphoreCreateMutex();
+}
 
 void printAllTimes(void) {
   /*     UTC     */
@@ -741,12 +752,14 @@ void getSystemTime(void) {
   // Only use when required and alternatively, use other
   // stored times when a lower time resolution is required.
   // --------------------------------------------------------
+  xSemaphoreTake(systemTimeMutex, portMAX_DELAY);
   gettimeofday(&tv_now, NULL);
   timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
   // --------------------------------------------------------
   // Keep this function quick by only storing unixtime uS.
   // --------------------------------------------------------
   satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+  xSemaphoreGive(systemTimeMutex);
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------

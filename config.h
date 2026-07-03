@@ -97,25 +97,25 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 // Low Power
 // ----------------------------------------------------------------------------------------
-#define TASK_MAX_FREQ_LOW_GPS                         100000 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_GPS                         100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_LOW_MULTIPLEXERS                100000 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_MULTIPLEXERS                100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_LOW_GYRO                        100000 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_GYRO                        100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_LOW_UNIVERSE                    500000 // (2 Hz)
+#define TASK_MAX_FREQ_LOW_UNIVERSE                    1000000 // (1 Hz) todo: split into (1) track_tp (2) starnav 
 
-#define TASK_MAX_FREQ_LOW_SWITCHES                    100000 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_SWITCHES                    100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_LOW_PORTCONTROLLER_INPUT        100000 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_PORTCONTROLLER_INPUT        100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_LOW_STORAGE                     500000 // (2 Hz)
+#define TASK_MAX_FREQ_LOW_STORAGE                     1000000 // (1 Hz)
 
-#define TASK_MAX_FREQ_LOW_DISPLAY                     50000  // (20 Hz)
+#define TASK_MAX_FREQ_LOW_DISPLAY                     50000   // (20 Hz)
 
-#define TASK_MAX_FREQ_LOW_SYSTEM_TIME                 50000  // (20 Hz)
+#define TASK_MAX_FREQ_LOW_SYSTEM_TIME                 50000   // (20 Hz)
 
-#define TASK_MAX_FREQ_LOW_SATIO_SERIAL_TX             100000 // (10 Hz)
+#define TASK_MAX_FREQ_LOW_SATIO_SERIAL_TX             100000  // (10 Hz)
 
 // ----------------------------------------------------------------------------------------
 // Balanced (Recommended)
@@ -126,15 +126,15 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_BALANCED_GYRO                   5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_UNIVERSE               500000  // (2 Hz)
+#define TASK_MAX_FREQ_BALANCED_UNIVERSE               1000000 // (1 Hz) todo: split into (1) track_tp (2) starnav 
 
 #define TASK_MAX_FREQ_BALANCED_SWITCHES               5000    // (200 Hz)
 
 #define TASK_MAX_FREQ_BALANCED_PORTCONTROLLER_INPUT   25000   // (40 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_STORAGE                500000  // (2 Hz)
+#define TASK_MAX_FREQ_BALANCED_STORAGE                1000000 // (1 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_DISPLAY                25000   // (40 Hz)
+#define TASK_MAX_FREQ_BALANCED_DISPLAY                50000   // (20 Hz)
 
 #define TASK_MAX_FREQ_BALANCED_SYSTEM_TIME            1000    // (1000 Hz)
 
@@ -143,25 +143,25 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 // Perfromance: Ultimate Perfromance
 // ----------------------------------------------------------------------------------------
-#define TASK_MAX_FREQ_HIGH_GPS                        100000 // (10 Hz)
+#define TASK_MAX_FREQ_HIGH_GPS                        100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_HIGH_MULTIPLEXERS               5000   // (200 Hz)
+#define TASK_MAX_FREQ_HIGH_MULTIPLEXERS               5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_HIGH_GYRO                       5000   // (200 Hz)
+#define TASK_MAX_FREQ_HIGH_GYRO                       5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_HIGH_UNIVERSE                   500000 // (2 Hz)
+#define TASK_MAX_FREQ_HIGH_UNIVERSE                   1000000 // (1 Hz) todo: split into (1) track_tp (2) starnav 
 
-#define TASK_MAX_FREQ_HIGH_SWITCHES                   1000   // (1000 Hz)
+#define TASK_MAX_FREQ_HIGH_SWITCHES                   1000    // (1000 Hz)
 
-#define TASK_MAX_FREQ_HIGH_PORTCONTROLLER_INPUT       25000  // (40 Hz)
+#define TASK_MAX_FREQ_HIGH_PORTCONTROLLER_INPUT       25000   // (40 Hz)
 
-#define TASK_MAX_FREQ_HIGH_STORAGE                    500000 // (2 Hz)
+#define TASK_MAX_FREQ_HIGH_STORAGE                    1000000 // (1 Hz)
 
-#define TASK_MAX_FREQ_HIGH_DISPLAY                    25000  // (40 Hz)
+#define TASK_MAX_FREQ_HIGH_DISPLAY                    50000   // (20 Hz)
 
-#define TASK_MAX_FREQ_HIGH_SYSTEM_TIME                1      // (1000000 Hz)
+#define TASK_MAX_FREQ_HIGH_SYSTEM_TIME                1000    // (1000 Hz)
 
-#define TASK_MAX_FREQ_HIGH_SATIO_SERIAL_TX            1000   // (1000 Hz)
+#define TASK_MAX_FREQ_HIGH_SATIO_SERIAL_TX            1000    // (1000 Hz)
 
 extern PwrConfig pwrConfigLowPower;
 extern PwrConfig pwrConfigBalanced;

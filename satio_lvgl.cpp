@@ -2555,6 +2555,20 @@ keyboard_t create_keyboard(
 }
 
 /** -------------------------------------------------------------------------------------
+ * @brief Frees a grid column/row dsc array malloc'd by create_menu_grid() once the grid
+ * object it was attached to is deleted. Registered per-array via LV_EVENT_DELETE so the
+ * lifetime of the heap allocation matches the LVGL object's lifetime instead of leaking
+ * every time the grid is recreated (e.g. on screen re-entry).
+ *
+ * @param e Pointer to the LVGL event structure; user data is the array to free.
+ */
+static void free_grid_dsc_cb(lv_event_t * e)
+{
+    lv_coord_t * dsc = (lv_coord_t *)lv_event_get_user_data(e);
+    free(dsc);
+}
+
+/** -------------------------------------------------------------------------------------
  * @brief Create Menu Grid Layout.
  *
  * @param parent Specify parent object.
@@ -2690,6 +2704,12 @@ lv_obj_t * create_menu_grid(
     lv_obj_set_style_grid_column_dsc_array(grid_menu, grid_menu_x_col_dsc, LV_PART_MAIN);
     lv_obj_set_style_grid_row_dsc_array(grid_menu, grid_menu_x_row_dsc, LV_PART_MAIN);
     lv_obj_update_layout(grid_menu);
+
+    // The dsc arrays above are heap allocations LVGL only stores a pointer to; free them
+    // when grid_menu is deleted so re-creating the grid (e.g. on screen re-entry) doesn't
+    // leak them.
+    lv_obj_add_event_cb(grid_menu, free_grid_dsc_cb, LV_EVENT_DELETE, grid_menu_x_col_dsc);
+    lv_obj_add_event_cb(grid_menu, free_grid_dsc_cb, LV_EVENT_DELETE, grid_menu_x_row_dsc);
 
     // Add buttons to grid
     for(int i = 0; i < GRID_MENU_X_TOTAL_CELLS; i++) {

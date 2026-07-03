@@ -162,11 +162,21 @@ static void uart0_event_task(void *pvParameters) {
                                 strncpy(serial0Data.BUFFER_RX, uart0_line_buffer, sizeof(serial0Data.BUFFER_RX) - 1);
 
                                 ESP_LOGI(UART0_TAG, "Received data: %s", serial0Data.BUFFER_RX);
+                                // uart0_event_task is not core-pinned and CmdProcess()
+                                // writes satioData/systemData directly (e.g. matrix/time
+                                // config commands), so it shares dataMutex with every
+                                // other satioData/systemData producer.
+                                xSemaphoreTake(dataMutex, portMAX_DELAY);
                                 CmdProcess();
+                                xSemaphoreGive(dataMutex);
 
-                                // Reset line buffer
+                                // Reset line buffer and keep scanning dtmp: a single
+                                // UART_DATA event's bytes can contain more than one
+                                // newline-terminated command (e.g. "CMD1\r\nCMD2\r\n"),
+                                // and `break` here would exit the for loop, silently
+                                // discarding any commands after the first.
                                 uart0_line_pos = 0;
-                                break;
+                                continue;
                             }
                             // Skip empty lines (consecutive \r\n)
                         } else {
@@ -258,6 +268,9 @@ extern "C" void app_main(void)
         .trigger_panic = false,   // Log a warning instead of panicking on timeout.
     };
     ESP_ERROR_CHECK(esp_task_wdt_reconfigure(&wdt_config));
+
+    initSystemTimeMutex(); // must exist before any task can touch tv_now/timeinfo
+    initDataMutex();       // must exist before any task can touch satioData/systemData
 
     // --------------------------------------------------------------
     // LVGL Initialization
@@ -364,7 +377,7 @@ extern "C" void app_main(void)
     // Create Tasks.
     // --------------------------------------------------------------
 
-    // // System Time
+    // System Time
     ESP_LOGI(APP_MAIN_TAG, "creating system time task");
     createTaskSystemTime();
 

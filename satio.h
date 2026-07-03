@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <math.h>
 #include <RTClib.h>  // https://github.com/adafruit/RTClib
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "config.h"
 #include "./LMST.h"
 #include <SiderealPlanets.h>
@@ -21,6 +23,30 @@ extern struct tm *timeinfo;
 extern struct timeval tv_now;
 extern bool sync_rtc_bool;
 extern RTC_DS3231 rtc;
+
+/**
+ * Guards every read/write of timeinfo and tv_now: they are written from both
+ * taskSystemTime() (core-pinned FreeRTOS task) and getSystemTime() (called
+ * from syncTasks() on the app task while taskSystemTime is already running),
+ * and localtime() returns a pointer into a shared, non-reentrant static
+ * buffer, so unsynchronized concurrent access can produce a torn timestamp.
+ * Created once by initSystemTimeMutex() before any task touches this state.
+ */
+extern SemaphoreHandle_t systemTimeMutex;
+void initSystemTimeMutex(void);
+
+/**
+ * Guards every read/write of satioData and systemData. With the LVGL display
+ * option, every producer task (GPS, gyro, multiplexers, switches, universe,
+ * storage, system time, satio serial tx) is pinned to core 1 alongside the
+ * display task, which reads both structs from core 0 with no synchronization
+ * otherwise -- and even producer tasks sharing core 1 can preempt each other
+ * mid-write. Coarse-grained: each task takes this once per work cycle around
+ * its whole per-cycle satioData/systemData access, rather than per field.
+ * Created once by initDataMutex() before any task touches this state.
+ */
+extern SemaphoreHandle_t dataMutex;
+void initDataMutex(void);
 
 // ----------------------------------------------------------------------------------------
 // SATIO Struct.

@@ -369,12 +369,15 @@ static void taskSystemTime(void *pvParameters) {
   for (;;) {
 
     if (taskFrequencySystemTime() == true) {
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
       // --------------------------------------------
       // System Timing.
       // --------------------------------------------
+      xSemaphoreTake(systemTimeMutex, portMAX_DELAY);
       gettimeofday(&tv_now, NULL);
       timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
       satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+      xSemaphoreGive(systemTimeMutex);
 
       // 1-second interval breach.
       if (tv_now.tv_sec != prev_tv_sec) {
@@ -393,6 +396,7 @@ static void taskSystemTime(void *pvParameters) {
       // Task frequency counter
       // --------------------------------------------
       stepFCounter(systemData.counters_st, 1);
+      xSemaphoreGive(dataMutex);
     }
 
     // delayMicroseconds(1);
@@ -429,6 +433,7 @@ static void taskGPS(void *pvParameters) {
         esp_task_wdt_reset();
         if (validateGPSData() == true)
         {
+          xSemaphoreTake(dataMutex, portMAX_DELAY);
           satioData.set_rtc_datetime_flag=true;
           esp_task_wdt_reset();
 
@@ -442,8 +447,8 @@ static void taskGPS(void *pvParameters) {
                   satioData.system_speed,
                   atof(gnggaData.gps_precision_factor),
                   gyroData.gyro_0_ang_z);
-          
-                  
+
+
           // --------------------------------------------
           // Task frequency counter
           // --------------------------------------------
@@ -452,13 +457,16 @@ static void taskGPS(void *pvParameters) {
           outputSerialGPS();
           #endif
           stepFFCounter(systemData.counters_gps, 1);
+          xSemaphoreGive(dataMutex);
         }
       }
     }
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_gps, 1);
+    xSemaphoreGive(dataMutex);
   }
 }
 void createTaskGPS() {
@@ -500,10 +508,12 @@ static void taskStorage(void *pvParameters) {
       // ------------------------------------------------
       // Check Flags
       // ------------------------------------------------
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
       if (systemData.logging_enabled) {
         Serial.printf("[log] setting write flag true\n");
         sdcardFlagData.write_log = true;
       }
+      xSemaphoreGive(dataMutex);
       sdcardFlagHandler();
       esp_task_wdt_reset();
 
@@ -516,7 +526,9 @@ static void taskStorage(void *pvParameters) {
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_stg, 1);
+    xSemaphoreGive(dataMutex);
     }
   }
 }
@@ -551,7 +563,8 @@ static void taskGyro(void *pvParameters) {
 
       if (readGyro() == true) {
         esp_task_wdt_reset();
-        
+        xSemaphoreTake(dataMutex, portMAX_DELAY);
+
         // --------------------------------------------
         // Task frequency counter
         // --------------------------------------------
@@ -577,12 +590,15 @@ static void taskGyro(void *pvParameters) {
 
         esp_task_wdt_reset();
         }
+        xSemaphoreGive(dataMutex);
       }
     }
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_gyr0, 1);
+    xSemaphoreGive(dataMutex);
   }
 }
 void createTaskGyro() {
@@ -622,15 +638,17 @@ static void taskMultiplexers(void *pvParameters) {
         // vTaskDelay(1); // CONFIG_FREERTOS_HZ=1000 makes delay 1ms. uncomment to delay
       }
       esp_task_wdt_reset();
-      
+
       // --------------------------------------------
       // Task frequency counter
       // --------------------------------------------
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
       systemData.counters_mplex0.flag_c = true;
       #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
       outputSerialADMplex0();
       #endif
       stepFFCounter(systemData.counters_mplex0, 1);
+      xSemaphoreGive(dataMutex);
 
       esp_task_wdt_reset();
     }
@@ -638,7 +656,9 @@ static void taskMultiplexers(void *pvParameters) {
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_mplex0, 1);
+    xSemaphoreGive(dataMutex);
   }
 }
 void createTaskMultiplexers() {
@@ -672,6 +692,7 @@ static void taskSwitches(void *pvParameters) {
 
     // Delay Task
     if (taskFrequencySwitches() == true) {
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
       esp_task_wdt_reset();
       // ------------------------------------------------
       // Calculate.
@@ -707,12 +728,15 @@ static void taskSwitches(void *pvParameters) {
       // Task frequency counter
       // --------------------------------------------
       stepFFCounter(systemData.counters_pco, count_write);
+      xSemaphoreGive(dataMutex);
     }
 
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_mtx, 1);
+    xSemaphoreGive(dataMutex);
   }
 }
 void createTaskSwitches() {
@@ -746,6 +770,7 @@ static void taskUniverse(void *pvParameters) {
 
     // Delay Task
     if (taskFrequencyUniverse() == true) {
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
       esp_task_wdt_reset();
 
       // ------------------------------------------------
@@ -850,12 +875,15 @@ static void taskUniverse(void *pvParameters) {
       stepFFCounter(systemData.counters_uni, 1);
 
       esp_task_wdt_reset();
+      xSemaphoreGive(dataMutex);
     }
 
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_uni, 1);
+    xSemaphoreGive(dataMutex);
   }
 }
 void createTaskUniverse() {
@@ -888,6 +916,7 @@ static void taskSatioSerialTx(void *pvParameters) {
 
     // Delay Task
     if (taskFrequencySatioSerialTx() == true) {
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
       esp_task_wdt_reset();
 
       // --------------------------------------------
@@ -905,12 +934,15 @@ static void taskSatioSerialTx(void *pvParameters) {
       // Task frequency counter
       // --------------------------------------------
       stepFFCounter(systemData.counters_satio_serial_tx, 1);
+      xSemaphoreGive(dataMutex);
     }
 
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_satio_serial_tx, 1);
+    xSemaphoreGive(dataMutex);
   }
 }
 void createTaskSatioSerialTx() {
@@ -946,19 +978,25 @@ static void taskDisplayUpdate(void *pvParameters) {
     if (taskFrequencyDisplay() == true) {
       locked = bsp_display_lock(portMAX_DELAY);
       if (locked) {
+        xSemaphoreTake(dataMutex, portMAX_DELAY);
         update_display();
+        xSemaphoreGive(dataMutex);
         bsp_display_unlock();
       }
       // --------------------------------------------
       // Task frequency counter
       // --------------------------------------------
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
       stepFFCounter(systemData.counters_dsp, 1);
+      xSemaphoreGive(dataMutex);
     }
 
     // --------------------------------------------
     // Task frequency counter
     // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_dsp, 1);
+    xSemaphoreGive(dataMutex);
   }
 }
 
