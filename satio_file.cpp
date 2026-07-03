@@ -336,7 +336,7 @@ static bool createNewLogFilename(void) {
 
   // Use local_unixtime_uS for filename
   char fname[128];
-  int written = snprintf(fname, sizeof(satioFileData.log_filepath), "%s%lld.csv", satioFileData.log_dir, (long long)satioData.local_unixtime_uS);
+  int written = snprintf(fname, sizeof(satioFileData.log_filepath), "%s%lld.csv", satioFileData.log_dir, (long long)satioData.systemTime.unixtime_uS);
   if (written < 0 || (size_t)written >= sizeof(satioFileData.log_filepath)) {
       /* A truncated path is not a usable path: fail outright instead of
       letting a caller write to a corrupted filename. */
@@ -425,12 +425,14 @@ void writeLog(void) {
     // Log Line: Satio
     // --------------------------------
     line = "$SATIO,";
-    line=line+ String(satioData.padded_rtc_time_HHMMSS) + ",";
-    line=line+ String(satioData.padded_rtc_date_DDMMYYYY) + ",";
-    line=line+ String(satioData.padded_rtc_sync_time_HHMMSS) + ",";
-    line=line+ String(satioData.padded_rtc_sync_date_DDMMYYYY) + ",";
-    line=line+ String(satioData.padded_local_time_HHMMSS) + ",";
-    line=line+ String(satioData.padded_local_date_DDMMYYYY) + ",";
+    line=line+ String(satioData.systemTime.padded_time_HHMMSS) + ",";
+    line=line+ String(satioData.systemTime.padded_date_DDMMYYYY) + ",";
+    line=line+ String(satioData.systemTime.sync_padded_time_HHMMSS) + ",";
+    line=line+ String(satioData.systemTime.sync_padded_date_DDMMYYYY) + ",";
+
+    line=line+ String(satioData.localTime.padded_time_HHMMSS) + ",";
+    line=line+ String(satioData.localTime.padded_date_DDMMYYYY) + ",";
+
     line=line+ String(systemData.uptime_seconds) + ",";
     line=line+ String(satioData.degrees_latitude) + ",";
     line=line+ String(satioData.degrees_longitude) + ",";
@@ -1022,9 +1024,10 @@ bool saveSystemFile(const char *filepath) {
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_NEPTUNE, systemData.output_neptune_enabled);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_METEORS, systemData.output_meteors_enabled);
 
-    WRITE_LONG_TAG(SYSTEM_FILE_UTC_SECOND_OFFSET, satioData.utc_second_offset);
-    WRITE_INT_TAG(SYSTEM_FILE_UTC_AUTO_OFFSET_FLAG, satioData.utc_auto_offset_flag);
-    WRITE_INT_TAG(SYSTEM_FILE_SET_DATETIME_AUTOMATICALLY, satioData.set_time_automatically);
+    WRITE_LONG_TAG(SYSTEM_FILE_UTC_SECOND_OFFSET, satioData.localTime.second_offset);
+    WRITE_INT_TAG(SYSTEM_FILE_UTC_AUTO_OFFSET_FLAG, satioData.localTime.auto_offset_flag);
+    // local set_time_automatically (from systemTime)
+    WRITE_INT_TAG(SYSTEM_FILE_SET_DATETIME_AUTOMATICALLY, satioData.systemTime.set_time_automatically); // systemTime set_time_automatically (from gps)
 
     WRITE_DBL_TAG(SYSTEM_FILE_INS_REQ_GPS_PRECISION, insData.INS_REQ_GPS_PRECISION);
     WRITE_DBL_TAG(SYSTEM_FILE_INS_REQ_MIN_SPEED, insData.INS_REQ_MIN_SPEED);
@@ -1113,9 +1116,9 @@ bool loadSystemFile(const char *filepath) {
         READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_NEPTUNE, systemData.output_neptune_enabled);
         READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_METEORS, systemData.output_meteors_enabled);
 
-        READ_LONG_TAG(SYSTEM_FILE_UTC_SECOND_OFFSET, satioData.utc_second_offset);
-        READ_BOOL_TAG(SYSTEM_FILE_UTC_AUTO_OFFSET_FLAG, satioData.utc_auto_offset_flag);
-        READ_BOOL_TAG(SYSTEM_FILE_SET_DATETIME_AUTOMATICALLY, satioData.set_time_automatically);
+        READ_LONG_TAG(SYSTEM_FILE_UTC_SECOND_OFFSET, satioData.localTime.second_offset);
+        READ_BOOL_TAG(SYSTEM_FILE_UTC_AUTO_OFFSET_FLAG, satioData.localTime.auto_offset_flag);
+        READ_BOOL_TAG(SYSTEM_FILE_SET_DATETIME_AUTOMATICALLY, satioData.systemTime.set_time_automatically);
 
         READ_DBL_TAG(SYSTEM_FILE_INS_REQ_GPS_PRECISION, insData.INS_REQ_GPS_PRECISION);
         READ_DBL_TAG(SYSTEM_FILE_INS_REQ_MIN_SPEED, insData.INS_REQ_MIN_SPEED);

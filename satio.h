@@ -46,6 +46,95 @@ void initSystemTimeMutex(void);
  * Created once by initDataMutex() before any task touches this state.
  */
 extern SemaphoreHandle_t dataMutex;
+
+typedef struct SatIOTimeData {
+  tm time_struct;
+  int64_t second_offset;
+  bool auto_offset_flag;
+  bool set_time_automatically;
+  bool set_datetime_flag;
+  bool sync_immediately_flag;
+  bool sync;
+  // ------------------------------------------------------------------------------------
+  // Date Time
+  // ------------------------------------------------------------------------------------
+  uint64_t unixtime_uS;
+  uint8_t hour;
+  uint8_t minute;
+  uint8_t second;
+  uint16_t year;
+  uint8_t month;
+  uint8_t mday;
+  uint16_t yday;
+  uint8_t wday;
+  char wday_name[MAX_GLOBAL_ELEMENT_SIZE];
+  char month_name[MAX_GLOBAL_ELEMENT_SIZE];
+  // ------------------------------------------------------------------------------------
+  // Time Formatted
+  // ------------------------------------------------------------------------------------
+  char formatted_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE];
+  char formatted_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE];
+  char formatted_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE];
+  // ------------------------------------------------------------------------------------
+  // Time Padded
+  // ------------------------------------------------------------------------------------
+  char padded_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE];
+  char padded_hour_HH[MAX_GLOBAL_ELEMENT_SIZE];
+  char padded_minute_MM[MAX_GLOBAL_ELEMENT_SIZE];
+  char padded_second_SS[MAX_GLOBAL_ELEMENT_SIZE];
+  // ------------------------------------------------------------------------------------
+  // Date Padded
+  // ------------------------------------------------------------------------------------
+  char padded_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE];
+  char padded_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE];
+  char padded_day_DD[MAX_GLOBAL_ELEMENT_SIZE];
+  char padded_month_MM[MAX_GLOBAL_ELEMENT_SIZE];
+  char padded_year_YY[MAX_GLOBAL_ELEMENT_SIZE];
+  char padded_year_YYYY[MAX_GLOBAL_ELEMENT_SIZE];
+  // ------------------------------------------------------------------------------------
+  // Photo Period Schedule
+  // ------------------------------------------------------------------------------------
+  PhotoPeriodSchedulele photo_period_schedule;
+
+  // ------------------------------------------------------------------------------------
+  // Sync Date Time
+  // ------------------------------------------------------------------------------------
+  uint64_t sync_unixtime_uS;
+  uint8_t sync_hour;
+  uint8_t sync_minute;
+  uint8_t sync_second;
+  uint16_t sync_year;
+  uint8_t sync_month;
+  uint8_t sync_mday;
+  uint16_t sync_yday;
+  uint8_t sync_wday;
+  char sync_wday_name[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_month_name[MAX_GLOBAL_ELEMENT_SIZE];
+  // ------------------------------------------------------------------------------------
+  // Sync Time Formatted
+  // ------------------------------------------------------------------------------------
+  char sync_formatted_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_formatted_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_formatted_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE];
+  // ------------------------------------------------------------------------------------
+  // Sync Time Padded
+  // ------------------------------------------------------------------------------------
+  char sync_padded_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_padded_hour_HH[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_padded_minute_MM[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_padded_second_SS[MAX_GLOBAL_ELEMENT_SIZE];
+  // ------------------------------------------------------------------------------------
+  // Sync Date Padded
+  // ------------------------------------------------------------------------------------
+  char sync_padded_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_padded_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_padded_day_DD[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_padded_month_MM[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_padded_year_YY[MAX_GLOBAL_ELEMENT_SIZE];
+  char sync_padded_year_YYYY[MAX_GLOBAL_ELEMENT_SIZE];
+
+} SatIOTimeData;
+
 void initDataMutex(void);
 
 // ----------------------------------------------------------------------------------------
@@ -133,114 +222,12 @@ struct SATIOStruct {
     char mileage[MAX_GLOBAL_ELEMENT_SIZE];        // Mileage (pending processing)
 
     // ------------------------------------------------------------------------------------
-    // LOCAL TIME ITEMS
+    // Date Time
     // ------------------------------------------------------------------------------------
-    uint64_t local_unixtime_uS;                         // Local Unix time in microseconds
-    uint8_t local_hour;                                 // Local hour
-    uint8_t local_minute;                               // Local minute
-    uint8_t local_second;                               // Local second
-    uint16_t local_year;                                // Local year
-    uint8_t local_month;                                // Local month
-    uint8_t local_mday;                                 // Local day of month
-    uint16_t local_yday;                                // Local day of year
-    uint8_t local_wday;                                 // Local day of week
-    char local_wday_name[MAX_GLOBAL_ELEMENT_SIZE];      // Local weekday name
-    char local_month_name[MAX_GLOBAL_ELEMENT_SIZE];     // Local month name
-    int64_t utc_second_offset;      // UTC offset in seconds
-    bool utc_auto_offset_flag;      // Auto offset flag
-    bool set_time_automatically;    // Auto time setting flag
-    // ------------------------------------------------------------------------------------
-    // LOCAL TIME FORMATTED (FOR USER)
-    // ------------------------------------------------------------------------------------
-    char formatted_local_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE];   // Formatted local time
-    char formatted_local_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted local date
-    char formatted_local_short_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted local date
-    // ------------------------------------------------------------------------------------
-    // LOCAL TIME PADDED (FOR CALC)
-    // ------------------------------------------------------------------------------------
-    char padded_local_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE]; // Padded local time (HHMMSS)
-    char padded_local_hour[MAX_GLOBAL_ELEMENT_SIZE];        // Padded local hour (HH)
-    char padded_local_minute[MAX_GLOBAL_ELEMENT_SIZE];      // Padded local hour (MM)
-    char padded_local_second[MAX_GLOBAL_ELEMENT_SIZE];      // Padded local hour (SS)
-    char padded_local_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE];     // Padded local date
-    char padded_local_short_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded local short date
-    char padded_local_day[MAX_GLOBAL_ELEMENT_SIZE];               // Padded local day (DD)
-    char padded_local_month[MAX_GLOBAL_ELEMENT_SIZE];             // Padded local hour (MM)
-    char padded_local_year[MAX_GLOBAL_ELEMENT_SIZE];              // Padded local hour (YYYY)
-    // ------------------------------------------------------------------------------------
-    // RTC ITEMS
-    // ------------------------------------------------------------------------------------
-    uint32_t rtc_unixtime;                              // RTC Unix time
-    uint8_t rtc_hour;                                   // RTC current hour
-    uint8_t rtc_minute;                                 // RTC current minute
-    uint8_t rtc_second;                                 // RTC current second
-    uint16_t rtc_year;                                  // RTC current year
-    uint8_t rtc_month;                                  // RTC current month
-    uint8_t rtc_mday;                                   // RTC current day
-    uint8_t rtc_wday;                                   // RTC current day of week
-    char rtc_wday_name[MAX_GLOBAL_ELEMENT_SIZE];        // RTC weekday name
-    // ------------------------------------------------------------------------------------
-    // RTC FORMATTED (FOR USER)
-    // ------------------------------------------------------------------------------------
-    char formatted_rtc_time[MAX_GLOBAL_ELEMENT_SIZE];       // Formatted RTC time
-    char formatted_rtc_date[MAX_GLOBAL_ELEMENT_SIZE];       // Formatted RTC date
-    char padded_rtc_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE];   // Padded RTC time (HHMMSS)
-    char padded_rtc_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded RTC date
-    // ------------------------------------------------------------------------------------
-    // RTC SYNC ITEMS
-    // ------------------------------------------------------------------------------------
-    uint32_t rtcsync_unixtime;                           // RTC sync Unix time
-    uint8_t rtcsync_hour;                                // RTC sync hour
-    uint8_t rtcsync_minute;                              // RTC sync minute
-    uint8_t rtcsync_second;                              // RTC sync second
-    uint16_t rtcsync_year;                               // RTC sync year
-    uint8_t rtcsync_month;                               // RTC sync month
-    uint8_t rtcsync_day;                                 // RTC sync day
-    char rtcsync_latitude[MAX_GLOBAL_ELEMENT_SIZE];      // RTC sync latitude
-    char rtcsync_longitude[MAX_GLOBAL_ELEMENT_SIZE];     // RTC sync longitude
-    char rtcsync_altitude[MAX_GLOBAL_ELEMENT_SIZE];      // RTC sync altitude
-    // ------------------------------------------------------------------------------------
-    // RTC SYNC FORMATTED (FOR USER)
-    // ------------------------------------------------------------------------------------
-    char formatted_rtc_sync_time[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted RTC sync time
-    char formatted_rtc_sync_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted RTC sync date
-    char formatted_rtc_sync_short_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted RTC sync date
-    // ------------------------------------------------------------------------------------
-    // RTC SYNC PADDED (FOR CALC)
-    // ------------------------------------------------------------------------------------
-    char padded_rtc_sync_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE]; // Padded RTC sync time (HHMMSS)
-    char padded_rtc_sync_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded RTC sync date
-
-    // ------------------------------------------------------------------------------------
-    // LMST (Local Mean Solar Time) - True Local Time (Not Geo-Political Time)
-    // ------------------------------------------------------------------------------------
-    tm LMST_tm; // LMST time structure
-    
-    uint8_t LMST_hour; // Hour for LMST time
-    uint8_t LMST_minute; // Minute for LMST time
-    uint8_t LMST_second; // Second for LMST time
-    uint8_t LMST_millisecond; // Millisecond for LMST time
-
-    uint16_t LMST_year; // Year for LMST time
-    uint8_t LMST_month; // Month for LMST time
-    uint8_t LMST_day; // Day for LMST time
-
-    char formatted_LMST_time[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted LMST time
-    char formatted_LMST_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted LMST date
-    char formatted_LMST_short_date_DDMMYY[MAX_GLOBAL_ELEMENT_SIZE]; // Formatted LMST date
-
-    char padded_LMST_time_HHMMSS[MAX_GLOBAL_ELEMENT_SIZE]; // Padded LMST time (HHMMSS)
-    char padded_LMST_date_DDMMYYYY[MAX_GLOBAL_ELEMENT_SIZE]; // Padded LMST date
-
-    // TwilightStageEntry LMST_twilight_stage; // current according to LMST time
-    PhotoPeriodSchedulele LMST_photo_period_schedule; // schedule according to LMST time
-    
-    // ------------------------------------------------------------------------------------
-    // FLAGS
-    // ------------------------------------------------------------------------------------
-    bool set_rtc_datetime_flag;
-    bool sync_rtc_immediately_flag; // for sync regardless of second/minute/hour
-    bool gps_sync;
+    SatIOTimeData GPSTime;
+    SatIOTimeData systemTime;
+    SatIOTimeData localTime;
+    SatIOTimeData localMeanSolarTime;
 };
 extern struct SATIOStruct satioData;
 
@@ -284,15 +271,16 @@ extern struct SpeedStruct speedData;
 // ----------------------------------------------------------------------------------------
 void setGroundHeadingName(float num);
 void printAllTimes(void);
-void storeRTCTime(void);
+
+void storeSystemTime(void);
 void storeLocalTime(void);
 void storeLMST(void);
-void storeRTCSYNCTime(void) ;
+
 void extractDateTimeFromGPSData(void);
 void setSystemTime(long usec);
 void getSystemTime(void);
-void syncRTC(void);
-void setSatIOData(void);
+void syncTimeGPS(void);
+void applyPendingDateTimeStore(void);
 void initSystemTime(void);
 /**
    * @brief Calculates the speed between two GPS points in any direction.
@@ -309,5 +297,11 @@ void initSystemTime(void);
    * This function has no Kalman filter.
  */
  double calculateSpeedFromLocationData(LocPoint p1, LocPoint p2);
+ 
+void setSatioCoordinates(void);
+void setSatIOAltitude(void);
+void setSatIOSpeed(void);
+void setSatIOGroundHeading(void);
+void setGroundHeadingName(float num);
 
 #endif

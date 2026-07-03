@@ -588,9 +588,9 @@ static void PrintSystemData(void) {
 static void PrintSatIOData(void) {
     printf("-----------------------------------------------------\n");
     printf("[SatIO] \n");
-    printf("[utc_second_offset] %lld\n", satioData.utc_second_offset);
-    printf("[utc_auto_offset_flag] %d\n", satioData.utc_auto_offset_flag);
-    printf("[set_time_automatically] %d\n", satioData.set_time_automatically);
+    printf("[utc_second_offset] %lld\n", satioData.systemTime.second_offset);
+    printf("[utc_auto_offset_flag] %d\n", satioData.systemTime.auto_offset_flag);
+    printf("[set_time_automatically] %d\n", satioData.systemTime.set_time_automatically);
     printf("-----------------------------------------------------\n");
 }
 
@@ -821,7 +821,7 @@ void setUTCSecondOffset(int64_t seconds) {
   /* LONG_LONG_MIN/LONG_LONG_MAX are not standard macros (the standard names
      are LLONG_MIN/LLONG_MAX); flagged here rather than changed. */
   if (seconds>=LONG_LONG_MIN && seconds<LONG_LONG_MAX)
-    {satioData.utc_second_offset=seconds;}
+    {satioData.systemTime.second_offset=seconds;}
 }
 
 void setMapConfig(int map_slot,
@@ -905,13 +905,13 @@ void datetimeSetRTC(uint16_t year, uint8_t month, uint8_t mday,
     satioData.tmp_hour_int=hour;
     satioData.tmp_minute_int=min;
     satioData.tmp_second_int=sec;
-    satioData.set_rtc_datetime_flag=true;
+    // set update flag
   }
 }
 
 void datetimeSetDTAuto(bool set_dt_auto) {
-  if (set_dt_auto==true) {satioData.sync_rtc_immediately_flag=true; satioData.set_time_automatically=true;}
-  else {satioData.set_time_automatically=false;}
+  if (set_dt_auto==true) {satioData.systemTime.sync_immediately_flag=true; satioData.systemTime.set_time_automatically =true;}
+  else {satioData.systemTime.set_time_automatically=false;}
 }
 
 void setCoordinatesDegrees(double latitude, double longitude) {
@@ -1520,15 +1520,24 @@ void outputSerialGPS(void) {
     memset(TXBUF_GPS, 0, sizeof(TXBUF_GPS));
     serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), "$SATIO,");
     serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(systemData.uptime_seconds) + ",").c_str());
-    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_rtc_time_HHMMSS) + ",").c_str());
-    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_rtc_date_DDMMYYYY) + ",").c_str());
-    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_rtc_sync_time_HHMMSS) + ",").c_str());
-    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_rtc_sync_date_DDMMYYYY) + ",").c_str());
-    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_local_time_HHMMSS) + ",").c_str());
-    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_local_date_DDMMYYYY) + ",").c_str());
-    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_LMST_time_HHMMSS) + ",").c_str());
-    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.padded_LMST_date_DDMMYYYY) + ",").c_str());
+
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.systemTime.padded_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.systemTime.padded_date_DDMMYYYY) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.systemTime.sync_padded_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.systemTime.sync_padded_date_DDMMYYYY) + ",").c_str());
+
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.localTime.padded_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.localTime.padded_date_DDMMYYYY) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.localTime.sync_padded_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.localTime.sync_padded_date_DDMMYYYY) + ",").c_str());
+
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.localMeanSolarTime.padded_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.localMeanSolarTime.padded_date_DDMMYYYY) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.localMeanSolarTime.sync_padded_time_HHMMSS) + ",").c_str());
+    serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(satioData.localMeanSolarTime.sync_padded_date_DDMMYYYY) + ",").c_str());
+
     serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.local_sidereal_time) + ",").c_str());
+
     serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.local_zenith_ra_dec.padded_ra_str) + ",").c_str());
     serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.local_zenith_ra_dec.padded_dec_str) + ",").c_str());
     serial0_buffer_append(TXBUF_GPS, sizeof(TXBUF_GPS), (String(siderealExtraData.gyro_0_ra_dec.padded_ra_str) + ",").c_str());
@@ -1831,13 +1840,11 @@ void outputStat(void) {
   // if (systemData.output_stat==true) { // forced on for dev
       printf(
           "[ %llu ] "
-          "gps=%s "
-          "rtc=%s "
-          "lcl=%s "
-          "lmst(t)=%s "
-          "lmst(d)=%s "
+          "gps=(%s %s syn=%s) "
+          "rtc=(%s %s syn=%s) "
+          "lcl=(%s %s syn=%s) "
+          "lmst=(%s %s syn=%s) "
           "lst=%f "
-          "syn=%s "
 
           "t_loop=%ld "
 
@@ -1885,14 +1892,25 @@ void outputStat(void) {
 
           "PowerConfig=%s\n",
           
-          satioData.local_unixtime_uS,
-          gnrmcData.utc_time,
-          satioData.padded_rtc_time_HHMMSS,
-          satioData.padded_local_time_HHMMSS,
-          satioData.padded_LMST_time_HHMMSS,
-          satioData.padded_LMST_date_DDMMYYYY,
+          satioData.systemTime.unixtime_uS,
+
+          satioData.GPSTime.padded_time_HHMMSS,
+          satioData.GPSTime.padded_date_DDMMYY,
+          satioData.GPSTime.sync_padded_time_HHMMSS,
+
+          satioData.systemTime.padded_time_HHMMSS,
+          satioData.systemTime.padded_date_DDMMYY,
+          satioData.systemTime.sync_padded_time_HHMMSS,
+
+          satioData.localTime.padded_time_HHMMSS,
+          satioData.localTime.padded_date_DDMMYY,
+          satioData.localTime.sync_padded_time_HHMMSS,
+
+          satioData.localMeanSolarTime.padded_time_HHMMSS,
+          satioData.localMeanSolarTime.padded_date_DDMMYY,
+          satioData.localMeanSolarTime.sync_padded_time_HHMMSS,
+
           siderealExtraData.local_sidereal_time,
-          satioData.padded_rtc_sync_time_HHMMSS,
 
           systemData.total_loops_a_second,
 

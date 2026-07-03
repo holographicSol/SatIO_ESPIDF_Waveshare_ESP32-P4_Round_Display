@@ -636,7 +636,7 @@ void keyboard_event_cb(lv_event_t * e)
         case KB_UTC_OFFSET_SECONDS:
             if (strval_validate(ctx->strval_type, input)) {
                 int64_t val = atoll(input);
-                satioData.utc_second_offset = val;
+                satioData.localTime.second_offset = val;
             }
             else {
             }
@@ -17310,15 +17310,15 @@ void update_display()
         lv_obj_set_style_outline_color(main_title_bar.panel, rainbow_outline_hue, LV_PART_MAIN);
 
         // Title Bar Local Time
-        lv_label_set_text(main_title_bar.time_label, satioData.formatted_local_time_HHMMSS);
+        lv_label_set_text(main_title_bar.time_label, satioData.localTime.formatted_time_HHMMSS);
         lv_obj_set_style_text_color(main_title_bar.time_label, rainbow_title_hue, LV_PART_MAIN);
 
         // Title Bar Local Date
-        lv_label_set_text(main_title_bar.date_label, satioData.formatted_local_short_date_DDMMYY);
+        lv_label_set_text(main_title_bar.date_label, satioData.localTime.formatted_date_DDMMYY);
         lv_obj_set_style_text_color(main_title_bar.date_label, rainbow_title_hue, LV_PART_MAIN);
 
         // GPS Sync
-        if (satioData.gps_sync) {
+        if (satioData.GPSTime.sync == true) {
             lv_obj_add_flag(main_title_bar.gps_signal_strength, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_flag(main_title_bar.datetime_sync, LV_OBJ_FLAG_HIDDEN);
             lv_obj_set_style_outline_color(main_title_bar.datetime_sync, lv_color_make(0, 255, 0), LV_PART_MAIN);
@@ -17376,19 +17376,19 @@ void update_display()
         lv_obj_set_style_outline_color(system_tray.slider_brightness, rainbow_contrast_outline_hue, LV_PART_INDICATOR);
 
         // System Tray Local Time
-        lv_label_set_text(system_tray.local_time, satioData.formatted_local_time_HHMMSS);
+        lv_label_set_text(system_tray.local_time, satioData.localTime.formatted_time_HHMMSS);
         lv_obj_set_style_text_color(system_tray.local_time, rainbow_title_hue, LV_PART_MAIN);
 
         // System Tray Local Date
-        lv_label_set_text(system_tray.local_date, satioData.formatted_local_short_date_DDMMYY);
+        lv_label_set_text(system_tray.local_date, satioData.localTime.formatted_date_DDMMYY);
         lv_obj_set_style_text_color(system_tray.local_date, rainbow_title_hue, LV_PART_MAIN);
 
         // System Tray Human Date
-        { char human_date[MAX_GLOBAL_ELEMENT_SIZE*3]; snprintf(human_date, sizeof(human_date), "%s %d %s", satioData.local_wday_name, satioData.local_mday, satioData.local_month_name); lv_label_set_text(system_tray.human_date, human_date); }
+        { char human_date[MAX_GLOBAL_ELEMENT_SIZE*3]; snprintf(human_date, sizeof(human_date), "%s %d %s", satioData.localTime.wday_name, satioData.localTime.mday, satioData.localTime.month_name); lv_label_set_text(system_tray.human_date, human_date); }
         lv_obj_set_style_text_color(system_tray.human_date, rainbow_title_hue, LV_PART_MAIN);
 
         // GPS Sync
-        if (satioData.gps_sync) {
+        if (satioData.GPSTime.sync == true) {
             lv_obj_add_flag(system_tray.gps_signal_strength, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_flag(system_tray.datetime_sync, LV_OBJ_FLAG_HIDDEN);
             lv_obj_set_style_outline_color(system_tray.datetime_sync, lv_color_make(0, 255, 0), LV_PART_MAIN);
@@ -17825,89 +17825,90 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // Local Year Day
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_local_yday, String(satioData.local_yday).c_str());
+                lv_label_set_text(satio_c.val_local_yday, String(satioData.localTime.yday).c_str());
 
                 // ────────────────────────────────────────────────
                 // Local Weekday Name
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_local_wday_name, String(satioData.local_wday_name).c_str());
+                lv_label_set_text(satio_c.val_local_wday_name, String(satioData.localTime.wday_name).c_str());
 
                 // ────────────────────────────────────────────────
                 // Local Month Name
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_local_month_name, String(satioData.local_month_name).c_str());
+                lv_label_set_text(satio_c.val_local_month_name, String(satioData.localTime.month_name).c_str());
 
 
                 // ────────────────────────────────────────────────
                 // Formatted Local Time
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_formatted_local_time, String(satioData.formatted_local_time_HHMMSS).c_str());
+                lv_label_set_text(satio_c.val_formatted_local_time, String(satioData.localTime.formatted_time_HHMMSS).c_str());
 
                 // ────────────────────────────────────────────────
                 // Formatted Local Date
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_formatted_local_date, String(satioData.formatted_local_date_DDMMYYYY).c_str());
+                lv_label_set_text(satio_c.val_formatted_local_date, String(satioData.localTime.formatted_date_DDMMYYYY).c_str());
 
                 // ────────────────────────────────────────────────
                 // Local Unix Time (μs)
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_local_unixtime_us, String(satioData.local_unixtime_uS).c_str());
+                lv_label_set_text(satio_c.val_local_unixtime_us, String(satioData.localTime.unixtime_uS).c_str());
 
                 // ────────────────────────────────────────────────
-                // Formatted RTC Sync Time
+                // Formatted System Time Sync Time (last GPS/manual sync)
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_formatted_rtc_sync_time, String(satioData.formatted_rtc_sync_time).c_str());
+                lv_label_set_text(satio_c.val_formatted_rtc_sync_time, String(satioData.systemTime.sync_formatted_time_HHMMSS).c_str());
 
                 // ────────────────────────────────────────────────
-                // Formatted RTC Sync Date
+                // Formatted System Time Sync Date (last GPS/manual sync)
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_formatted_rtc_sync_date, String(satioData.formatted_rtc_sync_date_DDMMYYYY).c_str());
+                lv_label_set_text(satio_c.val_formatted_rtc_sync_date, String(satioData.systemTime.sync_formatted_date_DDMMYYYY).c_str());
 
                 // ────────────────────────────────────────────────
-                // RTC Sync Latitude
+                // Sync Latitude (this board has no RTC-chip position snapshot;
+                // shows the current system latitude/longitude/altitude instead)
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_rtcsync_latitude, String(satioData.rtcsync_latitude).c_str());
+                lv_label_set_text(satio_c.val_rtcsync_latitude, String(satioData.system_degrees_latitude, 7).c_str());
 
                 // ────────────────────────────────────────────────
-                // RTC Sync Longitude
+                // Sync Longitude
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_rtcsync_longitude, String(satioData.rtcsync_longitude).c_str());
+                lv_label_set_text(satio_c.val_rtcsync_longitude, String(satioData.system_degrees_longitude, 7).c_str());
 
                 // ────────────────────────────────────────────────
-                // RTC Sync Altitude
+                // Sync Altitude
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_rtcsync_altitude, String(satioData.rtcsync_altitude).c_str());
+                lv_label_set_text(satio_c.val_rtcsync_altitude, String(gnggaData.altitude).c_str());
 
                 // ────────────────────────────────────────────────
-                // Formatted RTC Time
+                // Formatted System Time
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_formatted_rtc_time, String(satioData.formatted_rtc_time).c_str());
+                lv_label_set_text(satio_c.val_formatted_rtc_time, String(satioData.systemTime.formatted_time_HHMMSS).c_str());
 
                 // ────────────────────────────────────────────────
-                // Formatted RTC Date
+                // Formatted System Date
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_formatted_rtc_date, String(satioData.formatted_rtc_date).c_str());
+                lv_label_set_text(satio_c.val_formatted_rtc_date, String(satioData.systemTime.formatted_date_DDMMYYYY).c_str());
 
                 // ────────────────────────────────────────────────
-                // RTC Unix Time
+                // System Time Unix Time (s)
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_rtc_unixtime, String(satioData.rtc_unixtime).c_str());
+                lv_label_set_text(satio_c.val_rtc_unixtime, String((uint32_t)(satioData.systemTime.unixtime_uS / 1000000ULL)).c_str());
 
 
                 // ────────────────────────────────────────────────
                 // UTC Second Offset
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_utc_second_offset, String(satioData.utc_second_offset).c_str());
+                lv_label_set_text(satio_c.val_utc_second_offset, String(satioData.systemTime.second_offset).c_str());
 
                 // ────────────────────────────────────────────────
                 // UTC Auto Offset Flag
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_utc_auto_offset_flag, satioData.utc_auto_offset_flag ? "Yes" : "No");
+                lv_label_set_text(satio_c.val_utc_auto_offset_flag, satioData.systemTime.auto_offset_flag ? "Yes" : "No");
 
                 // ────────────────────────────────────────────────
                 // Set Time Automatically
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_set_time_automatically, satioData.set_time_automatically ? "Yes" : "No");
+                lv_label_set_text(satio_c.val_set_time_automatically, satioData.systemTime.set_time_automatically ? "Yes" : "No");
 
                 // ────────────────────────────────────────────────
                 // GPS Altitude
@@ -18040,32 +18041,32 @@ void update_display()
                 // ────────────────────────────────────────────────
                 // LMST Time
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_time, String(satioData.formatted_LMST_time).c_str());
+                lv_label_set_text(satio_c.val_LMST_time, String(satioData.localMeanSolarTime.formatted_time_HHMMSS).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Date
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_date, String(satioData.formatted_LMST_date_DDMMYYYY).c_str());
+                lv_label_set_text(satio_c.val_LMST_date, String(satioData.localMeanSolarTime.formatted_date_DDMMYYYY).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Daylight Hours
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_day_hours, String(satioData.LMST_photo_period_schedule.LMST_day_hours).c_str());
+                lv_label_set_text(satio_c.val_LMST_day_hours, String(satioData.localMeanSolarTime.photo_period_schedule.LMST_day_hours).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Night Hours
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_night_hours, String(satioData.LMST_photo_period_schedule.LMST_night_hours).c_str());
+                lv_label_set_text(satio_c.val_LMST_night_hours, String(satioData.localMeanSolarTime.photo_period_schedule.LMST_night_hours).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Anomaly
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_LMST_anomaly, String(satioData.LMST_photo_period_schedule.LMST_anomaly).c_str());
+                lv_label_set_text(satio_c.val_LMST_anomaly, String(satioData.localMeanSolarTime.photo_period_schedule.LMST_anomaly).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Current Twilight Zone Name
                 // ────────────────────────────────────────────────
-                lv_label_set_text(satio_c.val_current_twilight_zone_name, String(twilight_zone_names[satioData.LMST_photo_period_schedule.current_zone]).c_str());
+                lv_label_set_text(satio_c.val_current_twilight_zone_name, String(twilight_zone_names[satioData.localMeanSolarTime.photo_period_schedule.current_zone]).c_str());
 
                 // ────────────────────────────────────────────────
                 // LMST Astronomical Twilight Dawn
@@ -18073,9 +18074,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_astronomical_twilight_dawn,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dawn_start[AstronomicalTwilight]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_start[AstronomicalTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dawn_end[AstronomicalTwilight])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_end[AstronomicalTwilight])
                     ).c_str()
                 );
 
@@ -18085,9 +18086,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_nautical_twilight_dawn,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dawn_start[NauticalTwilight]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_start[NauticalTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dawn_end[NauticalTwilight])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_end[NauticalTwilight])
                     ).c_str()
                 );
 
@@ -18097,9 +18098,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_civil_twilight_dawn,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dawn_start[CivilTwilight]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_start[CivilTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dawn_end[CivilTwilight])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_end[CivilTwilight])
                     ).c_str()
                 );
 
@@ -18109,9 +18110,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_sunrise,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dawn_start[SunriseSunset]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_start[SunriseSunset]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dawn_end[SunriseSunset])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_end[SunriseSunset])
                     ).c_str()
                 );
 
@@ -18121,9 +18122,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_FullDayLight,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dawn_start[FullDaylight]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_start[FullDaylight]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dusk_end[FullDaylight])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_end[FullDaylight])
                     ).c_str()
                 );
 
@@ -18133,9 +18134,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_golden_hour_dawn,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dawn_start[GoldenHour]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_start[GoldenHour]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dawn_end[GoldenHour])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_end[GoldenHour])
                     ).c_str()
                 );
 
@@ -18145,9 +18146,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_golden_hour_dusk,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dusk_start[GoldenHour]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_start[GoldenHour]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dusk_end[GoldenHour])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_end[GoldenHour])
                     ).c_str()
                 );
 
@@ -18157,9 +18158,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_sunset,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dusk_start[SunriseSunset]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_start[SunriseSunset]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dusk_end[SunriseSunset])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_end[SunriseSunset])
                     ).c_str()
                 );
 
@@ -18169,9 +18170,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_civil_twilight_dusk,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dusk_start[CivilTwilight]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_start[CivilTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dusk_end[CivilTwilight])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_end[CivilTwilight])
                     ).c_str()
                 );
 
@@ -18181,9 +18182,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_nautical_twilight_dusk,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dusk_start[NauticalTwilight]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_start[NauticalTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dusk_end[NauticalTwilight])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_end[NauticalTwilight])
                     ).c_str()
                 );
 
@@ -18193,9 +18194,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_astronomical_twilight_dusk,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dusk_start[AstronomicalTwilight]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_start[AstronomicalTwilight]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dusk_end[AstronomicalTwilight])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_end[AstronomicalTwilight])
                     ).c_str()
                 );
 
@@ -18205,9 +18206,9 @@ void update_display()
                 lv_label_set_text(
                     satio_c.val_LMST_astronomical_night,
                     String(
-                        String(satioData.LMST_photo_period_schedule.dusk_start[AstronomicalNight]) +
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dusk_start[AstronomicalNight]) +
                         String(" - ") +
-                        String(satioData.LMST_photo_period_schedule.dawn_end[AstronomicalNight])
+                        String(satioData.localMeanSolarTime.photo_period_schedule.dawn_end[AstronomicalNight])
                     ).c_str()
                 );
             }

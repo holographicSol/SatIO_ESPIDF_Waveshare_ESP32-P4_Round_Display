@@ -6,8 +6,9 @@
 
 #include "./satio.h"
 #include <Arduino.h>
+#include <esp_timer.h>
+#include <time.h>
 #include <Wire.h>
-#include <RTClib.h>  // https://github.com/adafruit/RTClib
 #include "wtgps300p.h"
 #include "./task_handler.h"
 #include "freertos/semphr.h"
@@ -15,10 +16,26 @@
 #include <SiderealObjects.h>
 #include "./sidereal_helper.h"
 
-// ----------------------------------------------------------------------------------------
-// Globals
-// ----------------------------------------------------------------------------------------
-RTC_DS3231 rtc;
+// ------------------------------------------------------------------------------------
+// Global Time
+// ------------------------------------------------------------------------------------
+struct tm *timeinfo;
+struct timeval tv_now;
+// ------------------------------------------------------------------------------------
+
+
+SemaphoreHandle_t systemTimeMutex = nullptr;
+
+void initSystemTimeMutex(void) {
+  systemTimeMutex = xSemaphoreCreateMutex();
+}
+
+SemaphoreHandle_t dataMutex = nullptr;
+
+void initDataMutex(void) {
+  dataMutex = xSemaphoreCreateMutex();
+}
+
 
 struct SATIOStruct satioData = {
     // ------------------------------------------------------------------------------------
@@ -102,115 +119,12 @@ struct SATIOStruct satioData = {
     .mileage = "pending",
 
     // ------------------------------------------------------------------------------------
-    // LOCAL TIME ITEMS
+    // Date Time
     // ------------------------------------------------------------------------------------
-    .local_unixtime_uS = 0,
-    .local_hour = 0,
-    .local_minute = 0,
-    .local_second = 0,
-    .local_year = 2000,
-    .local_month = 1,
-    .local_mday = 1,
-    .local_yday = 1,
-    .local_wday = 1,
-    .local_wday_name = {0},
-    .local_month_name = {0},
-    .utc_second_offset = 0,
-    .utc_auto_offset_flag = false,
-    .set_time_automatically = true,
-    // ------------------------------------------------------------------------------------
-    // LOCAL TIME FORMATTED (FOR USER)
-    // ------------------------------------------------------------------------------------
-    .formatted_local_time_HHMMSS = "00:00:00",
-    .formatted_local_date_DDMMYYYY = "00/00/0000",
-    .formatted_local_short_date_DDMMYY = "00/00/00",
-    // ------------------------------------------------------------------------------------
-    // LOCAL TIME PADDED (FOR CALC)
-    // ------------------------------------------------------------------------------------
-    .padded_local_time_HHMMSS = "000000",
-    .padded_local_hour = "00",
-    .padded_local_minute = "00",
-    .padded_local_second = "00",
-    .padded_local_date_DDMMYYYY = "00000000",
-    .padded_local_short_date_DDMMYY = "000000",
-    .padded_local_day = "00",
-    .padded_local_month = "00",
-    .padded_local_year = "00",
-    // ------------------------------------------------------------------------------------
-    // RTC ITEMS
-    // ------------------------------------------------------------------------------------
-    .rtc_unixtime = 0,
-    .rtc_hour = 0,
-    .rtc_minute = 0,
-    .rtc_second = 0,
-    .rtc_year = 2000,
-    .rtc_month = 1,
-    .rtc_mday = 1,
-    .rtc_wday = 1,
-    .rtc_wday_name = {0},
-    // ------------------------------------------------------------------------------------
-    // RTC FORMATTED (FOR USER)
-    // ------------------------------------------------------------------------------------
-    .formatted_rtc_time = "00:00:00",
-    .formatted_rtc_date = "00/00/00",
-    .padded_rtc_time_HHMMSS = "000000",
-    .padded_rtc_date_DDMMYYYY = "00000000",
-    // ------------------------------------------------------------------------------------
-    // RTC SYNC ITEMS
-    // ------------------------------------------------------------------------------------
-    .rtcsync_unixtime = 0,
-    .rtcsync_hour = 0,
-    .rtcsync_minute = 0,
-    .rtcsync_second = 0,
-    .rtcsync_year = 0,
-    .rtcsync_month = 0,
-    .rtcsync_day = 0,
-    .rtcsync_latitude = "0.0",
-    .rtcsync_longitude = "0.0",
-    .rtcsync_altitude = "0.0",
-    // ------------------------------------------------------------------------------------
-    // RTC SYNC FORMATTED (FOR USER)
-    // ------------------------------------------------------------------------------------
-    .formatted_rtc_sync_time = "00:00:00",
-    .formatted_rtc_sync_date_DDMMYYYY = "00/00/00",
-    .formatted_rtc_sync_short_date_DDMMYY = "00/00/00",
-    // ------------------------------------------------------------------------------------
-    // RTC SYNC PADDED (FOR CALC)
-    // ------------------------------------------------------------------------------------
-    .padded_rtc_sync_time_HHMMSS = "000000",
-    .padded_rtc_sync_date_DDMMYYYY = "00000000",
-    // ------------------------------------------------------------------------------------
-    // LMST Time
-    // ------------------------------------------------------------------------------------
-    .LMST_tm = {},
-
-    .LMST_hour = 0,
-    .LMST_minute = 0,
-    .LMST_second = 0,
-    .LMST_millisecond = 0,
-    .LMST_year = 0,
-    .LMST_month = 0,
-    .LMST_day = 0,
-
-    .formatted_LMST_time = "00:00:00",
-    .formatted_LMST_date_DDMMYYYY = "00/00/0000",
-    .formatted_LMST_short_date_DDMMYY = "00/00/00",
-
-    .padded_LMST_time_HHMMSS = "000000",
-    .padded_LMST_date_DDMMYYYY = "00000000",
-
-    /*
-      schedule according to LMST time.
-      { zoneName, dusk_start, dusk_end, dawn_start, dawn_end } in HH.MM format; -1.0 if N/A.
-    */
-    .LMST_photo_period_schedule = {},
-
-    // ------------------------------------------------------------------------------------
-    // FLAGS
-    // ------------------------------------------------------------------------------------
-    .set_rtc_datetime_flag = false,
-    .sync_rtc_immediately_flag = true, // attempt sync immediately on starttup
-    .gps_sync = false,
+    .GPSTime = {},
+    .systemTime = {},
+    .localTime = {},
+    .localMeanSolarTime = {},
 };
 
 LocPoint loc_point1_gps = {0.0, 0.0, 0.0, 0};
@@ -239,7 +153,7 @@ struct SpeedStruct speedData = {
  *
  * Rule 8.7: internal linkage; only called from setSatIOData() in this file.
  */
-static void setSatIOAltitude(void) {
+void setSatIOAltitude(void) {
   satioData.altitude = atof(gnggaData.altitude);
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
@@ -253,7 +167,7 @@ static void setSatIOAltitude(void) {
  *
  * Rule 8.7: internal linkage; only called from setSatIOData() in this file.
  */
-static void setSatIOSpeed(void) {
+void setSatIOSpeed(void) {
   satioData.speed = atof(gnrmcData.ground_speed);
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
@@ -267,7 +181,7 @@ static void setSatIOSpeed(void) {
  *
  * Rule 8.7: internal linkage; only called from setSatIOData() in this file.
  */
-static void setSatIOGroundHeading(void) {
+void setSatIOGroundHeading(void) {
   satioData.ground_heading = atof(gnrmcData.ground_heading);
   // ---------------------------------------------------------------------
   // Select which value to use from the system.
@@ -319,7 +233,7 @@ void setGroundHeadingName(float num) {
 //                                                                                                         CONVERT COORDINTE DATA
 // ------------------------------------------------------------------------------------------------------------------------------
 /* Rule 8.7: internal linkage; only called from setSatIOData() in this file. */
-static void setSatioCoordinates(void){
+void setSatioCoordinates(void) {
   // ----------------------------------------------------------------------------------------------------------------------------
   //                                                                                                  GNGGA COORDINATE CONVERSION
   // ----------------------------------------------------------------------------------------------------------------------------
@@ -468,75 +382,11 @@ static void setSatioCoordinates(void){
 }
 
 // ----------------------------------------------------------------------------------------
-// printAllTimes.
-// ----------------------------------------------------------------------------------------
-struct tm *timeinfo;
-struct timeval tv_now;
-SemaphoreHandle_t systemTimeMutex = nullptr;
-
-void initSystemTimeMutex(void) {
-  systemTimeMutex = xSemaphoreCreateMutex();
-}
-
-SemaphoreHandle_t dataMutex = nullptr;
-
-void initDataMutex(void) {
-  dataMutex = xSemaphoreCreateMutex();
-}
-
-void printAllTimes(void) {
-  /*     UTC     */
-  Serial.println("-----------------------------------------");
-  Serial.println("[gnrmcData.utc_date]      " + String(gnrmcData.utc_date));
-  Serial.println("[gnrmcData.utc_time]      " + String(gnrmcData.utc_time));
-  Serial.println("-----------------------------------------");
-  Serial.println("[satioData.tmp_year_int]    " + String(satioData.tmp_year_int));
-  Serial.println("[satioData.tmp_month_int]   " + String(satioData.tmp_month_int));
-  Serial.println("[satioData.tmp_day_int]     " + String(satioData.tmp_day_int));
-  Serial.println("[satioData.tmp_hour_int]    " + String(satioData.tmp_hour_int));
-  Serial.println("[satioData.tmp_minute_int]  " + String(satioData.tmp_minute_int));
-  Serial.println("[satioData.tmp_second_int]  " + String(satioData.tmp_second_int));
-  Serial.println("[satioData.tmp_msecond_int] " + String(satioData.tmp_millisecond_int));
-  Serial.println("-----------------------------------------");
-  Serial.println("[satioData.rtc_year]        " + String(satioData.rtc_year));
-  Serial.println("[satioData.rtc_month]       " + String(satioData.rtc_month));
-  Serial.println("[satioData.rtc_mday]        " + String(satioData.rtc_mday));
-  Serial.println("[satioData.rtc_hour]        " + String(satioData.rtc_hour));
-  Serial.println("[satioData.rtc_minute]      " + String(satioData.rtc_minute));
-  Serial.println("[satioData.rtc_second]      " + String(satioData.rtc_second));
-  Serial.println("[satioData.rtc_unixtime]    " + String(satioData.rtc_unixtime));
-  Serial.println("[satioData.rtc wday]        " + String(rtc.now().dayOfTheWeek()));
-  Serial.println("-----------------------------------------");
-  Serial.println("[satioData.rtcsync_year]    " + String(satioData.rtcsync_year));
-  Serial.println("[satioData.rtcsync_month]   " + String(satioData.rtcsync_month));
-  Serial.println("[satioData.rtc_mday]        " + String(satioData.rtc_mday));
-  Serial.println("[satioData.rtcsync_hour]    " + String(satioData.rtcsync_hour));
-  Serial.println("[satioData.rtcsync_minute]  " + String(satioData.rtcsync_minute));
-  Serial.println("[satioData.rtcsync_second]  " + String(satioData.rtcsync_second));
-  /*    SYSTEM/LOCAL    */
-  Serial.println("-----------------------------------------");
-  Serial.println("[timeinfo->tm_year+last_epoch] " + String(timeinfo->tm_year+LAST_EPOCH));
-  Serial.println("[timeinfo->tm_mon+1]           " + String(timeinfo->tm_mon+1));
-  Serial.println("[timeinfo->tm_mday]            " + String(timeinfo->tm_mday));
-  Serial.println("[timeinfo->tm_hour]            " + String(timeinfo->tm_hour));
-  Serial.println("[timeinfo->tm_min]             " + String(timeinfo->tm_min));
-  Serial.println("[timeinfo->tm_sec]             " + String(timeinfo->tm_sec));
-  Serial.println("[tv_now.tv_sec]                " + String(tv_now.tv_sec));
-  Serial.println("[tv_now.tv_usec]               " + String(tv_now.tv_usec));
-  Serial.println("[timeinfo->wday]               " + String(timeinfo->tm_wday));
-  Serial.println("[timeinfo->mday]               " + String(timeinfo->tm_mday));
-  Serial.println("[timeinfo->yday]               " + String(timeinfo->tm_yday));
-  Serial.println("-----------------------------------------");
-
-}
-
-// ----------------------------------------------------------------------------------------
-// Shared time/date formatting (Rule 8.7: internal linkage; storeRTCTime(),
-// storeLocalTime(), storeLMST(), and storeRTCSYNCTime() each need the same
-// colon/slash-separated and compact-padded strings built from their own
-// clock source, so the snprintf() calls live here once instead of being
-// repeated per function). "%02d"/"%04d" zero-pad directly, so no separate
-// digit-padding helper is needed.
+// Shared time/date formatting (Rule 8.7: internal linkage; storeTimeFields()
+// needs the same colon/slash-separated and compact-padded strings built for
+// every SatIOTimeData instance, so the snprintf() calls live here once
+// instead of being repeated per clock domain). "%02d"/"%04d" zero-pad
+// directly, so no separate digit-padding helper is needed.
 // ----------------------------------------------------------------------------------------
 static void formatTimeStrings(uint8_t hour, uint8_t minute, uint8_t second,
                                char *formatted_time, size_t formatted_time_size,
@@ -545,8 +395,6 @@ static void formatTimeStrings(uint8_t hour, uint8_t minute, uint8_t second,
     snprintf(padded_time, padded_time_size, "%02d%02d%02d", hour, minute, second);
 }
 
-/* formatted_short_date/padded_short_date may be NULL where a caller has no
-   short-date field to fill (storeRTCTime has neither). */
 static void formatDateStrings(uint8_t day, uint8_t month, uint16_t year,
                                char *formatted_date, size_t formatted_date_size,
                                char *padded_date, size_t padded_date_size,
@@ -556,185 +404,199 @@ static void formatDateStrings(uint8_t day, uint8_t month, uint16_t year,
 
     snprintf(formatted_date, formatted_date_size, "%02d/%02d/%04d", day, month, year);
     snprintf(padded_date, padded_date_size, "%02d%02d%04d", day, month, year);
-
-    if (formatted_short_date != NULL) {
-        snprintf(formatted_short_date, formatted_short_date_size, "%02d/%02d/%02d", day, month, short_year);
-    }
-    if (padded_short_date != NULL) {
-        snprintf(padded_short_date, padded_short_date_size, "%02d%02d%02d", day, month, short_year);
-    }
+    snprintf(formatted_short_date, formatted_short_date_size, "%02d/%02d/%02d", day, month, short_year);
+    snprintf(padded_short_date, padded_short_date_size, "%02d%02d%02d", day, month, short_year);
 }
 
 // ----------------------------------------------------------------------------------------
-// storeRTCTime.
+// Shared SatIOTimeData population (Rule 8.7: internal linkage; every clock
+// domain -- GPSTime, systemTime, localTime, localMeanSolarTime -- fills the
+// same set of calendar/formatted/padded fields from its own hour..wday
+// values, so that logic lives here once instead of once per domain).
 // ----------------------------------------------------------------------------------------
-void storeRTCTime(void) {
-    // Store RTC time (UTC) to avoid multiple calls to rtc.now()
-    satioData.rtc_hour = rtc.now().hour();
-    satioData.rtc_minute = rtc.now().minute();
-    satioData.rtc_second = rtc.now().second();
-    satioData.rtc_year = rtc.now().year();
-    satioData.rtc_month = rtc.now().month();
-    satioData.rtc_wday = rtc.now().dayOfTheWeek();
-    satioData.rtc_mday = rtc.now().day();
-    satioData.rtc_unixtime = rtc.now().unixtime();
+static void storeTimeFields(SatIOTimeData &t, uint8_t hour, uint8_t minute, uint8_t second,
+                             uint16_t year, uint8_t month, uint8_t mday, uint16_t yday, uint8_t wday) {
+  t.hour = hour;
+  t.minute = minute;
+  t.second = second;
+  t.year = year;
+  t.month = month;
+  t.mday = mday;
+  t.yday = yday;
+  t.wday = wday;
 
-    // Copy weekday name
-    memset(satioData.rtc_wday_name, 0, sizeof(satioData.rtc_wday_name));
-    strncpy(satioData.rtc_wday_name, satioData.week_day_names[satioData.rtc_wday], sizeof(satioData.rtc_wday_name) - 1U);
+  memset(t.wday_name, 0, sizeof(t.wday_name));
+  strncpy(t.wday_name, satioData.week_day_names[wday], sizeof(t.wday_name) - 1U);
+  memset(t.month_name, 0, sizeof(t.month_name));
+  strncpy(t.month_name, satioData.month_names[month - 1U], sizeof(t.month_name) - 1U);
 
-    formatTimeStrings(satioData.rtc_hour, satioData.rtc_minute, satioData.rtc_second,
-                       satioData.formatted_rtc_time, sizeof(satioData.formatted_rtc_time),
-                       satioData.padded_rtc_time_HHMMSS, sizeof(satioData.padded_rtc_time_HHMMSS));
+  formatTimeStrings(hour, minute, second,
+                     t.formatted_time_HHMMSS, sizeof(t.formatted_time_HHMMSS),
+                     t.padded_time_HHMMSS, sizeof(t.padded_time_HHMMSS));
 
-    formatDateStrings(satioData.rtc_mday, satioData.rtc_month, satioData.rtc_year,
-                       satioData.formatted_rtc_date, sizeof(satioData.formatted_rtc_date),
-                       satioData.padded_rtc_date_DDMMYYYY, sizeof(satioData.padded_rtc_date_DDMMYYYY),
-                       NULL, 0, NULL, 0);
+  formatDateStrings(mday, month, year,
+                     t.formatted_date_DDMMYYYY, sizeof(t.formatted_date_DDMMYYYY),
+                     t.padded_date_DDMMYYYY, sizeof(t.padded_date_DDMMYYYY),
+                     t.formatted_date_DDMMYY, sizeof(t.formatted_date_DDMMYY),
+                     t.padded_date_DDMMYY, sizeof(t.padded_date_DDMMYY));
+
+  snprintf(t.padded_hour_HH, sizeof(t.padded_hour_HH), "%02d", hour);
+  snprintf(t.padded_minute_MM, sizeof(t.padded_minute_MM), "%02d", minute);
+  snprintf(t.padded_second_SS, sizeof(t.padded_second_SS), "%02d", second);
+  snprintf(t.padded_day_DD, sizeof(t.padded_day_DD), "%02d", mday);
+  snprintf(t.padded_month_MM, sizeof(t.padded_month_MM), "%02d", month);
+  snprintf(t.padded_year_YY, sizeof(t.padded_year_YY), "%02d", year % 100U);
+  snprintf(t.padded_year_YYYY, sizeof(t.padded_year_YYYY), "%04d", year);
+}
+
+/* Rule 8.7: internal linkage; convenience wrapper around storeTimeFields()
+   for the common case of a populated struct tm (as produced by mktime()/
+   gmtime_r()/makeLMST()) plus a microsecond unix timestamp. */
+static void storeTimeFromTm(SatIOTimeData &t, const struct tm &src, uint64_t unixtime_uS) {
+  t.time_struct = src;
+  t.unixtime_uS = unixtime_uS;
+  storeTimeFields(t,
+                   (uint8_t)src.tm_hour, (uint8_t)src.tm_min, (uint8_t)src.tm_sec,
+                   (uint16_t)(src.tm_year + LAST_EPOCH), (uint8_t)(src.tm_mon + 1),
+                   (uint8_t)src.tm_mday, (uint16_t)(src.tm_yday + 1), (uint8_t)src.tm_wday);
 }
 
 // ----------------------------------------------------------------------------------------
 // storeLocalTime.
 // ----------------------------------------------------------------------------------------
+/**
+ * Fills satioData.localTime as systemTime shifted by systemTime.second_offset
+ * (the user-configured +-seconds offset from UTC).
+ */
 void storeLocalTime(void) {
-    // Store system time (Local Time) to avoid multiple calls to timeinfo
-    satioData.local_hour = timeinfo->tm_hour;
-    satioData.local_minute = timeinfo->tm_min;
-    satioData.local_second = timeinfo->tm_sec;
-    satioData.local_year = timeinfo->tm_year + LAST_EPOCH; // Adjust from timeinfo's year (since 1900)
-    satioData.local_month = timeinfo->tm_mon + 1; // Adjust from 0
-    satioData.local_wday = timeinfo->tm_wday;
-    satioData.local_mday = timeinfo->tm_mday;
-    satioData.local_yday = timeinfo->tm_yday + 1; // Adjust from 0
-    // printf("local_yday: %d\n", satioData.local_yday);
-
-    // Copy weekday name
-    memset(satioData.local_wday_name, 0, sizeof(satioData.local_wday_name));
-    strncpy(satioData.local_wday_name, satioData.week_day_names[satioData.local_wday], sizeof(satioData.local_wday_name) - 1U);
-
-    // Copy month name
-    memset(satioData.local_month_name, 0, sizeof(satioData.local_month_name));
-    strncpy(satioData.local_month_name, satioData.month_names[satioData.local_month-1], sizeof(satioData.local_month_name) - 1U);
-
-    formatTimeStrings(satioData.local_hour, satioData.local_minute, satioData.local_second,
-                       satioData.formatted_local_time_HHMMSS, sizeof(satioData.formatted_local_time_HHMMSS),
-                       satioData.padded_local_time_HHMMSS, sizeof(satioData.padded_local_time_HHMMSS));
-
-    formatDateStrings(satioData.local_mday, satioData.local_month, satioData.local_year,
-                       satioData.formatted_local_date_DDMMYYYY, sizeof(satioData.formatted_local_date_DDMMYYYY),
-                       satioData.padded_local_date_DDMMYYYY, sizeof(satioData.padded_local_date_DDMMYYYY),
-                       satioData.formatted_local_short_date_DDMMYY, sizeof(satioData.formatted_local_short_date_DDMMYY),
-                       satioData.padded_local_short_date_DDMMYY, sizeof(satioData.padded_local_short_date_DDMMYY));
-
-    // The individually-padded fields below are unique to local time (no
-    // other clock source exposes its components separately), so they are
-    // formatted directly here rather than through the shared helpers.
-    snprintf(satioData.padded_local_hour, sizeof(satioData.padded_local_hour), "%02d", satioData.local_hour);
-    snprintf(satioData.padded_local_minute, sizeof(satioData.padded_local_minute), "%02d", satioData.local_minute);
-    snprintf(satioData.padded_local_second, sizeof(satioData.padded_local_second), "%02d", satioData.local_second);
-    snprintf(satioData.padded_local_day, sizeof(satioData.padded_local_day), "%02d", satioData.local_mday);
-    snprintf(satioData.padded_local_month, sizeof(satioData.padded_local_month), "%02d", satioData.local_month);
-    snprintf(satioData.padded_local_year, sizeof(satioData.padded_local_year), "%02d", satioData.local_year % 100U);
+  time_t local_sec = (time_t)((int64_t)tv_now.tv_sec + satioData.systemTime.second_offset);
+  struct tm local_tm = {};
+  gmtime_r(&local_sec, &local_tm);
+  uint64_t local_unixtime_uS = ((uint64_t)local_sec * 1000000ULL) + (uint64_t)tv_now.tv_usec;
+  storeTimeFromTm(satioData.localTime, local_tm, local_unixtime_uS);
 }
 
 /* Rule 8.7: internal linkage; only called from storeLMST() in this file. */
 static void setPhotoPeriodSchedule_LMST(void) {
-  satioData.LMST_photo_period_schedule = getPhotoPeriodData(
+  satioData.localMeanSolarTime.photo_period_schedule = getPhotoPeriodData(
     satioData.system_degrees_latitude,
     satioData.system_degrees_longitude,
-    satioData.LMST_tm,
-    satioData.LMST_hour,
-    satioData.LMST_minute,
-    satioData.LMST_second
+    satioData.localMeanSolarTime.time_struct,
+    satioData.localMeanSolarTime.hour,
+    satioData.localMeanSolarTime.minute,
+    satioData.localMeanSolarTime.second
   );
 }
 
-
 void storeLMST(void) {
-
-  satioData.LMST_tm = makeLMST(
-    satioData.rtc_year,
-    satioData.rtc_month,
-    satioData.rtc_mday,
-    satioData.rtc_hour,
-    satioData.rtc_minute,
-    satioData.rtc_second,
-    satioData.degrees_latitude,
-    satioData.degrees_longitude
+  struct tm lmst_tm = makeLMST(
+    satioData.systemTime.year,
+    satioData.systemTime.month,
+    satioData.systemTime.mday,
+    satioData.systemTime.hour,
+    satioData.systemTime.minute,
+    satioData.systemTime.second,
+    satioData.system_degrees_latitude,
+    satioData.system_degrees_longitude
   );
-  /* LMST_year/month/day/hour/minute/second are uint16_t/uint8_t fields
-     (Rule 10.x: assigning through an unrelated floating type is misleading
-     and unnecessary when the destination is already an integer type). */
-  satioData.LMST_year        = satioData.LMST_tm.tm_year + LAST_EPOCH;
-  satioData.LMST_month       = satioData.LMST_tm.tm_mon + 1;
-  satioData.LMST_day         = satioData.LMST_tm.tm_mday;
-  satioData.LMST_hour        = satioData.LMST_tm.tm_hour;
-  satioData.LMST_minute      = satioData.LMST_tm.tm_min;
-  satioData.LMST_second      = satioData.LMST_tm.tm_sec;
-
-  formatTimeStrings(satioData.LMST_hour, satioData.LMST_minute, satioData.LMST_second,
-                     satioData.formatted_LMST_time, sizeof(satioData.formatted_LMST_time),
-                     satioData.padded_LMST_time_HHMMSS, sizeof(satioData.padded_LMST_time_HHMMSS));
-
-  formatDateStrings(satioData.LMST_day, satioData.LMST_month, satioData.LMST_year,
-                     satioData.formatted_LMST_date_DDMMYYYY, sizeof(satioData.formatted_LMST_date_DDMMYYYY),
-                     satioData.padded_LMST_date_DDMMYYYY, sizeof(satioData.padded_LMST_date_DDMMYYYY),
-                     satioData.formatted_LMST_short_date_DDMMYY, sizeof(satioData.formatted_LMST_short_date_DDMMYY),
-                     NULL, 0);
+  storeTimeFromTm(satioData.localMeanSolarTime, lmst_tm, 0U);
 
   // Store photo period schedule for LMST
   setPhotoPeriodSchedule_LMST();
 }
 
 // ----------------------------------------------------------------------------------------
-// storeRTCSYNCTime.
+// storeSyncTime.
 // ----------------------------------------------------------------------------------------
-void storeRTCSYNCTime(void) {
-    // Store RTC sync time (based on local time and RTC)
-    satioData.rtcsync_hour = satioData.local_hour;
-    satioData.rtcsync_minute = satioData.local_minute;
-    satioData.rtcsync_second = satioData.local_second;
-    satioData.rtcsync_year = satioData.local_year;
-    satioData.rtcsync_month = satioData.local_month;
-    satioData.rtcsync_day = satioData.local_mday;
-    satioData.rtcsync_unixtime = rtc.now().unixtime();
+/* Rule 8.7: internal linkage; only called from storeSyncTime() in this
+   file. Copies a SatIOTimeData's live fields into its own sync_* fields, so
+   each clock domain remembers what it read at the moment of the last sync
+   alongside what it reads live. All sync_* char buffers are declared with
+   the exact same size as their live counterpart, so a straight memcpy of
+   the whole (already null-terminated) buffer is safe. */
+/**
+ * @brief Sync time stored is derived from each SatIOTimeData unixtime_uS.
+ *        Therefore sync time reflects the SatIOTimeData unixtime_uS arg, rather than being
+ *        strictly UTC0/local/etc.
+ *        This allows for unique sync times for each instance of SatIOTimeData.
+ *        Example:
+ *          systemTime sync time is in system time.
+ *          localTime sync time is in local time.
+ *
+ */
+static void snapshotSyncFields(SatIOTimeData &t) {
+  t.sync_unixtime_uS = t.unixtime_uS;
+  t.sync_hour   = t.hour;
+  t.sync_minute = t.minute;
+  t.sync_second = t.second;
+  t.sync_year   = t.year;
+  t.sync_month  = t.month;
+  t.sync_mday   = t.mday;
+  t.sync_yday   = t.yday;
+  t.sync_wday   = t.wday;
 
-    formatTimeStrings(satioData.rtcsync_hour, satioData.rtcsync_minute, satioData.rtcsync_second,
-                       satioData.formatted_rtc_sync_time, sizeof(satioData.formatted_rtc_sync_time),
-                       satioData.padded_rtc_sync_time_HHMMSS, sizeof(satioData.padded_rtc_sync_time_HHMMSS));
+  memcpy(t.sync_wday_name, t.wday_name, sizeof(t.wday_name));
+  memcpy(t.sync_month_name, t.month_name, sizeof(t.month_name));
 
-    formatDateStrings(satioData.rtcsync_day, satioData.rtcsync_month, satioData.rtcsync_year,
-                       satioData.formatted_rtc_sync_date_DDMMYYYY, sizeof(satioData.formatted_rtc_sync_date_DDMMYYYY),
-                       satioData.padded_rtc_sync_date_DDMMYYYY, sizeof(satioData.padded_rtc_sync_date_DDMMYYYY),
-                       satioData.formatted_rtc_sync_short_date_DDMMYY, sizeof(satioData.formatted_rtc_sync_short_date_DDMMYY),
-                       NULL, 0);
+  memcpy(t.sync_formatted_time_HHMMSS, t.formatted_time_HHMMSS, sizeof(t.formatted_time_HHMMSS));
+  memcpy(t.sync_formatted_date_DDMMYY, t.formatted_date_DDMMYY, sizeof(t.formatted_date_DDMMYY));
+  memcpy(t.sync_formatted_date_DDMMYYYY, t.formatted_date_DDMMYYYY, sizeof(t.formatted_date_DDMMYYYY));
 
-    // RTC sync latitude/longitude/altitude (unique to this function).
-    snprintf(satioData.rtcsync_latitude, sizeof(satioData.rtcsync_latitude), "%.7f", satioData.degrees_latitude);
-    snprintf(satioData.rtcsync_longitude, sizeof(satioData.rtcsync_longitude), "%.7f", satioData.degrees_longitude);
+  memcpy(t.sync_padded_time_HHMMSS, t.padded_time_HHMMSS, sizeof(t.padded_time_HHMMSS));
+  memcpy(t.sync_padded_hour_HH, t.padded_hour_HH, sizeof(t.padded_hour_HH));
+  memcpy(t.sync_padded_minute_MM, t.padded_minute_MM, sizeof(t.padded_minute_MM));
+  memcpy(t.sync_padded_second_SS, t.padded_second_SS, sizeof(t.padded_second_SS));
 
-    memset(satioData.rtcsync_altitude, 0, sizeof(satioData.rtcsync_altitude));
-    strncpy(satioData.rtcsync_altitude, gnggaData.altitude, sizeof(satioData.rtcsync_altitude) - 1U);
+  memcpy(t.sync_padded_date_DDMMYY, t.padded_date_DDMMYY, sizeof(t.padded_date_DDMMYY));
+  memcpy(t.sync_padded_date_DDMMYYYY, t.padded_date_DDMMYYYY, sizeof(t.padded_date_DDMMYYYY));
+  memcpy(t.sync_padded_day_DD, t.padded_day_DD, sizeof(t.padded_day_DD));
+  memcpy(t.sync_padded_month_MM, t.padded_month_MM, sizeof(t.padded_month_MM));
+  memcpy(t.sync_padded_year_YY, t.padded_year_YY, sizeof(t.padded_year_YY));
+  memcpy(t.sync_padded_year_YYYY, t.padded_year_YYYY, sizeof(t.padded_year_YYYY));
+
+  t.sync = true;
+}
+
+/**
+ * Snapshots every clock domain's live fields into its own sync_* fields.
+ * Called once a sync (manual or GPS) has been applied to the system clock
+ * and every domain refreshed from it, so e.g. satioData.systemTime.hour is
+ * "now" and satioData.systemTime.sync_hour is "at the last sync".
+ */
+void storeSyncTime(void) {
+  snapshotSyncFields(satioData.GPSTime);
+  snapshotSyncFields(satioData.systemTime);
+  snapshotSyncFields(satioData.localTime);
+  snapshotSyncFields(satioData.localMeanSolarTime);
+}
+
+/* Rule 8.7: internal linkage; only called from setSystemTime() and
+   extractDateTimeFromGPSData() in this file. GPS NMEA dates and the CLI's
+   --set-datetime command both give a 2-digit year (e.g. 25 for 2025). */
+static uint16_t normalizeTwoDigitYear(uint16_t year) {
+  return (year < 100U) ? (year + 2000U) : year;
 }
 
 // ----------------------------------------------------------------------------------------
 // setSystemTime.
 // ----------------------------------------------------------------------------------------
+/**
+ * Applies a datetime pending in temporary values.
+ */
 void setSystemTime(long usec) {
-  // -----------------------------------------------------
-  // System time = Local Time.
-  // -----------------------------------------------------
+  uint16_t full_year = normalizeTwoDigitYear((uint16_t)satioData.tmp_year_int);
+
   struct tm tmpti = {};
-  tmpti.tm_year = int(rtc.now().year()) - LAST_EPOCH; // Years since 1900 (since last epoch)
-  tmpti.tm_mon = rtc.now().month() - 1; // Months 0-11
-  tmpti.tm_mday = rtc.now().day();
-  tmpti.tm_hour = rtc.now().hour();
-  tmpti.tm_min = rtc.now().minute();
-  tmpti.tm_sec = rtc.now().second();
+  tmpti.tm_year = (int)full_year - LAST_EPOCH; // Years since 1900
+  tmpti.tm_mon = (int)satioData.tmp_month_int - 1; // Months 0-11
+  tmpti.tm_mday = (int)satioData.tmp_day_int;
+  tmpti.tm_hour = (int)satioData.tmp_hour_int;
+  tmpti.tm_min = (int)satioData.tmp_minute_int;
+  tmpti.tm_sec = (int)satioData.tmp_second_int;
   tmpti.tm_isdst = -1; // No DST
   time_t now = mktime(&tmpti);
   tv_now = {
-      .tv_sec = now + satioData.utc_second_offset, // negative utc_second_offset will be deducted.
+      .tv_sec = now, // systemTime is always UTC.
       .tv_usec = usec
   };
   /* Rule 15.7: a terminating else with no empty if-branch -- the failure
@@ -747,23 +609,31 @@ void setSystemTime(long usec) {
 // ----------------------------------------------------------------------------------------
 void getSystemTime(void) {
   // --------------------------------------------------------
-  // System time = Local Time
-  // This function must be called in order to update timeinfo
-  // Only use when required and alternatively, use other
-  // stored times when a lower time resolution is required.
+  // This function must be called in order to update timeinfo.
+  // More calls means higher resolution of system time, and can therefore decrease performance.
+  // All time is derived from tv_now/timeinfo.
   // --------------------------------------------------------
-  xSemaphoreTake(systemTimeMutex, portMAX_DELAY);
   gettimeofday(&tv_now, NULL);
-  timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
+  timeinfo = localtime(&tv_now.tv_sec);
   // --------------------------------------------------------
   // Keep this function quick by only storing unixtime uS.
   // --------------------------------------------------------
-  satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
-  xSemaphoreGive(systemTimeMutex);
+  satioData.systemTime.unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+}
+
+// ----------------------------------------------------------------------------------------
+// storeSystemTime.
+// ----------------------------------------------------------------------------------------
+/**
+ * Fills satioData.systemTime from timeinfo.
+ * System time should always be UTC+-0.
+ */
+void storeSystemTime(void) {
+  storeTimeFromTm(satioData.systemTime, *timeinfo, satioData.systemTime.unixtime_uS);
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------
-//                                                                                                              SYNC RTC FROM GPS
+//                                                                                                              SYNC SYSTEM TIME FROM GPS
 // ------------------------------------------------------------------------------------------------------------------------------
 void extractDateTimeFromGPSData(void) {
   memset(satioData.tmp_day, 0, sizeof(satioData.tmp_day));
@@ -795,82 +665,117 @@ void extractDateTimeFromGPSData(void) {
   satioData.tmp_minute_int=atoi(satioData.tmp_minute);
   satioData.tmp_second_int=atoi(satioData.tmp_second);
   satioData.tmp_millisecond_int=atoi(satioData.tmp_millisecond);
+
+  // ----------------------------------------------------------------------------
+  // Reflect what GPS is currently reporting into satioData.GPSTime, distinct
+  // from the tmp_* scratch fields above (which feed setSystemTime()).
+  // ----------------------------------------------------------------------------
+  uint16_t full_year = normalizeTwoDigitYear((uint16_t)satioData.tmp_year_int);
+  struct tm gps_tm = {};
+  gps_tm.tm_year = (int)full_year - LAST_EPOCH;
+  gps_tm.tm_mon = satioData.tmp_month_int - 1;
+  gps_tm.tm_mday = satioData.tmp_day_int;
+  gps_tm.tm_hour = satioData.tmp_hour_int;
+  gps_tm.tm_min = satioData.tmp_minute_int;
+  gps_tm.tm_sec = satioData.tmp_second_int;
+  gps_tm.tm_isdst = -1;
+  time_t gps_epoch_sec = mktime(&gps_tm); // Normalizes tm_wday/tm_yday too.
+  uint64_t gps_unixtime_uS = ((uint64_t)gps_epoch_sec * 1000000ULL) +
+                              ((uint64_t)satioData.tmp_millisecond_int * 10000ULL); // centiseconds -> uS
+  storeTimeFromTm(satioData.GPSTime, gps_tm, gps_unixtime_uS);
 }
 
-/* Rule 8.7: internal linkage; only called from syncRTC() in this file. */
-static void setRTCDateTime(void) {
-  rtc.adjust(DateTime((uint16_t)satioData.tmp_year_int,
-            (uint8_t)satioData.tmp_month_int,
-            (uint8_t)satioData.tmp_day_int,
-            (uint8_t)satioData.tmp_hour_int,
-            (uint8_t)satioData.tmp_minute_int,
-            (uint8_t)satioData.tmp_second_int));
-  // Serial.println("[ " + String(satioData.local_unixtime_uS) + " ] sync time in setRTCDateTime");
-  storeRTCSYNCTime();
-  satioData.sync_rtc_immediately_flag=false;
+void applyPendingDateTimeStore(void) {
+  storeSystemTime();
+  storeLocalTime();
+  storeLMST();
 }
 
-// GPS sync timeout timer
-int64_t gps_sync_timestamp = 0;
-const int64_t GPS_SYNC_TIMEOUT_uS = 1000000; // Reset gps_sync after 1 second
+/* */
+static void applyPendingDateTime(void) {
+  /**
+   * For efficiency, just update system datetime and sync datetime here.
+   *
+   */
+  int64_t entry_uS = esp_timer_get_time();
+  int64_t handoff_uS = entry_uS - gps_read_done_uS;
 
-void syncRTC(void) {
+  int64_t t_setSystemTime_uS = esp_timer_get_time();
+  setSystemTime(0);
+  t_setSystemTime_uS = esp_timer_get_time() - t_setSystemTime_uS;
 
-  // Set GPS sync flag false
-  if (satioData.gps_sync == true) {
-    if ((satioData.local_unixtime_uS >= gps_sync_timestamp + GPS_SYNC_TIMEOUT_uS) ||
-        (satioData.local_unixtime_uS < gps_sync_timestamp)) {
-      satioData.gps_sync = false;
+  int64_t t_getSystemTime_uS = esp_timer_get_time();
+  xSemaphoreTake(systemTimeMutex, portMAX_DELAY);
+  getSystemTime();
+  xSemaphoreGive(systemTimeMutex);
+  t_getSystemTime_uS = esp_timer_get_time() - t_getSystemTime_uS;
+
+  int64_t t_storeSyncTime_uS = esp_timer_get_time();
+  storeSyncTime();
+  t_storeSyncTime_uS = esp_timer_get_time() - t_storeSyncTime_uS;
+
+  /**
+   * [ Utlimately this time includes ]
+   *  Through  readGPS()
+   *           validateGPSData()
+   *           syncTimeGPS()
+   *           extractDateTimeFromGPSData()
+   *  Finally: applyPendingDateTime()
+   * 
+   * Sample ( 0.4 milliseconds = 400 microseconds ):
+   * 
+   * SATIO_DISPLAY_OPTION_HEADLESS + Balanced Power: total=389 uS  handoff=239 uS  setSystemTime=54 uS  getSystemTime=38 uS  storeSyncTime=50 uS
+   * 
+   * SATIO_DISPLAY_OPTION_HEADLESS + Ultimate Perf: total=501 uS  handoff=345 uS  setSystemTime=60 uS  getSystemTime=38 uS  storeSyncTime=50 uS (^ -100 uS)
+   * 
+   * SATIO_DISPLAY_OPTION_LVGL + Balanced Power: total=1338 uS  handoff=1183 uS  setSystemTime=63 uS  getSystemTime=38 uS  storeSyncTime=49 uS
+   * 
+   * SATIO_DISPLAY_OPTION_LVGL + Ultimate Perf: total=1410 uS  handoff=1260 uS  setSystemTime=58 uS  getSystemTime=38 uS  storeSyncTime=49 uS (^ -100 uS)
+   */
+  int64_t readGPS_to_applyPendingDateTime_uS = esp_timer_get_time() - gps_read_done_uS;
+  printf("readGPS->applyPendingDateTime: total=%lld uS  handoff=%lld uS  setSystemTime=%lld uS  getSystemTime=%lld uS  storeSyncTime=%lld uS\n",
+         (long long)readGPS_to_applyPendingDateTime_uS,
+         (long long)handoff_uS,
+         (long long)t_setSystemTime_uS,
+         (long long)t_getSystemTime_uS,
+         (long long)t_storeSyncTime_uS);
+}
+
+// Reset GPSTime.sync after 1 second
+int64_t GPS_SYNC_TIMEOUT_uS = 1000000;
+
+void syncTimeGPS(void) {
+
+  // Clear sync flag (used for gps sync indicators)
+  if (satioData.GPSTime.sync == true) {
+    if ((satioData.systemTime.unixtime_uS >= satioData.GPSTime.sync_unixtime_uS + GPS_SYNC_TIMEOUT_uS) ||
+        (satioData.systemTime.unixtime_uS < satioData.GPSTime.sync_unixtime_uS)) {
+      satioData.GPSTime.sync = false;
     }
   }
 
   /**
-   * Manually set RTC datetime.
-   * 
-   * (1) Set set_time_automatically false.
-   * (1) Set temporary datetime values.
-   * (2) Set satioData.set_rtc_datetime_flag true.
+   * Automatically set system time with GPS data.
    */
-  if (satioData.set_time_automatically==false && satioData.set_rtc_datetime_flag==true)
-  {
-    satioData.set_rtc_datetime_flag=false;
-    setRTCDateTime();
-    setSystemTime(0);
-    getSystemTime();
-    storeLocalTime();
-    storeLMST();
-    printf("[rtc] sync 2: %s\n", String(rtc.now().timestamp()).c_str());
-  }
-
-  /**
-   * Automatically set RTC datetime with GPS data.
-   */
-  else if (satioData.set_time_automatically==true && satioData.set_rtc_datetime_flag==true) {
-    satioData.set_rtc_datetime_flag=false;
+  if (satioData.systemTime.set_time_automatically==true) {
     // ----------------------------------------------------------------------------------------------
-    /*                                 SYNC RTC TIME & DATE FROM GPS                               */
+    /*                                 SYNC SYSTEM TIME FROM GPS                                    */
     // ----------------------------------------------------------------------------------------------
     if ((atoi(gnggaData.satellite_count)>3) && (atoi(gnggaData.gps_precision_factor)<=3)) {
       // ----------------------------------------------------------------------------
       // Extract just what we need to perform a timing check.
       // ----------------------------------------------------------------------------
       extractDateTimeFromGPSData();
-      if (satioData.sync_rtc_immediately_flag==true) {
+      if (satioData.systemTime.sync_immediately_flag==true) {
         // ----------------------------------------------------------------------------
         // Sync within the first 100 milliseconds of any second.
         // ----------------------------------------------------------------------------
         if (satioData.tmp_millisecond_int==0) {
-          // --------------------------------------------------------------------------
-          // Sync RTC to UTC.
-          // --------------------------------------------------------------------------
-          setRTCDateTime();
-          setSystemTime(0);
-          getSystemTime();
-          storeLocalTime();
-          storeLMST();
-          satioData.gps_sync=true;
-          gps_sync_timestamp = satioData.local_unixtime_uS;
-          printf("[rtc] sync 0: %s\n", String(rtc.now().timestamp()).c_str());
+          applyPendingDateTime();
+          satioData.systemTime.sync_immediately_flag=false;
+          satioData.GPSTime.sync = true;
+          satioData.GPSTime.sync_unixtime_uS = satioData.systemTime.unixtime_uS;
+          printf("syn: 0\n");
         }
       }
       else {
@@ -878,17 +783,11 @@ void syncRTC(void) {
         // Sync within the first 100 milliseconds of any minute.
         // ----------------------------------------------------------------------------
         if (satioData.tmp_second_int==0 && satioData.tmp_millisecond_int==0) {
-          // --------------------------------------------------------------------------
-          // Sync RTC to UTC.
-          // --------------------------------------------------------------------------
-          setRTCDateTime();
-          setSystemTime(0);
-          getSystemTime();
-          storeLocalTime();
-          storeLMST();
-          satioData.gps_sync=true;
-          gps_sync_timestamp = satioData.local_unixtime_uS;
-          printf("[rtc] sync 1: %s\n", String(rtc.now().timestamp()).c_str());
+          applyPendingDateTime();
+          satioData.systemTime.sync_immediately_flag=false;
+          satioData.GPSTime.sync = true;
+          satioData.GPSTime.sync_unixtime_uS = satioData.systemTime.unixtime_uS;
+          printf("syn: 1\n");
         }
       }
     }
@@ -896,37 +795,38 @@ void syncRTC(void) {
 }
 
 // ----------------------------------------------------------------------------------------
-// setSatIOData.
-// ----------------------------------------------------------------------------------------
-void setSatIOData(void) {
-    syncRTC();
-    setSatioCoordinates();
-    setSatIOAltitude();
-    setSatIOSpeed();
-    setSatIOGroundHeading();
-    setGroundHeadingName(atof(gnrmcData.ground_heading));
-}
-
-// ----------------------------------------------------------------------------------------
 // initSystemTime.
 // ----------------------------------------------------------------------------------------
 void initSystemTime(void) {
-  Serial.println("[SYNC] synchronizing system time with RTC");
-  int rtc_second_now=rtc.now().second();
+  Serial.println("[SYNC] initializing system time");
+  // No external RTC chip to seed from: read whatever the system clock
+  // currently holds and populate the derived domains. syncTime() takes over
+  // once a GPS fix is available.
   getSystemTime();
-  while (rtc_second_now==rtc.now().second()) { // wait to sync
-    setSystemTime(0);
-  }
-  getSystemTime();
+  storeSystemTime();
   storeLocalTime();
-  storeRTCTime();
   storeLMST();
-  Serial.println("[SYNC] RTC datetime:    " +
-                  String(satioData.padded_rtc_time_HHMMSS) + " " +
-                  String(satioData.padded_rtc_date_DDMMYYYY));
   Serial.println("[SYNC] system datetime: " +
-                 String(satioData.padded_local_time_HHMMSS) + " " +
-                 String(satioData.padded_local_date_DDMMYYYY) +
+                 String(satioData.systemTime.padded_time_HHMMSS) + " " +
+                 String(satioData.systemTime.padded_date_DDMMYYYY) +
                  " (+- offset seconds " +
-                 String(satioData.utc_second_offset) + ")");
+                 String((long)satioData.systemTime.second_offset) + ")");
+}
+
+// ----------------------------------------------------------------------------------------
+// printAllTimes.
+// ----------------------------------------------------------------------------------------
+/* Rule 8.7: internal linkage; only called from printAllTimes() in this file. */
+static void printTimeDomain(const char *label, const SatIOTimeData &t) {
+  printf("[%s] %s %s  (sync: %s %s)\n",
+         label,
+         t.padded_time_HHMMSS, t.padded_date_DDMMYYYY,
+         t.sync_padded_time_HHMMSS, t.sync_padded_date_DDMMYYYY);
+}
+
+void printAllTimes(void) {
+  printTimeDomain("GPSTime", satioData.GPSTime);
+  printTimeDomain("systemTime", satioData.systemTime);
+  printTimeDomain("localTime", satioData.localTime);
+  printTimeDomain("localMeanSolarTime", satioData.localMeanSolarTime);
 }

@@ -92,8 +92,8 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_DISPLAY_PRIORITY               5
 #define TASK_SATIO_SERIAL_TX_PRIORITY       5
 // CORE ASSIGNMENT
-#define TASK_SYSTEM_TIME_CORE               1
-#define TASK_GPS_CORE                       1
+#define TASK_SYSTEM_TIME_CORE               0
+#define TASK_GPS_CORE                       0
 #define TASK_GYRO_CORE                      1
 #define TASK_MULTIPLEXERS_CORE              1
 #define TASK_SWITCHES_CORE                  1
@@ -184,7 +184,7 @@ void syncTasks() {
   Serial.println("[syncronizing system] please wait");
   global_task_sync = false;
   // Boolean object used directly as the controlling expression (MISRA C 2012 Rule 14.4).
-  while (satioData.sync_rtc_immediately_flag) {
+  while (satioData.systemTime.sync_immediately_flag) {
     getSystemTime();
     system_sync_retry_max--;
     if (system_sync_retry_max <= 0) {
@@ -250,9 +250,14 @@ void stepFFCounter(SystemConuters &counters, int32_t steps) {
 
 
 static void intervalBreach1Second(void) {
-  storeLocalTime();
-  storeRTCTime();
-  storeLMST();
+  // printf("system uS unixtime: %lld\n", satioData.systemTime.unixtime_uS);
+  
+  /**
+   * @brief Uncomment to update every second.
+   * @note Enabling applyPendingDateTimeStore here provides 1 second resolution
+   *       for system, local and LMST.
+   */
+  applyPendingDateTimeStore();
 
   totalCounters(systemData.counters_st);
   totalCounters(systemData.counters_gps);
@@ -276,7 +281,7 @@ static void intervalBreach1Second(void) {
     systemData.uptime_seconds = 0;
     printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
   }
-  outputStat();
+  outputStat(); // uncomment for full stat
 
   clearCounters(systemData.counters_st);
   clearCounters(systemData.counters_gps);
@@ -292,6 +297,13 @@ static void intervalBreach1Second(void) {
   clearCounters(systemData.counters_stg);
   clearCounters(systemData.counters_log);
   clearCounters(systemData.counters_satio_serial_tx);
+
+  // uncomment to set every second (ensure not called elsewhere)
+  setSatioCoordinates();
+  setSatIOAltitude();
+  setSatIOSpeed();
+  setSatIOGroundHeading();
+  setGroundHeadingName(atof(gnrmcData.ground_heading));
 }
 
 // Callback for the one-shot esp_timer armed by TASK_FREQ_WAIT below. Runs in
@@ -362,6 +374,8 @@ bool taskFrequencySatioSerialTx() { TASK_FREQ_WAIT(TASK_MAX_FREQ_SATIO_SERIAL_TX
  *        Higher frequency this task -> greater resolution of system time.
  * @note This task should also fascilitate setting time manually. 
  */
+bool gps_sync_ready = false;
+int64_t gps_read_done_uS = 0;
 
 static void taskSystemTime(void *pvParameters) {
   (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
@@ -370,26 +384,31 @@ static void taskSystemTime(void *pvParameters) {
 
     if (taskFrequencySystemTime() == true) {
       xSemaphoreTake(dataMutex, portMAX_DELAY);
+
       // --------------------------------------------
-      // System Timing.
+      // Update System Unixtime
       // --------------------------------------------
+      /**
+       * @brief Each call to getSystemTime() updates tv_now & unixtime_uS.
+       * @note System unixtime_uS & tv_now are used for internal timings.
+       * @warning If never called then tv_now will go stale.
+       */
       xSemaphoreTake(systemTimeMutex, portMAX_DELAY);
-      gettimeofday(&tv_now, NULL);
-      timeinfo = localtime(&tv_now.tv_sec); // Assumes localtime works
-      satioData.local_unixtime_uS = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+      getSystemTime();
       xSemaphoreGive(systemTimeMutex);
 
-      // 1-second interval breach.
+      // --------------------------------------------
+      // 1 Second interval
+      // --------------------------------------------
+      /**
+       * @brief Creates a 1Hz gate for timing related calls that
+       *        do not need to run at the same Hz as this task.
+       * @warning getSystemTime must be called to update tv_now.
+       */
       if (tv_now.tv_sec != prev_tv_sec) {
         prev_tv_sec = tv_now.tv_sec;
         intervalBreach1Second();
       }
-      esp_task_wdt_reset();
-
-      // --------------------------------------------
-      // Set SatIO Data
-      // --------------------------------------------
-      setSatIOData(); // ensure sync once
       esp_task_wdt_reset();
 
       // --------------------------------------------
@@ -430,11 +449,15 @@ static void taskGPS(void *pvParameters) {
 
       if (readGPS() == true)
       {
-        esp_task_wdt_reset();
+        gps_read_done_uS = esp_timer_get_time();
         if (validateGPSData() == true)
         {
           xSemaphoreTake(dataMutex, portMAX_DELAY);
-          satioData.set_rtc_datetime_flag=true;
+
+          // --------------------------------------------
+          // Sync System Unixtime With GPS 
+          // --------------------------------------------
+          syncTimeGPS();
           esp_task_wdt_reset();
 
           // --------------------------------------------
@@ -447,7 +470,6 @@ static void taskGPS(void *pvParameters) {
                   satioData.system_speed,
                   atof(gnggaData.gps_precision_factor),
                   gyroData.gyro_0_ang_z);
-
 
           // --------------------------------------------
           // Task frequency counter
@@ -582,7 +604,7 @@ static void taskGyro(void *pvParameters) {
                                     gyroData.gyro_0_ang_z,
                                     satioData.system_ground_heading,
                                     satioData.system_speed,
-                                    satioData.local_unixtime_uS)) {
+                                    satioData.systemTime.unixtime_uS)) {
         // --------------------------------------------
         // Task frequency counter
         // --------------------------------------------
@@ -779,15 +801,15 @@ static void taskUniverse(void *pvParameters) {
       setSiderealData(
         satioData.system_degrees_latitude,
         satioData.system_degrees_longitude,
-        satioData.rtc_year,
-        satioData.rtc_month,
-        satioData.rtc_mday,
-        satioData.rtc_hour,
-        satioData.rtc_minute,
-        satioData.rtc_second,
-        satioData.local_hour,
-        satioData.local_minute,
-        satioData.local_second,
+        satioData.systemTime.year,
+        satioData.systemTime.month,
+        satioData.systemTime.mday,
+        satioData.systemTime.hour,
+        satioData.systemTime.minute,
+        satioData.systemTime.second,
+        satioData.systemTime.hour,
+        satioData.localTime.minute,
+        satioData.localTime.second,
         satioData.system_altitude);
 
       // ------------------------------------------------
@@ -796,7 +818,7 @@ static void taskUniverse(void *pvParameters) {
       esp_task_wdt_reset();
       trackPlanets();
       esp_task_wdt_reset();
-      setMeteorShowerWarning(satioData.local_month, satioData.local_mday);
+      setMeteorShowerWarning(satioData.localTime.month, satioData.localTime.mday);
       esp_task_wdt_reset();
 
       // ------------------------------------------------

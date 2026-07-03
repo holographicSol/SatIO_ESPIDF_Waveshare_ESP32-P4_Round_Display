@@ -396,27 +396,27 @@ bool matrixSwitch(void) {
           break;
 
         case INDEX_MATRIX_SWITCH_FUNCTION_TIME_HHMMSS:
-          tmp_x = (double)atol(satioData.padded_local_time_HHMMSS);
+          tmp_x = (double)atol(satioData.localTime.padded_time_HHMMSS);
           handle_digit = true;
           break;
 
         case INDEX_MATRIX_SWITCH_FUNCTION_WEEK_DAY:
-          tmp_x = (double)satioData.local_wday;
+          tmp_x = (double)satioData.localTime.wday;
           handle_digit = true;
           break;
 
         case INDEX_MATRIX_SWITCH_FUNCTION_MONTH_DAY:
-          tmp_x = (double)satioData.local_mday;
+          tmp_x = (double)satioData.localTime.mday;
           handle_digit = true;
           break;
 
         case INDEX_MATRIX_SWITCH_FUNCTION_MONTH:
-          tmp_x = (double)satioData.local_month;
+          tmp_x = (double)satioData.localTime.month;
           handle_digit = true;
           break;
 
         case INDEX_MATRIX_SWITCH_FUNCTION_YEAR:
-          tmp_x = (double)satioData.local_year;
+          tmp_x = (double)satioData.localTime.year;
           handle_digit = true;
           break;
 
@@ -921,12 +921,12 @@ bool matrixSwitch(void) {
         }
 
         case INDEX_MATRIX_LMST_TIME:
-          tmp_x = (double)atol(satioData.padded_LMST_time_HHMMSS);
+          tmp_x = (double)atol(satioData.localMeanSolarTime.padded_time_HHMMSS);
           handle_digit = true;
           break;
 
         case INDEX_MATRIX_LMST_DATE:
-          tmp_x = (double)atol(satioData.padded_LMST_date_DDMMYYYY);
+          tmp_x = (double)atol(satioData.localMeanSolarTime.padded_date_DDMMYYYY);
           handle_digit = true;
           break;
 
@@ -1134,23 +1134,23 @@ void get_matrix_function_comparitor(int32_t index_matrix_value_comparitor, char 
   switch (index_matrix_value_comparitor) {
 
     case INDEX_MATRIX_SWITCH_FUNCTION_TIME_HHMMSS:
-      snprintf(out, out_size, "%s", satioData.padded_local_time_HHMMSS);
+      snprintf(out, out_size, "%s", satioData.localTime.padded_time_HHMMSS);
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_WEEK_DAY:
-      snprintf(out, out_size, "%.10g", (double)satioData.local_wday);
+      snprintf(out, out_size, "%.10g", (double)satioData.localTime.wday);
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_MONTH_DAY:
-      snprintf(out, out_size, "%.10g", (double)satioData.local_mday);
+      snprintf(out, out_size, "%.10g", (double)satioData.localTime.mday);
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_MONTH:
-      snprintf(out, out_size, "%.10g", (double)satioData.local_month);
+      snprintf(out, out_size, "%.10g", (double)satioData.localTime.month);
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_YEAR:
-      snprintf(out, out_size, "%.10g", (double)satioData.local_year);
+      snprintf(out, out_size, "%.10g", (double)satioData.localTime.year);
       break;
 
     case INDEX_MATRIX_SWITCH_FUNCTION_SATIO_DEG_LAT:

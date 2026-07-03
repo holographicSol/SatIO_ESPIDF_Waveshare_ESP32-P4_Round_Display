@@ -308,22 +308,12 @@ extern "C" void app_main(void)
     ESP_LOGI(APP_MAIN_TAG, "UART0 ready - send data to GPIO1 (RX0)");
 
     /** ----------------------------------------------------------------------------
-     * I2C Bus 0: RTC.
+     * System Time
      *
-     * (1) begin()'s and setBufferSize()'s results are not needed here, so
-     *     each discard is made explicit with a (void) cast (MISRA C 2012
-     *     Rule 17.7).
-     * (2) Brings up I2C bus 0 and the DS3231 real-time clock attached to
-     *     it, then seeds the system clock from it.
+     * Requires battery for system RTC
      */
-    ESP_LOGI(APP_MAIN_TAG, "Initializing RTC");
-    (void)iic_0.setPins(IIC_BUS0_SDA, IIC_BUS0_SCL);
-    (void)iic_0.setBufferSize(MAX_IIC_BUFFER_SIZE);
-    iic_0.setTimeOut(I2C_TIMEOUT_MS_BUS0);
-    (void)iic_0.begin(IIC_BUS0_SDA, IIC_BUS0_SCL, I2C_CLOCK_Hz_BUS0);
-    (void)rtc.begin(&iic_0);
-    const uint32_t rtc_settle_delay_ms = 200U; // Time for the RTC to settle after begin().
-    delay(rtc_settle_delay_ms);
+    ESP_LOGI(APP_MAIN_TAG, "Initializing system time");
+    satioData.systemTime.sync_immediately_flag=true;
     initSystemTime();
 
     /** ----------------------------------------------------------------------------

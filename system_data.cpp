@@ -111,10 +111,10 @@ void restore_system_defaults(void) {
   systemData.output_meteors_enabled = false;
 
   // Restore SATIO time-sync settings to their startup values.
-  satioData.utc_second_offset = 0;
-  satioData.utc_auto_offset_flag = false;
-  satioData.set_time_automatically = true;
-  satioData.sync_rtc_immediately_flag = true;
+  satioData.systemTime.second_offset = 0;
+  satioData.systemTime.auto_offset_flag = false;
+  satioData.systemTime.set_time_automatically = true;
+  satioData.systemTime.sync_immediately_flag = true;
 
   // Restore INS thresholds and mode to their startup values.
   insData.INS_REQ_GPS_PRECISION = DEFAULT_INS_REQ_GPS_PRECISION;

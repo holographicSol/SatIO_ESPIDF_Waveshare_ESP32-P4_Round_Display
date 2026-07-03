@@ -589,7 +589,7 @@ static const GPATTFieldSpec gpatt_fields[MAX_GPATT_ELEMENTS] = {
     { &GPATTStruct::custom_logo_10,    val_custom_flag,               false },
     { &GPATTStruct::custom_logo_11,    val_custom_flag,               false },
     { &GPATTStruct::speed_num,         val_speed_num_gpatt,           false },
-    { &GPATTStruct::scalable,          val_custom_flag,               false },
+    { &GPATTStruct::scalable,          val_custom_flag,               true  },
     { nullptr,                         nullptr,                       false }, /* checksum: verified before tokenizing */
 };
 
@@ -784,7 +784,7 @@ bool readGPS(void)
 
     serial1Data.gngga_bool = false;
     serial1Data.gnrmc_bool = false;
-    serial1Data.gpatt_bool = false;
+    serial1Data.gpatt_bool = true; // false if using gpatt
 
     /* Rule 15.4: no break statements in this loop —
        `done` is the single point of control instead. */
@@ -823,12 +823,13 @@ bool readGPS(void)
                 }
                 else if (serial1Data.gpatt_bool == false)
                 {
-                    if (strncmp(serial1Data.BUFFER, "$GPATT", 6) == 0)
-                    {
-                        (void)strncpy(gpattData.sentence, serial1Data.BUFFER, sizeof(gpattData.sentence) - 1U);
-                        gpattData.sentence[sizeof(gpattData.sentence) - 1U] = '\0';
-                        serial1Data.gpatt_bool = true;
-                    }
+                    // uncomment for gpatt
+                    // if (strncmp(serial1Data.BUFFER, "$GPATT", 6) == 0)
+                    // {
+                    //     (void)strncpy(gpattData.sentence, serial1Data.BUFFER, sizeof(gpattData.sentence) - 1U);
+                    //     gpattData.sentence[sizeof(gpattData.sentence) - 1U] = '\0';
+                        // serial1Data.gpatt_bool = true;
+                    // }
                 }
                 else
                 {
@@ -927,7 +928,7 @@ bool validateGPSData(void)
     // ------------------------------------------------
     gnggaData.valid_checksum = false;
     gnrmcData.valid_checksum = false;
-    gpattData.valid_checksum = false;
+    gpattData.valid_checksum = true; // false if using gpatt
     bool validated = false;
 
     /* Parse data only once all three sentences have been collected. */
@@ -949,13 +950,14 @@ bool validateGPSData(void)
             GNRMC();
         }
 
-        (void)strncpy(gpattData.outsentence, gpattData.sentence, sizeof(gpattData.outsentence) - 1U);
-        gpattData.outsentence[sizeof(gpattData.outsentence) - 1U] = '\0';
-        gpattData.valid_checksum = validateChecksumSerial1(gpattData.sentence);
-        if (gpattData.valid_checksum == true)
-        {
-            GPATT();
-        }
+        // uncomment for gpatt
+        // (void)strncpy(gpattData.outsentence, gpattData.sentence, sizeof(gpattData.outsentence) - 1U);
+        // gpattData.outsentence[sizeof(gpattData.outsentence) - 1U] = '\0';
+        // gpattData.valid_checksum = validateChecksumSerial1(gpattData.sentence);
+        // if (gpattData.valid_checksum == true)
+        // {
+        //     GPATT();
+        // }
     }
 
     if (gnggaData.valid_checksum && gnrmcData.valid_checksum && gpattData.valid_checksum)

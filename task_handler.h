@@ -33,6 +33,11 @@ extern TaskHandle_t TaskDisplayUpdate;
 extern TaskHandle_t TaskSystemTime;
 extern TaskHandle_t TaskSatioSerialTx;
 
+/* Timestamp (esp_timer_get_time(), uS since boot) captured the moment readGPS()
+   returns true in taskGPS. Used to measure readGPS() -> applyPendingDateTime()
+   latency across the taskGPS -> taskSystemTime handoff. */
+extern int64_t gps_read_done_uS;
+
 void createTaskStorage();
 void createTaskMultiplexers();
 void createTaskGyro();
