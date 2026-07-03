@@ -91,6 +91,14 @@ PwrConfig pwrConfigUltimatePerformance = {
 
 /**
  * @brief Current power configuration for the system.
- * @note Setup as required (default set to Balanced).
+ * @note Defined in config.h
  */
+#ifdef SATIO_DEFAULT_POWER_CONFIG_LOW_POWER
+PwrConfig pwrConfigCurrent = pwrConfigLowPower;
+#endif
+#ifdef SATIO_DEFAULT_POWER_CONFIG_BALANCED
 PwrConfig pwrConfigCurrent = pwrConfigBalanced;
+#endif
+#ifdef SATIO_DEFAULT_POWER_CONFIG_ULTIMATE_PERFORMANCE
+PwrConfig pwrConfigCurrent = pwrConfigUltimatePerformance;
+#endif

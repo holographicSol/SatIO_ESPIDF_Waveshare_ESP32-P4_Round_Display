@@ -59,6 +59,27 @@ extern bool ISR_Bool_MultiDisplayController_0;
  */
 #define SATIO_SERIAL_TX_OPTION_NEW_TASK
 // ----------------------------------------------------------------------------------------
+/**
+ * @brief SATIO_DEFAULT_POWER_CONFIG_LOW_POWER
+ * @def If defined then the default power configuration will be low power.
+ * @warning Ensure only one SATIO_DEFAULT_POWER_CONFIG is defined.
+ */
+// #define SATIO_DEFAULT_POWER_CONFIG_LOW_POWER
+
+/**
+ * @brief SATIO_DEFAULT_POWER_CONFIG_BALANCED
+ * @def If defined then the default power configuration will be balanced.
+ * @warning Ensure only one SATIO_DEFAULT_POWER_CONFIG is defined.
+ */
+#define SATIO_DEFAULT_POWER_CONFIG_BALANCED
+
+/**
+ * @brief SATIO_DEFAULT_POWER_CONFIG_ULTIMATE_PERFORMANCE
+ * @def If defined then the default power configuration will be ultimate performance.
+ * @warning Ensure only one SATIO_DEFAULT_POWER_CONFIG is defined.
+ */
+// #define SATIO_DEFAULT_POWER_CONFIG_ULTIMATE_PERFORMANCE
+// ----------------------------------------------------------------------------------------
 
 
 // ----------------------------------------------------------------------------------------
