@@ -479,16 +479,19 @@ RaDecData SiderealPlanets::getRADecFromLSTLat(double lst, double latitude_degree
 // ------------------------------------------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------------------------------------------------
-// modified: added to try and maintain time related decimal numbers < 60
+// modified: converts a true decimal-hours value (fraction = 1/60 hour) into
+// H.MM display form (fraction = minutes/100), so callers printing "%.2f"
+// show clock-style digits instead of a raw hour fraction.
 // ------------------------------------------------------------------------------------------------------------------------------
 double SiderealPlanets::inRange60(double d) {
-	int i = (int)d;
-	double remainder = d - i;
-	while (remainder > .59) {
-		remainder -= .10;
+	double h = floor(d);
+	double minutes = (d - h) * 60.0;
+	if (minutes >= 59.5) {  // would display as "H.60" when rounded to 2 decimals
+		minutes = 0.0;
+		h += 1.0;
+		if (h >= 24.0) h -= 24.0;
 	}
-	d = i + remainder;
-	return d;
+	return h + (minutes / 100.0);
 }
 // ------------------------------------------------------------------------------------------------------------------------------
 

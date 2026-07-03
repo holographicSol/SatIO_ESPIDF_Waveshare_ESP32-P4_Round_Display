@@ -14558,7 +14558,7 @@ matrix_function_container_t create_matrix_function_container(
         snprintf(dd_operator_name, sizeof(dd_operator_name), "%s", matrixData.matrix_function_operator_name[i]);
         lv_dropdown_add_option(result.dd_operator, dd_operator_name, LV_DROPDOWN_POS_LAST);
     }
-    lv_dropdown_set_selected(result.label_operator, 0);
+    lv_dropdown_set_selected(result.dd_operator, 0);
     lv_obj_add_event_cb(result.dd_operator, dd_operator_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Label Inverted

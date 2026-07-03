@@ -90,7 +90,7 @@
 #endif
 
 #define UART0_NUM               UART_NUM_0
-#define UART0_BUF_SIZE          (512)
+#define UART0_BUF_SIZE          (1024)
 #define UART0_RD_BUF_SIZE       (UART0_BUF_SIZE)
 #define UART0_QUEUE_LENGTH      (20)
 #define UART0_TASK_STACK_SIZE   (3072)
