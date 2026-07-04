@@ -31,11 +31,11 @@
 #define PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG 52
 
 /* Customize pins as required */
-// #define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_SO  12
-// #define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_S1  14
-// #define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_S2  27
-// #define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_S3  16
-// #define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_SIG 4
+#define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_SO  32
+#define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_S1  51
+#define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_S2  24
+#define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_S3  50
+#define PIN_ANALOG_DIGITAL_MULTIPLEXER_1_SIG 20
 
 /* Do not modify */
 #define I2C_MULTIPLEXER_TCA9548A_ADDRESS_0    0x70 // Default I2C address for TCA9548A
@@ -59,8 +59,9 @@ typedef struct {
   int pins[MAX_ANALOG_DIGITAL_MULTIPLEXER_PINS];
   double data[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
 } AnalogDigitalMultiplexer;
+
 extern AnalogDigitalMultiplexer ad_mux_0;
-// extern AnalogDigitalMultiplexer ad_mux_1;
+extern AnalogDigitalMultiplexer ad_mux_1;
 
 /**
  * Set IIC multiplexer channel
