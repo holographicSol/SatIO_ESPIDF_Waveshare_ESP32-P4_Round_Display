@@ -134,7 +134,7 @@ typedef struct PwrConfig {
 } PwrConfig;
 
 // ----------------------------------------------------------------------------------------
-// Low Power
+// Low Power Delay uS Times
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_LOW_GPS                         100000  // (10 Hz)
 
@@ -161,7 +161,7 @@ typedef struct PwrConfig {
 #define TASK_MAX_FREQ_LOW_SATIO_SERIAL_TX             100000  // (10 Hz)
 
 // ----------------------------------------------------------------------------------------
-// Balanced (Recommended)
+// Balanced Delay uS Times (Recommended)
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_BALANCED_GPS                    100000  // (10 Hz)
 
@@ -188,7 +188,7 @@ typedef struct PwrConfig {
 #define TASK_MAX_FREQ_BALANCED_SATIO_SERIAL_TX        5000    // (200 Hz)
 
 // ----------------------------------------------------------------------------------------
-// Perfromance: Ultimate Perfromance
+// Ultimate Perfromance Delay uS Times
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_HIGH_GPS                        100000  // (10 Hz)
 
