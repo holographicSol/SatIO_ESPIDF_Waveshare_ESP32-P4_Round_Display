@@ -687,6 +687,8 @@ typedef struct {
     lv_obj_t * sw_output_input_controller;
     lv_obj_t * lbl_output_admplex_0;
     lv_obj_t * sw_output_admplex_0;
+    lv_obj_t * lbl_output_admplex_1;
+    lv_obj_t * sw_output_admplex_1;
 
     lv_obj_t * lbl_output_sun;
     lv_obj_t * sw_output_sun;
@@ -765,6 +767,56 @@ typedef struct {
     
     lv_obj_t * lbl_title_chan_15;
     lv_obj_t * lbl_val_chan_15;
+
+    lv_obj_t * lbl_title_admplex_1;
+
+    lv_obj_t * lbl_title_chan1_0;
+    lv_obj_t * lbl_val_chan1_0;
+
+    lv_obj_t * lbl_title_chan1_1;
+    lv_obj_t * lbl_val_chan1_1;
+
+    lv_obj_t * lbl_title_chan1_2;
+    lv_obj_t * lbl_val_chan1_2;
+
+    lv_obj_t * lbl_title_chan1_3;
+    lv_obj_t * lbl_val_chan1_3;
+
+    lv_obj_t * lbl_title_chan1_4;
+    lv_obj_t * lbl_val_chan1_4;
+
+    lv_obj_t * lbl_title_chan1_5;
+    lv_obj_t * lbl_val_chan1_5;
+
+    lv_obj_t * lbl_title_chan1_6;
+    lv_obj_t * lbl_val_chan1_6;
+
+    lv_obj_t * lbl_title_chan1_7;
+    lv_obj_t * lbl_val_chan1_7;
+
+    lv_obj_t * lbl_title_chan1_8;
+    lv_obj_t * lbl_val_chan1_8;
+
+    lv_obj_t * lbl_title_chan1_9;
+    lv_obj_t * lbl_val_chan1_9;
+
+    lv_obj_t * lbl_title_chan1_10;
+    lv_obj_t * lbl_val_chan1_10;
+
+    lv_obj_t * lbl_title_chan1_11;
+    lv_obj_t * lbl_val_chan1_11;
+
+    lv_obj_t * lbl_title_chan1_12;
+    lv_obj_t * lbl_val_chan1_12;
+
+    lv_obj_t * lbl_title_chan1_13;
+    lv_obj_t * lbl_val_chan1_13;
+
+    lv_obj_t * lbl_title_chan1_14;
+    lv_obj_t * lbl_val_chan1_14;
+
+    lv_obj_t * lbl_title_chan1_15;
+    lv_obj_t * lbl_val_chan1_15;
 
 } admplex0_container_t;
 

@@ -92,6 +92,7 @@ struct systemStruct {
   bool output_config_matrix_enabled;
   bool output_config_mapping_enabled;
   bool output_admplex0_enabled;
+  bool output_admplex1_enabled;
   bool output_gyro_0_enabled;
   bool output_sun_enabled;
   bool output_mercury_enabled;
@@ -119,6 +120,7 @@ struct systemStruct {
   SystemConuters counters_gyr0;
   SystemConuters counters_ins;
   SystemConuters counters_mplex0;
+  SystemConuters counters_mplex1;
   SystemConuters counters_pci;
   SystemConuters counters_uni;
   SystemConuters counters_mtx;

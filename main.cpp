@@ -372,16 +372,16 @@ extern "C" void app_main(void)
     // Storage
     sdcardFlagData.load_system = true; // Lets the SD-card flag handler perform its first mount on the next pass.
     ESP_LOGI(APP_MAIN_TAG, "creating storage task");
-    createTaskStorage();             // (target: 2/ps)    SD card
+    createTaskStorage(); // (target: 2Hz)
 
     // GPS
     ESP_LOGI(APP_MAIN_TAG, "creating GPS task");
-    createTaskGPS();                 // (target: 10/ps)   Time & location
+    createTaskGPS(); // (target: 10Hz)
 
     // Gyro
     initWT901();
     ESP_LOGI(APP_MAIN_TAG, "creating gyro task");
-    createTaskGyro();                // (target: 200/ps)  Attitude
+    createTaskGyro(); // (target: 200Hz)
 
     /** ----------------------------------------------------------------------------
      * Auxiliary Fast Input.
@@ -392,26 +392,28 @@ extern "C" void app_main(void)
      *     initialization on the multiplexer's signal pin before the task
      *     that relies on it starts running.
      */
-    (void)analogRead(PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG);
     analogSetAttenuation(ADC_11db);  // Full ~0-3.3V input range; applies to every ADC channel.
-    initADMultiplexer(ad_mux_0);
     // set read mode once (perfermance/efficiency if only reading, else change in task as required)
+    initADMultiplexer(ad_mux_0);
+    initADMultiplexer(ad_mux_1);
     setReadModeADMultiplexer(ad_mux_0);
-    createTaskMultiplexers();        // (target: 200/ps)  Fast general input
+    setReadModeADMultiplexer(ad_mux_1);
+    createTaskADMplex0(); // (target: x16 chan >= 250-350Hz, x4+ chan >= 1KHz)  Fast general input
+    createTaskADMplex1(); // (target: x16 chan >= 250-350Hz, x4+ chan >= 1KHz)  Fast general input
 
     // Auxiliary Output
     ESP_LOGI(APP_MAIN_TAG, "creating auxiliary output task");
-    createTaskSwitches();            // (target: approx. max 1000/ps) Fast general output
+    createTaskSwitches(); // (target: max 1KHz) Fast general output
 
     // Universe
     ESP_LOGI(APP_MAIN_TAG, "creating universe task");
     myAstroBegin();
-    createTaskUniverse();            // (target: 1/ps)    Star tracking
+    createTaskUniverse(); // (target: +1Hz)
 
     #ifdef SATIO_SERIAL_TX_OPTION_NEW_TASK
     // SatIO Serial Tx
     ESP_LOGI(APP_MAIN_TAG, "creating satio serial tx task");
-    createTaskSatioSerialTx();       // (target: 1000/ps)    $SATIO / $PCINPT sentences
+    createTaskSatioSerialTx(); // (target: >= 200Hz)
     #endif
 
     // Attempt to approximately synchronize tasks

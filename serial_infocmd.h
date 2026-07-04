@@ -36,6 +36,7 @@ struct Serial0Struct {
   char BUFFER_RX[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
   char BUFFER_TX_GPS[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
   char BUFFER_TX_ADMPLEX0[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
+  char BUFFER_TX_ADMPLEX1[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
   char BUFFER_TX_GYRO0[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
   char BUFFER_TX_UNI[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
   char BUFFER_TX_SWITCHES[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
@@ -75,6 +76,7 @@ void outputSerialGPS(void);
 void outputSerialSatIO(void);
 void outputSerialGyro0(void);
 void outputSerialADMplex0(void);
+void outputSerialADMplex1(void);
 void outputSerialUniverse(void);
 void outputSerialMatrix(void);
 void outputSerialPCInput(void);

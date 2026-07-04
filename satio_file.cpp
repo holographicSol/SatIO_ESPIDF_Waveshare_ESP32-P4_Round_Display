@@ -889,6 +889,7 @@ typedef enum {
     SYSTEM_FILE_OUTPUT_GPATT,
     SYSTEM_FILE_OUTPUT_MATRIX,
     SYSTEM_FILE_OUTPUT_ADMPLEX0,
+    SYSTEM_FILE_OUTPUT_ADMPLEX1,
     SYSTEM_FILE_OUTPUT_GYRO0,
 
     SYSTEM_FILE_OUTPUT_SUN,
@@ -943,6 +944,7 @@ static const char * getSystemTag(int t) {
         case SYSTEM_FILE_OUTPUT_GPATT:                   return "OUTPUT_GPATT";
         case SYSTEM_FILE_OUTPUT_MATRIX:                  return "OUTPUT_MATRIX";
         case SYSTEM_FILE_OUTPUT_ADMPLEX0:                return "OUTPUT_ADMPLEX0";
+        case SYSTEM_FILE_OUTPUT_ADMPLEX1:                return "OUTPUT_ADMPLEX1";
         case SYSTEM_FILE_OUTPUT_GYRO0:                   return "OUTPUT_GYRO0";
 
         case SYSTEM_FILE_OUTPUT_SUN:                     return "OUTPUT_SUN";
@@ -1010,6 +1012,7 @@ bool saveSystemFile(const char *filepath) {
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GPATT, systemData.output_gpatt_enabled);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_MATRIX, systemData.output_matrix_enabled);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_ADMPLEX0, systemData.output_admplex0_enabled);
+    WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_ADMPLEX1, systemData.output_admplex1_enabled);
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_GYRO0, systemData.output_gyro_0_enabled);
 
     WRITE_INT_TAG(SYSTEM_FILE_OUTPUT_SUN, systemData.output_sun_enabled);
@@ -1102,6 +1105,7 @@ bool loadSystemFile(const char *filepath) {
         READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_GPATT, systemData.output_gpatt_enabled);
         READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_MATRIX, systemData.output_matrix_enabled);
         READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_ADMPLEX0, systemData.output_admplex0_enabled);
+        READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_ADMPLEX1, systemData.output_admplex1_enabled);
         READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_GYRO0, systemData.output_gyro_0_enabled);
 
         READ_BOOL_TAG(SYSTEM_FILE_OUTPUT_SUN, systemData.output_sun_enabled);

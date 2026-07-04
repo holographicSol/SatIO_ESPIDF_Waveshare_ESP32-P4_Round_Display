@@ -58,6 +58,7 @@ struct Serial0Struct serial0Data = {
   .BUFFER_RX = {0},
   .BUFFER_TX_GPS = {0},
   .BUFFER_TX_ADMPLEX0 = {0},
+  .BUFFER_TX_ADMPLEX1 = {0},
   .BUFFER_TX_GYRO0 = {0},
   .BUFFER_TX_UNI = {0},
   .BUFFER_TX_SWITCHES = {0},
@@ -501,6 +502,7 @@ static void PrintHelp(void) {
       powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
 
       setdelay --admplex0               Specify max task frequency in uS.
+      setdelay --admplex1               Specify max task frequency in uS.
       setdelay --gyro0                  Specify max task frequency in uS.
       setdelay --universe               Specify max task frequency in uS.
       setdelay --gps                    Specify max task frequency in uS.
@@ -537,6 +539,7 @@ static void PrintHelp(void) {
       stat --sentence --matrix    Takes arguments -e, -d.
       stat --sentence --pcinput   Takes arguments -e, -d.
       stat --sentence --admplex0  Takes arguments -e, -d.
+      stat --sentence --admplex1  Takes arguments -e, -d.
       stat --sentence --gyro0     Takes arguments -e, -d.
       stat --sentence --sun       Takes arguments -e, -d.
       stat --sentence --luna      Takes arguments -e, -d.
@@ -571,6 +574,7 @@ static void PrintSystemData(void) {
     printf("[output_matrix_enabled] %d\n", systemData.output_matrix_enabled);
     printf("[output_input_portcontroller] %d\n", systemData.output_input_portcontroller);
     printf("[output_admplex0_enabled] %d\n", systemData.output_admplex0_enabled);
+    printf("[output_admplex1_enabled] %d\n", systemData.output_admplex1_enabled);
     printf("[output_gyro_0_enabled] %d\n", systemData.output_gyro_0_enabled);
     printf("[output_sun_enabled] %d\n", systemData.output_sun_enabled);
     printf("[output_luna_enabled] %d\n", systemData.output_luna_enabled);
@@ -659,6 +663,7 @@ void setAllSentenceOutput(bool enable) {
   systemData.output_matrix_enabled=enable;
   systemData.output_input_portcontroller=enable;
   systemData.output_admplex0_enabled=enable;
+  systemData.output_admplex1_enabled=enable;
   systemData.output_gyro_0_enabled=enable;
   systemData.output_sun_enabled=enable;
   systemData.output_mercury_enabled=enable;
@@ -1130,6 +1135,7 @@ void CmdProcess(void) {
             }
           if (argparser_has_flag(&parser, "pcinput") == true) {systemData.output_input_portcontroller=enable; printf("setting input_portcontroller output enabled: %d\n", systemData.output_input_portcontroller);}
           if (argparser_has_flag(&parser, "admplex0") == true) {systemData.output_admplex0_enabled=enable; printf("setting admplex0 output enabled: %d\n", systemData.output_admplex0_enabled);}
+          if (argparser_has_flag(&parser, "admplex1") == true) {systemData.output_admplex1_enabled=enable; printf("setting admplex1 output enabled: %d\n", systemData.output_admplex1_enabled);}
           if (argparser_has_flag(&parser, "gyro0") == true) {systemData.output_gyro_0_enabled=enable; printf("setting gyro_0 output enabled: %d\n", systemData.output_gyro_0_enabled);}
           if (argparser_has_flag(&parser, "sun") == true) {systemData.output_sun_enabled=enable; printf("setting sun output enabled: %d\n", systemData.output_sun_enabled);}
           if (argparser_has_flag(&parser, "earth") == true) {systemData.output_sun_enabled=enable; printf("setting earth output enabled: %d\n", systemData.output_earth_enabled);}
@@ -1299,7 +1305,10 @@ void CmdProcess(void) {
             if (argparser_has_flag(&parser, "setdelay")) {
 
               if (argparser_has_flag(&parser, "admplex0"))
-                {setDelay(TaskMultiplexers, argparser_get_uint32(&parser, "admplex0", pwrConfigCurrent.TASK_MAX_FREQ_MULTIPLEXERS), &pwrConfigCurrent.TASK_MAX_FREQ_MULTIPLEXERS);}
+                {setDelay(TaskADMplex0, argparser_get_uint32(&parser, "admplex0", pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX0), &pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX0);}
+
+              if (argparser_has_flag(&parser, "admplex1"))
+                {setDelay(TaskADMplex1, argparser_get_uint32(&parser, "admplex1", pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX1), &pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX1);}
 
               if (argparser_has_flag(&parser, "gyro0"))
                 {setDelay(TaskGyro, argparser_get_uint32(&parser, "gyro0", pwrConfigCurrent.TASK_MAX_FREQ_GYRO), &pwrConfigCurrent.TASK_MAX_FREQ_GYRO);}
@@ -1340,6 +1349,7 @@ long i_output_config_matrix = 0;
  */
 #define TXBUF_GPS      (serial0Data.BUFFER_TX_GPS)
 #define TXBUF_ADMPLEX0 (serial0Data.BUFFER_TX_ADMPLEX0)
+#define TXBUF_ADMPLEX1 (serial0Data.BUFFER_TX_ADMPLEX1)
 #define TXBUF_GYRO0    (serial0Data.BUFFER_TX_GYRO0)
 #define TXBUF_UNI      (serial0Data.BUFFER_TX_UNI)
 #define TXBUF_SWITCHES (serial0Data.BUFFER_TX_SWITCHES)
@@ -1352,6 +1362,7 @@ long i_output_config_matrix = 0;
  */
 #define TXBUF_GPS      (serial0Data.BUFFER_TX)
 #define TXBUF_ADMPLEX0 (serial0Data.BUFFER_TX)
+#define TXBUF_ADMPLEX1 (serial0Data.BUFFER_TX)
 #define TXBUF_GYRO0    (serial0Data.BUFFER_TX)
 #define TXBUF_UNI      (serial0Data.BUFFER_TX)
 #define TXBUF_SWITCHES (serial0Data.BUFFER_TX)
@@ -1611,6 +1622,26 @@ void outputSerialADMplex0(void) {
   }
 }
 
+void outputSerialADMplex1(void) {
+  if (systemData.counters_mplex1.flag_c == true) {
+    systemData.counters_mplex1.flag_c = false;
+    if (systemData.output_admplex1_enabled == true) {
+      char checksum[MAX_CHECKSUM_SIZE];
+
+      memset(TXBUF_ADMPLEX1, 0, sizeof(TXBUF_ADMPLEX1));
+      serial0_buffer_append(TXBUF_ADMPLEX1, sizeof(TXBUF_ADMPLEX1), "$MPLEX1,");
+      for (int i = 0; i < MAX_AD_MUX_CHANNELS; i++) {
+        serial0_buffer_append(TXBUF_ADMPLEX1, sizeof(TXBUF_ADMPLEX1), (String(ad_mux_1.data[i]) + ",").c_str());
+      }
+      serial0_buffer_strip_trailing_comma(TXBUF_ADMPLEX1);
+      createChecksumSerial0(TXBUF_ADMPLEX1, checksum, sizeof(checksum));
+      serial0_buffer_append(TXBUF_ADMPLEX1, sizeof(TXBUF_ADMPLEX1), "*");
+      serial0_buffer_append(TXBUF_ADMPLEX1, sizeof(TXBUF_ADMPLEX1), checksum);
+      printf("%s\n", TXBUF_ADMPLEX1);
+    }
+  }
+}
+
 void outputSerialUniverse(void) {
   if (systemData.counters_uni.flag_c == true) {
     systemData.counters_uni.flag_c = false;
@@ -1841,18 +1872,19 @@ void outputStat(void) {
       printf(
           "[ %llu ] "
           "gps=(%s %s syn=%s) "
-          "rtc=(%s %s syn=%s) "
+          "sys=(%s %s syn=%s) "
           "lcl=(%s %s syn=%s) "
           "lmst=(%s %s syn=%s) "
           "lst=%f "
 
           "t_loop=%ld "
 
-          "t_system_timing_resolution=%ldHz "
+          "t_system_timing=%ldHz "
           "t_gps=(%ldHz/%ldHz) "
           "t_gyr0=(%ldHz/%ldHz) "
           "t_ins=(%ldHz/%ldHz) "
           "t_mplex0=(%ldHz/%ldHz) "
+          "t_mplex1=(%ldHz/%ldHz) "
           "t_pci=(%ldHz/%ldHz) "
           "t_uni=(%ldHz/%ldHz) "
           "t_mtx=(%ldHz/%ldHz) "
@@ -1927,6 +1959,9 @@ void outputStat(void) {
 
           systemData.counters_mplex0.task_ffreq_t,
           systemData.counters_mplex0.task_freq_t,
+
+          systemData.counters_mplex1.task_ffreq_t,
+          systemData.counters_mplex1.task_freq_t,
 
           systemData.counters_pci.task_ffreq_t,
           systemData.counters_pci.task_freq_t,
