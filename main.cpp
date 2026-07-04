@@ -233,7 +233,6 @@ static void uart0_event_task(void *pvParameters) {
  * app_main() performs every initialization step this project needs.
  */
 void setup() {
-
 }
 
 /** -----------------------------------------------------------------------------------------------
@@ -244,11 +243,11 @@ void setup() {
  */
 extern "C" void app_main(void)
 {
-    // --------------------------------------------------------------
+    // ----------------------------------------------------------------------------
     // Warmup delay: some devices require at least one second start.
-    // --------------------------------------------------------------
-    const uint32_t startup_delay_ms = 1000U; // Named so the duration is documented once.
-    delay(startup_delay_ms);
+    // ----------------------------------------------------------------------------
+    // const uint32_t startup_delay_ms = 1000U; // Named so the duration is documented once.
+    // delay(startup_delay_ms);
 
     /** ----------------------------------------------------------------------------
      * Watchdog Configuration.
@@ -269,12 +268,15 @@ extern "C" void app_main(void)
     };
     ESP_ERROR_CHECK(esp_task_wdt_reconfigure(&wdt_config));
 
+    /** ----------------------------------------------------------------------------
+     * Initialize Mutexes
+     */
     initSystemTimeMutex(); // must exist before any task can touch tv_now/timeinfo
     initDataMutex();       // must exist before any task can touch satioData/systemData
 
-    // --------------------------------------------------------------
-    // LVGL Initialization
-    // --------------------------------------------------------------
+    /** ----------------------------------------------------------------------------
+     * LVGL Initialization
+     */
     #ifdef SATIO_DISPLAY_OPTION_LVGL
     initSatIOUI();
     #endif
@@ -361,16 +363,19 @@ extern "C" void app_main(void)
     ESP_LOGI(APP_MAIN_TAG, "Serial1 baud rate: %lu", (unsigned long)gps_uart_baud_rate);
     ESP_LOGI(APP_MAIN_TAG, "Serial1 hardware remap: RX=%d TX=%d", gps_uart_rxd_pin, gps_uart_txd_pin);
 
-    // --------------------------------------------------------------
+    // Full ~0-3.3V input range; applies to every ADC channel.
+    analogSetAttenuation(ADC_11db);
+
+    // ----------------------------------------------------------------------------
     // Create Tasks.
-    // --------------------------------------------------------------
+    // ----------------------------------------------------------------------------
 
     // System Time
     ESP_LOGI(APP_MAIN_TAG, "creating system time task");
     createTaskSystemTime();
 
     // Storage
-    sdcardFlagData.load_system = true; // Lets the SD-card flag handler perform its first mount on the next pass.
+    sdcardFlagData.load_system = true;
     ESP_LOGI(APP_MAIN_TAG, "creating storage task");
     createTaskStorage(); // (target: 2Hz)
 
@@ -382,25 +387,15 @@ extern "C" void app_main(void)
     initWT901();
     ESP_LOGI(APP_MAIN_TAG, "creating gyro task");
     createTaskGyro(); // (target: 200Hz)
-
-    /** ----------------------------------------------------------------------------
-     * Auxiliary Fast Input.
-     *
-     * (1) analogRead()'s sampled value is not needed here, so the discard
-     *     is made explicit with a (void) cast (MISRA C 2012 Rule 17.7).
-     * (2) Forces the ADC driver to perform its (otherwise lazy) one-time
-     *     initialization on the multiplexer's signal pin before the task
-     *     that relies on it starts running.
-     */
-
-    analogSetAttenuation(ADC_11db);  // Full ~0-3.3V input range; applies to every ADC channel.
     
+    // Admplex 0
     #ifdef SATIO_CD74HC4067_OPTION_USE_1
     initADMultiplexer(ad_mux_0);
     setReadModeADMultiplexer(ad_mux_0);
     createTaskADMplex0(); // (target: x16 chan >= 250-350Hz, x4+ chan >= 1KHz)  Fast general input
     #endif
 
+    // Admplex 1
     #ifdef SATIO_CD74HC4067_OPTION_USE_2
     initADMultiplexer(ad_mux_1);
     setReadModeADMultiplexer(ad_mux_1);
@@ -426,16 +421,11 @@ extern "C" void app_main(void)
     ESP_LOGI(APP_MAIN_TAG, "attempting to synchronize tasks");
     syncTasks();
 
-    ESP_LOGI(APP_MAIN_TAG, "waiting for tasks to settle");
-    const uint32_t task_settle_delay_ms = 5000U; // Gives every task time for a first pass before the UI starts.
-    delay(task_settle_delay_ms);
+    // ESP_LOGI(APP_MAIN_TAG, "waiting for tasks to settle");
+    // const uint32_t task_settle_delay_ms = 5000U; // Gives every task time for a first pass before the UI starts.
+    // delay(task_settle_delay_ms);
 
-    /** ----------------------------------------------------------------------------
-     * Display Home Screen.
-     *
-     * initSatIOUI() already ran earlier to drive the loading screen; only
-     * the home screen needs to be shown now that every task is running.
-     */
+    // Display
     #ifdef SATIO_DISPLAY_OPTION_LVGL
     ESP_LOGI(APP_MAIN_TAG, "starting SatIO UI");
     flag_display_home_screen = true;
@@ -445,9 +435,4 @@ extern "C" void app_main(void)
     // app_main() may now return: every task created above keeps running
     // under the FreeRTOS scheduler, and the ESP-IDF idle task takes over
     // this thread.
-    // for (;;)
-    // {
-        // system_timing();
-        // setSatIOData();
-    // }
 }

@@ -19749,7 +19749,7 @@ void initSatIOUI() {
     // --------------------------------------------------------------
     ESP_LOGI("LVGL", "Version: %d.%d.%d", LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH);
 
-    delay(1000);
+    // delay(1000);
     
     // Initialize LVGL display object via BSP
     lv_display_t *disp = bsp_display_start();
@@ -19757,7 +19757,7 @@ void initSatIOUI() {
     ESP_LOGI("APP", "Display initialized successfully");
     
     // Give BSP task time to fully initialize LVGL
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    // vTaskDelay(pdMS_TO_TICKS(1000));
 
     // Set LVGL tick period
     lv_timer_set_period(lv_timer_get_next(NULL), 40);  // ms

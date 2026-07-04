@@ -401,9 +401,19 @@ static void update_zodiac(int earth_x, int earth_y) {
  * 
  * Orbital path lines reflect objects that are actually above the
  * horizon (altitude > 0).
+ * 
+ * ecliptic_long=-0.000000  altitde_angle=nan  neptune.orbit_radius=256
+   altitude_points[0].x=179  altitude_points[0].y=275  altitude_points[1].x=-2147483470  altitude_points[1].x=-2147483374
  */
 static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle, lv_point_precise_t * altitude_points, float intersection) {
-    if (!altitude_line) return;
+    if (!altitude_line) {return;}
+    if (!altitude_angle) {return;}
+    if (!altitude_points) {return;}
+    if (!intersection) {return;}
+    if (!altitude_points[0].x) {return;}
+    if (!altitude_points[0].y) {return;}
+    if (!altitude_points[1].x) {return;}
+    if (!altitude_points[1].y) {return;}
     
     float rad = deg2rad(altitude_angle);
     float dx = cosf(rad);
@@ -441,6 +451,9 @@ static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle,
     altitude_points[0].y = (earth.y + earth.radius);
     altitude_points[1].x = (earth.x + earth.radius) + (int)(dx * r);
     altitude_points[1].y = (earth.y + earth.radius) + (int)(dy * r);
+
+    printf("altitude_points[0].x=%ld  altitude_points[0].y=%ld  altitude_points[1].x=%ld  altitude_points[1].x=%ld\n",
+    altitude_points[0].x, altitude_points[0].y, altitude_points[1].x, altitude_points[1].y);
     
     lv_line_set_points(altitude_line, altitude_points, 2);
 }
@@ -526,7 +539,11 @@ void astro_clock_update(void) {
         altitde_angle = ecliptic_long - siderealPlanetData.sun_az + 180.0f; // rotate by az = deg relative to local pos, sun pos
         lv_color_t color = (siderealPlanetData.sun_alt <= 0) ? COLOR_SUN_BELOW : COLOR_SUN_ABOVE;
         lv_obj_set_style_line_color(sun_altitude_line, color, 0);
+
+        printf("ecliptic_long=%f  altitde_angle=%f  neptune.orbit_radius=%d\n", ecliptic_long, altitde_angle, neptune.orbit_radius);
+        printf("allowing sun_altitude_line");
         update_altitude_line(sun_altitude_line, altitde_angle, sun_altitude_points, neptune.orbit_radius);
+        lv_obj_clear_flag(sun_altitude_line, LV_OBJ_FLAG_HIDDEN);
 
         lv_obj_clear_flag(earth.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(earth.obj, LV_OBJ_FLAG_HIDDEN);
@@ -534,6 +551,7 @@ void astro_clock_update(void) {
     }
     else {
         hide_zodiac();
+        lv_obj_add_flag(sun_altitude_line, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(earth.orbit, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(earth.obj, LV_OBJ_FLAG_HIDDEN);
     }
@@ -1386,6 +1404,14 @@ void astro_clock_begin(
     astro_container = lv_obj_create(parent);
     if (!astro_container) { printf("ERROR: Failed to create astro_container\n"); return;}
     printf("DEBUG: astro_container done\n");
+    lv_obj_remove_style_all(astro_container);
+    lv_obj_set_size(astro_container, OUTLINE_WIDTH, OUTLINE_HEIGHT);
+    lv_obj_align(astro_container, alignment, pos_x, pos_y);
+    lv_obj_set_style_bg_color(astro_container, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(astro_container, LV_OPA_0, 0);
+    lv_obj_set_style_border_width(astro_container, 0, 0);
+    lv_obj_set_style_border_color(astro_container, COLOR_ZODIAC, 0);
+
     // Target boxes - debug print before potentially crashing
     // size_t free_heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
     // printf("DEBUG: Creating target boxes. astro_container=%p sun.radius=%d free_heap=%u\n", 
@@ -1395,13 +1421,6 @@ void astro_clock_begin(
     //     printf("ERROR: astro_container invalid before creating target boxes!\n");
     //     return;
     // }
-    lv_obj_remove_style_all(astro_container);
-    lv_obj_set_size(astro_container, OUTLINE_WIDTH, OUTLINE_HEIGHT);
-    lv_obj_align(astro_container, alignment, pos_x, pos_y);
-    lv_obj_set_style_bg_color(astro_container, lv_color_black(), 0);
-    lv_obj_set_style_bg_opa(astro_container, LV_OPA_0, 0);
-    lv_obj_set_style_border_width(astro_container, 0, 0);
-    lv_obj_set_style_border_color(astro_container, COLOR_ZODIAC, 0);
 
     // lv_obj_set_style_outline_width(astro_container, 2, 0); // dev outline
     lv_obj_set_style_outline_width(astro_container, 0, 0); // actual outline
@@ -1477,6 +1496,7 @@ void astro_clock_begin(
     // Sun altitde line (line from Earth to edge showing local altitde relative to sun)
     printf("DEBUG: Creating sun_altitude_line\n");
     sun_altitude_line = lv_line_create(astro_container);
+    lv_obj_add_flag(sun_altitude_line, LV_OBJ_FLAG_HIDDEN);
     if (!sun_altitude_line) { printf("ERROR: Failed to create sun_altitude_line\n"); return;}
     printf("DEBUG: sun_altitude_line done\n");
     lv_obj_set_style_line_color(sun_altitude_line, lv_color_make(128, 0, 0), 0);
@@ -1488,7 +1508,6 @@ void astro_clock_begin(
     sun_altitude_points[1].x = 0;
     sun_altitude_points[1].y = 0;
 
-    
     int luna_spacing = SIZE_UNIT;  // Gap between Earth surface and Luna orbit
     luna.orbit_radius = earth.radius + luna_spacing + luna.radius;
     luna.orbit = create_orbit(astro_container, luna.orbit_radius, COLOR_ORBIT_LUNA_BELOW);
@@ -1596,6 +1615,7 @@ void astro_clock_begin(
     // Target data box (displays object information when selected)
     // -----------------------------------------------------------------
     target_data_box = lv_obj_create(astro_container);
+    lv_obj_add_flag(target_data_box, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_style_all(target_data_box);
     lv_obj_set_size(target_data_box, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_style_border_width(target_data_box, TARGET_BOX_LINE_WIDTH, 0);
@@ -1603,7 +1623,6 @@ void astro_clock_begin(
     lv_obj_set_style_bg_color(target_data_box, lv_color_black(), 0);
     lv_obj_set_style_bg_opa(target_data_box, LV_OPA_80, 0);
     lv_obj_set_style_pad_all(target_data_box, 12, 0);
-    lv_obj_add_flag(target_data_box, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(target_data_box, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(target_data_box, LV_OBJ_FLAG_CLICKABLE);
     
@@ -1611,10 +1630,10 @@ void astro_clock_begin(
     // Connector line (connects target box to data box)
     // -----------------------------------------------------------------
     target_connector_line = lv_line_create(astro_container);
+    lv_obj_add_flag(target_connector_line, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_style_line_color(target_connector_line, COLOR_TARGET, 0);
     lv_obj_set_style_line_width(target_connector_line, TARGET_BOX_LINE_WIDTH, 0);
     lv_obj_set_style_line_rounded(target_connector_line, true, 0);
-    lv_obj_add_flag(target_connector_line, LV_OBJ_FLAG_HIDDEN);
     connector_points[0].x = 0;
     connector_points[0].y = 0;
     connector_points[1].x = 0;
