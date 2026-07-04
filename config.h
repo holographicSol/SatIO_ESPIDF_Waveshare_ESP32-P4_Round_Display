@@ -143,9 +143,9 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_BALANCED_GPS                    100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_ADMPLEX0               2000    // (500 Hz)
+#define TASK_MAX_FREQ_BALANCED_ADMPLEX0               5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_ADMPLEX1               2000    // (500 Hz)
+#define TASK_MAX_FREQ_BALANCED_ADMPLEX1               5000    // (200 Hz)
 
 #define TASK_MAX_FREQ_BALANCED_GYRO                   5000    // (200 Hz)
 
@@ -166,15 +166,15 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_HIGH_GPS                        100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_HIGH_ADMPLEX0                   1000    // (1000 Hz)
+#define TASK_MAX_FREQ_HIGH_ADMPLEX0                   2000    // (500 Hz)
 
-#define TASK_MAX_FREQ_HIGH_ADMPLEX1                   1000    // (1000 Hz)
+#define TASK_MAX_FREQ_HIGH_ADMPLEX1                   2000    // (500 Hz)
 
 #define TASK_MAX_FREQ_HIGH_GYRO                       5000    // (200 Hz)
 
 #define TASK_MAX_FREQ_HIGH_UNIVERSE                   1000000 // (1 Hz) todo: split into (1) track_tp (2) starnav 
 
-#define TASK_MAX_FREQ_HIGH_SWITCHES                   1000    // (1000 Hz)
+#define TASK_MAX_FREQ_HIGH_SWITCHES                   2000    // (500 Hz)
 
 #define TASK_MAX_FREQ_HIGH_PORTCONTROLLER_INPUT       25000   // (40 Hz)
 
