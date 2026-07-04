@@ -452,8 +452,8 @@ static void update_altitude_line(lv_obj_t * altitude_line, float altitude_angle,
     altitude_points[1].x = (earth.x + earth.radius) + (int)(dx * r);
     altitude_points[1].y = (earth.y + earth.radius) + (int)(dy * r);
 
-    printf("altitude_points[0].x=%ld  altitude_points[0].y=%ld  altitude_points[1].x=%ld  altitude_points[1].x=%ld\n",
-    altitude_points[0].x, altitude_points[0].y, altitude_points[1].x, altitude_points[1].y);
+    // printf("altitude_points[0].x=%ld  altitude_points[0].y=%ld  altitude_points[1].x=%ld  altitude_points[1].x=%ld\n",
+    // altitude_points[0].x, altitude_points[0].y, altitude_points[1].x, altitude_points[1].y);
     
     lv_line_set_points(altitude_line, altitude_points, 2);
 }
@@ -540,8 +540,7 @@ void astro_clock_update(void) {
         lv_color_t color = (siderealPlanetData.sun_alt <= 0) ? COLOR_SUN_BELOW : COLOR_SUN_ABOVE;
         lv_obj_set_style_line_color(sun_altitude_line, color, 0);
 
-        printf("ecliptic_long=%f  altitde_angle=%f  neptune.orbit_radius=%d\n", ecliptic_long, altitde_angle, neptune.orbit_radius);
-        printf("allowing sun_altitude_line");
+        // printf("ecliptic_long=%f  altitde_angle=%f  neptune.orbit_radius=%d\n", ecliptic_long, altitde_angle, neptune.orbit_radius);
         update_altitude_line(sun_altitude_line, altitde_angle, sun_altitude_points, neptune.orbit_radius);
         lv_obj_clear_flag(sun_altitude_line, LV_OBJ_FLAG_HIDDEN);
 
