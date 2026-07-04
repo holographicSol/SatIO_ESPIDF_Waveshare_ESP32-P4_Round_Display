@@ -96,7 +96,9 @@ typedef struct PwrConfig {
 
     uint32_t TASK_MAX_FREQ_GPS;
 
-    uint32_t TASK_MAX_FREQ_MULTIPLEXERS;
+    uint32_t TASK_MAX_FREQ_ADMPLEX0;
+
+    uint32_t TASK_MAX_FREQ_ADMPLEX1;
 
     uint32_t TASK_MAX_FREQ_GYRO;
 
@@ -118,7 +120,9 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_LOW_GPS                         100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_LOW_MULTIPLEXERS                100000  // (10 Hz)
+#define TASK_MAX_FREQ_LOW_ADMPLEX0                    100000  // (10 Hz)
+
+#define TASK_MAX_FREQ_LOW_ADMPLEX1                    100000  // (10 Hz)
 
 #define TASK_MAX_FREQ_LOW_GYRO                        100000  // (10 Hz)
 
@@ -139,7 +143,9 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_BALANCED_GPS                    100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_MULTIPLEXERS           5000    // (200 Hz)
+#define TASK_MAX_FREQ_BALANCED_ADMPLEX0               2000    // (500 Hz)
+
+#define TASK_MAX_FREQ_BALANCED_ADMPLEX1               2000    // (500 Hz)
 
 #define TASK_MAX_FREQ_BALANCED_GYRO                   5000    // (200 Hz)
 
@@ -160,7 +166,9 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_HIGH_GPS                        100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_HIGH_MULTIPLEXERS               4000    // (250 Hz)
+#define TASK_MAX_FREQ_HIGH_ADMPLEX0                   1000    // (1000 Hz)
+
+#define TASK_MAX_FREQ_HIGH_ADMPLEX1                   1000    // (1000 Hz)
 
 #define TASK_MAX_FREQ_HIGH_GYRO                       5000    // (200 Hz)
 
@@ -470,6 +478,22 @@ extern PwrConfig pwrConfigCurrent;
 #define INDEX_ADMPLEX_0_CH_13 13
 #define INDEX_ADMPLEX_0_CH_14 14
 #define INDEX_ADMPLEX_0_CH_15 15
+#define INDEX_ADMPLEX_1_CH_0 0
+#define INDEX_ADMPLEX_1_CH_1 1
+#define INDEX_ADMPLEX_1_CH_2 2
+#define INDEX_ADMPLEX_1_CH_3 3
+#define INDEX_ADMPLEX_1_CH_4 4
+#define INDEX_ADMPLEX_1_CH_5 5
+#define INDEX_ADMPLEX_1_CH_6 6
+#define INDEX_ADMPLEX_1_CH_7 7
+#define INDEX_ADMPLEX_1_CH_8 8
+#define INDEX_ADMPLEX_1_CH_9 9
+#define INDEX_ADMPLEX_1_CH_10 10
+#define INDEX_ADMPLEX_1_CH_11 11
+#define INDEX_ADMPLEX_1_CH_12 12
+#define INDEX_ADMPLEX_1_CH_13 13
+#define INDEX_ADMPLEX_1_CH_14 14
+#define INDEX_ADMPLEX_1_CH_15 15
 // ----------------------------------------------------------------------------------------
 // Meteors.
 // ----------------------------------------------------------------------------------------

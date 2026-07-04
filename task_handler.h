@@ -24,7 +24,8 @@
 /* Handles of the FreeRTOS tasks created by this library, exposed so that other
    translation units can query task state or retarget a task's delay/tick setting. */
 extern TaskHandle_t TaskStorage;
-extern TaskHandle_t TaskMultiplexers;
+extern TaskHandle_t TaskADMplex0;
+extern TaskHandle_t TaskADMplex1;
 extern TaskHandle_t TaskGyro;
 extern TaskHandle_t TaskGPS;
 extern TaskHandle_t TaskUniverse;
@@ -39,7 +40,8 @@ extern TaskHandle_t TaskSatioSerialTx;
 extern int64_t gps_read_done_uS;
 
 void createTaskStorage();
-void createTaskMultiplexers();
+void createTaskADMplex0();
+void createTaskADMplex1();
 void createTaskGyro();
 void createTaskGPS();
 void createTaskUniverse();
@@ -89,7 +91,8 @@ bool taskFrequencyGyro(void);
 bool taskFrequencySwitches(void);
 bool taskFrequencyStorage(void);
 bool taskFrequencyInfoCMD(void);
-bool taskFrequencyMultiplexers(void);
+bool taskFrequencyADMplex0(void);
+bool taskFrequencyADMplex1(void);
 bool taskFrequencyUniverse(void);
 bool taskFrequencyDisplay(void);
 bool taskFrequencySatioSerialTx(void);

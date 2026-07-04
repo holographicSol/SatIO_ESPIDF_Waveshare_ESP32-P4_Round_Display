@@ -42,7 +42,8 @@
 
 TaskHandle_t TaskGPS;
 TaskHandle_t TaskGyro;
-TaskHandle_t TaskMultiplexers;
+TaskHandle_t TaskADMplex0;
+TaskHandle_t TaskADMplex1;
 TaskHandle_t TaskSwitches;
 TaskHandle_t TaskStorage;
 TaskHandle_t TaskUniverse;
@@ -60,7 +61,8 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_SYSTEM_TIME_PRIORITY           5
 #define TASK_GPS_PRIORITY                   5
 #define TASK_GYRO_PRIORITY                  5
-#define TASK_MULTIPLEXERS_PRIORITY          5
+#define TASK_ADMPLEX0_PRIORITY              5
+#define TASK_ADMPLEX1_PRIORITY              5
 #define TASK_SWITCHES_PRIORITY              5
 #define TASK_UNIVERSE_PRIORITY              5
 #define TASK_STORAGE_PRIORITY               5
@@ -68,9 +70,10 @@ TaskHandle_t TaskSatioSerialTx;
 // CORE ASSIGNMENT
 #define TASK_SYSTEM_TIME_CORE               1
 #define TASK_GPS_CORE                       1
-#define TASK_GYRO_CORE                      0
-#define TASK_MULTIPLEXERS_CORE              0
-#define TASK_SWITCHES_CORE                  0
+#define TASK_GYRO_CORE                      1
+#define TASK_ADMPLEX0_CORE                  1
+#define TASK_ADMPLEX1_CORE                  1
+#define TASK_SWITCHES_CORE                  1
 #define TASK_UNIVERSE_CORE                  0
 #define TASK_STORAGE_CORE                   0
 #define TASK_SATIO_SERIAL_TX_CORE           0
@@ -78,7 +81,8 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_SYSTEM_TIME_STACK_SIZE         5120
 #define TASK_GPS_STACK_SIZE                 5120
 #define TASK_GYRO_STACK_SIZE                4608
-#define TASK_MULTIPLEXERS_STACK_SIZE        4096
+#define TASK_ADMPLEX0_STACK_SIZE            4096
+#define TASK_ADMPLEX1_STACK_SIZE            4096
 #define TASK_SWITCHES_STACK_SIZE            5120
 #define TASK_UNIVERSE_STACK_SIZE            20480
 #define TASK_STORAGE_STACK_SIZE             6144
@@ -90,7 +94,8 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_SYSTEM_TIME_PRIORITY           5
 #define TASK_GPS_PRIORITY                   5
 #define TASK_GYRO_PRIORITY                  5
-#define TASK_MULTIPLEXERS_PRIORITY          5
+#define TASK_ADMPLEX0_PRIORITY              5
+#define TASK_ADMPLEX1_PRIORITY              5
 #define TASK_SWITCHES_PRIORITY              5
 #define TASK_UNIVERSE_PRIORITY              5
 #define TASK_STORAGE_PRIORITY               5
@@ -100,7 +105,8 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_SYSTEM_TIME_CORE               0
 #define TASK_GPS_CORE                       0
 #define TASK_GYRO_CORE                      1
-#define TASK_MULTIPLEXERS_CORE              1
+#define TASK_ADMPLEX0_CORE                  1
+#define TASK_ADMPLEX1_CORE                  1
 #define TASK_SWITCHES_CORE                  1
 #define TASK_UNIVERSE_CORE                  1
 #define TASK_STORAGE_CORE                   1
@@ -110,7 +116,8 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_SYSTEM_TIME_STACK_SIZE         5120
 #define TASK_GPS_STACK_SIZE                 5120
 #define TASK_GYRO_STACK_SIZE                4608
-#define TASK_MULTIPLEXERS_STACK_SIZE        4096
+#define TASK_ADMPLEX0_STACK_SIZE            4096
+#define TASK_ADMPLEX1_STACK_SIZE            4096
 #define TASK_SWITCHES_STACK_SIZE            5120
 #define TASK_UNIVERSE_STACK_SIZE            20480
 #define TASK_STORAGE_STACK_SIZE             6144
@@ -130,7 +137,8 @@ TaskHandle_t TaskSatioSerialTx;
  */
 static void notifyAllTasks(void) {
   if (TaskStorage != nullptr) { xTaskNotifyGive(TaskStorage); }
-  if (TaskMultiplexers != nullptr) { xTaskNotifyGive(TaskMultiplexers); }
+  if (TaskADMplex0 != nullptr) { xTaskNotifyGive(TaskADMplex0); }
+  if (TaskADMplex1 != nullptr) { xTaskNotifyGive(TaskADMplex1); }
   if (TaskGyro != nullptr) { xTaskNotifyGive(TaskGyro); }
   if (TaskGPS != nullptr) { xTaskNotifyGive(TaskGPS); }
   if (TaskUniverse != nullptr) { xTaskNotifyGive(TaskUniverse); }
@@ -261,6 +269,7 @@ static void intervalBreach1Second(void) {
   totalCounters(systemData.counters_gyr0);
   totalCounters(systemData.counters_ins);
   totalCounters(systemData.counters_mplex0);
+  totalCounters(systemData.counters_mplex1);
   totalCounters(systemData.counters_mtx);
   totalCounters(systemData.counters_pci);
   totalCounters(systemData.counters_pco);
@@ -285,6 +294,7 @@ static void intervalBreach1Second(void) {
   clearCounters(systemData.counters_gyr0);
   clearCounters(systemData.counters_ins);
   clearCounters(systemData.counters_mplex0);
+  clearCounters(systemData.counters_mplex1);
   clearCounters(systemData.counters_mtx);
   clearCounters(systemData.counters_pci);
   clearCounters(systemData.counters_pco);
@@ -361,7 +371,8 @@ bool taskFrequencyGPS()         { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_
 bool taskFrequencyGyro()        { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_GYRO);        return true; }
 bool taskFrequencySwitches()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_SWITCHES);    return true; }
 bool taskFrequencyStorage()     { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_STORAGE);     return true; }
-bool taskFrequencyMultiplexers(){ TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_MULTIPLEXERS);return true; }
+bool taskFrequencyADMplex0()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX0);    return true; }
+bool taskFrequencyADMplex1()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX1);    return true; }
 bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_UNIVERSE);    return true; }
 bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_DISPLAY);     return true; }
 bool taskFrequencySatioSerialTx() { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_SATIO_SERIAL_TX); return true; }
@@ -630,11 +641,11 @@ void createTaskGyro() {
 }
 
 /** ----------------------------------------------------------------------------
- * Multiplexer Task.
+ * Multiplexer Task (ADMplex0).
  *
- * @brief Reads all analog/digital multiplexer channels.
+ * @brief Reads all analog/digital multiplexer channels on ad_mux_0.
  */
-static void taskMultiplexers(void *pvParameters) {
+static void taskADMplex0(void *pvParameters) {
   (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
   esp_task_wdt_add(nullptr);
   while (!global_task_sync) {
@@ -644,17 +655,18 @@ static void taskMultiplexers(void *pvParameters) {
   for (;;) {
 
     // Delay Task
-    if (taskFrequencyMultiplexers() == true) {
-      // esp_task_wdt_reset();
+    if (taskFrequencyADMplex0() == true) {
+
       // ------------------------------------------------
       // Read multiplexer channels (customize as required).
       // ------------------------------------------------
-      // setReadModeADMultiplexer(ad_mux_0); uncomment if r/w required
-      // for (uint8_t i_chan = 0; i_chan < MAX_AD_MUX_CHANNELS; i_chan++) {
-        // readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
-        readAllADMultiplexerAnalogChannels(ad_mux_0);
-        // vTaskDelay(1); // CONFIG_FREERTOS_HZ=1000 makes delay 1ms. uncomment to delay
-      // }
+      // remember to automatically adjust TASK_MAX_FREQ_BALANCED_ADMPLEX0
+      // fir pins in use: example 6 pins TASK_MAX_FREQ_BALANCED_ADMPLEX0=1000uS (1000Hz)
+      int hardcoded_max = 5; // sim enable/disable channels to test performance with some channels enabled
+      for (uint8_t i_chan = 0; i_chan < hardcoded_max; i_chan++) {
+        readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
+      }
+      // readAllADMultiplexerAnalogChannels(ad_mux_0);
       esp_task_wdt_reset();
 
       // --------------------------------------------
@@ -667,8 +679,6 @@ static void taskMultiplexers(void *pvParameters) {
       #endif
       stepFFCounter(systemData.counters_mplex0, 1);
       xSemaphoreGive(dataMutex);
-
-      // esp_task_wdt_reset();
     }
 
     // --------------------------------------------
@@ -677,17 +687,81 @@ static void taskMultiplexers(void *pvParameters) {
     xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_mplex0, 1);
     xSemaphoreGive(dataMutex);
+
+    // delayMicroseconds(1);
   }
 }
-void createTaskMultiplexers() {
+void createTaskADMplex0() {
   xTaskCreatePinnedToCore(
-    taskMultiplexers,             /* Function to implement the task */
-    "TaskMultiplexers",           /* Name of the task */
-    TASK_MULTIPLEXERS_STACK_SIZE, /* Stack size in words */
-    nullptr,                      /* Task input parameter */
-    TASK_MULTIPLEXERS_PRIORITY,   /* Priority of the task */
-    &TaskMultiplexers,            /* Task handle. */
-    TASK_MULTIPLEXERS_CORE);      /* Core where the task should run */
+    taskADMplex0,             /* Function to implement the task */
+    "TaskADMplex0",           /* Name of the task */
+    TASK_ADMPLEX0_STACK_SIZE, /* Stack size in words */
+    nullptr,                  /* Task input parameter */
+    TASK_ADMPLEX0_PRIORITY,   /* Priority of the task */
+    &TaskADMplex0,            /* Task handle. */
+    TASK_ADMPLEX0_CORE);      /* Core where the task should run */
+}
+
+/** ----------------------------------------------------------------------------
+ * Multiplexer Task (ADMplex1).
+ *
+ * @brief Reads all analog/digital multiplexer channels on ad_mux_1.
+ */
+static void taskADMplex1(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  while (!global_task_sync) {
+    esp_task_wdt_reset();
+    vTaskDelay(1);
+  }
+  for (;;) {
+
+    // Delay Task
+    if (taskFrequencyADMplex1() == true) {
+
+      // ------------------------------------------------
+      // Read multiplexer channels (customize as required).
+      // ------------------------------------------------
+      // remember to automatically adjust TASK_MAX_FREQ_BALANCED_ADMPLEX1
+      // fir pins in use: example 6 pins TASK_MAX_FREQ_BALANCED_ADMPLEX1=1000uS (1000Hz)
+      int hardcoded_max = 5; // sim enable/disable channels to test performance with some channels enabled
+      for (uint8_t i_chan = 0; i_chan < hardcoded_max; i_chan++) {
+        readADMultiplexerAnalogChannel(ad_mux_1, i_chan);
+      }
+      // readAllADMultiplexerAnalogChannels(ad_mux_1);
+      esp_task_wdt_reset();
+      
+      // --------------------------------------------
+      // Task frequency counter
+      // --------------------------------------------
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
+      systemData.counters_mplex1.flag_c = true;
+      #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+      outputSerialADMplex1();
+      #endif
+      stepFFCounter(systemData.counters_mplex1, 1);
+      xSemaphoreGive(dataMutex);
+    }
+
+    // --------------------------------------------
+    // Task frequency counter
+    // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
+    stepFCounter(systemData.counters_mplex1, 1);
+    xSemaphoreGive(dataMutex);
+
+    delayMicroseconds(1);
+  }
+}
+void createTaskADMplex1() {
+  xTaskCreatePinnedToCore(
+    taskADMplex1,             /* Function to implement the task */
+    "TaskADMplex1",           /* Name of the task */
+    TASK_ADMPLEX1_STACK_SIZE, /* Stack size in words */
+    nullptr,                  /* Task input parameter */
+    TASK_ADMPLEX1_PRIORITY,   /* Priority of the task */
+    &TaskADMplex1,            /* Task handle. */
+    TASK_ADMPLEX1_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
@@ -943,6 +1017,7 @@ static void taskSatioSerialTx(void *pvParameters) {
       outputSerialGPS();
       // outputSerialSatIO();
       outputSerialADMplex0();
+      outputSerialADMplex1();
       outputSerialGyro0();
       outputSerialUniverse();
       outputSerialMatrix();
