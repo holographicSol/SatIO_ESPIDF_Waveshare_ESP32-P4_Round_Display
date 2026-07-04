@@ -82,14 +82,14 @@ extern bool ISR_Bool_MultiDisplayController_0;
 // ----------------------------------------------------------------------------------------
 /**
  * @brief SATIO_CD74HC4067_OPTION_USE_1
- * @def If defined then the system will be compiled to use 1 CD74HC4067.
+ * @def If defined then the system will be compiled to use CD74HC4067 1.
  * @warning If neither SATIO_CD74HC4067_OPTION is defined, the system will be built without a CD74HC4067.
  */
 #define SATIO_CD74HC4067_OPTION_USE_1
 
 /**
  * @brief SATIO_CD74HC4067_OPTION_USE_2
- * @def If defined then the system will be compiled to use 2 CD74HC4067's.
+ * @def If defined then the system will be compiled to use CD74HC4067 2.
  * @warning If neither SATIO_CD74HC4067_OPTION is defined, the system will be built without a CD74HC4067.
  */
 #define SATIO_CD74HC4067_OPTION_USE_2
