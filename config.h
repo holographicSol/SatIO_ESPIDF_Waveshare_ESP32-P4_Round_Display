@@ -160,7 +160,7 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_HIGH_GPS                        100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_HIGH_MULTIPLEXERS               5000    // (200 Hz)
+#define TASK_MAX_FREQ_HIGH_MULTIPLEXERS               4000    // (250 Hz)
 
 #define TASK_MAX_FREQ_HIGH_GYRO                       5000    // (200 Hz)
 
