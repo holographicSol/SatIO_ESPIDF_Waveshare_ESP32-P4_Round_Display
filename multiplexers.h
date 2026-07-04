@@ -58,6 +58,7 @@ extern I2CMultiplexer i2c_mux_0;
 typedef struct {
   int pins[MAX_ANALOG_DIGITAL_MULTIPLEXER_PINS];
   double data[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+  bool enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
 } AnalogDigitalMultiplexer;
 
 extern AnalogDigitalMultiplexer ad_mux_0;
@@ -115,6 +116,17 @@ void writeADMultiplexerDigitalChannel(AnalogDigitalMultiplexer &mux_id, uint8_t 
  * NAN stored analog/digital multiplexer channel data
  */
 void setADMultiplexerDataNAN(AnalogDigitalMultiplexer &mux_id);
+
+/**
+ * Enable/disable a channel. Disabled channels are skipped by the read tasks;
+ * disabling immediately clears the channel's stored data to NAN (a one-off
+ * write here rather than every task cycle while it remains disabled).
+ * @param mux_id Specify analog/digital multiplexer
+ * @param channel Specify analog/digital multiplexer channel
+ * @param enabled Enable/disable channel
+ * @return None
+ */
+void setADMultiplexerChannelEnabled(AnalogDigitalMultiplexer &mux_id, uint8_t channel, bool enabled);
 
 /**
  * NAN stored IIC multiplexer channel data

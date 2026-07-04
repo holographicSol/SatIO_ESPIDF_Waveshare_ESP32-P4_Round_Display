@@ -923,7 +923,10 @@ typedef enum {
     SYSTEM_FILE_SATIO_LOCATION_VALUE_MODE,
     SYSTEM_FILE_SATIO_ALTITUDE_VALUE_MODE,
     SYSTEM_FILE_SATIO_SPEED_VALUE_MODE,
-    SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE, 
+    SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE,
+
+    SYSTEM_FILE_ADMPLEX0_CH_ENABLED,
+    SYSTEM_FILE_ADMPLEX1_CH_ENABLED,
 } system_tag_t;
 
 /* Rule 7.4: a string literal's type is "array of const char", so the
@@ -972,13 +975,16 @@ static const char * getSystemTag(int t) {
         case SYSTEM_FILE_USER_LATITUDE:                  return "USER_LATITUDE";
         case SYSTEM_FILE_USER_LONGITUDE:                 return "USER_LONGITUDE";
         case SYSTEM_FILE_USER_SPEED:                     return "USER_SPEED";
-        case SYSTEM_FILE_USER_GROUND_HEADING:                   return "USER_HEADING";
+        case SYSTEM_FILE_USER_GROUND_HEADING:            return "USER_HEADING";
         case SYSTEM_FILE_USER_ALTITUDE:                  return "USER_ALTITUDE";
 
         case SYSTEM_FILE_SATIO_LOCATION_VALUE_MODE:      return "SATIO_LOCATION_VALUE_MODE";
         case SYSTEM_FILE_SATIO_ALTITUDE_VALUE_MODE:      return "SATIO_ALTITUDE_VALUE_MODE";
         case SYSTEM_FILE_SATIO_SPEED_VALUE_MODE:         return "SATIO_SPEED_VALUE_MODE";
         case SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE:return "SATIO_GROUND_HEADING_VALUE_MODE";
+
+        case SYSTEM_FILE_ADMPLEX0_CH_ENABLED:            return "ADMPLEX0_CH_ENABLED";
+        case SYSTEM_FILE_ADMPLEX1_CH_ENABLED:            return "ADMPLEX1_CH_ENABLED";
 
         default:                                         return "?";
     }
@@ -1048,7 +1054,17 @@ bool saveSystemFile(const char *filepath) {
     WRITE_INT_TAG(SYSTEM_FILE_SATIO_ALTITUDE_VALUE_MODE, satioData.altitude_value_mode);
     WRITE_INT_TAG(SYSTEM_FILE_SATIO_SPEED_VALUE_MODE, satioData.speed_value_mode);
     WRITE_INT_TAG(SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE, satioData.ground_heading_value_mode);
-    
+
+    // ADMPLEX0_CH_ENABLED / ADMPLEX1_CH_ENABLED
+    for (int i_ch=0; i_ch<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_ch++) {
+        snprintf(lineBuf, 256, "%s,%d,%d", getSystemTag(SYSTEM_FILE_ADMPLEX0_CH_ENABLED), i_ch, (int)ad_mux_0.enabled[i_ch]);
+        printLine(f, lineBuf);
+    }
+    for (int i_ch=0; i_ch<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_ch++) {
+        snprintf(lineBuf, 256, "%s,%d,%d", getSystemTag(SYSTEM_FILE_ADMPLEX1_CH_ENABLED), i_ch, (int)ad_mux_1.enabled[i_ch]);
+        printLine(f, lineBuf);
+    }
+
     #undef WRITE_INT_TAG
     #undef WRITE_LONG_TAG
     #undef WRITE_DBL_TAG
@@ -1091,6 +1107,19 @@ bool loadSystemFile(const char *filepath) {
 
         char *val = strtok(NULL, ",");
         if (val == NULL) continue;
+
+        // ADMPLEX0_CH_ENABLED / ADMPLEX1_CH_ENABLED: "TAG,channel,enabled" (channel-indexed, unlike the single-value tags below).
+        if (tag_index == SYSTEM_FILE_ADMPLEX0_CH_ENABLED || tag_index == SYSTEM_FILE_ADMPLEX1_CH_ENABLED) {
+            char *val2 = strtok(NULL, ",");
+            if (val2 != NULL && str_is_int8(val) && str_is_bool(val2)) {
+                int ch = atoi(val);
+                if (ch >= 0 && ch < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
+                    if (tag_index == SYSTEM_FILE_ADMPLEX0_CH_ENABLED) {setADMultiplexerChannelEnabled(ad_mux_0, (uint8_t)ch, atoi(val2) != 0);}
+                    else {setADMultiplexerChannelEnabled(ad_mux_1, (uint8_t)ch, atoi(val2) != 0);}
+                }
+            }
+            continue;
+        }
 
         READ_INT8_TAG(SYSTEM_FILE_MATRIX_FILE, satioFileData.i_current_matrix_file_path);
         READ_BOOL_TAG(SYSTEM_FILE_LOAD_MATRIX_ON_STARTUP, matrixData.load_matrix_on_startup);

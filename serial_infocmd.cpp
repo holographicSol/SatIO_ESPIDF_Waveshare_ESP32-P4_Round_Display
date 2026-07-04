@@ -447,6 +447,13 @@ static void PrintHelp(void) {
       matrix -s 1 --map-slot 1
       Optional: matrix -s 1 --omode 1
 
+  [ Multiplexer ]
+
+      admplex0 -c n --enable   Enable channel n on ADMPlex0 (read every task cycle).
+      admplex0 -c n --disable  Disable channel n on ADMPlex0 (data reports NAN while disabled).
+      admplex1 -c n --enable   Enable channel n on ADMPlex1.
+      admplex1 -c n --disable  Disable channel n on ADMPlex1.
+
   [ INS ]
 
       ins -m n              Set INS mode n. (0 : Off) (1 : Dynamic, set by gps every 100ms) (2 : Fixed, remains on after conditions met).
@@ -1285,6 +1292,14 @@ void CmdProcess(void) {
           if (argparser_has_flag(&parser, "calmag-start") == true) {WT901CalMagStart();}
           else if (argparser_has_flag(&parser, "calmag-stop") == true) {WT901CalMagEnd();}
           else { /* no more options */ }
+        }
+        // admplex0
+        else if (strcmp(pos[0], "admplex0")==0) {
+          if (argparser_has_flag(&parser, "c") == true) {setADMultiplexerChannelEnabled(ad_mux_0, argparser_get_uint8(&parser, "c", 0), enable);}
+        }
+        // admplex1
+        else if (strcmp(pos[0], "admplex1")==0) {
+          if (argparser_has_flag(&parser, "c") == true) {setADMultiplexerChannelEnabled(ad_mux_1, argparser_get_uint8(&parser, "c", 0), enable);}
         }
 
         // else if (strcmp(pos[0], "sdcard")==0) {

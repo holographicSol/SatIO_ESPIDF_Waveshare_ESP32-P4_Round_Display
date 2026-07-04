@@ -691,9 +691,12 @@ static void taskADMplex0(void *pvParameters) {
       // ------------------------------------------------
       // remember to automatically adjust TASK_MAX_FREQ_BALANCED_ADMPLEX0
       // fir pins in use: example 6 pins TASK_MAX_FREQ_BALANCED_ADMPLEX0=1000uS (1000Hz)
-      int hardcoded_max = 5; // sim enable/disable channels to test performance with some channels enabled
-      for (uint8_t i_chan = 0; i_chan < hardcoded_max; i_chan++) {
-        readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
+      // Disabled channels are left NAN by setADMultiplexerChannelEnabled()/initADMultiplexer(),
+      // so this loop only ever touches channels currently enabled.
+      for (uint8_t i_chan = 0; i_chan < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan++) {
+        if (ad_mux_0.enabled[i_chan] == true) {
+          readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
+        }
       }
       // readAllADMultiplexerAnalogChannels(ad_mux_0);
       esp_task_wdt_reset();
@@ -755,9 +758,12 @@ static void taskADMplex1(void *pvParameters) {
       // ------------------------------------------------
       // remember to automatically adjust TASK_MAX_FREQ_BALANCED_ADMPLEX1
       // fir pins in use: example 6 pins TASK_MAX_FREQ_BALANCED_ADMPLEX1=1000uS (1000Hz)
-      int hardcoded_max = 5; // sim enable/disable channels to test performance with some channels enabled
-      for (uint8_t i_chan = 0; i_chan < hardcoded_max; i_chan++) {
-        readADMultiplexerAnalogChannel(ad_mux_1, i_chan);
+      // Disabled channels are left NAN by setADMultiplexerChannelEnabled()/initADMultiplexer(),
+      // so this loop only ever touches channels currently enabled.
+      for (uint8_t i_chan = 0; i_chan < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan++) {
+        if (ad_mux_1.enabled[i_chan] == true) {
+          readADMultiplexerAnalogChannel(ad_mux_1, i_chan);
+        }
       }
       // readAllADMultiplexerAnalogChannels(ad_mux_1);
       esp_task_wdt_reset();

@@ -1585,6 +1585,35 @@ void sw_output_event_cb(lv_event_t * e)
     }
 }
 
+/* user_data on an admplex channel-enable switch is the channel number (0-15) for
+   ad_mux_0, or channel+ADMPLEX_CHANNEL_ENABLE_MUX1_OFFSET for ad_mux_1, so one
+   callback can serve every channel switch on both multiplexer panels. */
+static const int ADMPLEX_CHANNEL_ENABLE_MUX1_OFFSET = 100;
+
+/** -------------------------------------------------------------------------------------
+ * @brief Event callback.
+ *
+ * Toggles enable/disable for a single ADMplex0/ADMplex1 channel switch.
+ *
+ * @param e Pointer to the LVGL event structure.
+ */
+void sw_admplex_channel_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if (code == LV_EVENT_VALUE_CHANGED) {
+        lv_obj_t * sw = (lv_obj_t *)lv_event_get_target(e);
+        bool is_enabled = lv_obj_has_state(sw, LV_STATE_CHECKED);
+        int packed_channel = static_cast<int>(reinterpret_cast<intptr_t>(lv_event_get_user_data(e)));
+
+        if (packed_channel >= ADMPLEX_CHANNEL_ENABLE_MUX1_OFFSET) {
+            setADMultiplexerChannelEnabled(ad_mux_1, (uint8_t)(packed_channel - ADMPLEX_CHANNEL_ENABLE_MUX1_OFFSET), is_enabled);
+        } else {
+            setADMultiplexerChannelEnabled(ad_mux_0, (uint8_t)packed_channel, is_enabled);
+        }
+    }
+}
+
 /** -------------------------------------------------------------------------------------
  * @brief Create Title Bar.
  * 
@@ -12299,6 +12328,78 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_val_chan_15, obj_w_0, obj_height);
 
     /* ---------------------------------------------------------- */
+    /* Channel Enable/Disable (ADMplex 0)                          */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_enable_0 = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height*2,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    lv_obj_set_flex_flow(row_enable_0, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_flex_align(
+        row_enable_0,
+        LV_FLEX_ALIGN_START,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    int32_t enable_item_w = (sub_row_width/8) - sub_column_padding;
+
+    for (uint8_t i_chan_en=0; i_chan_en<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan_en++) {
+        lv_obj_t * col_enable_0 = lv_obj_create(row_enable_0);
+        lv_obj_set_size(col_enable_0, enable_item_w, sub_row_height);
+        lv_obj_set_style_pad_all(col_enable_0, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_width(col_enable_0, 0, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(col_enable_0, 0, LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(col_enable_0, LV_OPA_TRANSP, LV_PART_MAIN);
+        lv_obj_set_scrollbar_mode(col_enable_0, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(col_enable_0, LV_DIR_NONE);
+        lv_obj_set_flex_flow(col_enable_0, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_flex_align(col_enable_0, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+        char chan_label_buf_0[4];
+        snprintf(chan_label_buf_0, sizeof(chan_label_buf_0), "%u", (unsigned)i_chan_en);
+
+        create_label(
+            col_enable_0,
+            enable_item_w,
+            obj_height/2,
+            LV_ALIGN_CENTER,
+            0,
+            0,
+            chan_label_buf_0,
+            LV_TEXT_ALIGN_CENTER,
+            &cobalt_alien_17,
+            true,
+            false,
+            false,
+            0,
+            general_radius,
+            1,
+            default_bg_hue,
+            default_subtitle_hue
+        );
+
+        result.sw_chan_enabled[i_chan_en] = create_switch(
+            col_enable_0,
+            enable_item_w,
+            obj_height/2,
+            LV_ALIGN_CENTER,
+            0,
+            0
+        );
+
+        lv_obj_add_event_cb(result.sw_chan_enabled[i_chan_en], sw_admplex_channel_event_cb, LV_EVENT_VALUE_CHANGED, reinterpret_cast<void *>(static_cast<intptr_t>(i_chan_en)));
+    }
+
+    /* ---------------------------------------------------------- */
     /* Title ADMplex 1                                             */
     /* ---------------------------------------------------------- */
 
@@ -13432,6 +13533,78 @@ admplex0_container_t create_admplex0_panel(
 
     lv_obj_set_size(result.lbl_title_chan1_15, obj_w_0, obj_height);
     lv_obj_set_size(result.lbl_val_chan1_15, obj_w_0, obj_height);
+
+    /* ---------------------------------------------------------- */
+    /* Channel Enable/Disable (ADMplex 1)                          */
+    /* ---------------------------------------------------------- */
+
+    lv_obj_t * row_enable_1 = create_row(
+        result.panel,
+        sub_row_width,
+        sub_row_height*2,
+        inner_pad_all,
+        sub_row_padding,
+        sub_column_padding,
+        false,
+        false
+    );
+
+    lv_obj_set_flex_flow(row_enable_1, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_flex_align(
+        row_enable_1,
+        LV_FLEX_ALIGN_START,
+        LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER
+    );
+
+    int32_t enable_item_w_1 = (sub_row_width/8) - sub_column_padding;
+
+    for (uint8_t i_chan_en=0; i_chan_en<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan_en++) {
+        lv_obj_t * col_enable_1 = lv_obj_create(row_enable_1);
+        lv_obj_set_size(col_enable_1, enable_item_w_1, sub_row_height);
+        lv_obj_set_style_pad_all(col_enable_1, 0, LV_PART_MAIN);
+        lv_obj_set_style_border_width(col_enable_1, 0, LV_PART_MAIN);
+        lv_obj_set_style_outline_width(col_enable_1, 0, LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(col_enable_1, LV_OPA_TRANSP, LV_PART_MAIN);
+        lv_obj_set_scrollbar_mode(col_enable_1, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_scroll_dir(col_enable_1, LV_DIR_NONE);
+        lv_obj_set_flex_flow(col_enable_1, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_flex_align(col_enable_1, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+        char chan_label_buf_1[4];
+        snprintf(chan_label_buf_1, sizeof(chan_label_buf_1), "%u", (unsigned)i_chan_en);
+
+        create_label(
+            col_enable_1,
+            enable_item_w_1,
+            obj_height/2,
+            LV_ALIGN_CENTER,
+            0,
+            0,
+            chan_label_buf_1,
+            LV_TEXT_ALIGN_CENTER,
+            &cobalt_alien_17,
+            true,
+            false,
+            false,
+            0,
+            general_radius,
+            1,
+            default_bg_hue,
+            default_subtitle_hue
+        );
+
+        result.sw_chan1_enabled[i_chan_en] = create_switch(
+            col_enable_1,
+            enable_item_w_1,
+            obj_height/2,
+            LV_ALIGN_CENTER,
+            0,
+            0
+        );
+
+        lv_obj_add_event_cb(result.sw_chan1_enabled[i_chan_en], sw_admplex_channel_event_cb, LV_EVENT_VALUE_CHANGED, reinterpret_cast<void *>(static_cast<intptr_t>(i_chan_en + ADMPLEX_CHANNEL_ENABLE_MUX1_OFFSET)));
+    }
 
     return result;
 }

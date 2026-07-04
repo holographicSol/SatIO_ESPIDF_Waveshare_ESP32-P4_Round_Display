@@ -818,6 +818,10 @@ typedef struct {
     lv_obj_t * lbl_title_chan1_15;
     lv_obj_t * lbl_val_chan1_15;
 
+    /* Per-channel enable/disable switches (index == channel number). */
+    lv_obj_t * sw_chan_enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+    lv_obj_t * sw_chan1_enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+
 } admplex0_container_t;
 
 /** ---------------------------------------------------------------------------------------

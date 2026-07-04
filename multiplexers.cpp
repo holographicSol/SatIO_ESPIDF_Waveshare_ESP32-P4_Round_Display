@@ -19,7 +19,8 @@ AnalogDigitalMultiplexer ad_mux_0 = {
            PIN_ANALOG_DIGITAL_MULTIPLEXER_0_S2,
            PIN_ANALOG_DIGITAL_MULTIPLEXER_0_S3,
            PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG},
-  .data = {}
+  .data = {},
+  .enabled = {false}
 };
 
 AnalogDigitalMultiplexer ad_mux_1 = {
@@ -29,6 +30,7 @@ AnalogDigitalMultiplexer ad_mux_1 = {
            PIN_ANALOG_DIGITAL_MULTIPLEXER_1_S3,
            PIN_ANALOG_DIGITAL_MULTIPLEXER_1_SIG},
   .data = {},
+  .enabled = {false}
 };
 
 I2CMultiplexer i2c_mux_0 = {
@@ -210,9 +212,26 @@ void setADMultiplexerDataNAN(AnalogDigitalMultiplexer &mux_id) {
 }
 
 /**
+ * Enables/disables a channel. Read tasks skip disabled channels entirely
+ * (see taskADMplex0()/taskADMplex1()); disabling here writes NAN into the
+ * channel's data once, at the moment of the transition, instead of every
+ * task cycle for as long as the channel stays disabled.
+ *
+ * Rule 18.1: channel is bounds-checked against mux_id.enabled's real size
+ * before being used as an index.
+ */
+void setADMultiplexerChannelEnabled(AnalogDigitalMultiplexer &mux_id, uint8_t channel, bool enabled) {
+  if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
+    mux_id.enabled[channel] = enabled;
+    if (enabled == false) {mux_id.data[channel] = NAN;}
+  }
+}
+
+/**
  * Configures an analog/digital multiplexer instance's pins: the 4 control
  * pins as outputs (driven low), and the shared SIG pin as an input,
  * ready for setADMultiplexerChannel()/readADMultiplexerAnalogChannel().
+ * Channel data starts NAN until a channel is enabled and read.
  */
 void initADMultiplexer(AnalogDigitalMultiplexer &mux_id) {
   for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CONTROL_PINS; i++) {
@@ -220,4 +239,5 @@ void initADMultiplexer(AnalogDigitalMultiplexer &mux_id) {
     pinMode(mux_id.pins[i], OUTPUT);
     digitalWrite(mux_id.pins[i], LOW);
   }
+  setADMultiplexerDataNAN(mux_id);
 }
