@@ -57,7 +57,7 @@ TaskHandle_t TaskSatioSerialTx;
 // but it lets that burst preempt same-core tasks immediately on its notify
 // instead of waiting for the next FreeRTOS tick's round-robin time slice
 // (CONFIG_FREERTOS_HZ=1000, i.e. up to 1 ms of avoidable lateness otherwise).
-#define TASK_SYSTEM_TIME_PRIORITY           6
+#define TASK_SYSTEM_TIME_PRIORITY           5
 #define TASK_GPS_PRIORITY                   5
 #define TASK_GYRO_PRIORITY                  5
 #define TASK_MULTIPLEXERS_PRIORITY          5
@@ -645,15 +645,16 @@ static void taskMultiplexers(void *pvParameters) {
 
     // Delay Task
     if (taskFrequencyMultiplexers() == true) {
-      esp_task_wdt_reset();
+      // esp_task_wdt_reset();
       // ------------------------------------------------
       // Read multiplexer channels (customize as required).
       // ------------------------------------------------
-      setReadModeADMultiplexer(ad_mux_0);
-      for (uint8_t i_chan = 0; i_chan < MAX_AD_MUX_CHANNELS; i_chan++) {
-        readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
+      // setReadModeADMultiplexer(ad_mux_0); uncomment if r/w required
+      // for (uint8_t i_chan = 0; i_chan < MAX_AD_MUX_CHANNELS; i_chan++) {
+        // readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
+        readAllADMultiplexerAnalogChannels(ad_mux_0);
         // vTaskDelay(1); // CONFIG_FREERTOS_HZ=1000 makes delay 1ms. uncomment to delay
-      }
+      // }
       esp_task_wdt_reset();
 
       // --------------------------------------------
@@ -667,7 +668,7 @@ static void taskMultiplexers(void *pvParameters) {
       stepFFCounter(systemData.counters_mplex0, 1);
       xSemaphoreGive(dataMutex);
 
-      esp_task_wdt_reset();
+      // esp_task_wdt_reset();
     }
 
     // --------------------------------------------

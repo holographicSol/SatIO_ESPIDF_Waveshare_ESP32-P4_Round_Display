@@ -309,8 +309,6 @@ extern "C" void app_main(void)
 
     /** ----------------------------------------------------------------------------
      * System Time
-     *
-     * Requires battery for system RTC
      */
     ESP_LOGI(APP_MAIN_TAG, "Initializing system time");
     satioData.systemTime.sync_immediately_flag=true;
@@ -397,6 +395,8 @@ extern "C" void app_main(void)
     (void)analogRead(PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG);
     analogSetAttenuation(ADC_11db);  // Full ~0-3.3V input range; applies to every ADC channel.
     initADMultiplexer(ad_mux_0);
+    // set read mode once (perfermance/efficiency if only reading, else change in task as required)
+    setReadModeADMultiplexer(ad_mux_0);
     createTaskMultiplexers();        // (target: 200/ps)  Fast general input
 
     // Auxiliary Output
