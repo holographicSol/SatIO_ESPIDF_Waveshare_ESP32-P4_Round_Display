@@ -530,22 +530,21 @@ static void update_zodiac(const int32_t earth_x, const int32_t earth_y) {
  * Orbital path lines reflect objects that are actually above the
  * horizon (altitude > 0).
  *
- * MISRA: every argument, including each coordinate already stored in
- * altitude_points, is checked for null/zero before use; a zero coordinate
- * indicates the point has not been computed yet, so the line is left as-is
- * rather than being redrawn from stale or partially-initialised data.
+ * MISRA: altitude_angle is checked with std::isfinite rather than a
+ * non-zero comparison, because a non-zero check does not reject NaN (NaN
+ * compares unequal to everything, so it would pass) and a value of exactly
+ * zero degrees is a legitimate angle. altitude_points holds this function's
+ * own output, so its prior contents are not used as a precondition: doing
+ * so would make the very first call permanently unable to produce a
+ * non-zero result to satisfy itself.
  */
 static void update_altitude_line(lv_obj_t * const altitude_line, const float altitude_angle,
                                   lv_point_precise_t * const altitude_points, const float intersection) {
     const bool args_valid =
         (altitude_line != nullptr) &&
-        (altitude_angle != 0.0f) &&
         (altitude_points != nullptr) &&
-        (intersection != 0.0f) &&
-        (altitude_points[0].x != 0) &&
-        (altitude_points[0].y != 0) &&
-        (altitude_points[1].x != 0) &&
-        (altitude_points[1].y != 0);
+        std::isfinite(altitude_angle) &&
+        (intersection != 0.0f);
 
     if (args_valid) {
         const float rad = deg2rad(altitude_angle);
@@ -586,6 +585,9 @@ static void update_altitude_line(lv_obj_t * const altitude_line, const float alt
         altitude_points[1].y = (earth.y + earth.radius) + static_cast<int32_t>(dy * r);
 
         lv_line_set_points(altitude_line, altitude_points, 2);
+    }
+    else {
+        printf("ERROR: Invalid args in update_altitude_line, called with args altitude_angle=%f  intersection=%f\n", altitude_angle, intersection);
     }
 }
 
