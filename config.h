@@ -80,6 +80,20 @@ extern bool ISR_Bool_MultiDisplayController_0;
  */
 // #define SATIO_DEFAULT_POWER_CONFIG_ULTIMATE_PERFORMANCE
 // ----------------------------------------------------------------------------------------
+/**
+ * @brief SATIO_CD74HC4067_OPTION_USE_1
+ * @def If defined then the system will be compiled to use 1 CD74HC4067.
+ * @warning If neither SATIO_CD74HC4067_OPTION is defined, the system will be built without a CD74HC4067.
+ */
+#define SATIO_CD74HC4067_OPTION_USE_1
+
+/**
+ * @brief SATIO_CD74HC4067_OPTION_USE_2
+ * @def If defined then the system will be compiled to use 2 CD74HC4067's.
+ * @warning If neither SATIO_CD74HC4067_OPTION is defined, the system will be built without a CD74HC4067.
+ */
+#define SATIO_CD74HC4067_OPTION_USE_2
+// ----------------------------------------------------------------------------------------
 
 
 // ----------------------------------------------------------------------------------------
@@ -96,9 +110,13 @@ typedef struct PwrConfig {
 
     uint32_t TASK_MAX_FREQ_GPS;
 
+    #ifdef SATIO_CD74HC4067_OPTION_USE_1
     uint32_t TASK_MAX_FREQ_ADMPLEX0;
+    #endif
 
+    #ifdef SATIO_CD74HC4067_OPTION_USE_2
     uint32_t TASK_MAX_FREQ_ADMPLEX1;
+    #endif
 
     uint32_t TASK_MAX_FREQ_GYRO;
 
@@ -120,9 +138,13 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_LOW_GPS                         100000  // (10 Hz)
 
+#ifdef SATIO_CD74HC4067_OPTION_USE_1
 #define TASK_MAX_FREQ_LOW_ADMPLEX0                    100000  // (10 Hz)
+#endif
 
+#ifdef SATIO_CD74HC4067_OPTION_USE_2
 #define TASK_MAX_FREQ_LOW_ADMPLEX1                    100000  // (10 Hz)
+#endif
 
 #define TASK_MAX_FREQ_LOW_GYRO                        100000  // (10 Hz)
 
@@ -143,9 +165,13 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_BALANCED_GPS                    100000  // (10 Hz)
 
+#ifdef SATIO_CD74HC4067_OPTION_USE_1
 #define TASK_MAX_FREQ_BALANCED_ADMPLEX0               5000    // (200 Hz)
+#endif
 
+#ifdef SATIO_CD74HC4067_OPTION_USE_2
 #define TASK_MAX_FREQ_BALANCED_ADMPLEX1               5000    // (200 Hz)
+#endif
 
 #define TASK_MAX_FREQ_BALANCED_GYRO                   5000    // (200 Hz)
 
@@ -166,9 +192,13 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 #define TASK_MAX_FREQ_HIGH_GPS                        100000  // (10 Hz)
 
+#ifdef SATIO_CD74HC4067_OPTION_USE_1
 #define TASK_MAX_FREQ_HIGH_ADMPLEX0                   2000    // (500 Hz)
+#endif
 
+#ifdef SATIO_CD74HC4067_OPTION_USE_2
 #define TASK_MAX_FREQ_HIGH_ADMPLEX1                   2000    // (500 Hz)
+#endif
 
 #define TASK_MAX_FREQ_HIGH_GYRO                       5000    // (200 Hz)
 

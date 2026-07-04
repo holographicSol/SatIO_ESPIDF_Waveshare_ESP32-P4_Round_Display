@@ -392,14 +392,20 @@ extern "C" void app_main(void)
      *     initialization on the multiplexer's signal pin before the task
      *     that relies on it starts running.
      */
+
     analogSetAttenuation(ADC_11db);  // Full ~0-3.3V input range; applies to every ADC channel.
-    // set read mode once (perfermance/efficiency if only reading, else change in task as required)
+    
+    #ifdef SATIO_CD74HC4067_OPTION_USE_1
     initADMultiplexer(ad_mux_0);
-    initADMultiplexer(ad_mux_1);
     setReadModeADMultiplexer(ad_mux_0);
-    setReadModeADMultiplexer(ad_mux_1);
     createTaskADMplex0(); // (target: x16 chan >= 250-350Hz, x4+ chan >= 1KHz)  Fast general input
+    #endif
+
+    #ifdef SATIO_CD74HC4067_OPTION_USE_2
+    initADMultiplexer(ad_mux_1);
+    setReadModeADMultiplexer(ad_mux_1);
     createTaskADMplex1(); // (target: x16 chan >= 250-350Hz, x4+ chan >= 1KHz)  Fast general input
+    #endif
 
     // Auxiliary Output
     ESP_LOGI(APP_MAIN_TAG, "creating auxiliary output task");

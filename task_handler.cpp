@@ -71,8 +71,14 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_SYSTEM_TIME_CORE               1
 #define TASK_GPS_CORE                       1
 #define TASK_GYRO_CORE                      1
+
+#ifdef SATIO_CD74HC4067_OPTION_USE_1
 #define TASK_ADMPLEX0_CORE                  1
+#endif
+#ifdef SATIO_CD74HC4067_OPTION_USE_2
 #define TASK_ADMPLEX1_CORE                  1
+#endif
+
 #define TASK_SWITCHES_CORE                  1
 #define TASK_UNIVERSE_CORE                  0
 #define TASK_STORAGE_CORE                   0
@@ -105,8 +111,14 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_SYSTEM_TIME_CORE               0
 #define TASK_GPS_CORE                       0
 #define TASK_GYRO_CORE                      1
+
+#ifdef SATIO_CD74HC4067_OPTION_USE_1
 #define TASK_ADMPLEX0_CORE                  1
+#endif
+#ifdef SATIO_CD74HC4067_OPTION_USE_2
 #define TASK_ADMPLEX1_CORE                  1
+#endif
+
 #define TASK_SWITCHES_CORE                  1
 #define TASK_UNIVERSE_CORE                  1
 #define TASK_STORAGE_CORE                   1
@@ -137,8 +149,12 @@ TaskHandle_t TaskSatioSerialTx;
  */
 static void notifyAllTasks(void) {
   if (TaskStorage != nullptr) { xTaskNotifyGive(TaskStorage); }
+  #ifdef SATIO_CD74HC4067_OPTION_USE_1
   if (TaskADMplex0 != nullptr) { xTaskNotifyGive(TaskADMplex0); }
+  #endif
+  #ifdef SATIO_CD74HC4067_OPTION_USE_2
   if (TaskADMplex1 != nullptr) { xTaskNotifyGive(TaskADMplex1); }
+  #endif
   if (TaskGyro != nullptr) { xTaskNotifyGive(TaskGyro); }
   if (TaskGPS != nullptr) { xTaskNotifyGive(TaskGPS); }
   if (TaskUniverse != nullptr) { xTaskNotifyGive(TaskUniverse); }
@@ -268,8 +284,12 @@ static void intervalBreach1Second(void) {
   totalCounters(systemData.counters_gps);
   totalCounters(systemData.counters_gyr0);
   totalCounters(systemData.counters_ins);
+  #ifdef SATIO_CD74HC4067_OPTION_USE_1
   totalCounters(systemData.counters_mplex0);
+  #endif
+  #ifdef SATIO_CD74HC4067_OPTION_USE_2
   totalCounters(systemData.counters_mplex1);
+  #endif
   totalCounters(systemData.counters_mtx);
   totalCounters(systemData.counters_pci);
   totalCounters(systemData.counters_pco);
@@ -293,8 +313,12 @@ static void intervalBreach1Second(void) {
   clearCounters(systemData.counters_gps);
   clearCounters(systemData.counters_gyr0);
   clearCounters(systemData.counters_ins);
+  #ifdef SATIO_CD74HC4067_OPTION_USE_1
   clearCounters(systemData.counters_mplex0);
+  #endif
+  #ifdef SATIO_CD74HC4067_OPTION_USE_2
   clearCounters(systemData.counters_mplex1);
+  #endif
   clearCounters(systemData.counters_mtx);
   clearCounters(systemData.counters_pci);
   clearCounters(systemData.counters_pco);
@@ -371,8 +395,12 @@ bool taskFrequencyGPS()         { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_
 bool taskFrequencyGyro()        { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_GYRO);        return true; }
 bool taskFrequencySwitches()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_SWITCHES);    return true; }
 bool taskFrequencyStorage()     { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_STORAGE);     return true; }
+#ifdef SATIO_CD74HC4067_OPTION_USE_1
 bool taskFrequencyADMplex0()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX0);    return true; }
+#endif
+#ifdef SATIO_CD74HC4067_OPTION_USE_2
 bool taskFrequencyADMplex1()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX1);    return true; }
+#endif
 bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_UNIVERSE);    return true; }
 bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_DISPLAY);     return true; }
 bool taskFrequencySatioSerialTx() { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_SATIO_SERIAL_TX); return true; }
@@ -640,6 +668,7 @@ void createTaskGyro() {
     TASK_GYRO_CORE);      /* Core where the task should run */
 }
 
+#ifdef SATIO_CD74HC4067_OPTION_USE_1
 /** ----------------------------------------------------------------------------
  * Multiplexer Task (ADMplex0).
  *
@@ -701,7 +730,9 @@ void createTaskADMplex0() {
     &TaskADMplex0,            /* Task handle. */
     TASK_ADMPLEX0_CORE);      /* Core where the task should run */
 }
+#endif
 
+#ifdef SATIO_CD74HC4067_OPTION_USE_2
 /** ----------------------------------------------------------------------------
  * Multiplexer Task (ADMplex1).
  *
@@ -763,6 +794,7 @@ void createTaskADMplex1() {
     &TaskADMplex1,            /* Task handle. */
     TASK_ADMPLEX1_CORE);      /* Core where the task should run */
 }
+#endif
 
 /** ----------------------------------------------------------------------------
  * Switch Task.
