@@ -76,6 +76,7 @@
 #include "./satio.h"
 #include "./custommapping.h"
 #include "./matrix.h"
+#include "./gpio_portcontroller.h"
 #include "./serial_infocmd.h"
 #include "./system_data.h"
 #include "./sdcard_helper.h"
@@ -316,13 +317,15 @@ extern "C" void app_main(void)
     satioData.systemTime.sync_immediately_flag=true;
     initSystemTime();
 
+    // delay(5000);
+
     /** ----------------------------------------------------------------------------
      * I2C Bus 2: Output Port Controller.
      *
      * (1) begin()'s and setBufferSize()'s results are not needed here, so
      *     each discard is made explicit with a (void) cast (MISRA C 2012
      *     Rule 17.7).
-     * (2) Brings up I2C bus 2 and clears every output on the port
+     * (2) Brings up I2C bus and clears every output on the port
      *     controller attached to it.
      */
     ESP_LOGI(APP_MAIN_TAG, "Initializing output port controller");
@@ -331,9 +334,38 @@ extern "C" void app_main(void)
     iic_2.setTimeOut(I2C_TIMEOUT_MS_BUS2);
     (void)iic_2.begin(IIC_BUS2_SDA, IIC_BUS2_SCL, I2C_CLOCK_Hz_BUS2);
     iic_2.setClock(I2C_CLOCK_Hz_BUS2);
-    // set pins default
-    writeOutputPortControllerClear(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER_0);
-    // writeOutputPortControllerClear(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER_1);
+
+    /** ----------------------------------------------------------------------------
+     * I2C Bus 0: Input Port Controller.
+     *
+     * (1) begin()'s and setBufferSize()'s results are not needed here, so
+     *     each discard is made explicit with a (void) cast (MISRA C 2012
+     *     Rule 17.7).
+     * (2) Brings up I2C bus.
+     */
+    ESP_LOGI(APP_MAIN_TAG, "Initializing input port controller");
+    (void)iic_0.setPins(IIC_BUS0_SDA, IIC_BUS0_SCL);
+    (void)iic_0.setBufferSize(MAX_IIC_BUFFER_SIZE);
+    iic_0.setTimeOut(I2C_TIMEOUT_MS_BUS0);
+    (void)iic_0.begin(IIC_BUS0_SDA, IIC_BUS0_SCL, I2C_CLOCK_Hz_BUS0);
+    iic_0.setClock(I2C_CLOCK_Hz_BUS0);
+
+    /** ----------------------------------------------------------------------------
+     * GPIOPortExpander auto-discovery.
+     *
+     * Queries each port controller live over I2C (gpio_portcontroller.cpp)
+     * for its pin_min/pin_max/analog_pins/digital_pins, populating
+     * output_portcontroller_0/_1 and input_portcontroller_0.
+     */
+    clearGPIOPortController(GPIOPortExpander_ATMEGA2560_Output_0);
+    // clearGPIOPortController(GPIOPortExpander_ATMEGA2560_Output_1);
+
+    ESP_LOGI(APP_MAIN_TAG, "Discovering GPIOPortExpander configuration");
+    initGPIOPortExpanders(iic_2,
+                          iic_0,
+                          I2C_ADDR_OUTPUT_PORTCONTROLLER_0,
+                          I2C_ADDR_OUTPUT_PORTCONTROLLER_1,
+                          I2C_ADDR_INPUT_PORTCONTROLLER_0);
 
     /** ----------------------------------------------------------------------------
      * Serial1: GPS UART.
@@ -403,6 +435,10 @@ extern "C" void app_main(void)
     setReadModeADMultiplexer(ad_mux_1);
     createTaskADMplex1(); // (target: x16 chan >= 250-350Hz, x4+ chan >= 1KHz)  Fast general input
     #endif
+
+    // Auxiliary Input
+    ESP_LOGI(APP_MAIN_TAG, "creating auxiliary output task");
+    createTaskInputPortController(); // (target: ?) Large general output
 
     // Auxiliary Output
     ESP_LOGI(APP_MAIN_TAG, "creating auxiliary output task");

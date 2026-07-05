@@ -39,6 +39,7 @@
 #include "./task_handler.h"
 #include "i2c_helper.h"
 #include "./satio_lvgl.h"
+#include "./gpio_portcontroller.h"
 
 TaskHandle_t TaskGPS;
 TaskHandle_t TaskGyro;
@@ -50,6 +51,7 @@ TaskHandle_t TaskUniverse;
 TaskHandle_t TaskDisplayUpdate;
 TaskHandle_t TaskSystemTime;
 TaskHandle_t TaskSatioSerialTx;
+TaskHandle_t TaskInputPortController;
 
 #ifdef SATIO_DISPLAY_OPTION_HEADLESS
 // PRIORITY (same priority so that task Hz (from delay ms) can be tuned without triggering wdt for a starved task)
@@ -67,6 +69,7 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_UNIVERSE_PRIORITY              5
 #define TASK_STORAGE_PRIORITY               5
 #define TASK_SATIO_SERIAL_TX_PRIORITY       5
+#define TASK_INPUT_PORT_CONTROLLER_PRIORITY 5
 // CORE ASSIGNMENT
 #define TASK_SYSTEM_TIME_CORE               1
 #define TASK_GPS_CORE                       1
@@ -79,6 +82,7 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_ADMPLEX1_CORE                  1
 #endif
 
+#define TASK_INPUT_PORT_CONTROLLER_CORE     1
 #define TASK_SWITCHES_CORE                  1
 #define TASK_UNIVERSE_CORE                  0
 #define TASK_STORAGE_CORE                   0
@@ -93,6 +97,7 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_UNIVERSE_STACK_SIZE            20480
 #define TASK_STORAGE_STACK_SIZE             6144
 #define TASK_SATIO_SERIAL_TX_STACK_SIZE     4096
+#define TASK_INPUT_PORT_CONTROLLER_STACK_SIZE 5096
 #endif
 
 #ifdef SATIO_DISPLAY_OPTION_LVGL
@@ -107,6 +112,7 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_STORAGE_PRIORITY               5
 #define TASK_DISPLAY_PRIORITY               5
 #define TASK_SATIO_SERIAL_TX_PRIORITY       5
+#define TASK_INPUT_PORT_CONTROLLER_PRIORITY 5
 // CORE ASSIGNMENT
 #define TASK_SYSTEM_TIME_CORE               0
 #define TASK_GPS_CORE                       0
@@ -124,6 +130,7 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_STORAGE_CORE                   1
 #define TASK_DISPLAY_CORE                   0
 #define TASK_SATIO_SERIAL_TX_CORE           1
+#define TASK_INPUT_PORT_CONTROLLER_CORE     1
 // STACK SIZES
 #define TASK_SYSTEM_TIME_STACK_SIZE         5120
 #define TASK_GPS_STACK_SIZE                 5120
@@ -135,6 +142,7 @@ TaskHandle_t TaskSatioSerialTx;
 #define TASK_STORAGE_STACK_SIZE             6144
 #define TASK_DISPLAY_STACK_SIZE             32768
 #define TASK_SATIO_SERIAL_TX_STACK_SIZE     4096
+#define TASK_INPUT_PORT_CONTROLLER_STACK_SIZE 5096
 #endif
 
 
@@ -161,6 +169,7 @@ static void notifyAllTasks(void) {
   if (TaskSwitches != nullptr) { xTaskNotifyGive(TaskSwitches); }
   if (TaskSatioSerialTx != nullptr) { xTaskNotifyGive(TaskSatioSerialTx); }
   if (TaskDisplayUpdate != nullptr) { xTaskNotifyGive(TaskDisplayUpdate); }
+  if (TaskInputPortController != nullptr) { xTaskNotifyGive(TaskInputPortController); }
 }
 
 void setTasksDelayLowPower() {
@@ -408,6 +417,7 @@ bool taskFrequencyADMplex1()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_
 bool taskFrequencyUniverse()    { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_UNIVERSE);    return true; }
 bool taskFrequencyDisplay()     { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_DISPLAY);     return true; }
 bool taskFrequencySatioSerialTx() { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_SATIO_SERIAL_TX); return true; }
+bool taskFrequencyInputPortController() { TASK_FREQ_WAIT(pwrConfigCurrent.TASK_MAX_FREQ_PORTCONTROLLER_INPUT); return true; }
 
 /** ----------------------------------------------------------------------------
  * System Time Task.
@@ -910,7 +920,43 @@ static void taskSwitches(void *pvParameters) {
       // ------------------------------------------------
       setOutputValues();
       esp_task_wdt_reset();
-      int32_t count_write = writeOutputPortControllerSetPins(iic_2);
+
+      int32_t count_write = 0;
+
+      // Clamp to MAX_MATRIX_SWITCHES
+      for (int32_t Mi = 0; Mi < MAX_MATRIX_SWITCHES; Mi++) {
+
+        int address = matrixData.output_portcontroller_address[0][Mi];
+
+        if (matrixData.matrix_switch_write_required[0][Mi] == true) {
+          // Clear the flag now that the value has been sent.
+          matrixData.matrix_switch_write_required[0][Mi] = false;
+          
+          clearI2CLinkOutputPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink);
+
+          // Select value to send as either the computer-assisted output value
+          // or the override value.
+          int32_t value_to_send = matrixData.computer_assist[0][Mi]
+                            ? matrixData.output_value[0][Mi]
+                            : matrixData.override_output_value[0][Mi];
+
+          uint32_t off_time = matrixData.output_pwm[0][Mi][INDEX_MATRIX_SWITCH_PWM_OFF];
+          uint32_t on_time = matrixData.output_pwm[0][Mi][INDEX_MATRIX_SWITCH_PWM_ON];
+
+          // Build binary packet with human readable helper functions.
+          write_uint8_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 0, 0x6E); // command 110
+          write_uint8_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 1, (uint8_t)Mi);
+          write_int8_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 2, (int8_t)matrixData.matrix_port_map[0][Mi]);
+          write_int32_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 3, value_to_send);
+          write_uint32_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 7, off_time);
+          write_uint32_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 11, on_time);
+          // Write to slave.
+          writeI2CToSlaveBin(*GPIOPortExpander_ATMEGA2560_Output_0.wire, GPIOPortExpander_ATMEGA2560_Output_0.i2cLink, address, 15, 0, GPIOPortExpander_ATMEGA2560_Output_0.name);
+
+          count_write++;
+        }
+      }
+
       esp_task_wdt_reset();
 
       // --------------------------------------------
@@ -937,6 +983,58 @@ void createTaskSwitches() {
     TASK_SWITCHES_PRIORITY,   /* Priority of the task */
     &TaskSwitches,            /* Task handle. */
     TASK_SWITCHES_CORE);      /* Core where the task should run */
+}
+
+/** ----------------------------------------------------------------------------
+ * Input Controller Task.
+ *
+ * @brief Performs various operations including:
+ *        Reads and stores values from input port controller.
+ */
+static void taskInputPortController(void *pvParameters) {
+  (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
+  esp_task_wdt_add(nullptr);
+  while (!global_task_sync) {
+    esp_task_wdt_reset();
+    vTaskDelay(1);
+  }
+  for (;;) {
+
+    // Delay Task
+    if (taskFrequencyInputPortController() == true) {
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
+      esp_task_wdt_reset();
+
+      if (readGPIOPortExapander_All(GPIOPortExpander_ATMEGA2560_Input_0)) {
+        // --------------------------------------------
+        // Task frequency counter
+        // --------------------------------------------
+        systemData.counters_pci.flag_c = true;
+        #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+        outputSerialPCInput();
+        #endif
+        stepFFCounter(systemData.counters_pci, 1);
+      }
+      xSemaphoreGive(dataMutex);
+    }
+
+    // --------------------------------------------
+    // Task frequency counter
+    // --------------------------------------------
+    xSemaphoreTake(dataMutex, portMAX_DELAY);
+    stepFCounter(systemData.counters_pci, 1);
+    xSemaphoreGive(dataMutex);
+  }
+}
+void createTaskInputPortController() {
+  xTaskCreatePinnedToCore(
+    taskInputPortController,             /* Function to implement the task */
+    "TaskInputPortControllers",           /* Name of the task */
+    TASK_INPUT_PORT_CONTROLLER_STACK_SIZE, /* Stack size in words */
+    nullptr,                  /* Task input parameter */
+    TASK_INPUT_PORT_CONTROLLER_PRIORITY,   /* Priority of the task */
+    &TaskInputPortController,            /* Task handle. */
+    TASK_INPUT_PORT_CONTROLLER_CORE);      /* Core where the task should run */
 }
 
 /** ----------------------------------------------------------------------------
@@ -1118,6 +1216,7 @@ static void taskSatioSerialTx(void *pvParameters) {
       outputSerialGyro0();
       outputSerialUniverse();
       outputSerialMatrix();
+      outputSerialPCInput();
       esp_task_wdt_reset();
 
       // --------------------------------------------

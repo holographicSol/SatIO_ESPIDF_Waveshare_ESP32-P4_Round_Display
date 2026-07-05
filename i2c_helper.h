@@ -35,9 +35,11 @@
 // #####################################################################################################################
 
 #define I2C_ADDR_CONTROL_PAD 8
+
 #define I2C_ADDR_OUTPUT_PORTCONTROLLER_0 9
-#define I2C_ADDR_OUTPUT_PORTCONTROLLER_1 11
-#define I2C_ADDR_INPUT_PORTCONTROLLER  10
+#define I2C_ADDR_OUTPUT_PORTCONTROLLER_1 10
+
+#define I2C_ADDR_INPUT_PORTCONTROLLER_0  11
 
 // #####################################################################################################################
 // ## BEGIN I2C BUS PINS

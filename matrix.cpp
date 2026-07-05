@@ -42,6 +42,7 @@
 #include "sdcard_helper.h"
 #include "i2c_helper.h"
 #include "task_handler.h"
+#include "gpio_portcontroller.h"
 
 // ----------------------------------------------------------------------------------------
 //  MATRIX
@@ -224,28 +225,6 @@ struct MatrixStruct matrixData = {
     "Local Zenith Dec", // 117
     "Gyro 0 RA", // 118
     "Gyro 0 Dec", // 119
-  },
-  .input_portcontroller_address = { {I2C_ADDR_INPUT_PORTCONTROLLER} },
-  .input_portcontroller_value = { {0} },
-  .input_portcontroller_port_map={
-    {
-      // Pre-defined for ATMEGA2560
-      {
-        // --------------------------------------------
-        // digital
-        // --------------------------------------------
-         0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
-        10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-        20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-        30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
-        40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
-        50, 51, 52, 53,
-        // --------------------------------------------
-        // analog
-        // --------------------------------------------
-        54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
-      }
-    }
   },
 };
 
@@ -918,7 +897,7 @@ bool matrixSwitch(void) {
           int32_t input_pin = (int32_t)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z];
           tmp_x = 0.0;
           if ((input_pin >= 0) && (input_pin < MAX_MATRIX_SWITCHES)) {
-            tmp_x = matrixData.input_portcontroller_value[0][input_pin];
+            tmp_x = GPIOPortExpander_ATMEGA2560_Input_0.input_value[input_pin];
           }
           handle_digit = true;
           break;
@@ -1567,7 +1546,7 @@ void get_matrix_function_comparitor(int32_t index_matrix_value_comparitor, char 
       int32_t input_pin = (int32_t)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Z];
       double input_pin_value = 0.0;
       if ((input_pin >= 0) && (input_pin < MAX_MATRIX_SWITCHES)) {
-        input_pin_value = matrixData.input_portcontroller_value[0][input_pin];
+        input_pin_value = GPIOPortExpander_ATMEGA2560_Input_0.input_value[input_pin];
       }
       snprintf(out, out_size, "%.10g", input_pin_value);
       break;
@@ -1723,75 +1702,4 @@ void setOutputValues(void) {
       matrixData.matrix_switch_write_required[0][Mi] = true;
     }
   }
-}
-
-// ----------------------------------------------------------------------------------------
-//  MATRIX I/O
-// ----------------------------------------------------------------------------------------
-IICLink IICLinkPCO; // IIC link data structure for the output port controller.
-
-void writeOutputPortControllerClear(TwoWire &wire, int address) {
-  clearI2CLinkOutputPacket(IICLinkPCO);
-  write_uint8_ToPacket(IICLinkPCO.OUTPUT_PACKET, 0, 0x0A); // command 10
-  writeI2CToSlaveBin(wire, IICLinkPCO, address, 1, 0, "writeOutputPortControllerClear");
-}
-
-int32_t writeOutputPortControllerSetPins(TwoWire &wire) {
-  int32_t count_write=0;
-
-  for (int32_t Mi = 0; Mi < MAX_MATRIX_SWITCHES; Mi++) {
-
-    int address = matrixData.output_portcontroller_address[0][Mi];
-
-    if (matrixData.matrix_switch_write_required[0][Mi]) {
-      clearI2CLinkOutputPacket(IICLinkPCO);
-
-      // Select value to send as either the computer-assisted output value
-      // or the override value.
-      int32_t value_to_send = matrixData.computer_assist[0][Mi]
-                        ? matrixData.output_value[0][Mi]
-                        : matrixData.override_output_value[0][Mi];
-
-      uint32_t off_time = matrixData.output_pwm[0][Mi][INDEX_MATRIX_SWITCH_PWM_OFF];
-      uint32_t on_time = matrixData.output_pwm[0][Mi][INDEX_MATRIX_SWITCH_PWM_ON];
-
-      // Build binary packet with human readable helper functions.
-      write_uint8_ToPacket(IICLinkPCO.OUTPUT_PACKET, 0, 0x14); // command 20
-      write_uint8_ToPacket(IICLinkPCO.OUTPUT_PACKET, 1, (uint8_t)Mi);
-      write_int8_ToPacket(IICLinkPCO.OUTPUT_PACKET, 2, (int8_t)matrixData.matrix_port_map[0][Mi]);
-      write_int32_ToPacket(IICLinkPCO.OUTPUT_PACKET, 3, value_to_send);
-      write_uint32_ToPacket(IICLinkPCO.OUTPUT_PACKET, 7, off_time);
-      write_uint32_ToPacket(IICLinkPCO.OUTPUT_PACKET, 11, on_time);
-      // Write to slave.
-      writeI2CToSlaveBin(wire, IICLinkPCO, address, 15, 0, "writeOutputPortControllerM1");
-
-      // Clear the flag now that the value has been sent.
-      matrixData.matrix_switch_write_required[0][Mi] = false;
-
-      count_write++;
-    }
-  }
-  return count_write;
-}
-
-bool readInputPortControllerReadPins(TwoWire &wire, int address) {
-
-  // Send event ID once to set a mode on receiver.
-  clearI2CLinkOutputPacket(IICLinkPCO);
-  IICLinkPCO.OUTPUT_PACKET[0] = 0x1E; // command 30
-  writeI2CToSlaveBin(wire, IICLinkPCO, address, 1, 0, "readInputPortControllerM1");
-
-  // Keep requesting until every input pin has been read.
-  for (uint8_t i = 0; i < MAX_MATRIX_SWITCHES; i++) {
-    if (requestFromSlaveBinNoID(wire, IICLinkPCO, address, 5, 0, "readInputPortControllerM1")) {
-      uint8_t pin;
-      read_uint8_FromWire(wire, pin);
-      float value;
-      read_float_FromWire(wire, value);
-      if (pin < MAX_MATRIX_SWITCHES) {
-        matrixData.input_portcontroller_value[0][pin] = (double)value;
-      }
-    }
-  }
-  return true;
 }

@@ -92,9 +92,10 @@ extern bool ISR_Bool_MultiDisplayController_0;
  * @def If defined then the system will be compiled to use CD74HC4067 2.
  * @warning If neither SATIO_CD74HC4067_OPTION is defined, the system will be built without a CD74HC4067.
  */
-#define SATIO_CD74HC4067_OPTION_USE_2
+// #define SATIO_CD74HC4067_OPTION_USE_2
 // ----------------------------------------------------------------------------------------
 
+#define MAX_INPUT_PORT_CONTROLLERS 1
 
 // ----------------------------------------------------------------------------------------
 // Power Config.
@@ -131,6 +132,7 @@ typedef struct PwrConfig {
     uint32_t TASK_MAX_FREQ_DISPLAY;
 
     uint32_t TASK_MAX_FREQ_SATIO_SERIAL_TX;
+    
 } PwrConfig;
 
 // ----------------------------------------------------------------------------------------
@@ -158,7 +160,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_LOW_SWITCHES                    100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_LOW_PORTCONTROLLER_INPUT        100000  // (10 Hz)
+#define TASK_MAX_FREQ_LOW_PORTCONTROLLER_INPUT        1000000 // (1 Hz)
 
 #define TASK_MAX_FREQ_LOW_STORAGE                     1000000 // (1 Hz)
 
@@ -191,7 +193,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_BALANCED_SWITCHES               5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_PORTCONTROLLER_INPUT   25000   // (40 Hz)
+#define TASK_MAX_FREQ_BALANCED_PORTCONTROLLER_INPUT   1000000 // (1 Hz)
 
 #define TASK_MAX_FREQ_BALANCED_STORAGE                1000000 // (1 Hz)
 
@@ -224,7 +226,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_HIGH_SWITCHES                   2000    // (500 Hz)
 
-#define TASK_MAX_FREQ_HIGH_PORTCONTROLLER_INPUT       25000   // (40 Hz)
+#define TASK_MAX_FREQ_HIGH_PORTCONTROLLER_INPUT       1000000 // (1 Hz)
 
 #define TASK_MAX_FREQ_HIGH_STORAGE                    1000000 // (1 Hz)
 

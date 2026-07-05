@@ -38,6 +38,7 @@
 #include "config.h"
 #include "system_data.h"
 #include "multiplexers.h"
+#include "gpio_portcontroller.h"
 
 
 bool debug_bool=true;
@@ -521,6 +522,7 @@ static void PrintHelp(void) {
       setdelay --gps                    Specify max task frequency in uS.
       setdelay --switch                 Specify max task frequency in uS.
       setdelay --storage                Specify max task frequency in uS.
+      setdelay --pci                    Specify max task frequency in uS.
 
       example: setdelay --admplex0 20 --gyro0 200 --gps 10
 
@@ -1154,7 +1156,7 @@ void CmdProcess(void) {
               systemData.output_matrix_enabled=enable;
               printf("setting matrix output enabled: %d\n", systemData.output_matrix_enabled);
             }
-          if (argparser_has_flag(&parser, "pcinput") == true) {systemData.output_input_portcontroller=enable; printf("setting input_portcontroller output enabled: %d\n", systemData.output_input_portcontroller);}
+          if (argparser_has_flag(&parser, "pcinput") == true) {systemData.output_input_portcontroller=enable; printf("setting input_portcontroller_0 output enabled: %d\n", systemData.output_input_portcontroller);}
           if (argparser_has_flag(&parser, "admplex0") == true) {systemData.output_admplex0_enabled=enable; printf("setting admplex0 output enabled: %d\n", systemData.output_admplex0_enabled);}
           if (argparser_has_flag(&parser, "admplex1") == true) {systemData.output_admplex1_enabled=enable; printf("setting admplex1 output enabled: %d\n", systemData.output_admplex1_enabled);}
           if (argparser_has_flag(&parser, "gyro0") == true) {systemData.output_gyro_0_enabled=enable; printf("setting gyro_0 output enabled: %d\n", systemData.output_gyro_0_enabled);}
@@ -1348,12 +1350,14 @@ void CmdProcess(void) {
             // set max freq hz
             if (argparser_has_flag(&parser, "setdelay")) {
 
+              #ifdef SATIO_CD74HC4067_OPTION_USE_1
               if (argparser_has_flag(&parser, "admplex0"))
                 {setDelay(TaskADMplex0, argparser_get_uint32(&parser, "admplex0", pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX0), &pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX0);}
-
+              #endif
+              #ifdef SATIO_CD74HC4067_OPTION_USE_2
               if (argparser_has_flag(&parser, "admplex1"))
                 {setDelay(TaskADMplex1, argparser_get_uint32(&parser, "admplex1", pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX1), &pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX1);}
-
+              #endif
               if (argparser_has_flag(&parser, "gyro0"))
                 {setDelay(TaskGyro, argparser_get_uint32(&parser, "gyro0", pwrConfigCurrent.TASK_MAX_FREQ_GYRO), &pwrConfigCurrent.TASK_MAX_FREQ_GYRO);}
 
@@ -1368,6 +1372,9 @@ void CmdProcess(void) {
 
               if (argparser_has_flag(&parser, "storage"))
                 {setDelay(TaskStorage, argparser_get_uint32(&parser, "storage", pwrConfigCurrent.TASK_MAX_FREQ_STORAGE), &pwrConfigCurrent.TASK_MAX_FREQ_STORAGE);}
+
+              if (argparser_has_flag(&parser, "pci"))
+                {setDelay(TaskInputPortController, argparser_get_uint32(&parser, "pci", pwrConfigCurrent.TASK_MAX_FREQ_PORTCONTROLLER_INPUT), &pwrConfigCurrent.TASK_MAX_FREQ_PORTCONTROLLER_INPUT);}
             }
           }
         }
@@ -1863,7 +1870,7 @@ void outputSerialPCInput(void) {
       serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), "$PCINPT,");
       // append matrix switch state data
       for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
-        {serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), String(String(matrixData.input_portcontroller_value[0][i])+",").c_str());}
+        {serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), String(String(GPIOPortExpander_ATMEGA2560_Input_0.input_value[i])+",").c_str());}
       serial0_buffer_strip_trailing_comma(TXBUF_PCI);
       createChecksumSerial0(TXBUF_PCI, checksum, sizeof(checksum));
       serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), "*");

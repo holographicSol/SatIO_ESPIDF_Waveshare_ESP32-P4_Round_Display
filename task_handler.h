@@ -33,6 +33,7 @@ extern TaskHandle_t TaskSwitches;
 extern TaskHandle_t TaskDisplayUpdate;
 extern TaskHandle_t TaskSystemTime;
 extern TaskHandle_t TaskSatioSerialTx;
+extern TaskHandle_t TaskInputPortController;
 
 /* Timestamp (esp_timer_get_time(), uS since boot) captured the moment readGPS()
    returns true in taskGPS. Used to measure readGPS() -> applyPendingDateTime()
@@ -49,6 +50,7 @@ void createTaskSwitches();
 void createTaskDisplayUpdate();
 void createTaskSystemTime();
 void createTaskSatioSerialTx();
+void createTaskInputPortController();
 
 /**
  * @brief Time syncronize tasks.

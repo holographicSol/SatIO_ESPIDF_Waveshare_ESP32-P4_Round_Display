@@ -63,6 +63,7 @@ struct MatrixStruct {
    * Address specification may be useful for:
    *  Tight PWM on dedicated output port controller(s).
    *  Increasing MAX_MATRIX_SWITCHES beyond any current output port controller's I/O capacity.
+   *  Each switch has it's own output port controller address.
    *  Initiated with a default address.
    */
   uint8_t output_portcontroller_address[1][MAX_MATRIX_SWITCHES];
@@ -326,15 +327,6 @@ struct MatrixStruct {
     [119] Gyro 0 Dec
    */
   char matrix_function_names[MAX_MATRIX_FUNCTION_NAMES][MAX_GLOBAL_ELEMENT_SIZE];
-
-  // Input Port Controller Address
-  uint8_t input_portcontroller_address[1][MAX_MATRIX_SWITCHES];
-
-  // Raw input value read from the input port controller, per input pin.
-  double input_portcontroller_value[1][MAX_INPUT_PORT_CONTROLLERS];
-
-  // Input port map: input port controller pin index, per input pin.
-  int32_t input_portcontroller_port_map[1][MAX_INPUT_PORT_CONTROLLERS][70];
 };
 extern struct MatrixStruct matrixData;
 

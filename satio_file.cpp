@@ -24,6 +24,7 @@
 #include "wtgps300p.h"
 #include "wt901.h"
 #include "sdcard_helper.h"
+#include "gpio_portcontroller.h"
 
 struct satioFileStruct satioFileData = {
     .i_token=0,
@@ -467,7 +468,7 @@ void writeLog(void) {
     // Log Line: Port Controller Input
     // --------------------------------
     line="$PCINPT,";
-    for (int i=0; i<MAX_MATRIX_SWITCHES; i++) {line=line+String(matrixData.input_portcontroller_value[0][i])+",";}
+    for (int i=0; i<MAX_MATRIX_SWITCHES; i++) {line=line+String(GPIOPortExpander_ATMEGA2560_Input_0.input_value[i])+",";}
     printLogLine(line.c_str());
     // --------------------------------
     // Log Line: Gyro0
