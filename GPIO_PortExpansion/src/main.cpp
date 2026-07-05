@@ -9,9 +9,6 @@ PortController - IIC I/O device.
 
                  For perfomance reasons it is recommnended for single use as either input
                  or output device but can be used as both.
-
-                 Modulation is currently done here but modulation values may be forwarded to
-                 external MCU's on each IO in the future.
 */
 
 #include <Arduino.h>
