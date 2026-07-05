@@ -21,7 +21,7 @@ AnalogDigitalMultiplexer ad_mux_0 = {
            PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG},
   .data = {},
   .enabled = {false},
-  .chan_freq_uS = {0}
+  .chan_freq_uS = {1000000} // default 1Hz = delay 10^6 micros
 };
 
 AnalogDigitalMultiplexer ad_mux_1 = {
@@ -32,7 +32,7 @@ AnalogDigitalMultiplexer ad_mux_1 = {
            PIN_ANALOG_DIGITAL_MULTIPLEXER_1_SIG},
   .data = {},
   .enabled = {false},
-  .chan_freq_uS = {0}
+  .chan_freq_uS = {1000000} // default 1Hz = delay 10^6 micros
 };
 
 I2CMultiplexer i2c_mux_0 = {
