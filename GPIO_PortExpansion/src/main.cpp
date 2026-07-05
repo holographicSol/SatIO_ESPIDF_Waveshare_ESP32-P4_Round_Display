@@ -1,14 +1,16 @@
 /*
 Written by Benjamin Jack Cullen.
 
-PortController - IIC I/O device.
+GPIO Port Expander - IIC I/O device.
 
-                 Can send pin readings to master.
+  - Sends pin reads to master.
 
-                 Can set pin levels according to master.
+  - Sets pins from master.
 
-                 For perfomance reasons it is recommnended for single use as either input
-                 or output device but can be used as both.
+  - PWM.
+
+  For perfomance reasons it is recommnended for single use as either input
+  or output device but can be used as both.
 */
 
 #include <Arduino.h>
@@ -20,6 +22,7 @@ PortController - IIC I/O device.
 #include "./i2c_helper.h"
 #include "./gpio_portcontroller.h"
 
+#ifdef GPIO_PORT_EXPANDER_WRITE_MODE 
 // ------------------------------------------------------------
 // Output modulator
 // ------------------------------------------------------------
@@ -82,7 +85,9 @@ void modulator(GPIOPortExpander *expander) {
     }
   }
 }
+#endif
 
+#ifdef GPIO_PORT_EXPANDER_READ_MODE
 // ------------------------------------------------------------
 // Reads all analog and digital pins
 // ------------------------------------------------------------
@@ -97,6 +102,7 @@ void readPins(GPIOPortExpander *expander) {
     i_counter++;
   }
 }
+#endif
 
 // ------------------------------------------------------------------------------------------------------------------
 //                                                                                                              SETUP
@@ -131,7 +137,12 @@ void setup() {
 // ------------------------------------------------------------------------------------------------------------------
 
 void loop() {
+  #ifdef GPIO_PORT_EXPANDER_WRITE_MODE
   modulator(&GPIOPortExpander_ATMEGA2560_Default); // for output: uncomment if required
-  // readPins(&GPIOPortExpander_ATMEGA2560_Default);  // for input: // uncomment if required
+  #endif
+
+  #ifdef GPIO_PORT_EXPANDER_READ_MODE
+  readPins(&GPIOPortExpander_ATMEGA2560_Default);  // for input: // uncomment if required
+  #endif
   // Serial.println("loop"+String(millis()));
 }

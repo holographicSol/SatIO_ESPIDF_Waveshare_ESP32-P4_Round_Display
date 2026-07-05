@@ -54,11 +54,6 @@ typedef struct GPIOPortExpander {
 } GPIOPortExpander;
 
 // ------------------------------------------------------------
-/**
- * @brief BUILD OPTIONS
- */
-// ------------------------------------------------------------
-// ------------------------------------------------------------
 // Pointer members above are sized per-instance via compound literals
 // (see the definition in gpio_portcontroller.cpp) - exactly as many
 // elements as listed, so a board with fewer pins never pays for a
@@ -72,20 +67,52 @@ typedef struct GPIOPortExpander {
 // project-specific I2C_ADDR_* macros exist. On a slave build these are
 // simply unused and get dead-stripped.
 // ------------------------------------------------------------
+
+// ------------------------------------------------------------
+/**
+ * @brief BUILD OPTIONS
+ */
+// ------------------------------------------------------------
+/**
+ * @brief GPIO_PORT_EXPANDER_MASTER_MODE - Setup to control a GPIO Expander module.
+ */
 // #define GPIO_PORT_EXPANDER_MASTER_MODE
+
+/**
+ * @brief GPIO_PORT_EXPANDER_SLAVE_MODE - Setup to be controlled by a master.
+ */
 #define GPIO_PORT_EXPANDER_SLAVE_MODE
+
+/**
+ * @brief GPIO_PORT_EXPANDER_READ_MODE read pins for master
+ */
+// #define GPIO_PORT_EXPANDER_READ_MODE
+
+/**
+ * @brief GPIO_PORT_EXPANDER_READ_MODE write to pins for master
+ */
+#define GPIO_PORT_EXPANDER_WRITE_MODE
+// ------------------------------------------------------------
+// DEFAULT INSTANCES
+// ------------------------------------------------------------
 #define MAX_GPIOPortExpander_ATMEGA2560_Default_PINS 70
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Default;
+// ------------------------------------------------------------
+// CUSTOM INSTANCES
+// ------------------------------------------------------------
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Input_0;
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_0;
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_1;
+// ------------------------------------------------------------
 
 // ------------------------------------------------------------
-// Bus 0 control commands. (Copy to master)
+// Bus control commands.
 // Command bytes 0-69 directly address a pin (see MAX_GPIO_PORTCONTROLLER_PINS).
 // Control commands below are pushed well above the pin range so they can
 // never collide with a pin number, even on boards with more pins than this one.
 // Brace-init enforces (at compile time) that each value actually fits a uint8_t.
+// ------------------------------------------------------------
+// COMMAND
 // ------------------------------------------------------------
 constexpr uint8_t CMD_CLEAR_DATA            {100}; // 0x64 - nice round start of the control-command range
 constexpr uint8_t CMD_WRITE_PIN_PWM         {110}; // 0x6E
