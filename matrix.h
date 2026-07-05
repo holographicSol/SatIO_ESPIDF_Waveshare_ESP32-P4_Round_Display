@@ -58,7 +58,13 @@ struct MatrixStruct {
   // Checksummed sentence describing the current matrix configuration.
   char matrix_sentence[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
 
-  // Matrix Switch Output Port Controller Address
+  /**
+   * Matrix Switch Output Port Controller Addresses
+   * Address specification may be useful for:
+   *  Tight PWM on dedicated output port controller(s).
+   *  Increasing MAX_MATRIX_SWITCHES beyond any current output port controller's I/O capacity.
+   *  Initiated with a default address.
+   */
   uint8_t output_portcontroller_address[1][MAX_MATRIX_SWITCHES];
 
   // Enable/disable computer assist per switch. See struct-level note on the
@@ -323,8 +329,6 @@ struct MatrixStruct {
 
   // Input Port Controller Address
   uint8_t input_portcontroller_address[1][MAX_MATRIX_SWITCHES];
-
-  #define MAX_INPUT_PORT_CONTROLLERS 1
 
   // Raw input value read from the input port controller, per input pin.
   double input_portcontroller_value[1][MAX_INPUT_PORT_CONTROLLERS];
