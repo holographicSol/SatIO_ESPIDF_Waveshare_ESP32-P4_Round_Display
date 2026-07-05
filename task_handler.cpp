@@ -678,8 +678,6 @@ void createTaskGyro() {
  *
  * @brief Reads all analog/digital multiplexer channels on ad_mux_0.
  */
-int64_t admplex0_chan_last_read_uS[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {0}; // move out of here
-
 static void taskADMplex0(void *pvParameters) {
   (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
   esp_task_wdt_add(nullptr);
@@ -695,8 +693,6 @@ static void taskADMplex0(void *pvParameters) {
       // ------------------------------------------------
       // Read multiplexer channels (customize as required).
       // ------------------------------------------------
-      // remember to automatically adjust TASK_MAX_FREQ_BALANCED_ADMPLEX0
-      // fir pins in use: example 6 pins TASK_MAX_FREQ_BALANCED_ADMPLEX0=1000uS (1000Hz)
       // Disabled channels are left NAN by setADMultiplexerChannelEnabled()/initADMultiplexer(),
       // so this loop only ever touches channels currently enabled.
       // Each channel is additionally rate-limited to its own chan_freq_uS: the
@@ -704,22 +700,27 @@ static void taskADMplex0(void *pvParameters) {
       // channel is only actually read once that many microseconds have passed
       // since its last read, so e.g. channel 0 can run at 1Hz alongside
       // channel 1 at 1000Hz within the same task, bounded by TASK_MAX_FREQ_ADMPLEX0.
-      // static int64_t admplex0_chan_last_read_uS[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {0}; // move out of here
+      static int64_t admplex0_chan_last_read_uS[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {0};
+      // Snapshotted once per pass so the counter loop below can't disagree with the
+      // read loop about which channels were enabled this cycle (a concurrent
+      // CLI/LVGL disable between the two loops would otherwise drop a channel's
+      // count for a cycle it was actually read in).
+      bool admplex0_chan_was_enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {false};
       bool admplex0_chan_did_read[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {false};
-      int64_t admplex0_now_uS = esp_timer_get_time();
+      // int64_t admplex0_now_uS = esp_timer_get_time();
       for (uint8_t i_chan = 0; i_chan < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan++) {
         if (ad_mux_0.enabled[i_chan] == true) {
+          admplex0_chan_was_enabled[i_chan] = true;
           // check chan_freq_uS timer
-          if ((admplex0_now_uS - admplex0_chan_last_read_uS[i_chan]) >= (int64_t)ad_mux_0.chan_freq_uS[i_chan]) {
+          if ((esp_timer_get_time() - admplex0_chan_last_read_uS[i_chan]) >= (int64_t)ad_mux_0.chan_freq_uS[i_chan]) {
             // read/write
             readADMultiplexerAnalogChannel(ad_mux_0, i_chan);
-            admplex0_chan_last_read_uS[i_chan] = admplex0_now_uS;
+            admplex0_chan_last_read_uS[i_chan] = esp_timer_get_time();
             // just set a flag to save time between channel r/w
             admplex0_chan_did_read[i_chan] = true;
           }
         }
       }
-      // readAllADMultiplexerAnalogChannels(ad_mux_0);
       esp_task_wdt_reset();
 
       // --------------------------------------------
@@ -731,7 +732,7 @@ static void taskADMplex0(void *pvParameters) {
       // this second (its ceiling); task_ffreq_t is how often it was actually
       // read (its achieved Hz, gated by chan_freq_uS above).
       for (uint8_t i_chan = 0; i_chan < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan++) {
-        if (ad_mux_0.enabled[i_chan] == true) {
+        if (admplex0_chan_was_enabled[i_chan] == true) {
           stepFCounter(systemData.counters_mplex0_chan[i_chan], 1);
           if (admplex0_chan_did_read[i_chan] == true) {stepFFCounter(systemData.counters_mplex0_chan[i_chan], 1);}
         }
@@ -772,8 +773,6 @@ void createTaskADMplex0() {
  * @brief Reads all analog/digital multiplexer channels on ad_mux_1.
  */
 
-int64_t admplex1_chan_last_read_uS[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {0};
-
 static void taskADMplex1(void *pvParameters) {
   (void)pvParameters; // FreeRTOS task signature requires the parameter; it is unused here (MISRA C 2012 Rule 2.7).
   esp_task_wdt_add(nullptr);
@@ -789,8 +788,6 @@ static void taskADMplex1(void *pvParameters) {
       // ------------------------------------------------
       // Read multiplexer channels (customize as required).
       // ------------------------------------------------
-      // remember to automatically adjust TASK_MAX_FREQ_BALANCED_ADMPLEX1
-      // fir pins in use: example 6 pins TASK_MAX_FREQ_BALANCED_ADMPLEX1=1000uS (1000Hz)
       // Disabled channels are left NAN by setADMultiplexerChannelEnabled()/initADMultiplexer(),
       // so this loop only ever touches channels currently enabled.
       // Each channel is additionally rate-limited to its own chan_freq_uS: the
@@ -798,21 +795,27 @@ static void taskADMplex1(void *pvParameters) {
       // channel is only actually read once that many microseconds have passed
       // since its last read, so e.g. channel 0 can run at 1Hz alongside
       // channel 1 at 1000Hz within the same task, bounded by TASK_MAX_FREQ_ADMPLEX1.
+      static int64_t admplex1_chan_last_read_uS[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {0};
+      // Snapshotted once per pass so the counter loop below can't disagree with the
+      // read loop about which channels were enabled this cycle (a concurrent
+      // CLI/LVGL disable between the two loops would otherwise drop a channel's
+      // count for a cycle it was actually read in).
+      bool admplex1_chan_was_enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {false};
       bool admplex1_chan_did_read[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS] = {false};
-      int64_t admplex1_now_uS = esp_timer_get_time();
+      // int64_t admplex1_now_uS = esp_timer_get_time();
       for (uint8_t i_chan = 0; i_chan < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan++) {
         if (ad_mux_1.enabled[i_chan] == true) {
+          admplex1_chan_was_enabled[i_chan] = true;
           // check chan_freq_uS timer
-          if ((admplex1_now_uS - admplex1_chan_last_read_uS[i_chan]) >= (int64_t)ad_mux_1.chan_freq_uS[i_chan]) {
+          if ((esp_timer_get_time() - admplex1_chan_last_read_uS[i_chan]) >= (int64_t)ad_mux_1.chan_freq_uS[i_chan]) {
             // read/write
             readADMultiplexerAnalogChannel(ad_mux_1, i_chan);
-            admplex1_chan_last_read_uS[i_chan] = admplex1_now_uS;
+            admplex1_chan_last_read_uS[i_chan] = esp_timer_get_time();
             // just set a flag to save time between channel r/w
             admplex1_chan_did_read[i_chan] = true;
           }
         }
       }
-      // readAllADMultiplexerAnalogChannels(ad_mux_1);
       esp_task_wdt_reset();
 
       // --------------------------------------------
@@ -824,7 +827,7 @@ static void taskADMplex1(void *pvParameters) {
       // this second (its ceiling); task_ffreq_t is how often it was actually
       // read (its achieved Hz, gated by chan_freq_uS above).
       for (uint8_t i_chan = 0; i_chan < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan++) {
-        if (ad_mux_1.enabled[i_chan] == true) {
+        if (admplex1_chan_was_enabled[i_chan] == true) {
           stepFCounter(systemData.counters_mplex1_chan[i_chan], 1);
           if (admplex1_chan_did_read[i_chan] == true) {stepFFCounter(systemData.counters_mplex1_chan[i_chan], 1);}
         }

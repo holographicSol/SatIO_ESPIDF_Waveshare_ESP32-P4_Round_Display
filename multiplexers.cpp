@@ -234,10 +234,15 @@ void setADMultiplexerChannelEnabled(AnalogDigitalMultiplexer &mux_id, uint8_t ch
  *
  * Rule 18.1: channel is bounds-checked against mux_id.chan_freq_uS's real size
  * before being used as an index.
+ *
+ * freq_uS is clamped to INT64_MAX: the read tasks compare it against an elapsed
+ * microsecond count via (int64_t)chan_freq_uS, so a stored value above INT64_MAX
+ * would wrap negative and make the comparison always true, defeating the throttle
+ * instead of just being a very long (and already impractical) period.
  */
 void setADMultiplexerChannelFreq(AnalogDigitalMultiplexer &mux_id, uint8_t channel, uint64_t freq_uS) {
   if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
-    mux_id.chan_freq_uS[channel] = freq_uS;
+    mux_id.chan_freq_uS[channel] = (freq_uS > (uint64_t)INT64_MAX) ? (uint64_t)INT64_MAX : freq_uS;
   }
 }
 
