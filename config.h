@@ -28,7 +28,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
  * @note This option configures taks core asignment for pure, headless performance.
  * @warning Ensure only one SATIO_DISPLAY_OPTION is defined. 
  */
-#define SATIO_DISPLAY_OPTION_HEADLESS
+// #define SATIO_DISPLAY_OPTION_HEADLESS
 
 /**
  * @brief SATIO_DISPLAY_OPTION_LVGL - LVGL display option.
@@ -36,7 +36,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
  * @note If not defined then the project will be comiled for use without LVGL.
  * @warning Ensure only one SATIO_DISPLAY_OPTION is defined.
  */
-// #define SATIO_DISPLAY_OPTION_LVGL
+#define SATIO_DISPLAY_OPTION_LVGL
 // ----------------------------------------------------------------------------------------
 /**
  * @brief SATIO_SERIAL_TX_CURRENT_TASK

@@ -240,6 +240,7 @@ static void PrintHelp(void) {
       matrix -s n                 Specify switch index n.
       matrix -f n                 Specify function index n.
       matrix -p n                 Set port for switch -s.
+      matrix --opca n             Set output port controller I2C address for switch -s.
       matrix -fn n                Set function -f for switch -s. Primary Comparitors:
                                   [0] NONE
                                   [1] ON
@@ -641,6 +642,7 @@ static void PrintMatrixNData(int matrix_index) {
       matrixData.output_pwm[0][matrix_index][0],
       matrixData.output_pwm[0][matrix_index][1]);
     printf("[port] %d\n", matrixData.matrix_port_map[0][matrix_index]);
+    printf("[opca] %d\n", matrixData.output_portcontroller_address[0][matrix_index]);
     printf("[active] %d\n", matrixData.switch_intention[0][matrix_index]);
     printf("-----------------------------------------------------\n");
     for (int Fi=0; Fi<MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
@@ -693,6 +695,13 @@ void setAllSentenceOutput(bool enable) {
 void setMatrixPort(int switch_idx, signed int port_n) {
   if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && port_n>=-1 && port_n<MAX_MATRIX_SWITCHES) {
     matrixData.matrix_port_map[0][switch_idx]=port_n;
+    matrixData.matrix_switch_write_required[0][switch_idx]=true;
+  }
+}
+
+void setOutputPortControllerAddress(int switch_idx, uint8_t address) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES) {
+    matrixData.output_portcontroller_address[0][switch_idx]=address;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
 }
@@ -1227,6 +1236,7 @@ void CmdProcess(void) {
           int s = argparser_get_int8(&parser, "s", -1);
           int f = argparser_get_int8(&parser, "f", 0);
           if (has_s && argparser_has_flag(&parser, "p") == true) {setMatrixPort(s, argparser_get_int8(&parser, "p", -1));}
+          if (has_s && argparser_has_flag(&parser, "opca") == true) {setOutputPortControllerAddress(s, argparser_get_uint8(&parser, "opca", 0));}
           if (has_s && has_f && argparser_has_flag(&parser, "fn") == true) {setMatrixFunction(s, f, argparser_get_int8(&parser, "fn", 0));}
           if (has_s && has_f && argparser_has_flag(&parser, "fx") == true) {setMatrixXYZ(s, f, INDEX_MATRIX_FUNTION_X, argparser_get_double(&parser, "fx", 0));}
           if (has_s && has_f && argparser_has_flag(&parser, "fy") == true) {setMatrixXYZ(s, f, INDEX_MATRIX_FUNTION_Y, argparser_get_double(&parser, "fy", 0));}
@@ -1789,6 +1799,7 @@ void outputSerialMatrix(void) {
         serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.index_mapped_value[0][i_output_config_matrix])+",").c_str());
         serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.computer_assist[0][i_output_config_matrix])+",").c_str());
         serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_port_map[0][i_output_config_matrix])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_portcontroller_address[0][i_output_config_matrix])+",").c_str());
         // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.switch_intention[0][i_output_config_matrix])+",").c_str());
         // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.computer_intention[0][i_output_config_matrix])+",").c_str());
         // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_value[0][i_output_config_matrix])+",").c_str());
@@ -1852,7 +1863,7 @@ void outputSerialPCInput(void) {
       serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), "$PCINPT,");
       // append matrix switch state data
       for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
-        {serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), String(String(matrixData.input_value[0][i])+",").c_str());}
+        {serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), String(String(matrixData.input_portcontroller_value[0][i])+",").c_str());}
       serial0_buffer_strip_trailing_comma(TXBUF_PCI);
       createChecksumSerial0(TXBUF_PCI, checksum, sizeof(checksum));
       serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), "*");

@@ -910,7 +910,7 @@ static void taskSwitches(void *pvParameters) {
       // ------------------------------------------------
       setOutputValues();
       esp_task_wdt_reset();
-      int32_t count_write = writeOutputPortControllerSetPins(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER);
+      int32_t count_write = writeOutputPortControllerSetPins(iic_2);
       esp_task_wdt_reset();
 
       // --------------------------------------------

@@ -58,6 +58,9 @@ struct MatrixStruct {
   // Checksummed sentence describing the current matrix configuration.
   char matrix_sentence[MAX_GLOBAL_SERIAL_BUFFER_SIZE];
 
+  // Matrix Switch Output Port Controller Address
+  uint8_t output_portcontroller_address[1][MAX_MATRIX_SWITCHES];
+
   // Enable/disable computer assist per switch. See struct-level note on the
   // leading dimension.
   bool computer_assist[1][MAX_MATRIX_SWITCHES];
@@ -318,10 +321,16 @@ struct MatrixStruct {
    */
   char matrix_function_names[MAX_MATRIX_FUNCTION_NAMES][MAX_GLOBAL_ELEMENT_SIZE];
 
+  // Input Port Controller Address
+  uint8_t input_portcontroller_address[1][MAX_MATRIX_SWITCHES];
+
+  #define MAX_INPUT_PORT_CONTROLLERS 1
+
   // Raw input value read from the input port controller, per input pin.
-  double input_value[1][MAX_MATRIX_SWITCHES];
+  double input_portcontroller_value[1][MAX_INPUT_PORT_CONTROLLERS];
+
   // Input port map: input port controller pin index, per input pin.
-  int32_t input_port_map[1][MAX_MATRIX_SWITCHES];
+  int32_t input_portcontroller_port_map[1][MAX_INPUT_PORT_CONTROLLERS][70];
 };
 extern struct MatrixStruct matrixData;
 
@@ -404,7 +413,7 @@ void writeOutputPortControllerClear(TwoWire &wire, int address);
  * @param address I2C address of the output port controller.
  * @return int32_t.
  */
-int32_t writeOutputPortControllerSetPins(TwoWire &wire, int address);
+int32_t writeOutputPortControllerSetPins(TwoWire &wire);
 
 /**
  * @brief Read every input pin state from the input port controller.

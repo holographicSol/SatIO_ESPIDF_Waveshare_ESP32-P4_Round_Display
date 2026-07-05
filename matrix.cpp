@@ -59,6 +59,8 @@ struct MatrixStruct matrixData = {
 
   .matrix_sentence={0},
 
+  .output_portcontroller_address = { {I2C_ADDR_OUTPUT_PORTCONTROLLER_0} },
+
   .computer_assist={ {false} },
   .switch_intention={ {false} },
   .prev_switch_intention={{ false} },
@@ -223,24 +225,26 @@ struct MatrixStruct matrixData = {
     "Gyro 0 RA", // 118
     "Gyro 0 Dec", // 119
   },
-  .input_value = { {0} },
-  .input_port_map={
+  .input_portcontroller_address = { {I2C_ADDR_INPUT_PORTCONTROLLER} },
+  .input_portcontroller_value = { {0} },
+  .input_portcontroller_port_map={
     {
-      // --------------------------------------------
-      // digital
-      // --------------------------------------------
-      // 0, 1. 2, 3, 4, 5, 6, 7, 8, 9,
-      // 10,11,12,13,14,15,16,17,18,19,
-      // 20,21,22,23,24,
-      25,26,27,28,29,
-      30,31,32,33,34,35,36,37,38,39,
-      40,41,42,43,44,45,46,47,48,49,
-      50,51,52,53,
-      // --------------------------------------------
-      // analog
-      // --------------------------------------------
-      54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,
-
+      // Pre-defined for ATMEGA2560
+      {
+        // --------------------------------------------
+        // digital
+        // --------------------------------------------
+         0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+        10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+        20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+        30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+        40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+        50, 51, 52, 53,
+        // --------------------------------------------
+        // analog
+        // --------------------------------------------
+        54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+      }
     }
   },
 };
@@ -914,7 +918,7 @@ bool matrixSwitch(void) {
           int32_t input_pin = (int32_t)matrixData.matrix_function_xyz[0][Mi][Fi][INDEX_MATRIX_FUNTION_Z];
           tmp_x = 0.0;
           if ((input_pin >= 0) && (input_pin < MAX_MATRIX_SWITCHES)) {
-            tmp_x = matrixData.input_value[0][input_pin];
+            tmp_x = matrixData.input_portcontroller_value[0][input_pin];
           }
           handle_digit = true;
           break;
@@ -1563,7 +1567,7 @@ void get_matrix_function_comparitor(int32_t index_matrix_value_comparitor, char 
       int32_t input_pin = (int32_t)matrixData.matrix_function_xyz[0][index_matrix_value_comparitor][0][INDEX_MATRIX_FUNTION_Z];
       double input_pin_value = 0.0;
       if ((input_pin >= 0) && (input_pin < MAX_MATRIX_SWITCHES)) {
-        input_pin_value = matrixData.input_value[0][input_pin];
+        input_pin_value = matrixData.input_portcontroller_value[0][input_pin];
       }
       snprintf(out, out_size, "%.10g", input_pin_value);
       break;
@@ -1732,10 +1736,13 @@ void writeOutputPortControllerClear(TwoWire &wire, int address) {
   writeI2CToSlaveBin(wire, IICLinkPCO, address, 1, 0, "writeOutputPortControllerClear");
 }
 
-int32_t writeOutputPortControllerSetPins(TwoWire &wire, int address) {
+int32_t writeOutputPortControllerSetPins(TwoWire &wire) {
   int32_t count_write=0;
 
   for (int32_t Mi = 0; Mi < MAX_MATRIX_SWITCHES; Mi++) {
+
+    int address = matrixData.output_portcontroller_address[0][Mi];
+
     if (matrixData.matrix_switch_write_required[0][Mi]) {
       clearI2CLinkOutputPacket(IICLinkPCO);
 
@@ -1782,7 +1789,7 @@ bool readInputPortControllerReadPins(TwoWire &wire, int address) {
       float value;
       read_float_FromWire(wire, value);
       if (pin < MAX_MATRIX_SWITCHES) {
-        matrixData.input_value[0][pin] = (double)value;
+        matrixData.input_portcontroller_value[0][pin] = (double)value;
       }
     }
   }

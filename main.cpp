@@ -331,7 +331,9 @@ extern "C" void app_main(void)
     iic_2.setTimeOut(I2C_TIMEOUT_MS_BUS2);
     (void)iic_2.begin(IIC_BUS2_SDA, IIC_BUS2_SCL, I2C_CLOCK_Hz_BUS2);
     iic_2.setClock(I2C_CLOCK_Hz_BUS2);
-    writeOutputPortControllerClear(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER);
+    // set pins default
+    writeOutputPortControllerClear(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER_0);
+    // writeOutputPortControllerClear(iic_2, I2C_ADDR_OUTPUT_PORTCONTROLLER_1);
 
     /** ----------------------------------------------------------------------------
      * Serial1: GPS UART.
