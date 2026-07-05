@@ -449,10 +449,15 @@ static void PrintHelp(void) {
 
   [ Multiplexer ]
 
-      admplex0 -c n --enable   Enable channel n on ADMPlex0 (read every task cycle).
+      admplex0 -c n --enable   Enable channel n on ADMPlex0 (read every task cycle, subject to --freq).
       admplex0 -c n --disable  Disable channel n on ADMPlex0 (data reports NAN while disabled).
+      admplex0 -c n --freq uS  Minimum microseconds between reads of channel n (0 = read every task cycle).
       admplex1 -c n --enable   Enable channel n on ADMPlex1.
       admplex1 -c n --disable  Disable channel n on ADMPlex1.
+      admplex1 -c n --freq uS  Minimum microseconds between reads of channel n on ADMPlex1.
+
+      example: run admplex0 channel 3 at ~1Hz alongside the rest of the enabled channels:
+      admplex0 -c 3 --enable --freq 1000000
 
   [ INS ]
 
@@ -1295,11 +1300,25 @@ void CmdProcess(void) {
         }
         // admplex0
         else if (strcmp(pos[0], "admplex0")==0) {
-          if (argparser_has_flag(&parser, "c") == true) {setADMultiplexerChannelEnabled(ad_mux_0, argparser_get_uint8(&parser, "c", 0), enable);}
+          if (argparser_has_flag(&parser, "c") == true) {
+            uint8_t admplex0_c = argparser_get_uint8(&parser, "c", 0);
+            if (argparser_has_flag(&parser, "enable") == true || argparser_has_flag(&parser, "e") == true ||
+                argparser_has_flag(&parser, "disable") == true || argparser_has_flag(&parser, "d") == true) {
+              setADMultiplexerChannelEnabled(ad_mux_0, admplex0_c, enable);
+            }
+            if (argparser_has_flag(&parser, "freq") == true) {setADMultiplexerChannelFreq(ad_mux_0, admplex0_c, argparser_get_uint64(&parser, "freq", 0));}
+          }
         }
         // admplex1
         else if (strcmp(pos[0], "admplex1")==0) {
-          if (argparser_has_flag(&parser, "c") == true) {setADMultiplexerChannelEnabled(ad_mux_1, argparser_get_uint8(&parser, "c", 0), enable);}
+          if (argparser_has_flag(&parser, "c") == true) {
+            uint8_t admplex1_c = argparser_get_uint8(&parser, "c", 0);
+            if (argparser_has_flag(&parser, "enable") == true || argparser_has_flag(&parser, "e") == true ||
+                argparser_has_flag(&parser, "disable") == true || argparser_has_flag(&parser, "d") == true) {
+              setADMultiplexerChannelEnabled(ad_mux_1, admplex1_c, enable);
+            }
+            if (argparser_has_flag(&parser, "freq") == true) {setADMultiplexerChannelFreq(ad_mux_1, admplex1_c, argparser_get_uint64(&parser, "freq", 0));}
+          }
         }
 
         // else if (strcmp(pos[0], "sdcard")==0) {
@@ -2029,6 +2048,29 @@ void outputStat(void) {
 
           pwrConfigCurrent.name
       );
+    // }
+    // ----------------------------------------------------------------------------------------------------------------------------
+    //                                                                                             PRINT PER-CHANNEL MULTIPLEXER Hz
+    // ----------------------------------------------------------------------------------------------------------------------------
+    // if (systemData.output_stat_v==true) {
+        #ifdef SATIO_CD74HC4067_OPTION_USE_1
+        printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+        printf("                      ");
+        printSwitchIndexHeader(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+        printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+        printf("ADMPlex0 Ch Hz     :  ");
+        for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i++) {printf(STAT_COL_FORMAT_LD, (long)systemData.counters_mplex0_chan[i].task_ffreq_t);}
+        printf("\n");
+        #endif
+        #ifdef SATIO_CD74HC4067_OPTION_USE_2
+        printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+        printf("                      ");
+        printSwitchIndexHeader(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+        printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+        printf("ADMPlex1 Ch Hz     :  ");
+        for (int i=0; i<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i++) {printf(STAT_COL_FORMAT_LD, (long)systemData.counters_mplex1_chan[i].task_ffreq_t);}
+        printf("\n");
+        #endif
     // }
     // ----------------------------------------------------------------------------------------------------------------------------
     //                                                                                                        PRINT COMPUTER ASSIST

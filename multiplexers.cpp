@@ -20,7 +20,8 @@ AnalogDigitalMultiplexer ad_mux_0 = {
            PIN_ANALOG_DIGITAL_MULTIPLEXER_0_S3,
            PIN_ANALOG_DIGITAL_MULTIPLEXER_0_SIG},
   .data = {},
-  .enabled = {false}
+  .enabled = {false},
+  .chan_freq_uS = {0}
 };
 
 AnalogDigitalMultiplexer ad_mux_1 = {
@@ -30,7 +31,8 @@ AnalogDigitalMultiplexer ad_mux_1 = {
            PIN_ANALOG_DIGITAL_MULTIPLEXER_1_S3,
            PIN_ANALOG_DIGITAL_MULTIPLEXER_1_SIG},
   .data = {},
-  .enabled = {false}
+  .enabled = {false},
+  .chan_freq_uS = {0}
 };
 
 I2CMultiplexer i2c_mux_0 = {
@@ -224,6 +226,18 @@ void setADMultiplexerChannelEnabled(AnalogDigitalMultiplexer &mux_id, uint8_t ch
   if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
     mux_id.enabled[channel] = enabled;
     if (enabled == false) {mux_id.data[channel] = NAN;}
+  }
+}
+
+/**
+ * Sets a channel's minimum read period (microseconds); see setADMultiplexerChannelFreq() in the header.
+ *
+ * Rule 18.1: channel is bounds-checked against mux_id.chan_freq_uS's real size
+ * before being used as an index.
+ */
+void setADMultiplexerChannelFreq(AnalogDigitalMultiplexer &mux_id, uint8_t channel, uint64_t freq_uS) {
+  if (channel < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
+    mux_id.chan_freq_uS[channel] = freq_uS;
   }
 }
 

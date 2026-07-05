@@ -59,6 +59,7 @@ typedef struct {
   int pins[MAX_ANALOG_DIGITAL_MULTIPLEXER_PINS];
   double data[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
   bool enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+  uint64_t chan_freq_uS[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
 } AnalogDigitalMultiplexer;
 
 extern AnalogDigitalMultiplexer ad_mux_0;
@@ -127,6 +128,18 @@ void setADMultiplexerDataNAN(AnalogDigitalMultiplexer &mux_id);
  * @return None
  */
 void setADMultiplexerChannelEnabled(AnalogDigitalMultiplexer &mux_id, uint8_t channel, bool enabled);
+
+/**
+ * Set a channel's minimum read period in microseconds. The owning task
+ * (taskADMplex0()/taskADMplex1()) only actually reads the channel once this
+ * many microseconds have passed since its last read; 0 means "no floor"
+ * (read every task cycle, i.e. as fast as the task's own TASK_MAX_FREQ allows).
+ * @param mux_id Specify analog/digital multiplexer
+ * @param channel Specify analog/digital multiplexer channel
+ * @param freq_uS Minimum microseconds between reads of this channel
+ * @return None
+ */
+void setADMultiplexerChannelFreq(AnalogDigitalMultiplexer &mux_id, uint8_t channel, uint64_t freq_uS);
 
 /**
  * NAN stored IIC multiplexer channel data

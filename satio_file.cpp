@@ -927,6 +927,20 @@ typedef enum {
 
     SYSTEM_FILE_ADMPLEX0_CH_ENABLED,
     SYSTEM_FILE_ADMPLEX1_CH_ENABLED,
+    SYSTEM_FILE_ADMPLEX0_CH_FREQ,
+    SYSTEM_FILE_ADMPLEX1_CH_FREQ,
+
+    SYSTEM_FILE_PWRCFG_NAME,
+    SYSTEM_FILE_PWRCFG_GPS,
+    SYSTEM_FILE_PWRCFG_ADMPLEX0,
+    SYSTEM_FILE_PWRCFG_ADMPLEX1,
+    SYSTEM_FILE_PWRCFG_GYRO,
+    SYSTEM_FILE_PWRCFG_UNIVERSE,
+    SYSTEM_FILE_PWRCFG_SWITCHES,
+    SYSTEM_FILE_PWRCFG_PORTCONTROLLER_INPUT,
+    SYSTEM_FILE_PWRCFG_STORAGE,
+    SYSTEM_FILE_PWRCFG_DISPLAY,
+    SYSTEM_FILE_PWRCFG_SATIO_SERIAL_TX,
 } system_tag_t;
 
 /* Rule 7.4: a string literal's type is "array of const char", so the
@@ -985,6 +999,20 @@ static const char * getSystemTag(int t) {
 
         case SYSTEM_FILE_ADMPLEX0_CH_ENABLED:            return "ADMPLEX0_CH_ENABLED";
         case SYSTEM_FILE_ADMPLEX1_CH_ENABLED:            return "ADMPLEX1_CH_ENABLED";
+        case SYSTEM_FILE_ADMPLEX0_CH_FREQ:               return "ADMPLEX0_CH_FREQ";
+        case SYSTEM_FILE_ADMPLEX1_CH_FREQ:               return "ADMPLEX1_CH_FREQ";
+
+        case SYSTEM_FILE_PWRCFG_NAME:                    return "PWRCFG_NAME";
+        case SYSTEM_FILE_PWRCFG_GPS:                     return "PWRCFG_GPS";
+        case SYSTEM_FILE_PWRCFG_ADMPLEX0:                return "PWRCFG_ADMPLEX0";
+        case SYSTEM_FILE_PWRCFG_ADMPLEX1:                return "PWRCFG_ADMPLEX1";
+        case SYSTEM_FILE_PWRCFG_GYRO:                    return "PWRCFG_GYRO";
+        case SYSTEM_FILE_PWRCFG_UNIVERSE:                return "PWRCFG_UNIVERSE";
+        case SYSTEM_FILE_PWRCFG_SWITCHES:                return "PWRCFG_SWITCHES";
+        case SYSTEM_FILE_PWRCFG_PORTCONTROLLER_INPUT:    return "PWRCFG_PORTCONTROLLER_INPUT";
+        case SYSTEM_FILE_PWRCFG_STORAGE:                 return "PWRCFG_STORAGE";
+        case SYSTEM_FILE_PWRCFG_DISPLAY:                 return "PWRCFG_DISPLAY";
+        case SYSTEM_FILE_PWRCFG_SATIO_SERIAL_TX:         return "PWRCFG_SATIO_SERIAL_TX";
 
         default:                                         return "?";
     }
@@ -1000,10 +1028,11 @@ bool saveSystemFile(const char *filepath) {
     char* lineBuf = (char*)malloc(256);
     if (lineBuf == NULL) {fclose(f); printf("[saveSystemFile] Failed to allocate memory.\n"); return false;}
     
-    #define WRITE_INT_TAG(idx, val)  snprintf(lineBuf, 256, "%s,%d",   getSystemTag(idx), (int)(val));    printLine(f, lineBuf)
-    #define WRITE_LONG_TAG(idx, val) snprintf(lineBuf, 256, "%s,%ld",  getSystemTag(idx), (long)(val));   printLine(f, lineBuf)
-    #define WRITE_DBL_TAG(idx, val)  snprintf(lineBuf, 256, "%s,%.6f", getSystemTag(idx), (double)(val)); printLine(f, lineBuf)
-    #define WRITE_STR_TAG(idx, val)  snprintf(lineBuf, 256, "%s,%s",   getSystemTag(idx), (val));         printLine(f, lineBuf)
+    #define WRITE_INT_TAG(idx, val)    snprintf(lineBuf, 256, "%s,%d",   getSystemTag(idx), (int)(val));           printLine(f, lineBuf)
+    #define WRITE_LONG_TAG(idx, val)   snprintf(lineBuf, 256, "%s,%ld",  getSystemTag(idx), (long)(val));          printLine(f, lineBuf)
+    #define WRITE_DBL_TAG(idx, val)    snprintf(lineBuf, 256, "%s,%.6f", getSystemTag(idx), (double)(val));        printLine(f, lineBuf)
+    #define WRITE_STR_TAG(idx, val)    snprintf(lineBuf, 256, "%s,%s",   getSystemTag(idx), (val));                printLine(f, lineBuf)
+    #define WRITE_UINT32_TAG(idx, val) snprintf(lineBuf, 256, "%s,%lu",  getSystemTag(idx), (unsigned long)(val)); printLine(f, lineBuf)
     
     WRITE_INT_TAG(SYSTEM_FILE_MATRIX_FILE, satioFileData.i_current_matrix_file_path);
     WRITE_INT_TAG(SYSTEM_FILE_LOAD_MATRIX_ON_STARTUP, matrixData.load_matrix_on_startup);
@@ -1065,10 +1094,39 @@ bool saveSystemFile(const char *filepath) {
         printLine(f, lineBuf);
     }
 
+    // ADMPLEX0_CH_FREQ / ADMPLEX1_CH_FREQ
+    for (int i_ch=0; i_ch<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_ch++) {
+        snprintf(lineBuf, 256, "%s,%d,%llu", getSystemTag(SYSTEM_FILE_ADMPLEX0_CH_FREQ), i_ch, (unsigned long long)ad_mux_0.chan_freq_uS[i_ch]);
+        printLine(f, lineBuf);
+    }
+    for (int i_ch=0; i_ch<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_ch++) {
+        snprintf(lineBuf, 256, "%s,%d,%llu", getSystemTag(SYSTEM_FILE_ADMPLEX1_CH_FREQ), i_ch, (unsigned long long)ad_mux_1.chan_freq_uS[i_ch]);
+        printLine(f, lineBuf);
+    }
+
+    // Power config: task max-frequency values (uS) currently in effect, plus the
+    // active preset's display name (see PwrConfig in config.h).
+    WRITE_STR_TAG(SYSTEM_FILE_PWRCFG_NAME, pwrConfigCurrent.name);
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_GPS, pwrConfigCurrent.TASK_MAX_FREQ_GPS);
+    #ifdef SATIO_CD74HC4067_OPTION_USE_1
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_ADMPLEX0, pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX0);
+    #endif
+    #ifdef SATIO_CD74HC4067_OPTION_USE_2
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_ADMPLEX1, pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX1);
+    #endif
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_GYRO, pwrConfigCurrent.TASK_MAX_FREQ_GYRO);
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_UNIVERSE, pwrConfigCurrent.TASK_MAX_FREQ_UNIVERSE);
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_SWITCHES, pwrConfigCurrent.TASK_MAX_FREQ_SWITCHES);
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_PORTCONTROLLER_INPUT, pwrConfigCurrent.TASK_MAX_FREQ_PORTCONTROLLER_INPUT);
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_STORAGE, pwrConfigCurrent.TASK_MAX_FREQ_STORAGE);
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_DISPLAY, pwrConfigCurrent.TASK_MAX_FREQ_DISPLAY);
+    WRITE_UINT32_TAG(SYSTEM_FILE_PWRCFG_SATIO_SERIAL_TX, pwrConfigCurrent.TASK_MAX_FREQ_SATIO_SERIAL_TX);
+
     #undef WRITE_INT_TAG
     #undef WRITE_LONG_TAG
     #undef WRITE_DBL_TAG
     #undef WRITE_STR_TAG
+    #undef WRITE_UINT32_TAG
     
     free(lineBuf);
     fclose(f);
@@ -1086,10 +1144,12 @@ bool loadSystemFile(const char *filepath) {
 
     char lineBuffer[256];
 
-    #define READ_BOOL_TAG(idx, var) if (tag_index == idx) { if (str_is_bool(val)) { var = atoi(val); } }
-    #define READ_INT8_TAG(idx, var) if (tag_index == idx) { if (str_is_int8(val)) { var = atoi(val); } }
-    #define READ_LONG_TAG(idx, var) if (tag_index == idx) { if (str_is_long(val)) { var = strtol(val, NULL, 10); } }
-    #define READ_DBL_TAG(idx, var)  if (tag_index == idx) { if (str_is_double(val)) { var = strtod(val, NULL); } }
+    #define READ_BOOL_TAG(idx, var)      if (tag_index == idx) { if (str_is_bool(val)) { var = atoi(val); } }
+    #define READ_INT8_TAG(idx, var)      if (tag_index == idx) { if (str_is_int8(val)) { var = atoi(val); } }
+    #define READ_LONG_TAG(idx, var)      if (tag_index == idx) { if (str_is_long(val)) { var = strtol(val, NULL, 10); } }
+    #define READ_DBL_TAG(idx, var)       if (tag_index == idx) { if (str_is_double(val)) { var = strtod(val, NULL); } }
+    #define READ_UINT32_TAG(idx, var)    if (tag_index == idx) { if (str_is_uint32(val)) { var = strtoul(val, NULL, 10); } }
+    #define READ_STR_TAG(idx, var, size) if (tag_index == idx) { strncpy(var, val, (size)-1); var[(size)-1] = '\0'; }
 
     while (fgets(lineBuffer, sizeof(lineBuffer), f) != NULL) {
 
@@ -1108,14 +1168,18 @@ bool loadSystemFile(const char *filepath) {
         char *val = strtok(NULL, ",");
         if (val == NULL) continue;
 
-        // ADMPLEX0_CH_ENABLED / ADMPLEX1_CH_ENABLED: "TAG,channel,enabled" (channel-indexed, unlike the single-value tags below).
-        if (tag_index == SYSTEM_FILE_ADMPLEX0_CH_ENABLED || tag_index == SYSTEM_FILE_ADMPLEX1_CH_ENABLED) {
+        // ADMPLEX0/1_CH_ENABLED and ADMPLEX0/1_CH_FREQ: "TAG,channel,value" (channel-indexed, unlike the single-value tags below).
+        if (tag_index == SYSTEM_FILE_ADMPLEX0_CH_ENABLED || tag_index == SYSTEM_FILE_ADMPLEX1_CH_ENABLED ||
+            tag_index == SYSTEM_FILE_ADMPLEX0_CH_FREQ    || tag_index == SYSTEM_FILE_ADMPLEX1_CH_FREQ) {
             char *val2 = strtok(NULL, ",");
-            if (val2 != NULL && str_is_int8(val) && str_is_bool(val2)) {
+            if (val2 != NULL && str_is_int8(val)) {
                 int ch = atoi(val);
                 if (ch >= 0 && ch < MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS) {
-                    if (tag_index == SYSTEM_FILE_ADMPLEX0_CH_ENABLED) {setADMultiplexerChannelEnabled(ad_mux_0, (uint8_t)ch, atoi(val2) != 0);}
-                    else {setADMultiplexerChannelEnabled(ad_mux_1, (uint8_t)ch, atoi(val2) != 0);}
+                    if (tag_index == SYSTEM_FILE_ADMPLEX0_CH_ENABLED && str_is_bool(val2)) {setADMultiplexerChannelEnabled(ad_mux_0, (uint8_t)ch, atoi(val2) != 0);}
+                    else if (tag_index == SYSTEM_FILE_ADMPLEX1_CH_ENABLED && str_is_bool(val2)) {setADMultiplexerChannelEnabled(ad_mux_1, (uint8_t)ch, atoi(val2) != 0);}
+                    else if (tag_index == SYSTEM_FILE_ADMPLEX0_CH_FREQ && str_is_uint64(val2)) {setADMultiplexerChannelFreq(ad_mux_0, (uint8_t)ch, strtoull(val2, NULL, 10));}
+                    else if (tag_index == SYSTEM_FILE_ADMPLEX1_CH_FREQ && str_is_uint64(val2)) {setADMultiplexerChannelFreq(ad_mux_1, (uint8_t)ch, strtoull(val2, NULL, 10));}
+                    else { /* value failed validation for this tag: skip */ }
                 }
             }
             continue;
@@ -1169,12 +1233,30 @@ bool loadSystemFile(const char *filepath) {
         READ_INT8_TAG(SYSTEM_FILE_SATIO_ALTITUDE_VALUE_MODE, satioData.altitude_value_mode);
         READ_INT8_TAG(SYSTEM_FILE_SATIO_SPEED_VALUE_MODE, satioData.speed_value_mode);
         READ_INT8_TAG(SYSTEM_FILE_SATIO_GROUND_HEADING_VALUE_MODE, satioData.ground_heading_value_mode);
+
+        READ_STR_TAG(SYSTEM_FILE_PWRCFG_NAME, pwrConfigCurrent.name, sizeof(pwrConfigCurrent.name));
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_GPS, pwrConfigCurrent.TASK_MAX_FREQ_GPS);
+        #ifdef SATIO_CD74HC4067_OPTION_USE_1
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_ADMPLEX0, pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX0);
+        #endif
+        #ifdef SATIO_CD74HC4067_OPTION_USE_2
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_ADMPLEX1, pwrConfigCurrent.TASK_MAX_FREQ_ADMPLEX1);
+        #endif
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_GYRO, pwrConfigCurrent.TASK_MAX_FREQ_GYRO);
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_UNIVERSE, pwrConfigCurrent.TASK_MAX_FREQ_UNIVERSE);
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_SWITCHES, pwrConfigCurrent.TASK_MAX_FREQ_SWITCHES);
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_PORTCONTROLLER_INPUT, pwrConfigCurrent.TASK_MAX_FREQ_PORTCONTROLLER_INPUT);
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_STORAGE, pwrConfigCurrent.TASK_MAX_FREQ_STORAGE);
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_DISPLAY, pwrConfigCurrent.TASK_MAX_FREQ_DISPLAY);
+        READ_UINT32_TAG(SYSTEM_FILE_PWRCFG_SATIO_SERIAL_TX, pwrConfigCurrent.TASK_MAX_FREQ_SATIO_SERIAL_TX);
     }
 
     #undef READ_BOOL_TAG
     #undef READ_INT8_TAG
     #undef READ_LONG_TAG
     #undef READ_DBL_TAG
+    #undef READ_UINT32_TAG
+    #undef READ_STR_TAG
 
     fclose(f);
 

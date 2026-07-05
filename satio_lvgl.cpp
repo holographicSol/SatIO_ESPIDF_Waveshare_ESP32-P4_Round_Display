@@ -330,19 +330,22 @@ typedef enum {
     KB_USER_SPEED,
     KB_USER_GROUND_HEADING,
     KB_UTC_OFFSET_SECONDS,
+    KB_ADMPLEX0_CH_FREQ,
+    KB_ADMPLEX1_CH_FREQ,
     /* ... add other objects as required (does not have to be a lv_textarea) */
 } kb_target_t;
 
 /** ---------------------------------------------------------------------------------------
  * @brief Keyboard Context
- * 
+ *
  * Struct to hold context for keyboard events. This allows us to use a single event handler
  * across multiple keybords and multiple objects.
- * 
+ *
  */
 typedef struct {
     kb_target_t target;
     strval_type_t strval_type;  // Which strval function to use (enumerated by strval)
+    int index;                  // Optional: extra context (e.g. channel number) for targets shared across multiple objects. Unused (0) otherwise.
 } kb_ctx_t;
 
 /** ---------------------------------------------------------------------------------------
@@ -375,6 +378,11 @@ static kb_ctx_t user_altitude_ctx = { .target = KB_USER_ALTITUDE, .strval_type =
 static kb_ctx_t user_speed_ctx = { .target = KB_USER_SPEED, .strval_type = STRVAL_DOUBLE };
 static kb_ctx_t user_ground_heading_ctx = { .target = KB_USER_GROUND_HEADING, .strval_type = STRVAL_DOUBLE };
 static kb_ctx_t user_utc_offset_seconds_ctx = { .target = KB_UTC_OFFSET_SECONDS, .strval_type = STRVAL_INT64 };
+
+/* One context per channel (channel number carried in .index), filled in when
+   create_admplex0_panel() creates each channel's freq label. */
+static kb_ctx_t admplex0_ch_freq_ctx[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+static kb_ctx_t admplex1_ch_freq_ctx[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
 
 /* ... add other contexts as required (does not have to be a lv_textarea) */
 
@@ -419,6 +427,9 @@ void set_keyboard_context_cb(lv_event_t * e)
         case KB_USER_SPEED: kb = &kb_numdec; break;
         case KB_USER_GROUND_HEADING: kb = &kb_numdec; break;
         case KB_UTC_OFFSET_SECONDS: kb = &kb_numdec; break;
+
+        case KB_ADMPLEX0_CH_FREQ: kb = &kb_numdec; break;
+        case KB_ADMPLEX1_CH_FREQ: kb = &kb_numdec; break;
 
         /* ... add other cases as required */
         default: return;
@@ -641,7 +652,25 @@ void keyboard_event_cb(lv_event_t * e)
             else {
             }
             break;
-        
+
+        case KB_ADMPLEX0_CH_FREQ:
+            if (strval_validate(ctx->strval_type, input)) {
+                uint64_t val = strtoull(input, NULL, 10);
+                setADMultiplexerChannelFreq(ad_mux_0, (uint8_t)ctx->index, val);
+            }
+            else {
+            }
+            break;
+
+        case KB_ADMPLEX1_CH_FREQ:
+            if (strval_validate(ctx->strval_type, input)) {
+                uint64_t val = strtoull(input, NULL, 10);
+                setADMultiplexerChannelFreq(ad_mux_1, (uint8_t)ctx->index, val);
+            }
+            else {
+            }
+            break;
+
         // DEFAULT
         default:
             break;
@@ -11234,1169 +11263,166 @@ admplex0_container_t create_admplex0_panel(
     int32_t title_width = sub_row_width - (sub_column_padding);
 
     /* ---------------------------------------------------------- */
-    /* Row Channel 0                                              */
+    /* Channels (ADMplex 0): 2 rows each, name+data then           */
+    /* rate/set-rate/enable, so everything for a channel is        */
+    /* together.                                                   */
     /* ---------------------------------------------------------- */
 
-    lv_obj_t * row_0 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Adjust Flex
-    lv_obj_set_flex_flow(row_0, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_0,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    // Set row object widths
-    obj_w_0 = (((sub_row_width/2) *1)) - (sub_column_padding*1);
-
-    result.lbl_title_chan_0 = create_label(
-        row_0,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 0",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_0 = create_label(
-        row_0,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_0, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_0, obj_w_0, obj_height);
-
-/* ---------------------------------------------------------- */
-    /* Row Channel 1                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_1 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_1, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_1,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_1 = create_label(
-        row_1,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 1",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_1 = create_label(
-        row_1,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_1, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_1, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 2                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_2 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_2, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_2,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_2 = create_label(
-        row_2,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 2",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_2 = create_label(
-        row_2,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_2, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_2, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 3                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_3 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Adjust Flex
-    lv_obj_set_flex_flow(row_3, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_3,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    // Set row object widths
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_3 = create_label(
-        row_3,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 3",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_3 = create_label(
-        row_3,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_3, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_3, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 4                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_4 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_4, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_4,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_4 = create_label(
-        row_4,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 4",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_4 = create_label(
-        row_4,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_4, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_4, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 5                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_5 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_5, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_5,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_5 = create_label(
-        row_5,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 5",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_5 = create_label(
-        row_5,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_5, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_5, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 6                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_6 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_6, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_6,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_6 = create_label(
-        row_6,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 6",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_6 = create_label(
-        row_6,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_6, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_6, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 7                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_7 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_7, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_7,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_7 = create_label(
-        row_7,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 7",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_7 = create_label(
-        row_7,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_7, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_7, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 8                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_8 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    // Adjust Flex
-    lv_obj_set_flex_flow(row_8, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_8,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    // Set row object widths
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_8 = create_label(
-        row_8,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 8",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_8 = create_label(
-        row_8,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_8, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_8, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 9                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_9 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_9, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_9,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_9 = create_label(
-        row_9,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 9",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_9 = create_label(
-        row_9,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_9, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_9, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 10                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_10 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_10, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_10,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_10 = create_label(
-        row_10,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 10",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_10 = create_label(
-        row_10,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_10, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_10, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 11                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_11 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_11, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_11,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_11 = create_label(
-        row_11,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 11",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_11 = create_label(
-        row_11,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_11, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_11, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 12                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_12 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_12, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_12,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_12 = create_label(
-        row_12,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 12",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_12 = create_label(
-        row_12,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_12, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_12, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 13                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_13 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_13, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_13,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_13 = create_label(
-        row_13,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 13",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_13 = create_label(
-        row_13,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_13, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_13, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 14                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_14 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_14, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_14,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_14 = create_label(
-        row_14,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 14",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_14 = create_label(
-        row_14,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_14, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_14, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel 15                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_15 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_15, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row_15,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan_15 = create_label(
-        row_15,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 15",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan_15 = create_label(
-        row_15,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan_15, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan_15, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Channel Enable/Disable (ADMplex 0)                          */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_enable_0 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height*2,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_enable_0, LV_FLEX_FLOW_ROW_WRAP);
-    lv_obj_set_flex_align(
-        row_enable_0,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    int32_t enable_item_w = (sub_row_width/8) - sub_column_padding;
-
-    for (uint8_t i_chan_en=0; i_chan_en<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan_en++) {
-        lv_obj_t * col_enable_0 = lv_obj_create(row_enable_0);
-        lv_obj_set_size(col_enable_0, enable_item_w, sub_row_height);
-        lv_obj_set_style_pad_all(col_enable_0, 0, LV_PART_MAIN);
-        lv_obj_set_style_border_width(col_enable_0, 0, LV_PART_MAIN);
-        lv_obj_set_style_outline_width(col_enable_0, 0, LV_PART_MAIN);
-        lv_obj_set_style_bg_opa(col_enable_0, LV_OPA_TRANSP, LV_PART_MAIN);
-        lv_obj_set_scrollbar_mode(col_enable_0, LV_SCROLLBAR_MODE_OFF);
-        lv_obj_set_scroll_dir(col_enable_0, LV_DIR_NONE);
-        lv_obj_set_flex_flow(col_enable_0, LV_FLEX_FLOW_COLUMN);
-        lv_obj_set_flex_align(col_enable_0, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-
-        char chan_label_buf_0[4];
-        snprintf(chan_label_buf_0, sizeof(chan_label_buf_0), "%u", (unsigned)i_chan_en);
-
-        create_label(
-            col_enable_0,
-            enable_item_w,
-            obj_height/2,
+    int32_t chan_third_w = (sub_row_width/3) - sub_column_padding;
+    int32_t chan_sw_w = obj_height*2;
+
+    for (uint8_t i_chan=0; i_chan<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan++) {
+
+        char chan_title_buf[16];
+        snprintf(chan_title_buf, sizeof(chan_title_buf), "Channel %u", (unsigned)i_chan);
+
+        // Row A: name + data
+        lv_obj_t * row_chan_a = create_row(
+            result.panel,
+            sub_row_width,
+            sub_row_height,
+            inner_pad_all,
+            sub_row_padding,
+            sub_column_padding,
+            false,
+            false
+        );
+
+        lv_obj_set_flex_flow(row_chan_a, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(
+            row_chan_a,
+            LV_FLEX_ALIGN_START,
+            LV_FLEX_ALIGN_CENTER,
+            LV_FLEX_ALIGN_CENTER
+        );
+
+        obj_w_0 = (((sub_row_width/2) *1)) - (sub_column_padding*1);
+
+        result.lbl_title_chan[i_chan] = create_label(
+            row_chan_a,
+            obj_w_0,
+            obj_height,
             LV_ALIGN_CENTER,
             0,
             0,
-            chan_label_buf_0,
+            chan_title_buf,
             LV_TEXT_ALIGN_CENTER,
             &cobalt_alien_17,
-            true,
             false,
             false,
-            0,
+            false,
+            2,
             general_radius,
             1,
             default_bg_hue,
             default_subtitle_hue
         );
 
-        result.sw_chan_enabled[i_chan_en] = create_switch(
-            col_enable_0,
-            enable_item_w,
-            obj_height/2,
+        result.lbl_val_chan[i_chan] = create_label(
+            row_chan_a,
+            obj_w_0,
+            obj_height,
+            LV_ALIGN_CENTER,
+            0,
+            0,
+            "",
+            LV_TEXT_ALIGN_CENTER,
+            &cobalt_alien_17,
+            false,
+            false,
+            false,
+            2,
+            general_radius,
+            1,
+            default_bg_hue,
+            default_value_hue
+        );
+
+        lv_obj_set_size(result.lbl_title_chan[i_chan], obj_w_0, obj_height);
+        lv_obj_set_size(result.lbl_val_chan[i_chan], obj_w_0, obj_height);
+
+        // Row B: achieved rate out of configured rate, set rate, enable/disable
+        lv_obj_t * row_chan_b = create_row(
+            result.panel,
+            sub_row_width,
+            sub_row_height,
+            inner_pad_all,
+            sub_row_padding,
+            sub_column_padding,
+            false,
+            false
+        );
+
+        lv_obj_set_flex_flow(row_chan_b, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(
+            row_chan_b,
+            LV_FLEX_ALIGN_START,
+            LV_FLEX_ALIGN_CENTER,
+            LV_FLEX_ALIGN_CENTER
+        );
+
+        result.lbl_rate_chan[i_chan] = create_label(
+            row_chan_b,
+            chan_third_w,
+            obj_height,
+            LV_ALIGN_CENTER,
+            0,
+            0,
+            "",
+            LV_TEXT_ALIGN_CENTER,
+            &cobalt_alien_17,
+            false,
+            false,
+            false,
+            2,
+            general_radius,
+            1,
+            default_bg_hue,
+            default_subtitle_hue
+        );
+        lv_obj_set_flex_grow(result.lbl_rate_chan[i_chan], 1);
+
+        admplex0_ch_freq_ctx[i_chan].target = KB_ADMPLEX0_CH_FREQ;
+        admplex0_ch_freq_ctx[i_chan].strval_type = STRVAL_UINT64;
+        admplex0_ch_freq_ctx[i_chan].index = i_chan;
+
+        result.lbl_freq_chan[i_chan] = create_label(
+            row_chan_b,
+            chan_third_w,
+            obj_height,
+            LV_ALIGN_CENTER,
+            0,
+            0,
+            "",
+            LV_TEXT_ALIGN_CENTER,
+            &cobalt_alien_17,
+            false,
+            false,
+            false,
+            2,
+            general_radius,
+            1,
+            default_bg_hue,
+            default_value_hue
+        );
+        lv_obj_add_flag(result.lbl_freq_chan[i_chan], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(result.lbl_freq_chan[i_chan], set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_set_user_data(result.lbl_freq_chan[i_chan], &admplex0_ch_freq_ctx[i_chan]);
+        lv_obj_set_flex_grow(result.lbl_freq_chan[i_chan], 1);
+
+        result.sw_chan_enabled[i_chan] = create_switch(
+            row_chan_b,
+            chan_sw_w,
+            obj_height,
             LV_ALIGN_CENTER,
             0,
             0
         );
+        lv_obj_add_event_cb(result.sw_chan_enabled[i_chan], sw_admplex_channel_event_cb, LV_EVENT_VALUE_CHANGED, reinterpret_cast<void *>(static_cast<intptr_t>(i_chan)));
 
-        lv_obj_add_event_cb(result.sw_chan_enabled[i_chan_en], sw_admplex_channel_event_cb, LV_EVENT_VALUE_CHANGED, reinterpret_cast<void *>(static_cast<intptr_t>(i_chan_en)));
+        lv_obj_set_height(result.lbl_rate_chan[i_chan], obj_height);
+        lv_obj_set_height(result.lbl_freq_chan[i_chan], obj_height);
+        lv_obj_set_size(result.sw_chan_enabled[i_chan], chan_sw_w, obj_height);
     }
 
     /* ---------------------------------------------------------- */
@@ -12447,1163 +11473,163 @@ admplex0_container_t create_admplex0_panel(
     lv_obj_set_size(result.lbl_title_admplex_1, title_width, obj_height);
 
     /* ---------------------------------------------------------- */
-    /* Row Channel1 0                                              */
+    /* Channels (ADMplex 1): 2 rows each, name+data then           */
+    /* rate/set-rate/enable, so everything for a channel is        */
+    /* together.                                                   */
     /* ---------------------------------------------------------- */
 
-    lv_obj_t * row1_0 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_0, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_0,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_0 = create_label(
-        row1_0,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 0",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_0 = create_label(
-        row1_0,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_0, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_0, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 1                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_1 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_1, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_1,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_1 = create_label(
-        row1_1,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 1",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_1 = create_label(
-        row1_1,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_1, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_1, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 2                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_2 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_2, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_2,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_2 = create_label(
-        row1_2,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 2",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_2 = create_label(
-        row1_2,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_2, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_2, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 3                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_3 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_3, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_3,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_3 = create_label(
-        row1_3,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 3",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_3 = create_label(
-        row1_3,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_3, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_3, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 4                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_4 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_4, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_4,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_4 = create_label(
-        row1_4,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 4",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_4 = create_label(
-        row1_4,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_4, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_4, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 5                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_5 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_5, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_5,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_5 = create_label(
-        row1_5,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 5",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_5 = create_label(
-        row1_5,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_5, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_5, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 6                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_6 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_6, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_6,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_6 = create_label(
-        row1_6,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 6",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_6 = create_label(
-        row1_6,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_6, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_6, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 7                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_7 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_7, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_7,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_7 = create_label(
-        row1_7,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 7",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_7 = create_label(
-        row1_7,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_7, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_7, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 8                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_8 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_8, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_8,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_8 = create_label(
-        row1_8,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 8",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_8 = create_label(
-        row1_8,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_8, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_8, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 9                                              */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_9 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_9, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_9,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_9 = create_label(
-        row1_9,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 9",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_9 = create_label(
-        row1_9,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_9, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_9, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 10                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_10 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_10, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_10,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_10 = create_label(
-        row1_10,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 10",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_10 = create_label(
-        row1_10,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_10, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_10, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 11                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_11 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_11, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_11,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_11 = create_label(
-        row1_11,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 11",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_11 = create_label(
-        row1_11,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_11, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_11, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 12                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_12 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_12, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_12,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_12 = create_label(
-        row1_12,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 12",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_12 = create_label(
-        row1_12,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_12, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_12, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 13                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_13 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_13, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_13,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_13 = create_label(
-        row1_13,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 13",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_13 = create_label(
-        row1_13,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_13, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_13, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 14                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_14 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_14, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_14,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_14 = create_label(
-        row1_14,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 14",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_14 = create_label(
-        row1_14,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_14, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_14, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Row Channel1 15                                             */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row1_15 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row1_15, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(
-        row1_15,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    obj_w_0 = (((sub_row_width/2) * 1)) - (sub_column_padding * 1);
-
-    result.lbl_title_chan1_15 = create_label(
-        row1_15,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "Channel 15",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_subtitle_hue
-    );
-
-    result.lbl_val_chan1_15 = create_label(
-        row1_15,
-        obj_w_0,
-        obj_height,
-        LV_ALIGN_CENTER,
-        0,
-        0,
-        "",
-        LV_TEXT_ALIGN_CENTER,
-        &cobalt_alien_17,
-        false,
-        false,
-        false,
-        2,
-        general_radius,
-        1,
-        default_bg_hue,
-        default_value_hue
-    );
-
-    lv_obj_set_size(result.lbl_title_chan1_15, obj_w_0, obj_height);
-    lv_obj_set_size(result.lbl_val_chan1_15, obj_w_0, obj_height);
-
-    /* ---------------------------------------------------------- */
-    /* Channel Enable/Disable (ADMplex 1)                          */
-    /* ---------------------------------------------------------- */
-
-    lv_obj_t * row_enable_1 = create_row(
-        result.panel,
-        sub_row_width,
-        sub_row_height*2,
-        inner_pad_all,
-        sub_row_padding,
-        sub_column_padding,
-        false,
-        false
-    );
-
-    lv_obj_set_flex_flow(row_enable_1, LV_FLEX_FLOW_ROW_WRAP);
-    lv_obj_set_flex_align(
-        row_enable_1,
-        LV_FLEX_ALIGN_START,
-        LV_FLEX_ALIGN_CENTER,
-        LV_FLEX_ALIGN_CENTER
-    );
-
-    int32_t enable_item_w_1 = (sub_row_width/8) - sub_column_padding;
-
-    for (uint8_t i_chan_en=0; i_chan_en<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan_en++) {
-        lv_obj_t * col_enable_1 = lv_obj_create(row_enable_1);
-        lv_obj_set_size(col_enable_1, enable_item_w_1, sub_row_height);
-        lv_obj_set_style_pad_all(col_enable_1, 0, LV_PART_MAIN);
-        lv_obj_set_style_border_width(col_enable_1, 0, LV_PART_MAIN);
-        lv_obj_set_style_outline_width(col_enable_1, 0, LV_PART_MAIN);
-        lv_obj_set_style_bg_opa(col_enable_1, LV_OPA_TRANSP, LV_PART_MAIN);
-        lv_obj_set_scrollbar_mode(col_enable_1, LV_SCROLLBAR_MODE_OFF);
-        lv_obj_set_scroll_dir(col_enable_1, LV_DIR_NONE);
-        lv_obj_set_flex_flow(col_enable_1, LV_FLEX_FLOW_COLUMN);
-        lv_obj_set_flex_align(col_enable_1, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-
-        char chan_label_buf_1[4];
-        snprintf(chan_label_buf_1, sizeof(chan_label_buf_1), "%u", (unsigned)i_chan_en);
-
-        create_label(
-            col_enable_1,
-            enable_item_w_1,
-            obj_height/2,
+    for (uint8_t i_chan=0; i_chan<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan++) {
+
+        char chan_title_buf_1[16];
+        snprintf(chan_title_buf_1, sizeof(chan_title_buf_1), "Channel %u", (unsigned)i_chan);
+
+        // Row A: name + data
+        lv_obj_t * row1_chan_a = create_row(
+            result.panel,
+            sub_row_width,
+            sub_row_height,
+            inner_pad_all,
+            sub_row_padding,
+            sub_column_padding,
+            false,
+            false
+        );
+
+        lv_obj_set_flex_flow(row1_chan_a, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(
+            row1_chan_a,
+            LV_FLEX_ALIGN_START,
+            LV_FLEX_ALIGN_CENTER,
+            LV_FLEX_ALIGN_CENTER
+        );
+
+        obj_w_0 = (((sub_row_width/2) *1)) - (sub_column_padding*1);
+
+        result.lbl_title_chan1[i_chan] = create_label(
+            row1_chan_a,
+            obj_w_0,
+            obj_height,
             LV_ALIGN_CENTER,
             0,
             0,
-            chan_label_buf_1,
+            chan_title_buf_1,
             LV_TEXT_ALIGN_CENTER,
             &cobalt_alien_17,
-            true,
             false,
             false,
-            0,
+            false,
+            2,
             general_radius,
             1,
             default_bg_hue,
             default_subtitle_hue
         );
 
-        result.sw_chan1_enabled[i_chan_en] = create_switch(
-            col_enable_1,
-            enable_item_w_1,
-            obj_height/2,
+        result.lbl_val_chan1[i_chan] = create_label(
+            row1_chan_a,
+            obj_w_0,
+            obj_height,
+            LV_ALIGN_CENTER,
+            0,
+            0,
+            "",
+            LV_TEXT_ALIGN_CENTER,
+            &cobalt_alien_17,
+            false,
+            false,
+            false,
+            2,
+            general_radius,
+            1,
+            default_bg_hue,
+            default_value_hue
+        );
+
+        lv_obj_set_size(result.lbl_title_chan1[i_chan], obj_w_0, obj_height);
+        lv_obj_set_size(result.lbl_val_chan1[i_chan], obj_w_0, obj_height);
+
+        // Row B: achieved rate out of configured rate, set rate, enable/disable
+        lv_obj_t * row1_chan_b = create_row(
+            result.panel,
+            sub_row_width,
+            sub_row_height,
+            inner_pad_all,
+            sub_row_padding,
+            sub_column_padding,
+            false,
+            false
+        );
+
+        lv_obj_set_flex_flow(row1_chan_b, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(
+            row1_chan_b,
+            LV_FLEX_ALIGN_START,
+            LV_FLEX_ALIGN_CENTER,
+            LV_FLEX_ALIGN_CENTER
+        );
+
+        result.lbl_rate_chan1[i_chan] = create_label(
+            row1_chan_b,
+            chan_third_w,
+            obj_height,
+            LV_ALIGN_CENTER,
+            0,
+            0,
+            "",
+            LV_TEXT_ALIGN_CENTER,
+            &cobalt_alien_17,
+            false,
+            false,
+            false,
+            2,
+            general_radius,
+            1,
+            default_bg_hue,
+            default_subtitle_hue
+        );
+        lv_obj_set_flex_grow(result.lbl_rate_chan1[i_chan], 1);
+
+        admplex1_ch_freq_ctx[i_chan].target = KB_ADMPLEX1_CH_FREQ;
+        admplex1_ch_freq_ctx[i_chan].strval_type = STRVAL_UINT64;
+        admplex1_ch_freq_ctx[i_chan].index = i_chan;
+
+        result.lbl_freq_chan1[i_chan] = create_label(
+            row1_chan_b,
+            chan_third_w,
+            obj_height,
+            LV_ALIGN_CENTER,
+            0,
+            0,
+            "",
+            LV_TEXT_ALIGN_CENTER,
+            &cobalt_alien_17,
+            false,
+            false,
+            false,
+            2,
+            general_radius,
+            1,
+            default_bg_hue,
+            default_value_hue
+        );
+        lv_obj_add_flag(result.lbl_freq_chan1[i_chan], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(result.lbl_freq_chan1[i_chan], set_keyboard_context_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_set_user_data(result.lbl_freq_chan1[i_chan], &admplex1_ch_freq_ctx[i_chan]);
+        lv_obj_set_flex_grow(result.lbl_freq_chan1[i_chan], 1);
+
+        result.sw_chan1_enabled[i_chan] = create_switch(
+            row1_chan_b,
+            chan_sw_w,
+            obj_height,
             LV_ALIGN_CENTER,
             0,
             0
         );
+        lv_obj_add_event_cb(result.sw_chan1_enabled[i_chan], sw_admplex_channel_event_cb, LV_EVENT_VALUE_CHANGED, reinterpret_cast<void *>(static_cast<intptr_t>(i_chan + ADMPLEX_CHANNEL_ENABLE_MUX1_OFFSET)));
 
-        lv_obj_add_event_cb(result.sw_chan1_enabled[i_chan_en], sw_admplex_channel_event_cb, LV_EVENT_VALUE_CHANGED, reinterpret_cast<void *>(static_cast<intptr_t>(i_chan_en + ADMPLEX_CHANNEL_ENABLE_MUX1_OFFSET)));
+        lv_obj_set_height(result.lbl_rate_chan1[i_chan], obj_height);
+        lv_obj_set_height(result.lbl_freq_chan1[i_chan], obj_height);
+        lv_obj_set_size(result.sw_chan1_enabled[i_chan], chan_sw_w, obj_height);
     }
 
     return result;
@@ -18602,6 +16628,21 @@ static void dd_select(lv_obj_t *dd, uint32_t idx) {
 }
 
 /** -------------------------------------------------------------------------------------
+ * @brief Sets a switch's checked state to match enabled, so a switch always reflects
+ *        the data it controls (loaded from storage, set via CLI, etc.), not only the
+ *        state it was left in by the last tap. Skips the call (and the redraw it would
+ *        queue) when the switch is already in the correct state.
+ */
+static void sync_switch_state(lv_obj_t *sw, bool enabled) {
+    if (sw == NULL) return;
+    bool checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    if (checked != enabled) {
+        if (enabled) {lv_obj_add_state(sw, LV_STATE_CHECKED);}
+        else {lv_obj_clear_state(sw, LV_STATE_CHECKED);}
+    }
+}
+
+/** -------------------------------------------------------------------------------------
  * @brief Main function to update screen objects and load screens.
  */
 void update_display()
@@ -19794,39 +17835,54 @@ void update_display()
     // ---------------------
     else if (current_screen_number == MPLEX0_SCREEN) {
         if (admlpex0_c.panel) {
-            lv_label_set_text(admlpex0_c.lbl_val_chan_0,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_0]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_1,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_1]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_2,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_2]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_3,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_3]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_4,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_4]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_5,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_5]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_6,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_6]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_7,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_7]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_8,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_8]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_9,  String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_9]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_10, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_10]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_11, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_11]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_12, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_12]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_13, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_13]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_14, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_14]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan_15, String(ad_mux_0.data[INDEX_ADMPLEX_0_CH_15]).c_str());
+            for (uint8_t i_chan_disp=0; i_chan_disp<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; i_chan_disp++) {
+                lv_label_set_text(admlpex0_c.lbl_val_chan[i_chan_disp], String(ad_mux_0.data[i_chan_disp]).c_str());
+                lv_label_set_text(admlpex0_c.lbl_val_chan1[i_chan_disp], String(ad_mux_1.data[i_chan_disp]).c_str());
 
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_0,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_0]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_1,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_1]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_2,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_2]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_3,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_3]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_4,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_4]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_5,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_5]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_6,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_6]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_7,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_7]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_8,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_8]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_9,  String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_9]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_10, String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_10]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_11, String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_11]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_12, String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_12]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_13, String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_13]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_14, String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_14]).c_str());
-            lv_label_set_text(admlpex0_c.lbl_val_chan1_15, String(ad_mux_1.data[INDEX_ADMPLEX_1_CH_15]).c_str());
+                // Configured read rate (uS); clicking opens the keyboard to change it.
+                lv_label_set_text(admlpex0_c.lbl_freq_chan[i_chan_disp], String(ad_mux_0.chan_freq_uS[i_chan_disp]).c_str());
+                lv_label_set_text(admlpex0_c.lbl_freq_chan1[i_chan_disp], String(ad_mux_1.chan_freq_uS[i_chan_disp]).c_str());
+
+                // Achieved read rate (Hz) out of the configured rate (uS).
+                lv_label_set_text(admlpex0_c.lbl_rate_chan[i_chan_disp],
+                    String(String(systemData.counters_mplex0_chan[i_chan_disp].task_ffreq_t) + "Hz").c_str());
+                lv_label_set_text(admlpex0_c.lbl_rate_chan1[i_chan_disp],
+                    String(String(systemData.counters_mplex1_chan[i_chan_disp].task_ffreq_t) + "Hz").c_str());
+
+                // Enable/disable switches.
+                sync_switch_state(admlpex0_c.sw_chan_enabled[i_chan_disp], ad_mux_0.enabled[i_chan_disp]);
+                sync_switch_state(admlpex0_c.sw_chan1_enabled[i_chan_disp], ad_mux_1.enabled[i_chan_disp]);
+            }
+        }
+    }
+
+    // ---------------------
+    // Serial screen
+    // ---------------------
+    else if (current_screen_number == SERIAL_SCREEN) {
+        if (serial_c.panel) {
+            sync_switch_state(serial_c.sw_output_all, systemData.output_satio_all);
+            sync_switch_state(serial_c.sw_output_satio, systemData.output_satio_enabled);
+            sync_switch_state(serial_c.sw_output_gngga, systemData.output_gngga_enabled);
+            sync_switch_state(serial_c.sw_output_gnrmc, systemData.output_gnrmc_enabled);
+            sync_switch_state(serial_c.sw_output_gpatt, systemData.output_gpatt_enabled);
+            sync_switch_state(serial_c.sw_output_ins, systemData.output_ins_enabled);
+            sync_switch_state(serial_c.sw_output_matrix, systemData.output_matrix_enabled);
+            sync_switch_state(serial_c.sw_output_input_controller, systemData.output_input_portcontroller);
+            sync_switch_state(serial_c.sw_output_admplex_0, systemData.output_admplex0_enabled);
+            sync_switch_state(serial_c.sw_output_admplex_1, systemData.output_admplex1_enabled);
+            sync_switch_state(serial_c.sw_output_gyro_0, systemData.output_gyro_0_enabled);
+            sync_switch_state(serial_c.sw_output_sun, systemData.output_sun_enabled);
+            sync_switch_state(serial_c.sw_output_mercury, systemData.output_mercury_enabled);
+            sync_switch_state(serial_c.sw_output_venus, systemData.output_venus_enabled);
+            sync_switch_state(serial_c.sw_output_earth, systemData.output_earth_enabled);
+            sync_switch_state(serial_c.sw_output_luna, systemData.output_luna_enabled);
+            sync_switch_state(serial_c.sw_output_mars, systemData.output_mars_enabled);
+            sync_switch_state(serial_c.sw_output_jupiter, systemData.output_jupiter_enabled);
+            sync_switch_state(serial_c.sw_output_saturn, systemData.output_saturn_enabled);
+            sync_switch_state(serial_c.sw_output_uranus, systemData.output_uranus_enabled);
+            sync_switch_state(serial_c.sw_output_neptune, systemData.output_neptune_enabled);
+            sync_switch_state(serial_c.sw_output_meteors, systemData.output_meteors_enabled);
         }
     }
 

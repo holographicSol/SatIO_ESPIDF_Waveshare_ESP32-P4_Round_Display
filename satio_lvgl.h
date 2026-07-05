@@ -720,107 +720,25 @@ typedef struct {
 typedef struct {
     lv_obj_t * panel;
 
-    lv_obj_t * lbl_title_chan_0;
-    lv_obj_t * lbl_val_chan_0;
-    
-    lv_obj_t * lbl_title_chan_1;
-    lv_obj_t * lbl_val_chan_1;
-    
-    lv_obj_t * lbl_title_chan_2;
-    lv_obj_t * lbl_val_chan_2;
-    
-    lv_obj_t * lbl_title_chan_3;
-    lv_obj_t * lbl_val_chan_3;
-    
-    lv_obj_t * lbl_title_chan_4;
-    lv_obj_t * lbl_val_chan_4;
-    
-    lv_obj_t * lbl_title_chan_5;
-    lv_obj_t * lbl_val_chan_5;
-    
-    lv_obj_t * lbl_title_chan_6;
-    lv_obj_t * lbl_val_chan_6;
-    
-    lv_obj_t * lbl_title_chan_7;
-    lv_obj_t * lbl_val_chan_7;
-    
-    lv_obj_t * lbl_title_chan_8;
-    lv_obj_t * lbl_val_chan_8;
-    
-    lv_obj_t * lbl_title_chan_9;
-    lv_obj_t * lbl_val_chan_9;
-    
-    lv_obj_t * lbl_title_chan_10;
-    lv_obj_t * lbl_val_chan_10;
-    
-    lv_obj_t * lbl_title_chan_11;
-    lv_obj_t * lbl_val_chan_11;
-    
-    lv_obj_t * lbl_title_chan_12;
-    lv_obj_t * lbl_val_chan_12;
-    
-    lv_obj_t * lbl_title_chan_13;
-    lv_obj_t * lbl_val_chan_13;
-    
-    lv_obj_t * lbl_title_chan_14;
-    lv_obj_t * lbl_val_chan_14;
-    
-    lv_obj_t * lbl_title_chan_15;
-    lv_obj_t * lbl_val_chan_15;
-
     lv_obj_t * lbl_title_admplex_1;
 
-    lv_obj_t * lbl_title_chan1_0;
-    lv_obj_t * lbl_val_chan1_0;
-
-    lv_obj_t * lbl_title_chan1_1;
-    lv_obj_t * lbl_val_chan1_1;
-
-    lv_obj_t * lbl_title_chan1_2;
-    lv_obj_t * lbl_val_chan1_2;
-
-    lv_obj_t * lbl_title_chan1_3;
-    lv_obj_t * lbl_val_chan1_3;
-
-    lv_obj_t * lbl_title_chan1_4;
-    lv_obj_t * lbl_val_chan1_4;
-
-    lv_obj_t * lbl_title_chan1_5;
-    lv_obj_t * lbl_val_chan1_5;
-
-    lv_obj_t * lbl_title_chan1_6;
-    lv_obj_t * lbl_val_chan1_6;
-
-    lv_obj_t * lbl_title_chan1_7;
-    lv_obj_t * lbl_val_chan1_7;
-
-    lv_obj_t * lbl_title_chan1_8;
-    lv_obj_t * lbl_val_chan1_8;
-
-    lv_obj_t * lbl_title_chan1_9;
-    lv_obj_t * lbl_val_chan1_9;
-
-    lv_obj_t * lbl_title_chan1_10;
-    lv_obj_t * lbl_val_chan1_10;
-
-    lv_obj_t * lbl_title_chan1_11;
-    lv_obj_t * lbl_val_chan1_11;
-
-    lv_obj_t * lbl_title_chan1_12;
-    lv_obj_t * lbl_val_chan1_12;
-
-    lv_obj_t * lbl_title_chan1_13;
-    lv_obj_t * lbl_val_chan1_13;
-
-    lv_obj_t * lbl_title_chan1_14;
-    lv_obj_t * lbl_val_chan1_14;
-
-    lv_obj_t * lbl_title_chan1_15;
-    lv_obj_t * lbl_val_chan1_15;
+    /* Per-channel name/data (index == channel number). */
+    lv_obj_t * lbl_title_chan[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+    lv_obj_t * lbl_val_chan[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+    lv_obj_t * lbl_title_chan1[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+    lv_obj_t * lbl_val_chan1[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
 
     /* Per-channel enable/disable switches (index == channel number). */
     lv_obj_t * sw_chan_enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
     lv_obj_t * sw_chan1_enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+
+    /* Per-channel configured read rate; clickable to edit via keyboard. */
+    lv_obj_t * lbl_freq_chan[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+    lv_obj_t * lbl_freq_chan1[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+
+    /* Per-channel achieved read rate out of the configured rate, read-only. */
+    lv_obj_t * lbl_rate_chan[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+    lv_obj_t * lbl_rate_chan1[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
 
 } admplex0_container_t;
 

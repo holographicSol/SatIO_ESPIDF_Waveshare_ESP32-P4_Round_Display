@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include "esp_attr.h"
 #include "config.h"
+#include "multiplexers.h"
 
 /**
  * @brief SystemConuters
@@ -121,6 +122,12 @@ struct systemStruct {
   SystemConuters counters_ins;
   SystemConuters counters_mplex0;
   SystemConuters counters_mplex1;
+  // Per-channel read-rate counters, indexed by channel number: task_ffreq_t
+  // is the channel's achieved reads/sec, gated by its own chan_freq_uS
+  // (see setADMultiplexerChannelFreq()); task_freq_t is how often the
+  // channel was checked (bounded by TASK_MAX_FREQ_ADMPLEX0/1).
+  SystemConuters counters_mplex0_chan[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+  SystemConuters counters_mplex1_chan[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
   SystemConuters counters_pci;
   SystemConuters counters_uni;
   SystemConuters counters_mtx;
