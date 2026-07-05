@@ -59,7 +59,7 @@ typedef struct {
   int pins[MAX_ANALOG_DIGITAL_MULTIPLEXER_PINS];
   double data[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
   bool enabled[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
-  uint64_t chan_freq_uS[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
+  uint64_t chan_freq_uS[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS]; // target frequency in uS (1Hz = 10^6 micros)
 } AnalogDigitalMultiplexer;
 
 extern AnalogDigitalMultiplexer ad_mux_0;

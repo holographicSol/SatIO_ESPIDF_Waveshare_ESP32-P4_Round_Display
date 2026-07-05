@@ -28,7 +28,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
  * @note This option configures taks core asignment for pure, headless performance.
  * @warning Ensure only one SATIO_DISPLAY_OPTION is defined. 
  */
-// #define SATIO_DISPLAY_OPTION_HEADLESS
+#define SATIO_DISPLAY_OPTION_HEADLESS
 
 /**
  * @brief SATIO_DISPLAY_OPTION_LVGL - LVGL display option.
@@ -36,7 +36,7 @@ extern bool ISR_Bool_MultiDisplayController_0;
  * @note If not defined then the project will be comiled for use without LVGL.
  * @warning Ensure only one SATIO_DISPLAY_OPTION is defined.
  */
-#define SATIO_DISPLAY_OPTION_LVGL
+// #define SATIO_DISPLAY_OPTION_LVGL
 // ----------------------------------------------------------------------------------------
 /**
  * @brief SATIO_SERIAL_TX_CURRENT_TASK
@@ -136,6 +136,12 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 // Low Power Delay uS Times
 // ----------------------------------------------------------------------------------------
+/**
+ * @brief Target max frequency in microsecods (1Hz = 10^6 micros).
+ * @note Actual frequency may vary depending on how the system is configured.
+ *       Microseconds are used to mitigate N conversions from Hz to 'delay time', and so
+ *       that seperate values are not needed to store delay time derived from Hz.
+ */
 #define TASK_MAX_FREQ_LOW_GPS                         100000  // (10 Hz)
 
 #ifdef SATIO_CD74HC4067_OPTION_USE_1
@@ -163,6 +169,12 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 // Balanced Delay uS Times (Recommended)
 // ----------------------------------------------------------------------------------------
+/**
+ * @brief Target max frequency in microsecods (1Hz = 10^6 micros).
+ * @note Actual frequency may vary depending on how the system is configured.
+ *       Microseconds are used to mitigate N conversions from Hz to 'delay time', and so
+ *       that seperate values are not needed to store delay time derived from Hz.
+ */
 #define TASK_MAX_FREQ_BALANCED_GPS                    100000  // (10 Hz)
 
 #ifdef SATIO_CD74HC4067_OPTION_USE_1
@@ -190,6 +202,12 @@ typedef struct PwrConfig {
 // ----------------------------------------------------------------------------------------
 // Ultimate Perfromance Delay uS Times
 // ----------------------------------------------------------------------------------------
+/**
+ * @brief Target max frequency in microsecods (1Hz = 10^6 micros).
+ * @note Actual frequency may vary depending on how the system is configured.
+ *       Microseconds are used to mitigate N conversions from Hz to 'delay time', and so
+ *       that seperate values are not needed to store delay time derived from Hz.
+ */
 #define TASK_MAX_FREQ_HIGH_GPS                        100000  // (10 Hz)
 
 #ifdef SATIO_CD74HC4067_OPTION_USE_1
