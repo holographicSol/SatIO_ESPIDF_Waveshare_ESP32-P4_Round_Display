@@ -1920,8 +1920,10 @@ void outputSerialPCInput(void) {
 #define STAT_SWITCHES_PER_PAGE 23
 #define STAT_COL_FORMAT_D  "%-12d"
 #define STAT_COL_FORMAT_LD "%-12ld"
+#define STAT_COL_FORMAT_F  "%-12.2f"
 #define STAT_COL_WIDTH 12
 #define STAT_LABEL_WIDTH 22 // width of labels such as "Computer Assist    :  "
+#define STAT_LABEL_FMT "%-22s:  " // keep field width in sync with STAT_LABEL_WIDTH
 
 void printArray(signed long arr[], int start, int end) {
     for (int i = start; i < end; i++) {
@@ -1949,151 +1951,60 @@ static void printStatSeparator(int start, int end) {
 
 void outputStat(void) {
   // if (systemData.output_stat==true) { // forced on for dev
-      printf(
-          "[ %llu ] "
-          "gps=(%s %s syn=%s) "
-          "sys=(%s %s syn=%s) "
-          "lcl=(%s %s syn=%s) "
-          "lmst=(%s %s syn=%s) "
-          "lst=%f "
+    // ----------------------------------------------------------------------------------------------------------------------------
+    //                                                                                                              PRINT CLOCKS
+    // ----------------------------------------------------------------------------------------------------------------------------
+    printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+    printf(STAT_LABEL_FMT "%llu\n", "Timestamp (uS)", satioData.systemTime.unixtime_uS);
+    printf(STAT_LABEL_FMT "%s %s syn=%s\n", "GPS Time",     satioData.GPSTime.padded_time_HHMMSS,            satioData.GPSTime.padded_date_DDMMYY,            satioData.GPSTime.sync_padded_time_HHMMSS);
+    printf(STAT_LABEL_FMT "%s %s syn=%s\n", "System Time",  satioData.systemTime.padded_time_HHMMSS,         satioData.systemTime.padded_date_DDMMYY,         satioData.systemTime.sync_padded_time_HHMMSS);
+    printf(STAT_LABEL_FMT "%s %s syn=%s\n", "Local Time",   satioData.localTime.padded_time_HHMMSS,          satioData.localTime.padded_date_DDMMYY,          satioData.localTime.sync_padded_time_HHMMSS);
+    printf(STAT_LABEL_FMT "%s %s syn=%s\n", "LMST",         satioData.localMeanSolarTime.padded_time_HHMMSS, satioData.localMeanSolarTime.padded_date_DDMMYY, satioData.localMeanSolarTime.sync_padded_time_HHMMSS);
+    printf(STAT_LABEL_FMT "%f\n", "LST", siderealExtraData.local_sidereal_time);
 
-          "t_loop=%ld "
+    // ----------------------------------------------------------------------------------------------------------------------------
+    //                                                                                                         PRINT TASK RATES (Hz)
+    // ----------------------------------------------------------------------------------------------------------------------------
+    printf(STAT_LABEL_FMT "%ld\n",   "Loop Rate",     systemData.total_loops_a_second);
+    printf(STAT_LABEL_FMT "%ldHz\n", "System Timing", systemData.counters_st.task_freq_t);
+    printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+    printf("%-22s%-12s%-12s\n", "", "Function(Hz)", "Task(Hz)         (hit rate within current task Hz ceiling)");
+    printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "GPS",      systemData.counters_gps.task_ffreq_t,              systemData.counters_gps.task_freq_t);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "Gyro0",    systemData.counters_gyr0.task_ffreq_t,             systemData.counters_gyr0.task_freq_t);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "INS",      systemData.counters_ins.task_ffreq_t,              systemData.counters_gyr0.task_freq_t); // INS runs inside the Gyro0 task
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "Mplex0",   systemData.counters_mplex0.task_ffreq_t,           systemData.counters_mplex0.task_freq_t);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "Mplex1",   systemData.counters_mplex1.task_ffreq_t,           systemData.counters_mplex1.task_freq_t);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "PCI",      systemData.counters_pci.task_ffreq_t,              systemData.counters_pci.task_freq_t);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "Uni",      systemData.counters_uni.task_ffreq_t,              systemData.counters_uni.task_freq_t);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "Matrix",   systemData.counters_mtx.task_ffreq_t,              systemData.counters_mtx.task_freq_t);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "PCO",      systemData.counters_pco.task_ffreq_t,              systemData.counters_mtx.task_freq_t); // PCO runs inside the Matrix task
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "Display",  systemData.counters_dsp.task_ffreq_t,              systemData.counters_dsp.task_freq_t);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_LD STAT_COL_FORMAT_LD "\n", "SatIO Tx", systemData.counters_satio_serial_tx.task_ffreq_t,  systemData.counters_satio_serial_tx.task_freq_t);
 
-          "t_system_timing=%ldHz "
-          "t_gps=(%ldHz/%ldHz) "
-          "t_gyr0=(%ldHz/%ldHz) "
-          "t_ins=(%ldHz/%ldHz) "
-          "t_mplex0=(%ldHz/%ldHz) "
-          "t_mplex1=(%ldHz/%ldHz) "
-          "t_pci=(%ldHz/%ldHz) "
-          "t_uni=(%ldHz/%ldHz) "
-          "t_mtx=(%ldHz/%ldHz) "
-          "t_pco=(%ldHz/%ldHz) "
-          "t_dsp=(%ldHz/%ldHz) "
-          "t_satio_stx=(%ldHz/%ldHz) "
+    // ----------------------------------------------------------------------------------------------------------------------------
+    //                                                                                                    PRINT POSITION / TARGET
+    // ----------------------------------------------------------------------------------------------------------------------------
+    printf(STAT_LABEL_FMT "%s\n", "Satellites", gnggaData.satellite_count);
+    printf(STAT_LABEL_FMT "lat=%.7f  lon=%.7f\n", "Position (deg)",   satioData.degrees_latitude,        satioData.degrees_longitude);
+    printf(STAT_LABEL_FMT "lat=%.7f  lon=%.7f\n", "User Position",    satioData.user_degrees_latitude,   satioData.user_degrees_longitude);
+    printf(STAT_LABEL_FMT "lat=%.7f  lon=%.7f\n", "System Position",  satioData.system_degrees_latitude, satioData.system_degrees_longitude);
+    printf(STAT_LABEL_FMT "ra=%s  dec=%s\n", "Zenith RA/Dec", siderealExtraData.local_zenith_ra_dec.formatted_ra_str, siderealExtraData.local_zenith_ra_dec.formatted_dec_str);
+    printf(STAT_LABEL_FMT "ra=%s  dec=%s\n", "Gyro0 RA/Dec",  siderealExtraData.gyro_0_ra_dec.formatted_ra_str,       siderealExtraData.gyro_0_ra_dec.formatted_dec_str);
+    printf(STAT_LABEL_FMT "alt=%.2f  hdg=%.2f  spd=%.2f\n", "Alt/Heading/Speed", satioData.altitude, satioData.ground_heading, satioData.speed);
 
-          "sat=%s "
-          "deg_lat=%.7f "
-          "deg_lon=%.7f "
-          "usr_lat=%.7f "
-          "usr_lon=%.7f "
-          "sys_lat=%.7f "
-          "sys_lon=%.7f "
+    // ----------------------------------------------------------------------------------------------------------------------------
+    //                                                                                                 PRINT ORIENTATION / SENSORS
+    // ----------------------------------------------------------------------------------------------------------------------------
+    printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+    printf("%-22s%-12s%-12s%-12s\n", "", "X", "Y", "Z");
+    printStatSeparator(0, MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_F STAT_COL_FORMAT_F STAT_COL_FORMAT_F "\n", "Angle (deg)",   gyroData.gyro_0_ang_x, gyroData.gyro_0_ang_y, gyroData.gyro_0_ang_z);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_F STAT_COL_FORMAT_F STAT_COL_FORMAT_F "\n", "Gyro (deg/s)",  gyroData.gyro_0_gyr_x, gyroData.gyro_0_gyr_y, gyroData.gyro_0_gyr_z);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_F STAT_COL_FORMAT_F STAT_COL_FORMAT_F "\n", "Accel (g)",     gyroData.gyro_0_acc_x, gyroData.gyro_0_acc_y, gyroData.gyro_0_acc_z);
+    printf(STAT_LABEL_FMT STAT_COL_FORMAT_D STAT_COL_FORMAT_D STAT_COL_FORMAT_D "\n", "Mag",           gyroData.gyro_0_mag_x, gyroData.gyro_0_mag_y, gyroData.gyro_0_mag_z);
 
-          "current_zenith_ra=%s "
-          "current_zenith_dec=%s "
-          "gyro_0_ra=%s "
-          "gyro_0_dec=%s "
-
-          "alt=%.2f "
-          "ghd=%.2f "
-          "spd=%.2f "
-          
-          "ang_x=%.2f "
-          "ang_y=%.2f "
-          "ang_z=%.2f "
-          "gyr_x=%.2f "
-          "gyr_y=%.2f "
-          "gyr_z=%.2f "
-          "acc_x=%.2f "
-          "acc_y=%.2f "
-          "acc_z=%.2f "
-          "mag_x=%d "
-          "mag_y=%d "
-          "mag_z=%d  "
-
-          "PowerConfig=%s\n",
-          
-          satioData.systemTime.unixtime_uS,
-
-          satioData.GPSTime.padded_time_HHMMSS,
-          satioData.GPSTime.padded_date_DDMMYY,
-          satioData.GPSTime.sync_padded_time_HHMMSS,
-
-          satioData.systemTime.padded_time_HHMMSS,
-          satioData.systemTime.padded_date_DDMMYY,
-          satioData.systemTime.sync_padded_time_HHMMSS,
-
-          satioData.localTime.padded_time_HHMMSS,
-          satioData.localTime.padded_date_DDMMYY,
-          satioData.localTime.sync_padded_time_HHMMSS,
-
-          satioData.localMeanSolarTime.padded_time_HHMMSS,
-          satioData.localMeanSolarTime.padded_date_DDMMYY,
-          satioData.localMeanSolarTime.sync_padded_time_HHMMSS,
-
-          siderealExtraData.local_sidereal_time,
-
-          systemData.total_loops_a_second,
-
-          systemData.counters_st.task_freq_t,
-
-          systemData.counters_gps.task_ffreq_t,
-          systemData.counters_gps.task_freq_t,
-
-          systemData.counters_gyr0.task_ffreq_t,
-          systemData.counters_gyr0.task_freq_t,
-
-          systemData.counters_ins.task_ffreq_t,
-          systemData.counters_gyr0.task_freq_t,
-
-          systemData.counters_mplex0.task_ffreq_t,
-          systemData.counters_mplex0.task_freq_t,
-
-          systemData.counters_mplex1.task_ffreq_t,
-          systemData.counters_mplex1.task_freq_t,
-
-          systemData.counters_pci.task_ffreq_t,
-          systemData.counters_pci.task_freq_t,
-
-          systemData.counters_uni.task_ffreq_t,
-          systemData.counters_uni.task_freq_t,
-
-          systemData.counters_mtx.task_ffreq_t,
-          systemData.counters_mtx.task_freq_t,
-
-          systemData.counters_pco.task_ffreq_t,
-          systemData.counters_mtx.task_freq_t,
-
-          systemData.counters_dsp.task_ffreq_t,
-          systemData.counters_dsp.task_freq_t,
-
-          systemData.counters_satio_serial_tx.task_ffreq_t,
-          systemData.counters_satio_serial_tx.task_freq_t,
-
-          gnggaData.satellite_count,
-          satioData.degrees_latitude,
-          satioData.degrees_longitude,
-          satioData.user_degrees_latitude,
-          satioData.user_degrees_longitude,
-          satioData.system_degrees_latitude,
-          satioData.system_degrees_longitude,
-
-          siderealExtraData.local_zenith_ra_dec.formatted_ra_str,
-          siderealExtraData.local_zenith_ra_dec.formatted_dec_str,
-
-          siderealExtraData.gyro_0_ra_dec.formatted_ra_str,
-          siderealExtraData.gyro_0_ra_dec.formatted_dec_str,
-
-          satioData.altitude,
-          satioData.ground_heading,
-          satioData.speed,
-
-          gyroData.gyro_0_ang_x,
-          gyroData.gyro_0_ang_y,
-          gyroData.gyro_0_ang_z,
-          gyroData.gyro_0_gyr_x,
-          gyroData.gyro_0_gyr_y,
-          gyroData.gyro_0_gyr_z,
-          gyroData.gyro_0_acc_x,
-          gyroData.gyro_0_acc_y,
-          gyroData.gyro_0_acc_z,
-          gyroData.gyro_0_mag_x,
-          gyroData.gyro_0_mag_y,
-          gyroData.gyro_0_mag_z,
-
-          pwrConfigCurrent.name
-      );
+    printf(STAT_LABEL_FMT "%s\n", "PowerConfig", pwrConfigCurrent.name);
     // }
     // ----------------------------------------------------------------------------------------------------------------------------
     //                                                                                             PRINT PER-CHANNEL MULTIPLEXER Hz
@@ -2119,7 +2030,7 @@ void outputStat(void) {
         #endif
     // }
     // ----------------------------------------------------------------------------------------------------------------------------
-    //                                                                                                       PRINT PER-PIN PCI Hz
+    //                                                                                                        PRINT PER-PIN PCI Hz
     // ----------------------------------------------------------------------------------------------------------------------------
     /*
      * MAX_GPIOPortExpander_ATMEGA2560_Default_PINS (70) is wider than one
