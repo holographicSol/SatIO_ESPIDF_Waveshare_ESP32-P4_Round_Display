@@ -17,6 +17,7 @@
 #include <rtc_wdt.h>
 #include <esp_task_wdt.h>
 #include <esp_timer.h>
+#include "esp_log.h"
 #include "./config.h"
 #include "./REG.h"
 #include "./strval.h"
@@ -319,6 +320,10 @@ static void intervalBreach1Second(void) {
     printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
   }
   outputStat(); // uncomment for full stat
+  ESP_LOGI("GPIOPortExpander_ATMEGA2560_Input_0", "max_pins=%d num_analog_pins=%d num_digital_pins=%d",
+          GPIOPortExpander_ATMEGA2560_Input_0.max_pins,
+          GPIOPortExpander_ATMEGA2560_Input_0.num_analog_pins,
+          GPIOPortExpander_ATMEGA2560_Input_0.num_digital_pins);
 
   clearCounters(systemData.counters_st);
   clearCounters(systemData.counters_gps);
@@ -1002,10 +1007,12 @@ static void taskInputPortController(void *pvParameters) {
 
     // Delay Task
     if (taskFrequencyInputPortController() == true) {
-      xSemaphoreTake(dataMutex, portMAX_DELAY);
-      esp_task_wdt_reset();
 
-      if (readGPIOPortExapander_All(GPIOPortExpander_ATMEGA2560_Input_0)) {
+      esp_task_wdt_reset();
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
+      bool read_ok = readGPIOPortExapander_All(GPIOPortExpander_ATMEGA2560_Input_0);
+
+      if (read_ok) {
         // --------------------------------------------
         // Task frequency counter
         // --------------------------------------------
