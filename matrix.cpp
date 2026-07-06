@@ -60,8 +60,6 @@ struct MatrixStruct matrixData = {
 
   .matrix_sentence={0},
 
-  .output_portcontroller_address = { {I2C_ADDR_OUTPUT_PORTCONTROLLER_0} },
-
   .computer_assist={ {false} },
   .switch_intention={ {false} },
   .prev_switch_intention={{ false} },

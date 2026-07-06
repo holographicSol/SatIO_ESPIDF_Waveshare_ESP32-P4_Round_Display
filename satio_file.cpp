@@ -638,7 +638,6 @@ typedef enum {
     XYZ_MODE_X,
     XYZ_MODE_Y,
     XYZ_MODE_Z,
-    SWITCH_OPCA
 } matrix_tag_t;
 
 /* Rule 7.4: a string literal's type is "array of const char", so the
@@ -662,7 +661,6 @@ static const char * getMatrixTag(int t) {
         case XYZ_MODE_X:         return "XYZ_MODE_X";
         case XYZ_MODE_Y:         return "XYZ_MODE_Y";
         case XYZ_MODE_Z:         return "XYZ_MODE_Z";
-        case SWITCH_OPCA:        return "SWITCH_OPCA";
         default:                 return "?";
     }
 }
@@ -690,17 +688,10 @@ bool saveMatrixFile() {
     const char *tag_xyz_mode_x  = getMatrixTag(XYZ_MODE_X);
     const char *tag_xyz_mode_y  = getMatrixTag(XYZ_MODE_Y);
     const char *tag_xyz_mode_z  = getMatrixTag(XYZ_MODE_Z);
-    const char *tag_opca        = getMatrixTag(SWITCH_OPCA);
 
     // SWITCH_PORT
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", tag_switch_port, i_switch, (int)matrixData.matrix_port_map[0][i_switch]);
-        printLine(f, lineBuf);
-    }
-
-    // SWITCH_OPCA
-    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
-        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", tag_opca, i_switch, (int)matrixData.output_portcontroller_address[0][i_switch]);
         printLine(f, lineBuf);
     }
 
@@ -848,7 +839,6 @@ bool loadMatrixFile() {
         while (token != NULL) {if (tokenCount==0) {data_0=token;} else if (tokenCount==1) {data_1=token;} else if (tokenCount==2) {data_2=token;} token = strtok(NULL, ","); tokenCount++;}
 
         if      (tag_index==SWITCH_PORT) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.matrix_port_map[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
-        else if (tag_index==SWITCH_OPCA) {if (str_is_int8(data_0.c_str()) && str_is_uint8(data_1.c_str())) {matrixData.output_portcontroller_address[0][atoi(data_0.c_str())]=(uint8_t)atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==SWITCH_FUNCTION) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==FUNCTION_X) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=strtod(data_2.c_str(), NULL);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==FUNCTION_Y) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=strtod(data_2.c_str(), NULL);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
@@ -940,6 +930,8 @@ typedef enum {
     SYSTEM_FILE_ADMPLEX1_CH_ENABLED,
     SYSTEM_FILE_ADMPLEX0_CH_FREQ,
     SYSTEM_FILE_ADMPLEX1_CH_FREQ,
+    SYSTEM_FILE_PCI_CH_ENABLED,
+    SYSTEM_FILE_PCI_CH_FREQ,
 
     SYSTEM_FILE_PWRCFG_NAME,
     SYSTEM_FILE_PWRCFG_GPS,
@@ -1012,6 +1004,8 @@ static const char * getSystemTag(int t) {
         case SYSTEM_FILE_ADMPLEX1_CH_ENABLED:            return "ADMPLEX1_CH_ENABLED";
         case SYSTEM_FILE_ADMPLEX0_CH_FREQ:               return "ADMPLEX0_CH_FREQ";
         case SYSTEM_FILE_ADMPLEX1_CH_FREQ:               return "ADMPLEX1_CH_FREQ";
+        case SYSTEM_FILE_PCI_CH_ENABLED:                 return "PCI_CH_ENABLED";
+        case SYSTEM_FILE_PCI_CH_FREQ:                    return "PCI_CH_FREQ";
 
         case SYSTEM_FILE_PWRCFG_NAME:                    return "PWRCFG_NAME";
         case SYSTEM_FILE_PWRCFG_GPS:                     return "PWRCFG_GPS";
@@ -1115,6 +1109,16 @@ bool saveSystemFile(const char *filepath) {
         printLine(f, lineBuf);
     }
 
+    // PCI_CH_ENABLED / PCI_CH_FREQ
+    for (int i_ch=0; i_ch<(int)GPIOPortExpander_ATMEGA2560_Input_0.max_pins; i_ch++) {
+        snprintf(lineBuf, 256, "%s,%d,%d", getSystemTag(SYSTEM_FILE_PCI_CH_ENABLED), i_ch, (int)GPIOPortExpander_ATMEGA2560_Input_0.enabled[i_ch]);
+        printLine(f, lineBuf);
+    }
+    for (int i_ch=0; i_ch<(int)GPIOPortExpander_ATMEGA2560_Input_0.max_pins; i_ch++) {
+        snprintf(lineBuf, 256, "%s,%d,%llu", getSystemTag(SYSTEM_FILE_PCI_CH_FREQ), i_ch, (unsigned long long)GPIOPortExpander_ATMEGA2560_Input_0.chan_freq_uS[i_ch]);
+        printLine(f, lineBuf);
+    }
+
     // Power config: task max-frequency values (uS) currently in effect, plus the
     // active preset's display name (see PwrConfig in config.h).
     WRITE_STR_TAG(SYSTEM_FILE_PWRCFG_NAME, pwrConfigCurrent.name);
@@ -1190,6 +1194,20 @@ bool loadSystemFile(const char *filepath) {
                     else if (tag_index == SYSTEM_FILE_ADMPLEX1_CH_ENABLED && str_is_bool(val2)) {setADMultiplexerChannelEnabled(ad_mux_1, (uint8_t)ch, atoi(val2) != 0);}
                     else if (tag_index == SYSTEM_FILE_ADMPLEX0_CH_FREQ && str_is_uint64(val2)) {setADMultiplexerChannelFreq(ad_mux_0, (uint8_t)ch, strtoull(val2, NULL, 10));}
                     else if (tag_index == SYSTEM_FILE_ADMPLEX1_CH_FREQ && str_is_uint64(val2)) {setADMultiplexerChannelFreq(ad_mux_1, (uint8_t)ch, strtoull(val2, NULL, 10));}
+                    else { /* value failed validation for this tag: skip */ }
+                }
+            }
+            continue;
+        }
+
+        // PCI_CH_ENABLED and PCI_CH_FREQ: "TAG,pin,value" (pin-indexed, unlike the single-value tags below).
+        if (tag_index == SYSTEM_FILE_PCI_CH_ENABLED || tag_index == SYSTEM_FILE_PCI_CH_FREQ) {
+            char *val2 = strtok(NULL, ",");
+            if (val2 != NULL && str_is_int8(val)) {
+                int ch = atoi(val);
+                if (ch >= 0 && ch < (int)GPIOPortExpander_ATMEGA2560_Input_0.max_pins) {
+                    if (tag_index == SYSTEM_FILE_PCI_CH_ENABLED && str_is_bool(val2)) {setGPIOPortExpanderChannelEnabled(GPIOPortExpander_ATMEGA2560_Input_0, (uint8_t)ch, atoi(val2) != 0);}
+                    else if (tag_index == SYSTEM_FILE_PCI_CH_FREQ && str_is_uint64(val2)) {setGPIOPortExpanderChannelFreq(GPIOPortExpander_ATMEGA2560_Input_0, (uint8_t)ch, strtoull(val2, NULL, 10));}
                     else { /* value failed validation for this tag: skip */ }
                 }
             }

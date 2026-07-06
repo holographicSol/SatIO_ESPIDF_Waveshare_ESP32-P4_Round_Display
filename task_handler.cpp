@@ -767,8 +767,6 @@ static void taskADMplex0(void *pvParameters) {
     xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_mplex0, 1);
     xSemaphoreGive(dataMutex);
-
-    // delayMicroseconds(1);
   }
 }
 void createTaskADMplex0() {
@@ -862,8 +860,6 @@ static void taskADMplex1(void *pvParameters) {
     xSemaphoreTake(dataMutex, portMAX_DELAY);
     stepFCounter(systemData.counters_mplex1, 1);
     xSemaphoreGive(dataMutex);
-
-    delayMicroseconds(1);
   }
 }
 void createTaskADMplex1() {
@@ -933,8 +929,6 @@ static void taskSwitches(void *pvParameters) {
       // Clamp to MAX_MATRIX_SWITCHES
       for (int32_t Mi = 0; Mi < MAX_MATRIX_SWITCHES; Mi++) {
 
-        int address = matrixData.output_portcontroller_address[0][Mi];
-
         if (matrixData.matrix_switch_write_required[0][Mi] == true) {
           // Clear the flag now that the value has been sent.
           matrixData.matrix_switch_write_required[0][Mi] = false;
@@ -958,7 +952,7 @@ static void taskSwitches(void *pvParameters) {
           write_uint32_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 7, off_time);
           write_uint32_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 11, on_time);
           // Write to slave.
-          writeI2CToSlaveBin(*GPIOPortExpander_ATMEGA2560_Output_0.wire, GPIOPortExpander_ATMEGA2560_Output_0.i2cLink, address, 15, 0, GPIOPortExpander_ATMEGA2560_Output_0.name);
+          writeI2CToSlaveBin(*GPIOPortExpander_ATMEGA2560_Output_0.wire, GPIOPortExpander_ATMEGA2560_Output_0.i2cLink, GPIOPortExpander_ATMEGA2560_Output_0.address, 15, 0, GPIOPortExpander_ATMEGA2560_Output_0.name);
 
           count_write++;
         }
@@ -1021,15 +1015,23 @@ static void taskInputPortController(void *pvParameters) {
       // TASK_MAX_FREQ_PORTCONTROLLER_INPUT. Mirrors taskADMplex0()/
       // taskADMplex1()'s per-channel throttle.
       static int64_t pci_chan_last_read_uS[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS] = {0};
+      // Snapshotted once per pass so the counter loop below can't disagree with the
+      // read loop about which pins were enabled this cycle (a concurrent
+      // CLI/LVGL disable between the two loops would otherwise drop a pin's
+      // count for a cycle it was actually read in).
+      bool pci_chan_was_enabled[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS] = {false};
       bool pci_chan_did_read[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS] = {false};
       uint8_t pci_max_pins = (uint8_t)GPIOPortExpander_ATMEGA2560_Input_0.max_pins;
       for (uint8_t i_chan = 0; i_chan < pci_max_pins; i_chan++) {
-        if ((esp_timer_get_time() - pci_chan_last_read_uS[i_chan]) >= (int64_t)GPIOPortExpander_ATMEGA2560_Input_0.chan_freq_uS[i_chan]) {
-          if (readGPIOPortExapander_Pin(GPIOPortExpander_ATMEGA2560_Input_0, i_chan)) {
-            pci_chan_last_read_uS[i_chan] = esp_timer_get_time();
-            pci_chan_did_read[i_chan] = true;
-          } else {
-            printf("ERROR: readInputPortControllerReadPins (pin_index=%d)\n", i_chan);
+        if (GPIOPortExpander_ATMEGA2560_Input_0.enabled[i_chan] == true) {
+          pci_chan_was_enabled[i_chan] = true;
+          if ((esp_timer_get_time() - pci_chan_last_read_uS[i_chan]) >= (int64_t)GPIOPortExpander_ATMEGA2560_Input_0.chan_freq_uS[i_chan]) {
+            if (readGPIOPortExapander_Pin(GPIOPortExpander_ATMEGA2560_Input_0, i_chan)) {
+              pci_chan_last_read_uS[i_chan] = esp_timer_get_time();
+              pci_chan_did_read[i_chan] = true;
+            } else {
+              printf("ERROR: readInputPortControllerReadPins (pin_index=%d)\n", i_chan);
+            }
           }
         }
       }
@@ -1044,8 +1046,10 @@ static void taskInputPortController(void *pvParameters) {
       // (its ceiling); task_ffreq_t is how often it was actually read (its
       // achieved Hz, gated by chan_freq_uS above).
       for (uint8_t i_chan = 0; i_chan < pci_max_pins; i_chan++) {
-        stepFCounter(systemData.counters_pci_chan[i_chan], 1);
-        if (pci_chan_did_read[i_chan] == true) {stepFFCounter(systemData.counters_pci_chan[i_chan], 1);}
+        if (pci_chan_was_enabled[i_chan] == true) {
+          stepFCounter(systemData.counters_pci_chan[i_chan], 1);
+          if (pci_chan_did_read[i_chan] == true) {stepFFCounter(systemData.counters_pci_chan[i_chan], 1);}
+        }
       }
       #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
       outputSerialPCInput();

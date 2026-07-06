@@ -11,11 +11,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "config.h"
+#include "i2c_helper.h"
+#include "gpio_portcontroller.h"
 
 extern bool global_task_sync;
 extern long system_sync_retry_max;
-
-extern bool ISR_Bool_MultiDisplayController_0;
 
 // ----------------------------------------------------------------------------------------
 // BUILD OPTIONS
@@ -95,7 +95,6 @@ extern bool ISR_Bool_MultiDisplayController_0;
 // #define SATIO_CD74HC4067_OPTION_USE_2
 // ----------------------------------------------------------------------------------------
 
-#define MAX_INPUT_PORT_CONTROLLERS 1
 
 // ----------------------------------------------------------------------------------------
 // Power Config.
@@ -160,7 +159,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_LOW_SWITCHES                    100000  // (10 Hz)
 
-#define TASK_MAX_FREQ_LOW_PORTCONTROLLER_INPUT        1000000 // (1 Hz)
+#define TASK_MAX_FREQ_LOW_PORTCONTROLLER_INPUT        1000000   // (1 Hz)
 
 #define TASK_MAX_FREQ_LOW_STORAGE                     1000000 // (1 Hz)
 
@@ -193,7 +192,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_BALANCED_SWITCHES               5000    // (200 Hz)
 
-#define TASK_MAX_FREQ_BALANCED_PORTCONTROLLER_INPUT   1000000 // (1 Hz)
+#define TASK_MAX_FREQ_BALANCED_PORTCONTROLLER_INPUT   1000000   // (1 Hz)
 
 #define TASK_MAX_FREQ_BALANCED_STORAGE                1000000 // (1 Hz)
 
@@ -226,7 +225,7 @@ typedef struct PwrConfig {
 
 #define TASK_MAX_FREQ_HIGH_SWITCHES                   2000    // (500 Hz)
 
-#define TASK_MAX_FREQ_HIGH_PORTCONTROLLER_INPUT       1000000 // (1 Hz)
+#define TASK_MAX_FREQ_HIGH_PORTCONTROLLER_INPUT       1000000   // (1 Hz)
 
 #define TASK_MAX_FREQ_HIGH_STORAGE                    1000000 // (1 Hz)
 

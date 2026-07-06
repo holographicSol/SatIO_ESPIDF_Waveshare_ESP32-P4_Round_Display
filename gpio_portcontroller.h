@@ -25,6 +25,8 @@
  *       If this device will be a slave then create an instance and copy it to master,
  *       for gpio_portcontroller to use on the master side too.
  */
+#define MAX_GPIOPortExpander_ATMEGA2560_Default_PINS 70
+
 typedef struct GPIOPortExpander {
     char name[56];
     TwoWire *wire; // no default value: a default member initializer would
@@ -44,15 +46,16 @@ typedef struct GPIOPortExpander {
     unsigned long (*modulation_time)[3];
     long *input_value;
     long *output_value;
-    int *port_map;       // logical index -> physical pin, -1 = unmapped
-    bool *switch_state;   // per-pin modulation on/off tracking
+    int *port_map;          // logical index -> physical pin, -1 = unmapped
+    bool *switch_state;     // per-pin modulation on/off tracking
+    bool *enabled;          // channels enabled/disabled
     uint64_t *chan_freq_uS; // per-pin minimum microseconds between accepted
                             // reads (see setGPIOPortExpanderChannelFreq());
                             // 0 = no floor, i.e. accept every read
-    int8_t query_cursor;  // cursor for CMD_GET_EXPANDER_PIN_LIST streaming,
-                          // kept separate from current_pin so a discovery
-                          // query never interferes with the normal
-                          // pin-value-read protocol (CMD_RESET_CURRENT_PIN)
+    int8_t query_cursor;    // cursor for CMD_GET_EXPANDER_PIN_LIST streaming,
+                            // kept separate from current_pin so a discovery
+                            // query never interferes with the normal
+                            // pin-value-read protocol (CMD_RESET_CURRENT_PIN)
 } GPIOPortExpander;
 // ------------------------------------------------------------
 // Pointer members above are sized per-instance via compound literals
@@ -99,14 +102,12 @@ typedef struct GPIOPortExpander {
 // ------------------------------------------------------------
 // DEFAULT INSTANCES
 // ------------------------------------------------------------
-#define MAX_GPIOPortExpander_ATMEGA2560_Default_PINS 70
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Default;
 // ------------------------------------------------------------
 // CUSTOM INSTANCES
 // ------------------------------------------------------------
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Input_0;
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_0;
-extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_1;
 // ------------------------------------------------------------
 
 // ------------------------------------------------------------
@@ -147,6 +148,8 @@ bool readGPIOPortExapander_All(GPIOPortExpander &gpio_expander);
 bool readGPIOPortExapander_Pin(GPIOPortExpander &gpio_expander, uint8_t pin);
 
 void clearGPIOPortController(GPIOPortExpander &gpio_expander);
+
+void setGPIOPortExpanderChannelEnabled(GPIOPortExpander &gpio_expander, uint8_t channel,  bool enabled);
 
 /**
  * Set a pin's minimum accepted-read period in microseconds, analogous to

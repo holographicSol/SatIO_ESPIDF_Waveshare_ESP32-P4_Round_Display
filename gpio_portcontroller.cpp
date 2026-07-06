@@ -72,7 +72,8 @@ GPIOPortExpander GPIOPortExpander_ATMEGA2560_Default = {
       57,58,59,60,61,62,63,64,65,66,67,68,69
     },
     (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
-    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){1000000}, // chan_freq_uS - default 1Hz = delay 10^6 micros
+    (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // channels enabled/disabled
+    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){0}, // chan_freq_uS - default 1Hz = delay 10^6 micros
     0             // query_cursor
 };
 #endif
@@ -116,7 +117,8 @@ GPIOPortExpander GPIOPortExpander_ATMEGA2560_Input_0 = {
       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 60-69
     },
     (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
-    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){1000000}, // chan_freq_uS - default 1Hz = delay 10^6 micros
+    (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // channels enabled/disabled
+    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){0}, // chan_freq_uS - default 1Hz = delay 10^6 micros
     0 // query_cursor
 };
 
@@ -158,49 +160,8 @@ GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_0 = {
       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 60-69
     },
     (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
-    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){1000000}, // chan_freq_uS - default 1Hz = delay 10^6 micros
-    0 // query_cursor
-};
-
-// ------------------------------------------------------------
-/**
- * @brief GPIOPortExpander_ATMEGA2560 (Custom)
- */
-IICLink IICLinkPCO_1; // IIC link data structure for the GPIOPortExpander.
-GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_1 = {
-    "GPIOPortExpander_ATMEGA2560_Output_1",
-    &iic_2,
-    IICLinkPCO_1,
-    10, // address
-    0,  // current_pin
-    0,  // pin_min
-    69, // pin_max
-    MAX_GPIOPortExpander_ATMEGA2560_Default_PINS, // max_pins
-    16, // number of analog pins
-    54, // number of digital pins
-    (int8_t[]){54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69}, // analog_pins
-    (int8_t[]){ // digital_pins
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-        10,11,12,13,14,15,16,17,18,19,
-        20,21,22,23,24,25,26,27,28,29,
-        30,31,32,33,34,35,36,37,38,39,
-        40,41,42,43,44,45,46,47,48,49,
-        50,51,52,53
-    },
-    (unsigned long[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS][3]){}, // modulation_time
-    (long[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // input_value
-    (long[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // output_value
-    (int[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){ // port_map (default no port)
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0-9
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 10-19
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 20-29
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 30-39
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 40-49
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 50-59
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 60-69
-    },
-    (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
-    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){1000000}, // chan_freq_uS - default 1Hz = delay 10^6 micros
+    (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // channels enabled/disabled
+    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){0}, // chan_freq_uS - default 1Hz = delay 10^6 micros
     0 // query_cursor
 };
 #endif
@@ -706,6 +667,16 @@ void clearGPIOPortController(GPIOPortExpander &gpio_expander) {
   writeI2CToSlaveBin(*gpio_expander.wire, gpio_expander.i2cLink, gpio_expander.address, 1, 0, "clearGPIOPortController");
 }
 
+void setGPIOPortExpanderChannelEnabled(GPIOPortExpander &gpio_expander, uint8_t channel,  bool enabled) {
+  if (channel < gpio_expander.max_pins) {
+    gpio_expander.enabled[channel] = enabled;
+    if (enabled == false) {
+      gpio_expander.input_value[channel] = 0;
+      gpio_expander.output_value[channel] = 0;
+    }
+  }
+}
+
 /**
  * Sets a pin's minimum accepted-read period (microseconds); see
  * setGPIOPortExpanderChannelFreq() in the header.
@@ -751,62 +722,5 @@ int32_t writeGPIOPortExapander_All(GPIOPortExpander &gpio_expander) {
 
   }
   return count_write;
-}
-
-// ------------------------------------------------------------
-// Master-side: named instances for the known physical devices, each with
-// its own dedicated static backing storage (MISRA Rule 21.3: no dynamic
-// allocation - a buffer that must outlive a single call is a static
-// instead of a heap allocation).
-// ------------------------------------------------------------
-
-static int8_t        GPIOPortExpander_ATMEGA2560_Output_0_analog_pins[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static int8_t        GPIOPortExpander_ATMEGA2560_Output_0_digital_pins[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static unsigned long GPIOPortExpander_ATMEGA2560_Output_0_modulation_time[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS][3];
-static long          GPIOPortExpander_ATMEGA2560_Output_0_input_value[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static long          GPIOPortExpander_ATMEGA2560_Output_0_output_value[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static int           GPIOPortExpander_ATMEGA2560_Output_0_port_map[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static bool          GPIOPortExpander_ATMEGA2560_Output_0_switch_state[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-
-static int8_t        GPIOPortExpander_ATMEGA2560_Output_1_analog_pins[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static int8_t        GPIOPortExpander_ATMEGA2560_Output_1_digital_pins[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static unsigned long GPIOPortExpander_ATMEGA2560_Output_1_modulation_time[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS][3];
-static long          GPIOPortExpander_ATMEGA2560_Output_1_input_value[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static long          GPIOPortExpander_ATMEGA2560_Output_1_output_value[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static int           GPIOPortExpander_ATMEGA2560_Output_1_port_map[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static bool          GPIOPortExpander_ATMEGA2560_Output_1_switch_state[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-
-static int8_t        GPIOPortExpander_ATMEGA2560_Input_0_analog_pins[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static int8_t        GPIOPortExpander_ATMEGA2560_Input_0_digital_pins[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static unsigned long GPIOPortExpander_ATMEGA2560_Input_0_modulation_time[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS][3];
-static long          GPIOPortExpander_ATMEGA2560_Input_0_input_value[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static long          GPIOPortExpander_ATMEGA2560_Input_0_output_value[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static int           GPIOPortExpander_ATMEGA2560_Input_0_port_map[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-static bool          GPIOPortExpander_ATMEGA2560_Input_0_switch_state[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
-
-void initGPIOPortExpanders(
-  TwoWire &wire_output_0,
-  TwoWire &wire_input_0,
-  int addr_output_0, int addr_output_1,
-  int addr_input_0
-)
-{
-  queryGPIOPortExpander(wire_output_0, addr_output_0, "GPIOPortExpander_ATMEGA2560_Output_0", &GPIOPortExpander_ATMEGA2560_Output_0,
-                        GPIOPortExpander_ATMEGA2560_Output_0_analog_pins, GPIOPortExpander_ATMEGA2560_Output_0_digital_pins,
-                        GPIOPortExpander_ATMEGA2560_Output_0_modulation_time, GPIOPortExpander_ATMEGA2560_Output_0_input_value,
-                        GPIOPortExpander_ATMEGA2560_Output_0_output_value,
-                        GPIOPortExpander_ATMEGA2560_Output_0_port_map, GPIOPortExpander_ATMEGA2560_Output_0_switch_state);
-
-  queryGPIOPortExpander(wire_output_0, addr_output_1, "GPIOPortExpander_ATMEGA2560_Output_1", &GPIOPortExpander_ATMEGA2560_Output_1,
-                        GPIOPortExpander_ATMEGA2560_Output_1_analog_pins, GPIOPortExpander_ATMEGA2560_Output_1_digital_pins,
-                        GPIOPortExpander_ATMEGA2560_Output_1_modulation_time, GPIOPortExpander_ATMEGA2560_Output_1_input_value,
-                        GPIOPortExpander_ATMEGA2560_Output_1_output_value,
-                        GPIOPortExpander_ATMEGA2560_Output_1_port_map, GPIOPortExpander_ATMEGA2560_Output_1_switch_state);
-
-  queryGPIOPortExpander(wire_input_0, addr_input_0, "GPIOPortExpander_ATMEGA2560_Input_0", &GPIOPortExpander_ATMEGA2560_Input_0,
-                        GPIOPortExpander_ATMEGA2560_Input_0_analog_pins, GPIOPortExpander_ATMEGA2560_Input_0_digital_pins,
-                        GPIOPortExpander_ATMEGA2560_Input_0_modulation_time, GPIOPortExpander_ATMEGA2560_Input_0_input_value,
-                        GPIOPortExpander_ATMEGA2560_Input_0_output_value,
-                        GPIOPortExpander_ATMEGA2560_Input_0_port_map, GPIOPortExpander_ATMEGA2560_Input_0_switch_state);
 }
 #endif

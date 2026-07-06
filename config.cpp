@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "config.h"
+#include "gpio_portcontroller.h"
 
 bool global_task_sync      = false;
 long system_sync_retry_max = 10000;
