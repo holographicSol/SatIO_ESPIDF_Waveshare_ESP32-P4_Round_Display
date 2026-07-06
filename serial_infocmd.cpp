@@ -1312,7 +1312,14 @@ void CmdProcess(void) {
         }
         // admplex0
         else if (strcmp(pos[0], "admplex0")==0) {
-          if (argparser_has_flag(&parser, "c") == true) {
+          // admplex0 --all --freq X : set every channel's freq in one call
+          if (argparser_has_flag(&parser, "all") == true) {
+            if (argparser_has_flag(&parser, "freq") == true) {
+              uint64_t admplex0_freq_all = argparser_get_uint64(&parser, "freq", 0);
+              for (uint8_t c=0; c<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; c++) {setADMultiplexerChannelFreq(ad_mux_0, c, admplex0_freq_all);}
+            }
+          }
+          else if (argparser_has_flag(&parser, "c") == true) {
             uint8_t admplex0_c = argparser_get_uint8(&parser, "c", 0);
             if (argparser_has_flag(&parser, "enable") == true || argparser_has_flag(&parser, "e") == true ||
                 argparser_has_flag(&parser, "disable") == true || argparser_has_flag(&parser, "d") == true) {
@@ -1323,13 +1330,34 @@ void CmdProcess(void) {
         }
         // admplex1
         else if (strcmp(pos[0], "admplex1")==0) {
-          if (argparser_has_flag(&parser, "c") == true) {
+          // admplex1 --all --freq X : set every channel's freq in one call
+          if (argparser_has_flag(&parser, "all") == true) {
+            if (argparser_has_flag(&parser, "freq") == true) {
+              uint64_t admplex1_freq_all = argparser_get_uint64(&parser, "freq", 0);
+              for (uint8_t c=0; c<MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS; c++) {setADMultiplexerChannelFreq(ad_mux_1, c, admplex1_freq_all);}
+            }
+          }
+          else if (argparser_has_flag(&parser, "c") == true) {
             uint8_t admplex1_c = argparser_get_uint8(&parser, "c", 0);
             if (argparser_has_flag(&parser, "enable") == true || argparser_has_flag(&parser, "e") == true ||
                 argparser_has_flag(&parser, "disable") == true || argparser_has_flag(&parser, "d") == true) {
               setADMultiplexerChannelEnabled(ad_mux_1, admplex1_c, enable);
             }
             if (argparser_has_flag(&parser, "freq") == true) {setADMultiplexerChannelFreq(ad_mux_1, admplex1_c, argparser_get_uint64(&parser, "freq", 0));}
+          }
+        }
+        // pci (input port controller)
+        else if (strcmp(pos[0], "pci")==0) {
+          // pci --all --freq X : set every pin's freq in one call
+          if (argparser_has_flag(&parser, "all") == true) {
+            if (argparser_has_flag(&parser, "freq") == true) {
+              uint64_t pci_freq_all = argparser_get_uint64(&parser, "freq", 0);
+              for (uint8_t p=0; p<(uint8_t)GPIOPortExpander_ATMEGA2560_Input_0.max_pins; p++) {setGPIOPortExpanderChannelFreq(GPIOPortExpander_ATMEGA2560_Input_0, p, pci_freq_all);}
+            }
+          }
+          else if (argparser_has_flag(&parser, "pin") == true) {
+            uint8_t pci_pin = argparser_get_uint8(&parser, "pin", 0);
+            if (argparser_has_flag(&parser, "freq") == true) {setGPIOPortExpanderChannelFreq(GPIOPortExpander_ATMEGA2560_Input_0, pci_pin, argparser_get_uint64(&parser, "freq", 0));}
           }
         }
 
@@ -2090,6 +2118,29 @@ void outputStat(void) {
         printf("\n");
         #endif
     // }
+    // ----------------------------------------------------------------------------------------------------------------------------
+    //                                                                                                       PRINT PER-PIN PCI Hz
+    // ----------------------------------------------------------------------------------------------------------------------------
+    /*
+     * MAX_GPIOPortExpander_ATMEGA2560_Default_PINS (70) is wider than one
+     * line, so this pages the same way the matrix switch dump below does.
+     */
+    {
+        int pci_full_page_start = 0;
+        int pci_full_page_end = 0;
+        for (int page_start = 0; page_start < MAX_GPIOPortExpander_ATMEGA2560_Default_PINS; page_start += STAT_SWITCHES_PER_PAGE) {
+            int page_end = page_start + STAT_SWITCHES_PER_PAGE;
+            if (page_start==0) {pci_full_page_start=page_start; pci_full_page_end=page_end;} // use page zero width as longest expected width
+            if (page_end > MAX_GPIOPortExpander_ATMEGA2560_Default_PINS) {page_end = MAX_GPIOPortExpander_ATMEGA2560_Default_PINS;}
+            printStatSeparator(pci_full_page_start, pci_full_page_end);
+            printf("                      ");
+            printSwitchIndexHeader(page_start, page_end);
+            printStatSeparator(pci_full_page_start, pci_full_page_end);
+            printf("PCI Pin Hz         :  ");
+            for (int i=page_start; i<page_end; i++) {printf(STAT_COL_FORMAT_LD, (long)systemData.counters_pci_chan[i].task_ffreq_t);}
+            printf("\n");
+        }
+    }
     // ----------------------------------------------------------------------------------------------------------------------------
     //                                                                                                        PRINT COMPUTER ASSIST
     // ----------------------------------------------------------------------------------------------------------------------------

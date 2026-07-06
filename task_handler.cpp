@@ -304,6 +304,7 @@ static void intervalBreach1Second(void) {
   #endif
   totalCounters(systemData.counters_mtx);
   totalCounters(systemData.counters_pci);
+  for (int i_chan=0; i_chan<MAX_GPIOPortExpander_ATMEGA2560_Default_PINS; i_chan++) {totalCounters(systemData.counters_pci_chan[i_chan]);}
   totalCounters(systemData.counters_pco);
   totalCounters(systemData.counters_uni);
   totalCounters(systemData.counters_track_planets);
@@ -320,10 +321,10 @@ static void intervalBreach1Second(void) {
     printf("[reset uptime_seconds] %ld\n", systemData.uptime_seconds);
   }
   outputStat(); // uncomment for full stat
-  ESP_LOGI("GPIOPortExpander_ATMEGA2560_Input_0", "max_pins=%d num_analog_pins=%d num_digital_pins=%d",
-          GPIOPortExpander_ATMEGA2560_Input_0.max_pins,
-          GPIOPortExpander_ATMEGA2560_Input_0.num_analog_pins,
-          GPIOPortExpander_ATMEGA2560_Input_0.num_digital_pins);
+  // ESP_LOGI("GPIOPortExpander_ATMEGA2560_Input_0", "max_pins=%d num_analog_pins=%d num_digital_pins=%d",
+  //         GPIOPortExpander_ATMEGA2560_Input_0.max_pins,
+  //         GPIOPortExpander_ATMEGA2560_Input_0.num_analog_pins,
+  //         GPIOPortExpander_ATMEGA2560_Input_0.num_digital_pins);
 
   clearCounters(systemData.counters_st);
   clearCounters(systemData.counters_gps);
@@ -339,6 +340,7 @@ static void intervalBreach1Second(void) {
   #endif
   clearCounters(systemData.counters_mtx);
   clearCounters(systemData.counters_pci);
+  for (int i_chan=0; i_chan<MAX_GPIOPortExpander_ATMEGA2560_Default_PINS; i_chan++) {clearCounters(systemData.counters_pci_chan[i_chan]);}
   clearCounters(systemData.counters_pco);
   clearCounters(systemData.counters_uni);
   clearCounters(systemData.counters_track_planets);
@@ -1008,20 +1010,47 @@ static void taskInputPortController(void *pvParameters) {
     // Delay Task
     if (taskFrequencyInputPortController() == true) {
 
-      esp_task_wdt_reset();
-      xSemaphoreTake(dataMutex, portMAX_DELAY);
-      bool read_ok = readGPIOPortExapander_All(GPIOPortExpander_ATMEGA2560_Input_0);
-
-      if (read_ok) {
-        // --------------------------------------------
-        // Task frequency counter
-        // --------------------------------------------
-        systemData.counters_pci.flag_c = true;
-        #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
-        outputSerialPCInput();
-        #endif
-        stepFFCounter(systemData.counters_pci, 1);
+      // ------------------------------------------------
+      // Read input port controller pins (customize as required).
+      // ------------------------------------------------
+      // Each pin is additionally rate-limited to its own chan_freq_uS: the
+      // task itself still wakes at TASK_MAX_FREQ_PORTCONTROLLER_INPUT
+      // (unchanged), but a pin is only actually read once that many
+      // microseconds have passed since its last read, so e.g. pin 0 can run
+      // at 1Hz alongside pin 1 at 1000Hz within the same task, bounded by
+      // TASK_MAX_FREQ_PORTCONTROLLER_INPUT. Mirrors taskADMplex0()/
+      // taskADMplex1()'s per-channel throttle.
+      static int64_t pci_chan_last_read_uS[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS] = {0};
+      bool pci_chan_did_read[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS] = {false};
+      uint8_t pci_max_pins = (uint8_t)GPIOPortExpander_ATMEGA2560_Input_0.max_pins;
+      for (uint8_t i_chan = 0; i_chan < pci_max_pins; i_chan++) {
+        if ((esp_timer_get_time() - pci_chan_last_read_uS[i_chan]) >= (int64_t)GPIOPortExpander_ATMEGA2560_Input_0.chan_freq_uS[i_chan]) {
+          if (readGPIOPortExapander_Pin(GPIOPortExpander_ATMEGA2560_Input_0, i_chan)) {
+            pci_chan_last_read_uS[i_chan] = esp_timer_get_time();
+            pci_chan_did_read[i_chan] = true;
+          } else {
+            printf("ERROR: readInputPortControllerReadPins (pin_index=%d)\n", i_chan);
+          }
+        }
       }
+      esp_task_wdt_reset();
+
+      // --------------------------------------------
+      // Task frequency counter
+      // --------------------------------------------
+      xSemaphoreTake(dataMutex, portMAX_DELAY);
+      systemData.counters_pci.flag_c = true;
+      // Per-pin Hz: task_freq_t is how often a pin was checked this second
+      // (its ceiling); task_ffreq_t is how often it was actually read (its
+      // achieved Hz, gated by chan_freq_uS above).
+      for (uint8_t i_chan = 0; i_chan < pci_max_pins; i_chan++) {
+        stepFCounter(systemData.counters_pci_chan[i_chan], 1);
+        if (pci_chan_did_read[i_chan] == true) {stepFFCounter(systemData.counters_pci_chan[i_chan], 1);}
+      }
+      #ifdef SATIO_SERIAL_TX_OPTION_CURRENT_TASK
+      outputSerialPCInput();
+      #endif
+      stepFFCounter(systemData.counters_pci, 1);
       xSemaphoreGive(dataMutex);
     }
 

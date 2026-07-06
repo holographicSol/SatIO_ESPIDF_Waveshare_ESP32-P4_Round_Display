@@ -72,6 +72,7 @@ GPIOPortExpander GPIOPortExpander_ATMEGA2560_Default = {
       57,58,59,60,61,62,63,64,65,66,67,68,69
     },
     (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
+    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){1000000}, // chan_freq_uS - default 1Hz = delay 10^6 micros
     0             // query_cursor
 };
 #endif
@@ -115,6 +116,7 @@ GPIOPortExpander GPIOPortExpander_ATMEGA2560_Input_0 = {
       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 60-69
     },
     (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
+    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){1000000}, // chan_freq_uS - default 1Hz = delay 10^6 micros
     0 // query_cursor
 };
 
@@ -156,6 +158,7 @@ GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_0 = {
       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 60-69
     },
     (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
+    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){1000000}, // chan_freq_uS - default 1Hz = delay 10^6 micros
     0 // query_cursor
 };
 
@@ -197,11 +200,12 @@ GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_1 = {
       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 60-69
     },
     (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
+    (uint64_t[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){1000000}, // chan_freq_uS - default 1Hz = delay 10^6 micros
     0 // query_cursor
 };
 #endif
 
-#ifdef GPIO_PORT_EXPANDER_SLAVE_MODED
+#ifdef GPIO_PORT_EXPANDER_SLAVE_MODE
 // --------------------------------------------------------------------
 // Inline binary search – compiles to ~10–15 instructions
 // --------------------------------------------------------------------
@@ -291,6 +295,11 @@ void requestEventBus0Bin() {
     case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: // 40-49
     case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: // 50-59
     case 60: case 61: case 62: case 63: case 64: case 65: case 66: case 67: case 68: case 69: { // 60-69
+        // Take a fresh reading for the directly-addressed pin (matches
+        // CMD_RESET_CURRENT_PIN's readPin() call below) so a master-side
+        // single-pin read (readGPIOPortExapander_Pin()) isn't just handed
+        // back whatever was last cached by a previous bulk pass.
+        readPin(&gpio_expander);
         #ifdef GPIO_PORTCONTROLLER_DEBUG_2
         Serial.println("[CASE 0-N] sending: pin=" + String(gpio_expander.current_pin)  + "  value=" + String(gpio_expander.input_value[gpio_expander.current_pin]));
         #endif
@@ -668,10 +677,51 @@ bool readGPIOPortExapander_All(GPIOPortExpander &gpio_expander) {
   return ok;
 }
 
+/**
+ * Reads a single pin fresh via direct pin-addressing; see the header for the
+ * calling convention (mirrors readADMultiplexerAnalogChannel()).
+ *
+ * Rule 18.1: pin is bounds-checked against gpio_expander.max_pins before
+ * being used as an index into input_value.
+ */
+bool readGPIOPortExapander_Pin(GPIOPortExpander &gpio_expander, uint8_t pin) {
+  if (pin >= (uint8_t)gpio_expander.max_pins) {return false;}
+
+  clearI2CLinkOutputPacket(gpio_expander.i2cLink);
+  gpio_expander.i2cLink.OUTPUT_PACKET[0] = pin; // command 0-69: directly address this pin
+  writeI2CToSlaveBin(*gpio_expander.wire, gpio_expander.i2cLink, gpio_expander.address, 1, 0, "readGPIOPortExapander_Pin");
+
+  if (!requestFromSlaveBinNoID(*gpio_expander.wire, gpio_expander.i2cLink, gpio_expander.address, 4, 0, "readGPIOPortExapander_Pin")) {
+    return false;
+  }
+  float value;
+  read_float_FromWire(*gpio_expander.wire, value);
+  gpio_expander.input_value[pin] = (long)value;
+  return true;
+}
+
 void clearGPIOPortController(GPIOPortExpander &gpio_expander) {
   clearI2CLinkOutputPacket(gpio_expander.i2cLink);
   write_uint8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 0, 0x64); // command 100
   writeI2CToSlaveBin(*gpio_expander.wire, gpio_expander.i2cLink, gpio_expander.address, 1, 0, "clearGPIOPortController");
+}
+
+/**
+ * Sets a pin's minimum accepted-read period (microseconds); see
+ * setGPIOPortExpanderChannelFreq() in the header.
+ *
+ * Rule 18.1: pin is bounds-checked against gpio_expander.max_pins before
+ * being used as an index into chan_freq_uS.
+ *
+ * freq_uS is clamped to INT64_MAX for the same reason as
+ * setADMultiplexerChannelFreq(): the owning task compares it against an
+ * elapsed microsecond count via (int64_t)chan_freq_uS, so a stored value
+ * above INT64_MAX would wrap negative and defeat the throttle.
+ */
+void setGPIOPortExpanderChannelFreq(GPIOPortExpander &gpio_expander, uint8_t pin, uint64_t freq_uS) {
+  if (pin < (uint8_t)gpio_expander.max_pins) {
+    gpio_expander.chan_freq_uS[pin] = (freq_uS > (uint64_t)INT64_MAX) ? (uint64_t)INT64_MAX : freq_uS;
+  }
 }
 
 /**

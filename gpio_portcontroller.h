@@ -46,6 +46,9 @@ typedef struct GPIOPortExpander {
     long *output_value;
     int *port_map;       // logical index -> physical pin, -1 = unmapped
     bool *switch_state;   // per-pin modulation on/off tracking
+    uint64_t *chan_freq_uS; // per-pin minimum microseconds between accepted
+                            // reads (see setGPIOPortExpanderChannelFreq());
+                            // 0 = no floor, i.e. accept every read
     int8_t query_cursor;  // cursor for CMD_GET_EXPANDER_PIN_LIST streaming,
                           // kept separate from current_pin so a discovery
                           // query never interferes with the normal
@@ -129,7 +132,35 @@ constexpr uint8_t CMD_GET_EXPANDER_PIN_LIST {140}; // 0x8C - highest command in 
 void requestEventBus0Bin();
 void receiveEventBus0Bin(int n_bytes_received);
 bool readGPIOPortExapander_All(GPIOPortExpander &gpio_expander);
+
+/**
+ * Reads a single pin fresh, via the direct pin-addressing commands (0-69)
+ * rather than the bulk CMD_RESET_CURRENT_PIN sequential pass used by
+ * readGPIOPortExapander_All(). Intended to be called per-pin from a task
+ * loop that gates each pin by its own chan_freq_uS, the same way
+ * taskADMplex0()/taskADMplex1() call readADMultiplexerAnalogChannel() per
+ * channel instead of always reading the whole multiplexer.
+ * @param gpio_expander Specify GPIOPortExpander instance
+ * @param pin Specify pin index (bounds-checked against max_pins)
+ * @return false if pin is out of range or the I2C request failed
+ */
+bool readGPIOPortExapander_Pin(GPIOPortExpander &gpio_expander, uint8_t pin);
+
 void clearGPIOPortController(GPIOPortExpander &gpio_expander);
+
+/**
+ * Set a pin's minimum accepted-read period in microseconds, analogous to
+ * setADMultiplexerChannelFreq() for the analog/digital multiplexer. The
+ * owning task (taskInputPortController()) only calls readGPIOPortExapander_Pin()
+ * for this pin once this many microseconds have passed since it last did;
+ * 0 means "no floor" (read every task cycle, i.e. as fast as the task's own
+ * TASK_MAX_FREQ allows).
+ * @param gpio_expander Specify GPIOPortExpander instance
+ * @param pin Specify pin index (bounds-checked against max_pins)
+ * @param freq_uS Minimum microseconds between reads of this pin
+ * @return None
+ */
+void setGPIOPortExpanderChannelFreq(GPIOPortExpander &gpio_expander, uint8_t pin, uint64_t freq_uS);
 // ------------------------------------------------------------
 // Master-side: query a GPIOPortExpander's configuration live over I2C
 // (CMD_GET_EXPANDER_INFO + CMD_GET_EXPANDER_PIN_LIST) and point its pointer

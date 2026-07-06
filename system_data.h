@@ -27,6 +27,7 @@
 #include "esp_attr.h"
 #include "config.h"
 #include "multiplexers.h"
+#include "gpio_portcontroller.h"
 
 /**
  * @brief SystemConuters
@@ -129,6 +130,11 @@ struct systemStruct {
   SystemConuters counters_mplex0_chan[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
   SystemConuters counters_mplex1_chan[MAX_ANALOG_DIGITAL_MULTIPLEXER_CHANNELS];
   SystemConuters counters_pci;
+  // Per-pin read-rate counters, indexed by pin number: task_ffreq_t is the
+  // pin's achieved accepted-read rate, gated by its own chan_freq_uS (see
+  // setGPIOPortExpanderChannelFreq()); task_freq_t is how often the pin was
+  // checked (bounded by TASK_MAX_FREQ_PORTCONTROLLER_INPUT).
+  SystemConuters counters_pci_chan[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
   SystemConuters counters_uni;
   SystemConuters counters_mtx;
   SystemConuters counters_pco;
