@@ -20,7 +20,7 @@ GPIO Port Expander - IIC I/O device.
 #include <stdlib.h>
 #include <Wire.h>
 #include "./i2c_helper.h"
-#include "./gpio_portcontroller.h"
+#include "./gpio_port_expander.h"
 
 #ifdef GPIO_PORT_EXPANDER_WRITE_MODE 
 // ------------------------------------------------------------
@@ -88,20 +88,6 @@ void modulator(GPIOPortExpander *expander) {
 #endif
 
 #ifdef GPIO_PORT_EXPANDER_READ_MODE
-// ------------------------------------------------------------
-// Reads all analog and digital pins
-// ------------------------------------------------------------
-void readPins(GPIOPortExpander *expander) {
-  int i_counter=0;
-  for (int i=0; i<expander->num_digital_pins; i++) {
-    expander->input_value[i_counter]=digitalRead(expander->digital_pins[i]);
-    i_counter++;
-  }
-  for (int i=0; i<expander->num_analog_pins; i++) {
-    expander->input_value[i_counter]=analogRead(expander->analog_pins[i]);
-    i_counter++;
-  }
-}
 #endif
 
 // ------------------------------------------------------------------------------------------------------------------
@@ -110,11 +96,20 @@ void readPins(GPIOPortExpander *expander) {
 
 void setup() {
   // ------------------------------------------------------------
+  // ADC prescaler
+  // ------------------------------------------------------------
+  // Arduino core default is /128 (125kHz ADC clock, ~104us/conversion) -
+  // the datasheet's recommended range for full 10-bit accuracy. /16
+  // (1MHz ADC clock) cuts that to ~13us/conversion at the cost of some
+  // resolution/noise margin - validate readings against known references
+  // if analog precision matters for this build.
+  ADCSRA = (ADCSRA & ~0x07) | 0x04; // ADPS2:0 = 100 -> /16
+  // ------------------------------------------------------------
   // Serial
   // ------------------------------------------------------------
   Serial.setTimeout(50); // ensure this is set before begin()
   Serial.begin(115200);  while(!Serial);
-  
+
   // ------------------------------------------------------------
   // I2C
   // ------------------------------------------------------------
@@ -140,9 +135,4 @@ void loop() {
   #ifdef GPIO_PORT_EXPANDER_WRITE_MODE
   modulator(&GPIOPortExpander_ATMEGA2560_Default); // for output: uncomment if required
   #endif
-
-  #ifdef GPIO_PORT_EXPANDER_READ_MODE
-  readPins(&GPIOPortExpander_ATMEGA2560_Default);  // for input: // uncomment if required
-  #endif
-  // Serial.println("loop"+String(millis()));
 }
