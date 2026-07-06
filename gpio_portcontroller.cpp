@@ -31,7 +31,7 @@
  */
 
 #define GPIO_PORTCONTROLLER_DEBUG_0
-#define GPIO_PORTCONTROLLER_DEBUG_1
+// #define GPIO_PORTCONTROLLER_DEBUG_1
 // #define GPIO_PORTCONTROLLER_DEBUG_2
 
 #ifdef GPIO_PORT_EXPANDER_SLAVE_MODE
@@ -66,13 +66,10 @@ GPIOPortExpander GPIOPortExpander_ATMEGA2560_Default = {
     (long[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // input_value
     (long[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // output_value
     (int[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){ // port_map (default no port)
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0-9
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 10-19
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 20-29
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 30-39
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 40-49
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 50-59
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 60-69
+      0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+      21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,
+      39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,
+      57,58,59,60,61,62,63,64,65,66,67,68,69
     },
     (bool[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS]){}, // switch_state
     0             // query_cursor
@@ -220,6 +217,54 @@ inline bool isDigitalPin(int8_t digital_pins[], int8_t num_digital_pins, uint8_t
   }
   return false;
 }
+void readPins(GPIOPortExpander *expander) {
+  int i_counter=0;
+  for (int i=0; i<expander->num_digital_pins; i++) {
+    expander->input_value[i_counter]=digitalRead(expander->digital_pins[i]);
+    i_counter++;
+  }
+  for (int i=0; i<expander->num_analog_pins; i++) {
+    expander->input_value[i_counter]=analogRead(expander->analog_pins[i]);
+    i_counter++;
+  }
+}
+// --------------------------------------------------------------------
+// O(1) pin-kind lookup, keyed directly by physical pin number - built once
+// from analog_pins/digital_pins so readPin() doesn't re-scan up to 70
+// entries (isAnalogPin + isDigitalPin) on every single I2C request.
+// --------------------------------------------------------------------
+constexpr int8_t PIN_KIND_UNKNOWN = 0;
+constexpr int8_t PIN_KIND_ANALOG  = 1;
+constexpr int8_t PIN_KIND_DIGITAL = 2;
+static int8_t pin_kind_lookup[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS];
+static bool pin_kind_lookup_built = false;
+
+void buildPinKindLookup(GPIOPortExpander *gpio_expander) {
+  memset(pin_kind_lookup, PIN_KIND_UNKNOWN, sizeof(pin_kind_lookup));
+  for (int i=0; i<gpio_expander->num_analog_pins; i++) {
+    uint8_t pin = (uint8_t)gpio_expander->analog_pins[i];
+    if (pin < MAX_GPIOPortExpander_ATMEGA2560_Default_PINS) {pin_kind_lookup[pin] = PIN_KIND_ANALOG;}
+  }
+  for (int i=0; i<gpio_expander->num_digital_pins; i++) {
+    uint8_t pin = (uint8_t)gpio_expander->digital_pins[i];
+    if (pin < MAX_GPIOPortExpander_ATMEGA2560_Default_PINS) {pin_kind_lookup[pin] = PIN_KIND_DIGITAL;}
+  }
+  pin_kind_lookup_built = true;
+}
+
+inline void readPin(GPIOPortExpander *gpio_expander) {
+  if (!pin_kind_lookup_built) {buildPinKindLookup(gpio_expander);}
+  int mapped_pin = gpio_expander->port_map[gpio_expander->current_pin];
+  if (mapped_pin < 0 || mapped_pin >= MAX_GPIOPortExpander_ATMEGA2560_Default_PINS) {return;}
+  switch (pin_kind_lookup[mapped_pin]) {
+    case PIN_KIND_ANALOG:
+      gpio_expander->input_value[gpio_expander->current_pin] = analogRead((uint8_t)mapped_pin);
+      break;
+    case PIN_KIND_DIGITAL:
+      gpio_expander->input_value[gpio_expander->current_pin] = digitalRead((uint8_t)mapped_pin);
+      break;
+  }
+}
 
 /** ----------------------------------------------------------------------------
  * @brief Request binary event handler for an I2C Bus.
@@ -260,10 +305,27 @@ void requestEventBus0Bin() {
         #ifdef GPIO_PORTCONTROLLER_DEBUG_2
         Serial.println("[CMD_RESET_CURRENT_PIN] sending: pin=" + String(gpio_expander.current_pin)  + "  value=" + String(gpio_expander.input_value[gpio_expander.current_pin]));
         #endif
-        clearI2CLinkOutputPacket(gpio_expander.i2cLink);
+
+        #ifdef GPIO_PORTCONTROLLER_BENCH
+        int32_t t0 = micros();
+        #endif
+        readPin(&gpio_expander);
+        #ifdef GPIO_PORTCONTROLLER_BENCH
+        Serial.println("RP " + String(micros()-t0)); // read pin time uS
+        #endif
+
+        #ifdef GPIO_PORTCONTROLLER_BENCH
+        t0 = micros();
+        #endif
+        // (offsets 0-4) are fully overwritten by the two writes below, so
+        // zeroing the 32-byte buffer first bought nothing but ~6-9us.
+        clearI2CLinkOutputPacket(gpio_expander.i2cLink); // dropped here: the 5 bytes actually sent
         write_uint8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 0, gpio_expander.current_pin);
         write_float_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 1, (float)gpio_expander.input_value[gpio_expander.current_pin]);
         writeI2CToMasterBin(Wire, gpio_expander.i2cLink, 5, 0);
+        #ifdef GPIO_PORTCONTROLLER_BENCH
+        Serial.println("SN " + String(micros()-t0)); // write time uS
+        #endif
         if (++gpio_expander.current_pin >= gpio_expander.num_analog_pins + gpio_expander.num_digital_pins) {gpio_expander.current_pin = 0;}
         break;
       }
