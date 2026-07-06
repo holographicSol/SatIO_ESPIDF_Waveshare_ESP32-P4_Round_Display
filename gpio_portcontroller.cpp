@@ -633,7 +633,7 @@ bool queryGPIOPortExpander(TwoWire &wire, int address, const char *name, GPIOPor
   return true;
 }
 
-bool readGPIOPortExapander_All(GPIOPortExpander gpio_expander) {
+bool readGPIOPortExapander_All(GPIOPortExpander &gpio_expander) {
 
   bool ok = true; // assume true except even just one bad read (replace with counter)
 
@@ -668,7 +668,7 @@ bool readGPIOPortExapander_All(GPIOPortExpander gpio_expander) {
   return ok;
 }
 
-void clearGPIOPortController(GPIOPortExpander gpio_expander) {
+void clearGPIOPortController(GPIOPortExpander &gpio_expander) {
   clearI2CLinkOutputPacket(gpio_expander.i2cLink);
   write_uint8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 0, 0x64); // command 100
   writeI2CToSlaveBin(*gpio_expander.wire, gpio_expander.i2cLink, gpio_expander.address, 1, 0, "clearGPIOPortController");
@@ -677,7 +677,7 @@ void clearGPIOPortController(GPIOPortExpander gpio_expander) {
 /**
  * @brief A placeholder for writing to a GPIOPortExpander.
  */
-int32_t writeGPIOPortExapander_All(GPIOPortExpander gpio_expander) {
+int32_t writeGPIOPortExapander_All(GPIOPortExpander &gpio_expander) {
   int32_t count_write=0;
 
   for (int32_t Mi = 0; Mi < gpio_expander.max_pins; Mi++) {

@@ -128,8 +128,8 @@ constexpr uint8_t CMD_GET_EXPANDER_PIN_LIST {140}; // 0x8C - highest command in 
 // ------------------------------------------------------------
 void requestEventBus0Bin();
 void receiveEventBus0Bin(int n_bytes_received);
-bool readGPIOPortExapander_All(GPIOPortExpander gpio_expander);
-void clearGPIOPortController(GPIOPortExpander gpio_expander);
+bool readGPIOPortExapander_All(GPIOPortExpander &gpio_expander);
+void clearGPIOPortController(GPIOPortExpander &gpio_expander);
 // ------------------------------------------------------------
 // Master-side: query a GPIOPortExpander's configuration live over I2C
 // (CMD_GET_EXPANDER_INFO + CMD_GET_EXPANDER_PIN_LIST) and point its pointer

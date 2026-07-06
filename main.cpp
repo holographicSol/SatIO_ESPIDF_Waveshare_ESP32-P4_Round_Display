@@ -320,7 +320,7 @@ extern "C" void app_main(void)
     // delay(5000);
 
     /** ----------------------------------------------------------------------------
-     * I2C Bus 2: Output Port Controller.
+     * I2C Bus 2.
      *
      * (1) begin()'s and setBufferSize()'s results are not needed here, so
      *     each discard is made explicit with a (void) cast (MISRA C 2012
@@ -328,7 +328,7 @@ extern "C" void app_main(void)
      * (2) Brings up I2C bus and clears every output on the port
      *     controller attached to it.
      */
-    ESP_LOGI(APP_MAIN_TAG, "Initializing output port controller");
+    ESP_LOGI(APP_MAIN_TAG, "Initializing I2C bus 2");
     (void)iic_2.setPins(IIC_BUS2_SDA, IIC_BUS2_SCL);
     (void)iic_2.setBufferSize(MAX_IIC_BUFFER_SIZE);
     iic_2.setTimeOut(I2C_TIMEOUT_MS_BUS2);
@@ -336,14 +336,14 @@ extern "C" void app_main(void)
     iic_2.setClock(I2C_CLOCK_Hz_BUS2);
 
     /** ----------------------------------------------------------------------------
-     * I2C Bus 0: Input Port Controller.
+     * I2C Bus 0.
      *
      * (1) begin()'s and setBufferSize()'s results are not needed here, so
      *     each discard is made explicit with a (void) cast (MISRA C 2012
      *     Rule 17.7).
      * (2) Brings up I2C bus.
      */
-    ESP_LOGI(APP_MAIN_TAG, "Initializing input port controller");
+    ESP_LOGI(APP_MAIN_TAG, "Initializing I2C bus 0");
     (void)iic_0.setPins(IIC_BUS0_SDA, IIC_BUS0_SCL);
     (void)iic_0.setBufferSize(MAX_IIC_BUFFER_SIZE);
     iic_0.setTimeOut(I2C_TIMEOUT_MS_BUS0);
@@ -354,8 +354,7 @@ extern "C" void app_main(void)
      * GPIOPortExpander auto-discovery.
      *
      * Queries each port controller live over I2C (gpio_portcontroller.cpp)
-     * for its pin_min/pin_max/analog_pins/digital_pins, populating
-     * output_portcontroller_0/_1 and input_portcontroller_0.
+     * for its pin_min/pin_max/analog_pins/digital_pins, populating structs.
      */
     clearGPIOPortController(GPIOPortExpander_ATMEGA2560_Output_0);
     // clearGPIOPortController(GPIOPortExpander_ATMEGA2560_Output_1);

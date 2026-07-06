@@ -1869,7 +1869,7 @@ void outputSerialPCInput(void) {
       memset(TXBUF_PCI, 0, sizeof(TXBUF_PCI));
       serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), "$PCINPT,");
       // append matrix switch state data
-      for (int i=0; i < MAX_MATRIX_SWITCHES; i++)
+      for (int i=0; i < 70; i++)
         {serial0_buffer_append(TXBUF_PCI, sizeof(TXBUF_PCI), String(String(GPIOPortExpander_ATMEGA2560_Input_0.input_value[i])+",").c_str());}
       serial0_buffer_strip_trailing_comma(TXBUF_PCI);
       createChecksumSerial0(TXBUF_PCI, checksum, sizeof(checksum));
