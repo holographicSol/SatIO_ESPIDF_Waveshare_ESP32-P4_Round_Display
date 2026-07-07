@@ -40,7 +40,7 @@
 #include "./task_handler.h"
 #include "i2c_helper.h"
 #include "./satio_lvgl.h"
-#include "./gpio_portcontroller.h"
+#include "./gpio_port_expander.h"
 
 TaskHandle_t TaskGPS;
 TaskHandle_t TaskGyro;
@@ -304,7 +304,7 @@ static void intervalBreach1Second(void) {
   #endif
   totalCounters(systemData.counters_mtx);
   totalCounters(systemData.counters_pci);
-  for (int i_chan=0; i_chan<MAX_GPIOPortExpander_ATMEGA2560_Default_PINS; i_chan++) {totalCounters(systemData.counters_pci_chan[i_chan]);}
+  for (int i_chan=0; i_chan<GPIOPE_MAX_ATMEGA2560_MAX_PINS; i_chan++) {totalCounters(systemData.counters_pci_chan[i_chan]);}
   totalCounters(systemData.counters_pco);
   totalCounters(systemData.counters_uni);
   totalCounters(systemData.counters_track_planets);
@@ -340,7 +340,7 @@ static void intervalBreach1Second(void) {
   #endif
   clearCounters(systemData.counters_mtx);
   clearCounters(systemData.counters_pci);
-  for (int i_chan=0; i_chan<MAX_GPIOPortExpander_ATMEGA2560_Default_PINS; i_chan++) {clearCounters(systemData.counters_pci_chan[i_chan]);}
+  for (int i_chan=0; i_chan<GPIOPE_MAX_ATMEGA2560_MAX_PINS; i_chan++) {clearCounters(systemData.counters_pci_chan[i_chan]);}
   clearCounters(systemData.counters_pco);
   clearCounters(systemData.counters_uni);
   clearCounters(systemData.counters_track_planets);
@@ -1016,13 +1016,13 @@ static void taskInputPortController(void *pvParameters) {
       // at 1Hz alongside pin 1 at 1000Hz within the same task, bounded by
       // TASK_MAX_FREQ_PORTCONTROLLER_INPUT. Mirrors taskADMplex0()/
       // taskADMplex1()'s per-channel throttle.
-      static int64_t pci_chan_last_read_uS[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS] = {0};
+      static int64_t pci_chan_last_read_uS[GPIOPE_MAX_ATMEGA2560_MAX_PINS] = {0};
       // Snapshotted once per pass so the counter loop below can't disagree with the
       // read loop about which pins were enabled this cycle (a concurrent
       // CLI/LVGL disable between the two loops would otherwise drop a pin's
       // count for a cycle it was actually read in).
-      bool pci_chan_was_enabled[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS] = {false};
-      bool pci_chan_did_read[MAX_GPIOPortExpander_ATMEGA2560_Default_PINS] = {false};
+      bool pci_chan_was_enabled[GPIOPE_MAX_ATMEGA2560_MAX_PINS] = {false};
+      bool pci_chan_did_read[GPIOPE_MAX_ATMEGA2560_MAX_PINS] = {false};
       uint8_t pci_max_pins = (uint8_t)GPIOPortExpander_ATMEGA2560_Input_0.max_pins;
       for (uint8_t i_chan = 0; i_chan < pci_max_pins; i_chan++) {
         if (GPIOPortExpander_ATMEGA2560_Input_0.enabled[i_chan] == true) {

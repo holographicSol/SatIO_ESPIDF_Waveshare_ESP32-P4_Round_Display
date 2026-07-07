@@ -38,7 +38,7 @@
 #include "config.h"
 #include "system_data.h"
 #include "multiplexers.h"
-#include "gpio_portcontroller.h"
+#include "gpio_port_expander.h"
 
 
 bool debug_bool=true;
@@ -2054,16 +2054,16 @@ void outputStat(void) {
     //                                                                                                        PRINT PER-PIN PCI Hz
     // ----------------------------------------------------------------------------------------------------------------------------
     /*
-     * MAX_GPIOPortExpander_ATMEGA2560_Default_PINS (70) is wider than one
+     * GPIOPE_MAX_ATMEGA2560_MAX_PINS (70) is wider than one
      * line, so this pages the same way the matrix switch dump below does.
      */
     {
         int pci_full_page_start = 0;
         int pci_full_page_end = 0;
-        for (int page_start = 0; page_start < MAX_GPIOPortExpander_ATMEGA2560_Default_PINS; page_start += STAT_SWITCHES_PER_PAGE) {
+        for (int page_start = 0; page_start < GPIOPE_MAX_ATMEGA2560_MAX_PINS; page_start += STAT_SWITCHES_PER_PAGE) {
             int page_end = page_start + STAT_SWITCHES_PER_PAGE;
             if (page_start==0) {pci_full_page_start=page_start; pci_full_page_end=page_end;} // use page zero width as longest expected width
-            if (page_end > MAX_GPIOPortExpander_ATMEGA2560_Default_PINS) {page_end = MAX_GPIOPortExpander_ATMEGA2560_Default_PINS;}
+            if (page_end > GPIOPE_MAX_ATMEGA2560_MAX_PINS) {page_end = GPIOPE_MAX_ATMEGA2560_MAX_PINS;}
             printStatSeparator(pci_full_page_start, pci_full_page_end);
             printf("                      ");
             printSwitchIndexHeader(page_start, page_end);

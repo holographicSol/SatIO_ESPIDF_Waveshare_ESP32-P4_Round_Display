@@ -7,7 +7,7 @@ idf_component_register(
         cobalt_alien_25.c
         config.cpp
         custommapping.cpp
-        gpio_portcontroller.cpp
+        gpio_port_expander.cpp
         hextodig.cpp
         i2c_helper.cpp
         ins.cpp

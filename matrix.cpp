@@ -42,7 +42,7 @@
 #include "sdcard_helper.h"
 #include "i2c_helper.h"
 #include "task_handler.h"
-#include "gpio_portcontroller.h"
+#include "gpio_port_expander.h"
 
 // ----------------------------------------------------------------------------------------
 //  MATRIX

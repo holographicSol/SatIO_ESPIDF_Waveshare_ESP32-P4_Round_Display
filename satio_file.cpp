@@ -24,7 +24,7 @@
 #include "wtgps300p.h"
 #include "wt901.h"
 #include "sdcard_helper.h"
-#include "gpio_portcontroller.h"
+#include "gpio_port_expander.h"
 
 struct satioFileStruct satioFileData = {
     .i_token=0,
