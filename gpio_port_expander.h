@@ -1,11 +1,23 @@
 /**
  * GPIO Port Expander - Written by benjamin Jack Cullen.
  *
- * Intention is to keep everything in one place and in a dedicated library for
- * custom port controllers, while being as generally agnostic as possible.
+ * Intention [1] is to stay as MCU-agnostic as practical. Genericity here is a
+ * design-time property, not a runtime one: the GPIOPortExpander type is flexible
+ * enough to describe any MCU's pin layout, but every actual instance is still a
+ * static, compile-time definition — one requirement doesn't cost the other.
+ * 
+ * Intention [2] is to have portable instances that can be easily imported/exported
+ * between master and slave gpio_port_expander libs, which a GPIOPortExpander instance
+ * also reasonably fascilitates.
+ * 
+ * Intention [3]. Create as many new GPIOPortExpander instances as required, from any
+ * pre-defined default GPIOPortExpander instances.
  *
- * Dynamically allocating memory has been avoided, with safety as a plus, and extra
- * static code on the downside.
+ * For example, GPIOPortExpander as a type is dynamic (general-purpose), while any
+ * given GPIOPortExpander instance is static.
+ * 
+ * Specification flexibility, while remaining static, and with as many instances of a default
+ * instance as a project might require.
  *
  * (1) Ensure gpio_portcontroller exists on both master and slave.
  * (2) On the slave, create a new GPIOPortExpander instance, configured for the slave or use the default.
@@ -27,14 +39,7 @@
 #define GPIOPE_MAX_ATMEGA2560_MAX_PINS           70
 
 /**
- * @brief GPIOPortExpander - A dynamic type for defining specifications.
- * @note Being dynamic allows GPIOPortExpander to be used with virtually
- *       any MCU and may also mean that any GPIOPortExpander instances
- *       must be statically defined before building, a trade-off that
- *       also allows GPIOPortExpander instances to be passed into this
- *       libraries functions, because they are all the same type, even
- *       when they are for different cards, so they all get treated the
- *       same way, no special cases.
+ * @brief GPIOPortExpander - A dynamic type for defining an MCU's specifications.
  */
 typedef struct GPIOPortExpander {
     char name[56];
