@@ -12,6 +12,10 @@
  * 
  * Intention [3]. Create as many new GPIOPortExpander instances as required, from any
  * pre-defined default GPIOPortExpander instances.
+ * 
+ * Intention [4]. Run on both master, & slave(s).
+ * 
+ * Intention [5]. Command symmetry between master & slave(s).
  *
  * For example, GPIOPortExpander as a type is dynamic (general-purpose), while any
  * given GPIOPortExpander instance is static.
