@@ -18,75 +18,85 @@
     byte, nbytes.
 
   Includes binary packet reading functions for all of the above mentioned types.
-
-  Intended to be MISRA Compliant (untested, unverified, in-progress).
 */
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <cstring>
-#include <cstdio>
 #include "i2c_helper.h"
 
-TwoWire iic_0(0);
-TwoWire iic_1(1);
-TwoWire iic_2(2);
+// AVR (ATmega2560) has exactly one hardware I2C peripheral, already
+// instantiated as the global `Wire` object by the Arduino AVR core. Unlike
+// ESP32's TwoWire, this platform's TwoWire has no bus-number constructor, so
+// this is a separate AVR-specific initiator: a reference alias for Wire,
+// not a second distinct instance.
+TwoWire &iic_0 = Wire;
+// TwoWire iic_0(0);
+// TwoWire iic_1(1);
+// TwoWire iic_2(2);
 
 IICLink I2CLinkBus0;
 IICLink I2CLinkBus1;
 IICLink I2CLinkBus2;
 
 /** ----------------------------------------------------------------------------
- * Prints a human-readable description of Wire.endTransmission() error codes.
- *
- * (1) MISRA Rule 8.7: declared static because it is only ever called from
- *     within this translation unit and is not part of the public header API.
- * (2) Maps each I2CTransmissionStatus value to a log line; unrecognised codes
- *     fall through to the default case.
- *
- * @param code The return value from Wire.endTransmission().
- * @param debugTag Tag to identify the source of the error.
+ * Prints a human-readable description of Wire.endTransmission() error codes
+ * 
+ * @param code The return value from Wire.endTransmission()
+ * @param debugTag Optional tag to identify the source of the error
  */
-static void printI2CError(uint8_t code, const String &debugTag) {
+void printI2CError(uint8_t code, String debugTag) {    
     switch (code) {
-        case IIC_STATUS_SUCCESS:
+        case 0:
+            // Serial.println("[I2C] Code 0: Success");
             break;
+            
+        case 1:
+          Serial.print("[I2C] Code ");
+          Serial.print(code);
+          Serial.print(": Data too long to fit in transmit buffer. Function: ");
+          Serial.print(debugTag);
+          Serial.println();
+          break;
 
-        case IIC_STATUS_DATA_TOO_LONG:
-            Serial.printf("[I2C] Code %u: Data too long to fit in transmit buffer. Function: %s\n",
-                          code,
-                          debugTag.c_str());
-            break;
+        case 2:
+          Serial.print("[I2C] Code ");
+          Serial.print(code);
+          Serial.print(": Received NACK (device not found/not responding). Function: ");
+          Serial.print(debugTag);
+          Serial.println();
+          break;
 
-        case IIC_STATUS_NACK_ADDRESS:
-            Serial.printf("[I2C] Code %u: Received NACK (device not found/not responding). Function: %s\n",
-                          code,
-                          debugTag.c_str());
-            break;
+        case 3:
+          Serial.print("[I2C] Code ");
+          Serial.print(code);
+          Serial.print(": Received NACK on data. Function: ");
+          Serial.print(debugTag);
+          Serial.println();
+          break;
 
-        case IIC_STATUS_NACK_DATA:
-            Serial.printf("[I2C] Code %u: Received NACK on data. Function: %s\n",
-                          code,
-                          debugTag.c_str());
-            break;
+        case 4:
+          Serial.print("[I2C] Code ");
+          Serial.print(code);
+          Serial.print(": Other/TWI error (e.g. lost arbitration, timeout, etc.). Function: ");
+          Serial.print(debugTag);
+          Serial.println();
+          break;
 
-        case IIC_STATUS_OTHER_ERROR:
-            Serial.printf("[I2C] Code %u: Other/TWI error (e.g. lost arbitration, timeout, etc.). Function: %s\n",
-                          code,
-                          debugTag.c_str());
-            break;
-
-        case IIC_STATUS_TIMEOUT:
-            Serial.printf("[I2C] Code %u: Timeout (ESP32/ESP8266). Function: %s\n",
-                          code,
-                          debugTag.c_str());
-            break;
+        case 5:  // ESP32 / ESP8266 specific
+          Serial.print("[I2C] Code ");
+          Serial.print(code);
+          Serial.print(": Timeout (ESP32/ESP8266). Function: ");
+          Serial.print(debugTag);
+          Serial.println();
+          break;
 
         default:
-            Serial.printf("[I2C] Code %u: Unknown error code. Function: %s\n",
-                          code,
-                          debugTag.c_str());
-            break;
+          Serial.print("[I2C] Code ");
+          Serial.print(code);
+          Serial.print(": Unknown error code. Function: ");
+          Serial.print(debugTag);
+          Serial.println();
+          break;
     }
 }
 
@@ -131,23 +141,6 @@ void clearI2CLinkOutputPacket(IICLink &iic_link) {
 }
 
 /** ----------------------------------------------------------------------------
- * Discards every byte currently waiting on an I2C bus.
- *
- * (1) MISRA Rule 14.4: the loop condition is an explicit comparison rather
- *     than relying on the implicit int-to-bool conversion of available().
- *     MISRA Rule 17.7: read()'s return value is intentionally unused, so the
- *     discard is made explicit with a (void) cast.
- * (2) Reads and drops bytes one at a time until the bus has none left.
- *
- * @param wire Specify TwoWire instance.
- */
-void drainBus(TwoWire &wire) {
-  while (wire.available() > 0) {
-    (void)wire.read();
-  }
-}
-
-/** ----------------------------------------------------------------------------
  * @brief Writes data to an I2C slave device.
  * @param wire Specify TwoWire instance.
  * @param iic_link Specify IICLink instance.
@@ -159,16 +152,15 @@ void writeI2CToSlaveChars(TwoWire &wire,
                           IICLink &iic_link,
                           int address,
                           long delayMs,
-                          const String &debugTag) {
+                          String debugTag) {
   clearI2CLinkOutputBytes(iic_link);
-  size_t len = strlen(iic_link.OUTPUT_BUFFER_CHARS);
-  for (size_t i = 0; i < len; i++) {
-    iic_link.OUTPUT_BUFFER_BYTES[i] = (byte)iic_link.OUTPUT_BUFFER_CHARS[i];
-  }
+  int len = strlen(iic_link.OUTPUT_BUFFER_CHARS);
+  for (int i=0;i<len;i++)
+  {iic_link.OUTPUT_BUFFER_BYTES[i]=(byte)iic_link.OUTPUT_BUFFER_CHARS[i];}
   wire.beginTransmission(address);
   wire.write(iic_link.OUTPUT_BUFFER_BYTES, len);
   printI2CError(wire.endTransmission(), debugTag);
-  delay((unsigned long)delayMs); // Allow time for receiving device to process data.
+  delay(delayMs); // Allow time for receiving device to process data.
 }
 
 /** ----------------------------------------------------------------------------
@@ -181,24 +173,15 @@ void writeI2CToMasterChars(TwoWire &wire,
                            IICLink &iic_link,
                            long delayMs) {
   clearI2CLinkOutputBytes(iic_link);
-  size_t len = strlen(iic_link.OUTPUT_BUFFER_CHARS);
-  for (size_t i = 0; i < len; i++) {
-    iic_link.OUTPUT_BUFFER_BYTES[i] = (byte)iic_link.OUTPUT_BUFFER_CHARS[i];
-  }
+  int len = strlen(iic_link.OUTPUT_BUFFER_CHARS);
+  for (int i=0;i<len;i++)
+  {iic_link.OUTPUT_BUFFER_BYTES[i]=(byte)iic_link.OUTPUT_BUFFER_CHARS[i];}
   wire.write(iic_link.OUTPUT_BUFFER_BYTES, len);
-  delay((unsigned long)delayMs); // Allow time for receiving device to process data.
+  delay(delayMs); // Allow time for receiving device to process data.
 }
 
 /** ----------------------------------------------------------------------------
- * Requests data from an I2C slave device.
- *
- * (1) MISRA Dir 4.14/Rule 21.x: the request ID is formatted with snprintf into
- *     a bounded buffer instead of strcpy from a temporary String, so the
- *     destination can never be overrun.
- * (2) Sends the request ID, discards one stale response that may still be
- *     queued from a previous request, reads the fresh response, then splits
- *     it into comma-separated tokens.
- *
+ * @brief Requests data from an I2C slave device.
  * @param wire Specify TwoWire instance.
  * @param iic_link Specify IICLink instance.
  * @param address I2C address of the slave device.
@@ -213,37 +196,46 @@ void requestFromSlaveChars(TwoWire &wire,
                            long request_id,
                            size_t len_expected,
                            long delayMs,
-                           const String &debugTag) {
+                           String debugTag) {
   // Send request ID
   clearI2CLinkOutputChars(iic_link);
-  snprintf(iic_link.OUTPUT_BUFFER_CHARS, sizeof(iic_link.OUTPUT_BUFFER_CHARS), "%ld", request_id);
+  strcpy(iic_link.OUTPUT_BUFFER_CHARS, String(request_id).c_str());
   writeI2CToSlaveChars(wire, iic_link, address, delayMs, debugTag);
-
-  // Discard a stale response that may still be queued from a previous request
+  // Uncomment to read potentially old response before requesting new data (may be required)
   clearI2CLinkInputChars(iic_link);
-  (void)wire.requestFrom(address, len_expected);
-  (void)wire.readBytes((char *)iic_link.INPUT_BUFFER, len_expected);
+  int len_req = wire.requestFrom(address, len_expected);
+  int len_read = wire.readBytes((char *)iic_link.INPUT_BUFFER, len_expected);
+  // Serial.print("[requestFromSlave] ");
+  // Serial.print(iic_link.INPUT_BUFFER);
+  // Serial.print(" (");
+  // Serial.print(len);
+  // Serial.print(" bytes). Function: ");
+  // Serial.println(debugTag);
   delay(1);
-
-  // Read the response for this request
+  // Read response
   clearI2CLinkInputChars(iic_link);
-  (void)wire.requestFrom(address, len_expected);
-  size_t len_read = wire.readBytes((char *)iic_link.INPUT_BUFFER, len_expected);
-  Serial.printf("[requestFromSlave] %s (%zu bytes / %zu bytes). Function: %s\n",
-                iic_link.INPUT_BUFFER,
-                len_read,
-                len_expected,
-                debugTag.c_str());
-  if (len_read < 1U) {return;}
+  len_req = wire.requestFrom(address, len_expected);
+  len_read = wire.readBytes((char *)iic_link.INPUT_BUFFER, len_expected);
+  Serial.print("[requestFromSlave] ");
+  Serial.print(iic_link.INPUT_BUFFER);
+  Serial.print(" (");
+  Serial.print(len_read);
+  Serial.print(" bytes / ");
+  Serial.print(len_expected);
+  Serial.print(" bytes). Function: ");
+  Serial.println(debugTag);
+  if (len_read < 1) {return;}
   if (len_read != len_expected) {
-    Serial.printf("[I2C] Warning: Expected %zu bytes but received %zu bytes from slave. Function: %s\n",
-                  len_expected,
-                  len_read,
-                  debugTag.c_str());
+    Serial.print("[I2C] Warning: Expected ");
+    Serial.print(len_expected);
+    Serial.print(" bytes but received ");
+    Serial.print(len_read);
+    Serial.print(" bytes from slave. Function: ");
+    Serial.println(debugTag);
     return;
   }
   // Clear all tokens
-  for (size_t i = 0; i < I2C_MAX_TOKENS; i++) {
+  for (int i=0;i<I2C_MAX_TOKENS;i++) {
     memset(iic_link.TOKENS[i], 0, sizeof(iic_link.TOKENS[i]));
   }
   // Tokenize response
@@ -254,7 +246,7 @@ void requestFromSlaveChars(TwoWire &wire,
     iic_link.i_token++;
     iic_link.token = strtok(NULL, ",");
   }
-  delay((unsigned long)delayMs);
+  delay(delayMs);
 }
 
 /** ----------------------------------------------------------------------------
@@ -271,11 +263,12 @@ void writeI2CToSlaveBin(TwoWire &wire,
                         int address,
                         size_t len_packet,
                         long delayMs,
-                        const String &debugTag) {
+                        String debugTag) {
+  
   wire.beginTransmission(address);
   wire.write(iic_link.OUTPUT_PACKET, len_packet);
   printI2CError(wire.endTransmission(), debugTag);
-  delay((unsigned long)delayMs); // Allow time for receiving device to process data.
+  delay(delayMs); // Allow time for receiving device to process data.
 }
 
 /** ----------------------------------------------------------------------------
@@ -290,19 +283,11 @@ void writeI2CToMasterBin(TwoWire &wire,
                          size_t len_packet,
                          long delayMs) {
   wire.write(iic_link.OUTPUT_PACKET, len_packet);
-  delay((unsigned long)delayMs); // Allow time for receiving device to process data.
+  delay(delayMs); // Allow time for receiving device to process data.
 }
 
 /** ----------------------------------------------------------------------------
- * Requests binary data from an I2C slave device.
- *
- * (1) MISRA Rule 10.1: request_id is widened to an unsigned type before the
- *     shift/mask operations that extract its bytes, since bitwise operators
- *     on a signed operand have implementation-defined behaviour for negative
- *     values.
- * (2) Encodes the request ID as a little-endian 4-byte packet, sends it, then
- *     reads back exactly len_expected bytes of response.
- *
+ * @brief Requests binary data from an I2C slave device.
  * @param wire Specify TwoWire instance.
  * @param iic_link Specify IICLink instance.
  * @param address I2C address of the slave device.
@@ -318,35 +303,46 @@ void requestFromSlaveBin(TwoWire &wire,
                          long request_id,
                          size_t len_expected,
                          long delayMs,
-                         const String &debugTag) {
-  (void)len_packet;
+                         String debugTag) {
   // Send request ID
   memset(iic_link.OUTPUT_PACKET, 0, sizeof(iic_link.OUTPUT_PACKET));
-  unsigned long uid = (unsigned long)request_id;
-  iic_link.OUTPUT_PACKET[0] = (uint8_t)(uid & 0xFFUL);
-  iic_link.OUTPUT_PACKET[1] = (uint8_t)((uid >> 8U) & 0xFFUL);
-  iic_link.OUTPUT_PACKET[2] = (uint8_t)((uid >> 16U) & 0xFFUL);
-  iic_link.OUTPUT_PACKET[3] = (uint8_t)((uid >> 24U) & 0xFFUL);
+  iic_link.OUTPUT_PACKET[0] = (uint8_t)(request_id & 0xFF);
+  iic_link.OUTPUT_PACKET[1] = (uint8_t)((request_id >> 8) & 0xFF);
+  iic_link.OUTPUT_PACKET[2] = (uint8_t)((request_id >> 16) & 0xFF);
+  iic_link.OUTPUT_PACKET[3] = (uint8_t)((request_id >> 24) & 0xFF);
   writeI2CToSlaveBin(wire, iic_link, address, 4, delayMs, debugTag);
 
   // Send request
-  size_t len_req = wire.requestFrom(address, len_expected);
-
+  int len_req = wire.requestFrom(address, len_expected);
+//   Serial.print("[requestFromSlaveBin] received ");
+//   Serial.print(len_req);
+//   Serial.print(" bytes. Function: ");
+//   Serial.println(debugTag);
+  
   // Check response length
   if (len_req != len_expected) {
-    Serial.printf("[requestFromSlaveBin] Warning: Expected %zu bytes. Function: %s\n",
-                  len_expected,
-                  debugTag.c_str());
+    Serial.print("[requestFromSlaveBin] Warning: Expected ");
+    Serial.print(len_expected);
+    Serial.print(" bytes. Function: ");
+    Serial.println(debugTag);
     return;
   }
 
   // Read response
   memset(iic_link.INPUT_PACKET, 0, sizeof(iic_link.INPUT_PACKET));
-  for (size_t i = 0; i < len_req; i++) {
-    iic_link.INPUT_PACKET[i] = (uint8_t)wire.read();
-  }
+  for (int i=0;i<len_req;i++) {iic_link.INPUT_PACKET[i] = wire.read();}
+  
+  // Debug
+//   Serial.print("[requestFromSlaveBin] bin: ");
+//   for (int i = 0; i < len_req; i++) {
+//     if (iic_link.INPUT_PACKET[i] < 16) Serial.print("0");
+//     Serial.print(iic_link.INPUT_PACKET[i], HEX);
+//     Serial.print(" ");
+//   }
+//   Serial.print("Function: ");
+//   Serial.println(debugTag);
 
-  delay((unsigned long)delayMs);
+  delay(delayMs);
 }
 
 /** ----------------------------------------------------------------------------
@@ -363,18 +359,23 @@ bool requestFromSlaveBinNoID(TwoWire &wire,
                          int address,
                          size_t len_expected,
                          long delayMs,
-                         const String &debugTag) {
+                         String debugTag) {
   // Send request
-  size_t len_req = wire.requestFrom(address, len_expected);
-
+  int len_req = wire.requestFrom(address, len_expected);
+//   Serial.print("[requestFromSlaveBin] received ");
+//   Serial.print(len_req);
+//   Serial.print(" bytes. Function: ");
+//   Serial.println(debugTag);
+  
   // Check response length
   if (len_req != len_expected) {
-    Serial.printf("[requestFromSlaveBin] Warning: Expected %zu bytes. Function: %s\n",
-                  len_expected,
-                  debugTag.c_str());
+    Serial.print("[requestFromSlaveBin] Warning: Expected ");
+    Serial.print(len_expected);
+    Serial.print(" bytes. Function: ");
+    Serial.println(debugTag);
     return false;
   }
-  delay((unsigned long)delayMs);
+  delay(delayMs);
   return true;
 }
 
@@ -383,7 +384,7 @@ bool requestFromSlaveBinNoID(TwoWire &wire,
  * @warning Specified value is expected to be uint8_t.
  */
 void read_uint8_FromWire(TwoWire &wire, uint8_t &value) {
-  value = (uint8_t)wire.read();
+  value = wire.read(); 
 }
 
 /**
@@ -394,19 +395,15 @@ void read_int8_FromWire(TwoWire &wire, int8_t &value) {
   value = (int8_t)wire.read();
 }
 
-/** ----------------------------------------------------------------------------
- * Read uint16_t from I2C wire into specified value (2 bytes, little-endian).
- *
- * (1) MISRA Rule 19.2: bytes are composed with explicit shifts instead of a
- *     union, avoiding type-punning through an inactive union member.
- * (2) Reads the low byte, then the high byte, and combines them.
- *
+/**
+ * @brief Read uint16_t from I2C wire into specified value (2 bytes, little-endian).
  * @warning Specified value is expected to be uint16_t.
  */
 void read_uint16_FromWire(TwoWire &wire, uint16_t &value) {
-  uint16_t low  = (uint16_t)wire.read();
-  uint16_t high = (uint16_t)wire.read();
-  value = (uint16_t)(low | (high << 8U));
+  union { uint16_t u; uint8_t bytes[2]; } un;
+  un.bytes[0] = wire.read();
+  un.bytes[1] = wire.read();
+  value = un.u;
 }
 
 /**
@@ -414,9 +411,10 @@ void read_uint16_FromWire(TwoWire &wire, uint16_t &value) {
  * @warning Specified value is expected to be int16_t.
  */
 void read_int16_FromWire(TwoWire &wire, int16_t &value) {
-  uint16_t low  = (uint16_t)wire.read();
-  uint16_t high = (uint16_t)wire.read();
-  value = (int16_t)(low | (high << 8U));
+  union { int16_t i; uint8_t bytes[2]; } un;
+  un.bytes[0] = wire.read();
+  un.bytes[1] = wire.read();
+  value = un.i;
 }
 
 /**
@@ -424,11 +422,12 @@ void read_int16_FromWire(TwoWire &wire, int16_t &value) {
  * @warning Specified value is expected to be uint32_t.
  */
 void read_uint32_FromWire(TwoWire &wire, uint32_t &value) {
-  uint32_t result = 0U;
-  for (uint32_t i = 0U; i < 4U; i++) {
-    result |= ((uint32_t)(uint8_t)wire.read()) << (8U * i);
-  }
-  value = result;
+  union { uint32_t u; uint8_t bytes[4]; } un;
+  un.bytes[0] = wire.read();
+  un.bytes[1] = wire.read();
+  un.bytes[2] = wire.read();
+  un.bytes[3] = wire.read();
+  value = un.u;
 }
 
 /**
@@ -436,11 +435,12 @@ void read_uint32_FromWire(TwoWire &wire, uint32_t &value) {
  * @warning Specified value is expected to be int32_t.
  */
 void read_int32_FromWire(TwoWire &wire, int32_t &value) {
-  uint32_t result = 0U;
-  for (uint32_t i = 0U; i < 4U; i++) {
-    result |= ((uint32_t)(uint8_t)wire.read()) << (8U * i);
-  }
-  value = (int32_t)result;
+  union { int32_t i; uint8_t bytes[4]; } un;
+  un.bytes[0] = wire.read();
+  un.bytes[1] = wire.read();
+  un.bytes[2] = wire.read();
+  un.bytes[3] = wire.read();
+  value = un.i;
 }
 
 /**
@@ -448,11 +448,9 @@ void read_int32_FromWire(TwoWire &wire, int32_t &value) {
  * @warning Specified value is expected to be uint64_t.
  */
 void read_uint64_FromWire(TwoWire &wire, uint64_t &value) {
-  uint64_t result = 0U;
-  for (uint64_t i = 0U; i < 8U; i++) {
-    result |= ((uint64_t)(uint8_t)wire.read()) << (8U * i);
-  }
-  value = result;
+  union { uint64_t u; uint8_t bytes[8]; } un;
+  for (int i = 0; i < 8; i++) un.bytes[i] = wire.read();
+  value = un.u;
 }
 
 /**
@@ -460,31 +458,22 @@ void read_uint64_FromWire(TwoWire &wire, uint64_t &value) {
  * @warning Specified value is expected to be int64_t.
  */
 void read_int64_FromWire(TwoWire &wire, int64_t &value) {
-  uint64_t result = 0U;
-  for (uint64_t i = 0U; i < 8U; i++) {
-    result |= ((uint64_t)(uint8_t)wire.read()) << (8U * i);
-  }
-  value = (int64_t)result;
+  union { int64_t i; uint8_t bytes[8]; } un;
+  for (int i = 0; i < 8; i++) un.bytes[i] = wire.read();
+  value = un.i;
 }
 
-/** ----------------------------------------------------------------------------
- * Read float from I2C wire into specified value (4 bytes, little-endian).
- *
- * (1) MISRA Rule 19.2: the byte representation is copied into the float with
- *     memcpy rather than a union, which keeps the reinterpretation within
- *     well-defined object-representation copying instead of inactive-member
- *     type punning.
- * (2) Reads 4 raw bytes into a local buffer, then copies that buffer's bit
- *     pattern into the destination float.
- *
+/**
+ * @brief Read float from I2C wire into specified value (4 bytes, little-endian).
  * @warning Specified value is expected to be float.
  */
 void read_float_FromWire(TwoWire &wire, float &value) {
-  uint8_t bytes[4];
-  for (size_t i = 0; i < sizeof(bytes); i++) {
-    bytes[i] = (uint8_t)wire.read();
-  }
-  memcpy(&value, bytes, sizeof(value));
+  union { float f; uint8_t bytes[4]; } u;
+  u.bytes[0] = wire.read();
+  u.bytes[1] = wire.read();
+  u.bytes[2] = wire.read();
+  u.bytes[3] = wire.read();
+  value = u.f;
 }
 
 /**
@@ -492,11 +481,9 @@ void read_float_FromWire(TwoWire &wire, float &value) {
  * @warning Specified value is expected to be double.
  */
 void read_double_FromWire(TwoWire &wire, double &value) {
-  uint8_t bytes[8];
-  for (size_t i = 0; i < sizeof(bytes); i++) {
-    bytes[i] = (uint8_t)wire.read();
-  }
-  memcpy(&value, bytes, sizeof(value));
+  union { double d; uint8_t bytes[8]; } u;
+  for (int i = 0; i < 8; i++) u.bytes[i] = wire.read();
+  value = u.d;
 }
 
 /**
@@ -504,11 +491,9 @@ void read_double_FromWire(TwoWire &wire, double &value) {
  * @warning Specified value is expected to be long.
  */
 void read_long_FromWire(TwoWire &wire, long &value) {
-  unsigned long result = 0UL;
-  for (size_t i = 0; i < sizeof(long); i++) {
-    result |= ((unsigned long)(uint8_t)wire.read()) << (8U * (unsigned int)i);
-  }
-  value = (long)result;
+  union { long l; uint8_t bytes[sizeof(long)]; } un;
+  for (int i = 0; i < sizeof(long); i++) un.bytes[i] = wire.read();
+  value = un.l;
 }
 
 /**
@@ -516,24 +501,17 @@ void read_long_FromWire(TwoWire &wire, long &value) {
  * @warning Specified value is expected to be long long.
  */
 void read_longlong_FromWire(TwoWire &wire, long long &value) {
-  unsigned long long result = 0ULL;
-  for (size_t i = 0; i < sizeof(long long); i++) {
-    result |= ((unsigned long long)(uint8_t)wire.read()) << (8U * (unsigned int)i);
-  }
-  value = (long long)result;
+  union { long long ll; uint8_t bytes[8]; } un;
+  for (int i = 0; i < 8; i++) un.bytes[i] = wire.read();
+  value = un.ll;
 }
 
-/** ----------------------------------------------------------------------------
- * Read bool from I2C wire into specified value.
- *
- * (1) MISRA Rule 14.4: the int returned by read() is converted to bool with
- *     an explicit comparison instead of an implicit numeric-to-Boolean cast.
- * (2) Treats any non-zero byte as true.
- *
+/**
+ * @brief Read bool from I2C wire into specified value.
  * @warning Specified value is expected to be bool.
  */
 void read_bool_FromWire(TwoWire &wire, bool &value) {
-  value = (wire.read() != 0);
+  value = (bool)wire.read();
 }
 
 /**
@@ -553,6 +531,7 @@ void read_char_FromWire(TwoWire &wire, char &value) {
  * @warning Ensure the char array is large enough to hold n_chars values.
  */
 void read_nchars_FromWire(TwoWire &wire, char *value, size_t n_chars) {
+  memset(value, 0, sizeof(value));
   for (size_t i = 0; i < n_chars; i++) {
     value[i] = (char)wire.read();
   }
@@ -563,7 +542,7 @@ void read_nchars_FromWire(TwoWire &wire, char *value, size_t n_chars) {
  * @warning Specified value is expected to be byte.
  */
 void read_byte_FromWire(TwoWire &wire, byte &value) {
-  value = (byte)wire.read();
+  value = wire.read();
 }
 
 /**
@@ -575,9 +554,9 @@ void read_byte_FromWire(TwoWire &wire, byte &value) {
  * @warning Ensure the byte array is large enough to hold n_bytes values.
  */
 void read_nbytes_FromWire(TwoWire &wire, byte *value, size_t n_bytes) {
-  for (size_t i = 0; i < n_bytes; i++) {
-    value[i] = (byte)wire.read();
-  }
+    for (size_t i = 0; i < n_bytes; i++) {
+        value[i] = wire.read();
+    }
 }
 
 /**
@@ -600,38 +579,26 @@ void write_int8_ToPacket(uint8_t *buffer, size_t offset, int8_t value) {
   buffer[offset] = (uint8_t)value;
 }
 
-/** ----------------------------------------------------------------------------
- * Write uint16_t to packet buffer at specified offset (2 bytes, little-endian).
- *
- * (1) MISRA Rule 7.2: shift/mask constants carry the 'U' suffix so they are
- *     unambiguously unsigned, matching the unsigned operand they apply to.
- * (2) Writes the low byte, then the high byte.
- *
+/**
+ * @brief Write uint16_t to packet buffer at specified offset (2 bytes, little-endian).
  * @param buffer Pointer to packet buffer.
  * @param offset Byte offset in buffer.
  * @param value Value to write.
  */
 void write_uint16_ToPacket(uint8_t *buffer, size_t offset, uint16_t value) {
-  buffer[offset]     = (uint8_t)(value & 0xFFU);
-  buffer[offset + 1] = (uint8_t)((value >> 8U) & 0xFFU);
+  buffer[offset]     = (uint8_t)(value & 0xFF);
+  buffer[offset + 1] = (uint8_t)((value >> 8) & 0xFF);
 }
 
-/** ----------------------------------------------------------------------------
- * Write int16_t to packet buffer at specified offset (2 bytes, little-endian).
- *
- * (1) MISRA Rule 10.1: value is widened to its unsigned counterpart before
- *     the shift/mask, since bitwise operators on a signed operand have
- *     implementation-defined behaviour for negative values.
- * (2) Writes the low byte, then the high byte, of the unsigned representation.
- *
+/**
+ * @brief Write int16_t to packet buffer at specified offset (2 bytes, little-endian).
  * @param buffer Pointer to packet buffer.
  * @param offset Byte offset in buffer.
  * @param value Value to write.
  */
 void write_int16_ToPacket(uint8_t *buffer, size_t offset, int16_t value) {
-  uint16_t uvalue = (uint16_t)value;
-  buffer[offset]     = (uint8_t)(uvalue & 0xFFU);
-  buffer[offset + 1] = (uint8_t)((uvalue >> 8U) & 0xFFU);
+  buffer[offset]     = (uint8_t)(value & 0xFF);
+  buffer[offset + 1] = (uint8_t)((value >> 8) & 0xFF);
 }
 
 /**
@@ -641,10 +608,10 @@ void write_int16_ToPacket(uint8_t *buffer, size_t offset, int16_t value) {
  * @param value Value to write.
  */
 void write_uint32_ToPacket(uint8_t *buffer, size_t offset, uint32_t value) {
-  buffer[offset]     = (uint8_t)(value & 0xFFU);
-  buffer[offset + 1] = (uint8_t)((value >> 8U) & 0xFFU);
-  buffer[offset + 2] = (uint8_t)((value >> 16U) & 0xFFU);
-  buffer[offset + 3] = (uint8_t)((value >> 24U) & 0xFFU);
+  buffer[offset]     = (uint8_t)(value & 0xFF);
+  buffer[offset + 1] = (uint8_t)((value >> 8) & 0xFF);
+  buffer[offset + 2] = (uint8_t)((value >> 16) & 0xFF);
+  buffer[offset + 3] = (uint8_t)((value >> 24) & 0xFF);
 }
 
 /**
@@ -654,11 +621,10 @@ void write_uint32_ToPacket(uint8_t *buffer, size_t offset, uint32_t value) {
  * @param value Value to write.
  */
 void write_int32_ToPacket(uint8_t *buffer, size_t offset, int32_t value) {
-  uint32_t uvalue = (uint32_t)value;
-  buffer[offset]     = (uint8_t)(uvalue & 0xFFU);
-  buffer[offset + 1] = (uint8_t)((uvalue >> 8U) & 0xFFU);
-  buffer[offset + 2] = (uint8_t)((uvalue >> 16U) & 0xFFU);
-  buffer[offset + 3] = (uint8_t)((uvalue >> 24U) & 0xFFU);
+  buffer[offset]     = (uint8_t)(value & 0xFF);
+  buffer[offset + 1] = (uint8_t)((value >> 8) & 0xFF);
+  buffer[offset + 2] = (uint8_t)((value >> 16) & 0xFF);
+  buffer[offset + 3] = (uint8_t)((value >> 24) & 0xFF);
 }
 
 /**
@@ -668,8 +634,8 @@ void write_int32_ToPacket(uint8_t *buffer, size_t offset, int32_t value) {
  * @param value Value to write.
  */
 void write_uint64_ToPacket(uint8_t *buffer, size_t offset, uint64_t value) {
-  for (size_t i = 0; i < 8U; i++) {
-    buffer[offset + i] = (uint8_t)((value >> (8U * (unsigned int)i)) & 0xFFU);
+  for (int i = 0; i < 8; i++) {
+    buffer[offset + i] = (uint8_t)((value >> (i * 8)) & 0xFF);
   }
 }
 
@@ -680,9 +646,8 @@ void write_uint64_ToPacket(uint8_t *buffer, size_t offset, uint64_t value) {
  * @param value Value to write.
  */
 void write_int64_ToPacket(uint8_t *buffer, size_t offset, int64_t value) {
-  uint64_t uvalue = (uint64_t)value;
-  for (size_t i = 0; i < 8U; i++) {
-    buffer[offset + i] = (uint8_t)((uvalue >> (8U * (unsigned int)i)) & 0xFFU);
+  for (int i = 0; i < 8; i++) {
+    buffer[offset + i] = (uint8_t)((value >> (i * 8)) & 0xFF);
   }
 }
 
@@ -693,9 +658,8 @@ void write_int64_ToPacket(uint8_t *buffer, size_t offset, int64_t value) {
  * @param value Value to write.
  */
 void write_long_ToPacket(uint8_t *buffer, size_t offset, long value) {
-  unsigned long uvalue = (unsigned long)value;
-  for (size_t i = 0; i < sizeof(long); i++) {
-    buffer[offset + i] = (uint8_t)((uvalue >> (8U * (unsigned int)i)) & 0xFFU);
+  for (int i = 0; i < sizeof(long); i++) {
+    buffer[offset + i] = (uint8_t)((value >> (i * 8)) & 0xFF);
   }
 }
 
@@ -706,29 +670,22 @@ void write_long_ToPacket(uint8_t *buffer, size_t offset, long value) {
  * @param value Value to write.
  */
 void write_longlong_ToPacket(uint8_t *buffer, size_t offset, long long value) {
-  unsigned long long uvalue = (unsigned long long)value;
-  for (size_t i = 0; i < sizeof(long long); i++) {
-    buffer[offset + i] = (uint8_t)((uvalue >> (8U * (unsigned int)i)) & 0xFFU);
+  for (int i = 0; i < 8; i++) {
+    buffer[offset + i] = (uint8_t)((value >> (i * 8)) & 0xFF);
   }
 }
 
-/** ----------------------------------------------------------------------------
- * Write float to packet buffer at specified offset (4 bytes, little-endian).
- *
- * (1) MISRA Rule 19.2: the float's bit pattern is copied out with memcpy
- *     rather than read through an inactive union member.
- * (2) Copies the float's underlying bytes into a local buffer, then writes
- *     that buffer into the packet.
- *
+/**
+ * @brief Write float to packet buffer at specified offset (4 bytes, little-endian).
  * @param buffer Pointer to packet buffer.
  * @param offset Byte offset in buffer.
  * @param value Value to write.
  */
 void write_float_ToPacket(uint8_t *buffer, size_t offset, float value) {
-  uint8_t bytes[4];
-  memcpy(bytes, &value, sizeof(value));
-  for (size_t i = 0; i < sizeof(bytes); i++) {
-    buffer[offset + i] = bytes[i];
+  union { float f; uint8_t bytes[4]; } u;
+  u.f = value;
+  for (int i = 0; i < 4; i++) {
+    buffer[offset + i] = u.bytes[i];
   }
 }
 
@@ -739,10 +696,10 @@ void write_float_ToPacket(uint8_t *buffer, size_t offset, float value) {
  * @param value Value to write.
  */
 void write_double_ToPacket(uint8_t *buffer, size_t offset, double value) {
-  uint8_t bytes[8];
-  memcpy(bytes, &value, sizeof(value));
-  for (size_t i = 0; i < sizeof(bytes); i++) {
-    buffer[offset + i] = bytes[i];
+  union { double d; uint8_t bytes[8]; } u;
+  u.d = value;
+  for (int i = 0; i < 8; i++) {
+    buffer[offset + i] = u.bytes[i];
   }
 }
 
@@ -787,7 +744,7 @@ void write_nchars_ToPacket(uint8_t *buffer, size_t offset, const char *value, si
  * @param value Value to write.
  */
 void write_byte_ToPacket(uint8_t *buffer, size_t offset, byte value) {
-  buffer[offset] = value;
+    buffer[offset] = value;
 }
 
 /**
@@ -799,7 +756,7 @@ void write_byte_ToPacket(uint8_t *buffer, size_t offset, byte value) {
  * @warning Ensure source array is at least n_bytes in size.
  */
 void write_nbytes_ToPacket(uint8_t *buffer, size_t offset, const uint8_t *value, size_t n_bytes) {
-  for (size_t i = 0; i < n_bytes; i++) {
-    buffer[offset + i] = value[i];
-  }
+    for (size_t i = 0; i < n_bytes; i++) {
+        buffer[offset + i] = value[i];
+    }
 }
