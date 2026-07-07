@@ -929,6 +929,8 @@ static void taskSwitches(void *pvParameters) {
       // Clamp to MAX_MATRIX_SWITCHES
       for (int32_t Mi = 0; Mi < MAX_MATRIX_SWITCHES; Mi++) {
 
+        int address = matrixData.output_portcontroller_address[0][Mi];
+
         if (matrixData.matrix_switch_write_required[0][Mi] == true) {
           // Clear the flag now that the value has been sent.
           matrixData.matrix_switch_write_required[0][Mi] = false;
@@ -952,7 +954,7 @@ static void taskSwitches(void *pvParameters) {
           write_uint32_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 7, off_time);
           write_uint32_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 11, on_time);
           // Write to slave.
-          writeI2CToSlaveBin(*GPIOPortExpander_ATMEGA2560_Output_0.wire, GPIOPortExpander_ATMEGA2560_Output_0.i2cLink, GPIOPortExpander_ATMEGA2560_Output_0.address, 15, 0, GPIOPortExpander_ATMEGA2560_Output_0.name);
+          writeI2CToSlaveBin(*GPIOPortExpander_ATMEGA2560_Output_0.wire, GPIOPortExpander_ATMEGA2560_Output_0.i2cLink, address, 15, 0, GPIOPortExpander_ATMEGA2560_Output_0.name);
 
           count_write++;
         }

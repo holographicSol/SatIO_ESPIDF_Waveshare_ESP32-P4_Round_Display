@@ -55,7 +55,7 @@ Logic may require or not require values X, Y, Z. All of the following values can
 [13]  SatIO INS Alt
 [14]  GNGGA Status
 [15]  GNGGA Sat Count
-[16]  GNGGA Prescion
+[16]  GNGGA Precision
 [17]  GNGGA Altitude
 [18]  GNRMC Ground Speed
 [19]  GNRMC Heading
@@ -71,9 +71,9 @@ Logic may require or not require values X, Y, Z. All of the following values can
 [29]  GNGGA Valid CS
 [30]  GNRMC Valid CS
 [31]  GPATT Valid CS
-[32]  GNGGA Bad CD
-[33]  GNRMC Bad CD
-[34]  GPATT Bad CD
+[32]  GNGGA Valid CD
+[33]  GNRMC Valid CD
+[34]  GPATT Valid CD
 [35]  GNRMC Pos Stat A
 [36]  GNRMC Pos Stat V
 [37]  GNRMC Mode Ind A
@@ -202,64 +202,29 @@ system -log                 Automatically log data to disk (See performance for 
 Many values can be mapped and then used in the matrix and or sent directly to the port controller.
 
 ```
-map --new      Clears all mapping in memory.
-map --save
-map --load
-map --delete
-map -s n       Specify map slot n.
-map -m n       Specify slot -s mode. (0 : map min to max) (1 : center map x0) (2 : center map x1)
-map -c0 n      Configuration map slot -s value to map. See available map values.
-map -c1 n      Configuration map slot -s. (mode 0 : in_min)  (mode 1 : approximate center value)
-map -c2 n      Configuration map slot -s. (mode 0 : in_max)  (mode 1 : Neg_range : 0 to approximate center value)
-map -c3 n      Configuration map slot -s. (mode 0 : out_min) (mode 1 : Pos_range : ADC max - neg range)
-map -c4 n      Configuration map slot -s. (mode 0 : out_max) (mode 1 : out_max)
-map -c5 n      Configuration map slot -s. (mode 1 only : DEADZONE : expected fluctuation at center)
-```
-
-Available `-c0` map values (code prints these more tersely, e.g. "Plex Chan N", to save space in the on-device string table):
-
-```
-[0]  Digital
-[1]  G0 G-Force X
-[2]  G0 G-Force Y
-[3]  G0 G-Force Z
-[4]  G0 Incline X
-[5]  G0 Incline Y
-[6]  G0 Incline Z
-[7]  G0 Mag Field X
-[8]  G0 Mag Field Y
-[9]  G0 Mag Field Z
-[10] G0 Velocity X
-[11] G0 Velocity Y
-[12] G0 Velocity Z
-[13] Analog/Digital Multiplexer 0 Chan 0
-[14] Analog/Digital Multiplexer 0 Chan 1
-[15] Analog/Digital Multiplexer 0 Chan 2
-[16] Analog/Digital Multiplexer 0 Chan 3
-[17] Analog/Digital Multiplexer 0 Chan 4
-[18] Analog/Digital Multiplexer 0 Chan 5
-[19] Analog/Digital Multiplexer 0 Chan 6
-[20] Analog/Digital Multiplexer 0 Chan 7
-[21] Analog/Digital Multiplexer 0 Chan 8
-[22] Analog/Digital Multiplexer 0 Chan 9
-[23] Analog/Digital Multiplexer 0 Chan 10
-[24] Analog/Digital Multiplexer 0 Chan 11
-[25] Analog/Digital Multiplexer 0 Chan 12
-[26] Analog/Digital Multiplexer 0 Chan 13
-[27] Analog/Digital Multiplexer 0 Chan 14
-[28] Analog/Digital Multiplexer 0 Chan 15
+mapping --save
+mapping --load
+mapping --delete
+mapping -s n       Specify map slot n.
+mapping -m n       Specify slot -s mode. (0 : map min to max) (1 : center map x0) (2 : center map x1)
+mapping -c0 n      Configuration map slot -s  value to map. See available map values.
+mapping -c1 n      Configuration map slot -s. (mode 0 : in_min)  (mode 1 : approximate center value)
+mapping -c2 n      Configuration map slot -s. (mode 0 : in_max)  (mode 1 : Neg_range : 0 to approximate center value)
+mapping -c3 n      Configuration map slot -s. (mode 0 : out_min) (mode 1 : Pos_range : ADC max - neg range)
+mapping -c4 n      Configuration map slot -s. (mode 0 : out_max) (mode 1 : out_max)
+mapping -c5 n      Configuration map slot -s. (mode 1 only : DEADZONE : expected fluctuation at center)
 ```
 
 **Example** — map analog stick axis x0 on admplex0 channel 0 into map slot 0:
 
 ```
-map -s 0 -m 1 -c0 13 -c1 1974 -c2 1974 -c3 1894 -c4 255 -c5 50
+mapping -s 0 -m 1 -c0 16 -c1 1974 -c2 1974 -c3 1894 -c4 255 -c5 50
 ```
 
 **Example** — map analog stick axis x1 on admplex0 channel 1 into map slot 1:
 
 ```
-map -s 1 -m 2 -c0 14 -c1 1974 -c2 1974 -c3 1894 -c4 255 -c5 50
+mapping -s 1 -m 2 -c0 17 -c1 1974 -c2 1974 -c3 1894 -c4 255 -c5 50
 ```
 
 ---
@@ -279,16 +244,13 @@ matrix -s n                 Specify switch index n.
 matrix -f n                 Specify function index n.
 matrix -p n                 Set port for switch -s.
 matrix -fn n                Set function -f for switch -s. See available matrix functions.
-matrix --xyz-mode-x n       Set function -f value x comparator mode for switch -s. See Function XYZ Modes.
-matrix --xyz-mode-y n       Set function -f value y comparator mode for switch -s. See Function XYZ Modes.
-matrix --xyz-mode-z n       Set function -f value z comparator mode for switch -s. See Function XYZ Modes.
 matrix -fx n                Set function -f value x for switch -s.
 matrix -fy n                Set function -f value y for switch -s.
 matrix -fz n                Set function -f value z for switch -s.
 matrix -fi n                Set function -f logic inverted for switch -s.
 matrix -fo n                Set function -f operator for switch -s.
-matrix --pwm0 n             Set switch -s uS time off period (0uS = remain on). Must be given together with --pwm1.
-matrix --pwm1 n             Set switch -s uS time on period  (0uS = remain off after on). Must be given together with --pwm0.
+matrix --pwm0 n             Set switch -s uS time off period (0uS = remain on)
+matrix --pwm1 n             Set switch -s uS time on period  (0uS = remain off after on)
 matrix --flux n             Set switch -s output fluctuation threshold.
 matrix --oride n            Override switch -s output values.
 matrix --computer-assist n  Enable/disable computer assist for switch -s.
@@ -328,65 +290,17 @@ matrix -s 0 --omode 0
 
 ---
 
-## Multiplexer
-
-```
-admplex0 -c n --enable   Enable channel n on ADMPlex0 (read every task cycle, subject to --freq).
-admplex0 -c n --disable  Disable channel n on ADMPlex0 (data reports NAN while disabled).
-admplex0 -c n --freq uS  Minimum microseconds between reads of channel n (0 = read every task cycle).
-admplex0 --all --freq uS Set every channel's freq in one call (--all only supports --freq, not --enable/--disable).
-admplex1 -c n --enable   Enable channel n on ADMPlex1.
-admplex1 -c n --disable  Disable channel n on ADMPlex1.
-admplex1 -c n --freq uS  Minimum microseconds between reads of channel n on ADMPlex1.
-admplex1 --all --freq uS Set every channel's freq in one call (--all only supports --freq, not --enable/--disable).
-```
-
-**Example** — run admplex0 channel 3 at ~1Hz alongside the rest of the enabled channels:
-
-```
-admplex0 -c 3 --enable --freq 1000000
-
-Or if task frequency very low (say 1Hz) then run at task frequency:
-
-admplex0 -c 3 --enable --freq 0
-```
-
----
-
-## Port Controller Input
-
-```
-pci -c n --enable       Enable pin n on the input port controller (read every task cycle, subject to --freq).
-pci -c n --disable      Disable pin n on the input port controller (data reports 0 while disabled).
-pci -c n --freq uS      Minimum microseconds between reads of pin n (0 = read every task cycle).
-pci --all --enable      Enable every pin in one call.
-pci --all --disable     Disable every pin in one call.
-pci --all --freq uS     Set every pin's freq in one call.
-```
-
-**Example** — run pci pin 5 at ~1Hz alongside the rest of the enabled pins:
-
-```
-pci -c 5 --enable --freq 1000000
-
-Or if task frequency very low (say 1Hz) then run at task frequency:
-
-pci -c 3 --enable --freq 0
-```
-
----
-
 ## INS
 
 Customizable Inertial navigation system.
 
 ```
 ins -m n              Set INS mode n. (0 : Off) (1 : Dynamic, set by gps every 100ms) (2 : Fixed, remains on after conditions met).
-ins --gyro n          INS uses gyro for attitude. (0 : gyro heading) (1 : gps heading).
+ins -gyro n           INS uses gyro for attitude. (0 : gyro heading) (1 : gps heading).
 ins -p n              Set INS minimum required gps precision factor to initialize.
 ins -s n              Set INS minimum required speed to initialize.
 ins -r n              Set INS maximum required heading range difference to initialize (difference between gps heading and gyro heading).
-ins --reset-forced    Reset INS remains on after conditions met. Takes no value.
+ins --reset-forced n  Reset INS remains on after conditions met.
 ```
 
 ---
@@ -394,25 +308,32 @@ ins --reset-forced    Reset INS remains on after conditions met. Takes no value.
 ## Satio
 
 ```
-satio --coord-value-mode-gps       Use GPS latitude, longitude values.
-satio --coord-value-mode-user      Use user defined latitude, longitude (ensure --coord-value-mode-user before --set-coord).
-satio --set-coord -lat n -lon n    Set degrees latitude and longitude.
-satio --utc-offset n               Set +-seconds offset time.
-satio --auto-datetime-on           Enable set datetime automatically  (--auto-datetime-on overrides any datetime -set).
-satio --auto-datetime-off          Disable set datetime automatically (ensure --auto-datetime-off before using -set time).
+satio --coord-update-mode-gps     Use GPS latitude, longitude values.
+satio --coord-update-mode-static  Do not update latitude, longitude unless --set-coord or otherwise.
+satio --set-coord -lat n -lon n   Set degrees latitude and longitude (ensure --coord-update-mode-static before --set-coord).
+satio --utc-offset n              Set +-seconds offset time.
+satio --auto-datetime-on          Enable set datetime automatically  (--auto-datetime-on overrides any datetime -set).
+satio --auto-datetime-off         Disable set datetime automatically (ensure --auto-datetime-off before using -set time).
 satio --set-datetime --year n --month n --mday n --hour n --minute n --second n  (must be UTC except if utc offset 0).
 
-satio --speed-value-mode-gps   Use GPS speed values.
-satio --speed-value-mode-user  Use user defined speed (ensure --speed-value-mode-user before --set-speed).
-satio --set-speed n            Set speed in meters per second.
+satio --speed-mode-gps     Use GPS speed values.
+satio --speed-mode-static  Do not update speed unless --set-speed or otherwise.
+satio --set-speed n        Set speed in meters per second (ensure --speed-mode-static before --set-speed).
+satio --speed-unit-KTS     Use default knots.
+satio --speed-unit-KPH     Convert knots per second to K/PH.
+satio --speed-unit-MPH     Convert knots per second to M/PH.
+satio --speed-unit-mPS     Convert knots per second to meters per second.
 
-satio --altitude-value-mode-gps    Use GPS altitude values.
-satio --altitude-value-mode-user   Use user defined altitude (ensure --altitude-value-mode-user before --set-altitude).
-satio --set-altitude n             Set altitude in meters.
+satio --altitude-mode-gps         Use GPS altitude values.
+satio --altitude-mode-static      Do not update speed unless --set-altitude or otherwise.
+satio --set-altitude n            Set altitude in meters (ensure --altitude-mode-static before --set-altitude).
+satio --altitude-unit-meters      Use default meters altitude.
+satio --altitude-unit-kilometers  Convert meters to kilometers.
+satio --altitude-unit-miles       Convert meters to miles.
 
-satio --ground-heading-value-mode-gps     Use GPS ground heading values.
-satio --ground-heading-value-mode-user    Use user defined ground heading (ensure --ground-heading-value-mode-user before --set-ground-heading).
-satio --set-ground-heading n              Set ground heading in degrees (0-360).
+satio --ground-heading-update-mode-gps     Use GPS ground heading values.
+satio --ground-heading-update-mode-static  Do not update heading unless --set-ground-heading or otherwise.
+satio --set-ground-heading                 Set ground heading in degrees (0-360. Ensure --ground-heading-update-mode-static before --ground-heading).
 ```
 
 ---
@@ -422,7 +343,16 @@ satio --set-ground-heading n              Set ground heading in degrees (0-360).
 ```
 gyro --calacc        Calibrate the accelerometer.
 gyro --calmag-start  Begin calibrating the magnetometer.
-gyro --calmag-stop   End calibrating the magnetometer.
+gyro --calmag-end    End calibrating the magnetometer.
+```
+
+---
+
+## SDCard
+
+```
+sdcard --mount
+sdcard --unmount
 ```
 
 ---
@@ -434,19 +364,18 @@ powercfg --power-saving          Sets power configuration to low power consumpti
 powercfg --power-balanced        Sets power configuration to balanced.
 powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
 
-powercfg --setdelay --admplex0 n  Specify max task frequency in uS.
-powercfg --setdelay --gyro0 n     Specify max task frequency in uS.
-powercfg --setdelay --universe n  Specify max task frequency in uS.
-powercfg --setdelay --gps n       Specify max task frequency in uS.
-powercfg --setdelay --switch n    Specify max task frequency in uS.
-powercfg --setdelay --storage n   Specify max task frequency in uS.
-powercfg --setdelay --pci n       Specify max task frequency in uS.
+setdelay --admplex0               Specify max task frequency in uS.
+setdelay --gyro0                  Specify max task frequency in uS.
+setdelay --universe               Specify max task frequency in uS.
+setdelay --gps                    Specify max task frequency in uS.
+setdelay --switch                 Specify max task frequency in uS.
+setdelay --storage                Specify max task frequency in uS.
 ```
 
 **Example:**
 
 ```
-powercfg --setdelay --admplex0 20 --gyro0 200 --gps 10
+setdelay --admplex0 20 --gyro0 200 --gps 10
 ```
 
 ---
@@ -457,22 +386,23 @@ powercfg --setdelay --admplex0 20 --gyro0 200 --gps 10
 stat -e     Enable print.
 stat -d     Disable print.
 stat -t     Enables/disables serial print stats and counters. Takes arguments -e, -d.
+stat --partition-table      Print partition table.
+stat --memory-ram           Print ram information.
+stat --sdcard               Print matrix information.
 stat --system               Print system configuration.
+stat --matrix               Print matrix configuration.
 stat --matrix n             Print matrix switch n configuration.
 stat --matrix -A            Print configuration of all matrix switches.
-stat -map n                 Print map slot n data.
-stat -map -A                Print all map slot data.
+stat --mapping              Print configuration of all mapping slots.
 stat --sentence -A          Print all sentences. Takes arguments -e, -d.
 stat --sentence --satio     Takes arguments -e, -d.
+stat --sentence --ins       Takes arguments -e, -d.
 stat --sentence --gngga     Takes arguments -e, -d.
 stat --sentence --gnrmc     Takes arguments -e, -d.
 stat --sentence --gpatt     Takes arguments -e, -d.
 stat --sentence --matrix    Takes arguments -e, -d.
-stat --sentence --xmatrix   Takes arguments -e, -d.
-stat --sentence --xmap      Takes arguments -e, -d.
 stat --sentence --pcinput   Takes arguments -e, -d.
 stat --sentence --admplex0  Takes arguments -e, -d.
-stat --sentence --admplex1  Takes arguments -e, -d.
 stat --sentence --gyro0     Takes arguments -e, -d.
 stat --sentence --sun       Takes arguments -e, -d.
 stat --sentence --mercury   Takes arguments -e, -d.
@@ -492,11 +422,9 @@ stat --sentence --meteors   Takes arguments -e, -d.
 ## Other
 
 ```
--v, --verbose    Enable verbosity.
--vv, --verbose1  Enable extra verbosity.
--e, --enable     Wherever a command takes -e, -d (system -log, stat -t, admplex0/1, pci): enable.
--d, --disable    Wherever a command takes -e, -d (system -log, stat -t, admplex0/1, pci): disable.
-help, h          Print short usage line. Add -v to print this full command reference (e.g. "help -v").
+-v    Enable verbosity.
+-vv   Enable extra verbosity.
+help
 ```
 
 ---

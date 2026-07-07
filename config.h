@@ -11,11 +11,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "config.h"
-#include "i2c_helper.h"
-#include "gpio_portcontroller.h"
 
 extern bool global_task_sync;
 extern long system_sync_retry_max;
+
+extern bool ISR_Bool_MultiDisplayController_0;
 
 // ----------------------------------------------------------------------------------------
 // BUILD OPTIONS
@@ -94,7 +94,13 @@ extern long system_sync_retry_max;
  */
 // #define SATIO_CD74HC4067_OPTION_USE_2
 // ----------------------------------------------------------------------------------------
+/**
+ * @brief SATIO_USE_GPIO_PORT_EXPANDER_1
+ * @def If defined then the system will be compiled to use GPIO Port Expander 1.
+ */
+#define SATIO_USE_GPIO_PORT_EXPANDER_1
 
+// ----------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------
 // Power Config.

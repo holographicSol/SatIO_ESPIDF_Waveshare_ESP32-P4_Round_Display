@@ -351,9 +351,27 @@ extern "C" void app_main(void)
     iic_0.setClock(I2C_CLOCK_Hz_BUS0);
 
     /** ----------------------------------------------------------------------------
-     * GPIOPortExpander.
+     * GPIOPortExpander auto-discovery.
+     *
+     * Queries each port controller live over I2C (gpio_portcontroller.cpp)
+     * for its pin_min/pin_max/analog_pins/digital_pins, populating structs.
      */
     clearGPIOPortController(GPIOPortExpander_ATMEGA2560_Output_0);
+    // clearGPIOPortController(GPIOPortExpander_ATMEGA2560_Output_1);
+
+    ESP_LOGI(APP_MAIN_TAG, "Discovering GPIOPortExpander configuration");
+    // initGPIOPortExpanders(iic_2,
+    //                       iic_0,
+    //                       I2C_ADDR_OUTPUT_PORTCONTROLLER_0,
+    //                       I2C_ADDR_OUTPUT_PORTCONTROLLER_1,
+    //                       I2C_ADDR_INPUT_PORTCONTROLLER_0);
+    // TEMP DIAGNOSTIC: confirm how many pins a sweep of Input_0 actually
+    // iterates (readGPIOPortExapander_All loops i < max_pins), to settle
+    // whether observed sweep rates are physically plausible for the pin count.
+    ESP_LOGI(APP_MAIN_TAG, "GPIOPortExpander_ATMEGA2560_Input_0: max_pins=%d num_analog_pins=%d num_digital_pins=%d",
+             GPIOPortExpander_ATMEGA2560_Input_0.max_pins,
+             GPIOPortExpander_ATMEGA2560_Input_0.num_analog_pins,
+             GPIOPortExpander_ATMEGA2560_Input_0.num_digital_pins);
 
     /** ----------------------------------------------------------------------------
      * Serial1: GPS UART.

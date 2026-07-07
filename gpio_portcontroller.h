@@ -108,6 +108,7 @@ extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Default;
 // ------------------------------------------------------------
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Input_0;
 extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_0;
+extern GPIOPortExpander GPIOPortExpander_ATMEGA2560_Output_1;
 // ------------------------------------------------------------
 
 // ------------------------------------------------------------

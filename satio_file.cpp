@@ -638,6 +638,7 @@ typedef enum {
     XYZ_MODE_X,
     XYZ_MODE_Y,
     XYZ_MODE_Z,
+    SWITCH_OPCA
 } matrix_tag_t;
 
 /* Rule 7.4: a string literal's type is "array of const char", so the
@@ -661,6 +662,7 @@ static const char * getMatrixTag(int t) {
         case XYZ_MODE_X:         return "XYZ_MODE_X";
         case XYZ_MODE_Y:         return "XYZ_MODE_Y";
         case XYZ_MODE_Z:         return "XYZ_MODE_Z";
+        case SWITCH_OPCA:        return "SWITCH_OPCA";
         default:                 return "?";
     }
 }
@@ -688,10 +690,17 @@ bool saveMatrixFile() {
     const char *tag_xyz_mode_x  = getMatrixTag(XYZ_MODE_X);
     const char *tag_xyz_mode_y  = getMatrixTag(XYZ_MODE_Y);
     const char *tag_xyz_mode_z  = getMatrixTag(XYZ_MODE_Z);
+    const char *tag_opca        = getMatrixTag(SWITCH_OPCA);
 
     // SWITCH_PORT
     for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
         snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", tag_switch_port, i_switch, (int)matrixData.matrix_port_map[0][i_switch]);
+        printLine(f, lineBuf);
+    }
+
+    // SWITCH_OPCA
+    for (int i_switch=0; i_switch<MAX_MATRIX_SWITCHES; i_switch++) {
+        snprintf(lineBuf, sizeof(lineBuf), "%s,%d,%d", tag_opca, i_switch, (int)matrixData.output_portcontroller_address[0][i_switch]);
         printLine(f, lineBuf);
     }
 
@@ -839,6 +848,7 @@ bool loadMatrixFile() {
         while (token != NULL) {if (tokenCount==0) {data_0=token;} else if (tokenCount==1) {data_1=token;} else if (tokenCount==2) {data_2=token;} token = strtok(NULL, ","); tokenCount++;}
 
         if      (tag_index==SWITCH_PORT) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str())) {matrixData.matrix_port_map[0][atoi(data_0.c_str())]=atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
+        else if (tag_index==SWITCH_OPCA) {if (str_is_int8(data_0.c_str()) && str_is_uint8(data_1.c_str())) {matrixData.output_portcontroller_address[0][atoi(data_0.c_str())]=(uint8_t)atoi(data_1.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==SWITCH_FUNCTION) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_int8(data_2.c_str())) {matrixData.matrix_function[0][atoi(data_0.c_str())][atoi(data_1.c_str())]=atoi(data_2.c_str());} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==FUNCTION_X) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_X]=strtod(data_2.c_str(), NULL);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}
         else if (tag_index==FUNCTION_Y) {if (str_is_int8(data_0.c_str()) && str_is_int8(data_1.c_str()) && str_is_double(data_2.c_str())) {matrixData.matrix_function_xyz[0][atoi(data_0.c_str())][atoi(data_1.c_str())][INDEX_MATRIX_FUNTION_Y]=strtod(data_2.c_str(), NULL);} matrixData.matrix_switch_write_required[0][atoi(data_0.c_str())]=true;}

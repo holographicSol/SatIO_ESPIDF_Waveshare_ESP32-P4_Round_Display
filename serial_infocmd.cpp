@@ -241,6 +241,7 @@ static void PrintHelp(void) {
       matrix -s n                 Specify switch index n.
       matrix -f n                 Specify function index n.
       matrix -p n                 Set port for switch -s.
+      matrix --opca n             Set output port controller I2C address for switch -s.
       matrix -fn n                Set function -f for switch -s. Primary Comparitors:
                                   [0] NONE
                                   [1] ON
@@ -274,9 +275,9 @@ static void PrintHelp(void) {
                                   [29] GNGGA Valid CS
                                   [30] GNRMC Valid CS
                                   [31] GPATT Valid CS
-                                  [32] GNGGA Bad CD
-                                  [33] GNRMC Bad CD
-                                  [34] GPATT Bad CD
+                                  [32] GNGGA Valid CD
+                                  [33] GNRMC Valid CD
+                                  [34] GPATT Valid CD
                                   [35] GNRMC Pos Stat A
                                   [36] GNRMC Pos Stat V
                                   [37] GNRMC Mode Ind A
@@ -399,36 +400,39 @@ static void PrintHelp(void) {
       map --delete
       map -s n       Specify map slot n.
       map -m n       Specify slot -s mode. (0 : map min to max) (1 : center map x0) (2 : center map x1)
-      map -c0 n      Configuration map slot -s value to map (code prints these more tersely, e.g. "Plex Chan N", to save space in the on-device string table).
+      map -c0 n      Configuration map slot -s value to map. See available map values.
                      [0] Digital
-                     [1] G0 G-Force X
-                     [2] G0 G-Force Y
-                     [3] G0 G-Force Z
-                     [4] G0 Incline X
-                     [5] G0 Incline Y
-                     [6] G0 Incline Z
-                     [7] G0 Mag Field X
-                     [8] G0 Mag Field Y
-                     [9] G0 Mag Field Z
-                     [10] G0 Velocity X
-                     [11] G0 Velocity Y
-                     [12] G0 Velocity Z
-                     [13] Analog/Digital Multiplexer 0 Chan 0
-                     [14] Analog/Digital Multiplexer 0 Chan 1
-                     [15] Analog/Digital Multiplexer 0 Chan 2
-                     [16] Analog/Digital Multiplexer 0 Chan 3
-                     [17] Analog/Digital Multiplexer 0 Chan 4
-                     [18] Analog/Digital Multiplexer 0 Chan 5
-                     [19] Analog/Digital Multiplexer 0 Chan 6
-                     [20] Analog/Digital Multiplexer 0 Chan 7
-                     [21] Analog/Digital Multiplexer 0 Chan 8
-                     [22] Analog/Digital Multiplexer 0 Chan 9
-                     [23] Analog/Digital Multiplexer 0 Chan 10
-                     [24] Analog/Digital Multiplexer 0 Chan 11
-                     [25] Analog/Digital Multiplexer 0 Chan 12
-                     [26] Analog/Digital Multiplexer 0 Chan 13
-                     [27] Analog/Digital Multiplexer 0 Chan 14
-                     [28] Analog/Digital Multiplexer 0 Chan 15
+                     [1] YawGPATT
+                     [2] RollGPATT
+                     [3] PitchGPATT
+                     [4] Gyro0AccX
+                     [5] Gyro0AccY
+                     [6] Gyro0AccZ
+                     [7] Gyro0AngX
+                     [8] Gyro0AngY
+                     [9] Gyro0AngZ
+                     [10] Gyro0MagX
+                     [11] Gyro0MagY
+                     [12] Gyro0MagZ
+                     [13] Gyro0GyroX
+                     [14] Gyro0GyroY
+                     [15] Gyro0GyroZ
+                     [16] ADMPlex0_0
+                     [17] ADMPlex0_1
+                     [18] ADMPlex0_2
+                     [19] ADMPlex0_3
+                     [20] ADMPlex0_4
+                     [21] ADMPlex0_5
+                     [22] ADMPlex0_6
+                     [23] ADMPlex0_7
+                     [24] ADMPlex0_8
+                     [25] ADMPlex0_9
+                     [26] ADMPlex0_10
+                     [27] ADMPlex0_11
+                     [28] ADMPlex0_12
+                     [29] ADMPlex0_13
+                     [30] ADMPlex0_14
+                     [31] ADMPlex0_15
       map -c1 n      Configuration map slot -s. (mode 0 : in_min)  (mode 1 : approximate center value)
       map -c2 n      Configuration map slot -s. (mode 0 : in_max)  (mode 1 : Neg_range : 0 to approximate center value)
       map -c3 n      Configuration map slot -s. (mode 0 : out_min) (mode 1 : Pos_range : ADC max - neg range)
@@ -436,12 +440,12 @@ static void PrintHelp(void) {
       map -c5 n      Configuration map slot -s. (mode 1 only : DEADZONE : expected flutuation at center)
 
       example map analog stick axis x0 on admplex0 channel 0 into map slot 0:
-      map -s 0 -m 1 -c0 13 -c1 1974 -c2 1974 -c3 1894 -c4 255 -c5 50
+      map -s 0 -m 1 -c0 16 -c1 1974 -c2 1974 -c3 1894 -c4 255 -c5 50
       matrix -s 0 --map-slot 0
       Optional: matrix -s 0 --omode 1
 
       example map analog stick axis x1 on admplex0 channel 1 into map slot 1:
-      map -s 1 -m 2 -c0 14 -c1 1974 -c2 1974 -c3 1894 -c4 255 -c5 50
+      map -s 1 -m 2 -c0 17 -c1 1974 -c2 1974 -c3 1894 -c4 255 -c5 50
       matrix -s 1 --map-slot 1
       Optional: matrix -s 1 --omode 1
 
@@ -457,9 +461,6 @@ static void PrintHelp(void) {
       example: run admplex0 channel 3 at ~1Hz alongside the rest of the enabled channels:
       admplex0 -c 3 --enable --freq 1000000
 
-      Or if task frequency very low (say 1Hz) then run at task frequency:
-      admplex0 -c 3 --enable --freq 0
-
   [ Port Controller Input ]
 
       pci -c n --enable       Enable pin n on the input port controller (read every task cycle, subject to --freq).
@@ -472,13 +473,10 @@ static void PrintHelp(void) {
       example: run pci pin 5 at ~1Hz alongside the rest of the enabled pins:
       pci -c 5 --enable --freq 1000000
 
-      Or if task frequency very low (say 1Hz) then run at task frequency:
-      pci -c 3 --enable --freq 0
-
   [ INS ]
 
       ins -m n              Set INS mode n. (0 : Off) (1 : Dynamic, set by gps every 100ms) (2 : Fixed, remains on after conditions met).
-      ins --gyro n          INS uses gyro for attitude. (0 : gyro heading) (1 : gps heading).
+      ins -gyro n           INS uses gyro for attitude. (0 : gyro heading) (1 : gps heading).
       ins -p n              Set INS minmum required gps precision factor to initialize (higher requires less gps precision).
       ins -s n              Set INS minmum required speed to initialize (lower requires less speed).
       ins -r n              Set INS minmum required range difference difference between gps heading and gyro heading (higher allows more difference).
@@ -516,7 +514,12 @@ static void PrintHelp(void) {
 
       gyro --calacc        Callibrate the accelerometer.
       gyro --calmag-start  Begin calibrating the magnetometer.
-      gyro --calmag-stop   End calibrating the magnetometer.
+      gyro --calmag-end    End calibrating the magnetometer.
+
+  [ SDCard ]
+
+      sdcard --mount
+      sdcard --unmount
 
   [ PERFORMANCE ]
 
@@ -524,34 +527,43 @@ static void PrintHelp(void) {
       powercfg --power-balanced        Sets power configuration to balanced.
       powercfg --ultimate-performance  Sets power configuration to ultimate performance mode.
 
-      powercfg --setdelay --admplex0 n  Specify max task frequency in uS.
-      powercfg --setdelay --gyro0 n     Specify max task frequency in uS.
-      powercfg --setdelay --universe n  Specify max task frequency in uS.
-      powercfg --setdelay --gps n       Specify max task frequency in uS.
-      powercfg --setdelay --switch n    Specify max task frequency in uS.
-      powercfg --setdelay --storage n   Specify max task frequency in uS.
-      powercfg --setdelay --pci n       Specify max task frequency in uS.
+      setdelay --admplex0               Specify max task frequency in uS.
+      setdelay --admplex1               Specify max task frequency in uS.
+      setdelay --gyro0                  Specify max task frequency in uS.
+      setdelay --universe               Specify max task frequency in uS.
+      setdelay --gps                    Specify max task frequency in uS.
+      setdelay --switch                 Specify max task frequency in uS.
+      setdelay --storage                Specify max task frequency in uS.
+      setdelay --pci                    Specify max task frequency in uS.
 
-      example: powercfg --setdelay --admplex0 20 --gyro0 200 --gps 10
+      example: setdelay --admplex0 20 --gyro0 200 --gps 10
+
+  [ StarNav ]
+
+      starnav RA_HOUR RA_MIN RA_SEC DEC_D DEC_M DEC_S
+    
+      example: starnav 6 45 8.9 -16 42 58.0
 
   [ Stat ]
 
       stat -e     Enable print.
       stat -d     Disable print.
       stat -t     Enables/disables serial print stats and counters. Takes arguments -e, -d.
+      stat --partition-table      Print partition table.
+      stat --memory-ram           Print ram information.
+      stat --sdcard               Print SDCard information.
       stat --system               Print system configuration.
       stat --matrix n             Print matrix switch n configuration.
       stat --matrix -A            Print configuration of all matrix switches.
-      stat -map n                 Print map slot n data.
-      stat -map -A                Print all map slot data.
+      stat --map n                Print map slot n data.
+      stat --map -A               Print all map slot data.
       stat --sentence -A          Print all sentences. Takes arguments -e, -d.
       stat --sentence --satio     Takes arguments -e, -d.
+      stat --sentence --ins       Takes arguments -e, -d.
       stat --sentence --gngga     Takes arguments -e, -d.
       stat --sentence --gnrmc     Takes arguments -e, -d.
       stat --sentence --gpatt     Takes arguments -e, -d.
       stat --sentence --matrix    Takes arguments -e, -d.
-      stat --sentence --xmatrix   Takes arguments -e, -d.
-      stat --sentence --xmap      Takes arguments -e, -d.
       stat --sentence --pcinput   Takes arguments -e, -d.
       stat --sentence --admplex0  Takes arguments -e, -d.
       stat --sentence --admplex1  Takes arguments -e, -d.
@@ -569,11 +581,9 @@ static void PrintHelp(void) {
 
   [ Other ]
 
-      -v, --verbose    Enable verbosity.
-      -vv, --verbose1  Enable extra verbosity.
-      -e, --enable     Wherever a command takes -e, -d (system -log, stat -t, admplex0/1, pci): enable.
-      -d, --disable    Wherever a command takes -e, -d (system -log, stat -t, admplex0/1, pci): disable.
-      help, h          Print short usage line. Add -v to print this full command reference (e.g. "help -v").
+      -v    Enable verbosoity.
+      -vv   Enable extra verbosoity.
+      help
   )"
   );
 }
@@ -646,6 +656,7 @@ static void PrintMatrixNData(int matrix_index) {
       matrixData.output_pwm[0][matrix_index][0],
       matrixData.output_pwm[0][matrix_index][1]);
     printf("[port] %d\n", matrixData.matrix_port_map[0][matrix_index]);
+    printf("[opca] %d\n", matrixData.output_portcontroller_address[0][matrix_index]);
     printf("[active] %d\n", matrixData.switch_intention[0][matrix_index]);
     printf("-----------------------------------------------------\n");
     for (int Fi=0; Fi<MAX_MATRIX_SWITCH_FUNCTIONS; Fi++) {
@@ -698,6 +709,13 @@ void setAllSentenceOutput(bool enable) {
 void setMatrixPort(int switch_idx, signed int port_n) {
   if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES && port_n>=-1 && port_n<MAX_MATRIX_SWITCHES) {
     matrixData.matrix_port_map[0][switch_idx]=port_n;
+    matrixData.matrix_switch_write_required[0][switch_idx]=true;
+  }
+}
+
+void setOutputPortControllerAddress(int switch_idx, uint8_t address) {
+  if (switch_idx>=0 && switch_idx<MAX_MATRIX_SWITCHES) {
+    matrixData.output_portcontroller_address[0][switch_idx]=address;
     matrixData.matrix_switch_write_required[0][switch_idx]=true;
   }
 }
@@ -1232,6 +1250,7 @@ void CmdProcess(void) {
           int s = argparser_get_int8(&parser, "s", -1);
           int f = argparser_get_int8(&parser, "f", 0);
           if (has_s && argparser_has_flag(&parser, "p") == true) {setMatrixPort(s, argparser_get_int8(&parser, "p", -1));}
+          if (has_s && argparser_has_flag(&parser, "opca") == true) {setOutputPortControllerAddress(s, argparser_get_uint8(&parser, "opca", 0));}
           if (has_s && has_f && argparser_has_flag(&parser, "fn") == true) {setMatrixFunction(s, f, argparser_get_int8(&parser, "fn", 0));}
           if (has_s && has_f && argparser_has_flag(&parser, "fx") == true) {setMatrixXYZ(s, f, INDEX_MATRIX_FUNTION_X, argparser_get_double(&parser, "fx", 0));}
           if (has_s && has_f && argparser_has_flag(&parser, "fy") == true) {setMatrixXYZ(s, f, INDEX_MATRIX_FUNTION_Y, argparser_get_double(&parser, "fy", 0));}
@@ -1836,6 +1855,7 @@ void outputSerialMatrix(void) {
         serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.index_mapped_value[0][i_output_config_matrix])+",").c_str());
         serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.computer_assist[0][i_output_config_matrix])+",").c_str());
         serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.matrix_port_map[0][i_output_config_matrix])+",").c_str());
+        serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_portcontroller_address[0][i_output_config_matrix])+",").c_str());
         // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.switch_intention[0][i_output_config_matrix])+",").c_str());
         // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.computer_intention[0][i_output_config_matrix])+",").c_str());
         // serial0_buffer_append(TXBUF_SWITCHES, sizeof(TXBUF_SWITCHES), String(String(matrixData.output_value[0][i_output_config_matrix])+",").c_str());
