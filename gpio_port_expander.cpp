@@ -767,7 +767,7 @@ bool readGPIOPortExapander_Pin(GPIOPortExpander gpio_expander, uint8_t pin) {
 
 void clearGPIOPortController(GPIOPortExpander gpio_expander) {
   clearI2CLinkOutputPacket(gpio_expander.i2cLink);
-  write_uint8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 0, 0x64); // command 100
+  write_uint8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 0, GPIO_PE_CMD_CLEAR_DATA);
   writeI2CToSlaveBin(*gpio_expander.wire, gpio_expander.i2cLink, gpio_expander.address, 1, 0, "clearGPIOPortController");
 }
 
@@ -811,7 +811,7 @@ int32_t writeGPIOPortExapander_All(GPIOPortExpander gpio_expander) {
     uint32_t on_time = 0;
 
     // Build binary packet with human readable helper functions.
-    write_uint8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 0, 0x6E); // command 110
+    write_uint8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 0, GPIO_PE_CMD_WRITE_PIN_PWM); // command 110
     write_uint8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 1, (uint8_t)Mi);
     write_int8_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 2, (int8_t)gpio_expander.port_map[Mi]);
     write_int32_ToPacket(gpio_expander.i2cLink.OUTPUT_PACKET, 3, value_to_send);

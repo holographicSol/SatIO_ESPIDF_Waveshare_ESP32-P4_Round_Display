@@ -947,7 +947,7 @@ static void taskSwitches(void *pvParameters) {
           uint32_t on_time = matrixData.output_pwm[0][Mi][INDEX_MATRIX_SWITCH_PWM_ON];
 
           // Build binary packet with human readable helper functions.
-          write_uint8_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 0, 0x6E); // command 110
+          write_uint8_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 0, GPIO_PE_CMD_WRITE_PIN_PWM);
           write_uint8_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 1, (uint8_t)Mi);
           write_int8_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 2, (int8_t)matrixData.matrix_port_map[0][Mi]);
           write_int32_ToPacket(GPIOPortExpander_ATMEGA2560_Output_0.i2cLink.OUTPUT_PACKET, 3, value_to_send);
